@@ -1,0 +1,33 @@
+{
+  "hook": "gate-bash.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo x > src/app.js && git push origin audit-reports"
+    },
+    "tool_use_id": "tu1"
+  },
+  "setup": {
+    "files": {
+      "README.md": "x"
+    },
+    "state": {
+      "active-manifest.json": {
+        "name": "audit",
+        "source": "task.yaml",
+        "effects": [
+          {
+            "edit": "reports/**"
+          },
+          {
+            "push": "audit-reports"
+          }
+        ]
+      }
+    }
+  }
+}

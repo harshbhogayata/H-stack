@@ -1,0 +1,8 @@
+<!doctype html><html><body>
+<button id="load">Load report</button><div id="out"></div>
+<script>
+document.getElementById('load').onclick = () => {
+  const data = JSON.parse('{"total": 12');
+  document.getElementById('out').textContent = 'Total: ' + data.total;
+};
+</script></body></html>

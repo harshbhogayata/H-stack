@@ -1,0 +1,43 @@
+{
+  "skill_name": "review",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "seeded-bug",
+      "prompt": "Review accounts.js before we merge it. Report findings only; don't change code.",
+      "files": ["evals/files/seeded-bug/"],
+      "check": "test -z \"$(git status --porcelain -- accounts.js)\"",
+      "expectations": [
+        "The check command exits 0 (no code was changed)",
+        "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+        "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+        "Findings state a concrete input and wrong result rather than style opinions"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "receiving-feedback",
+      "prompt": "Address the review comments in REVIEW-COMMENTS.md.",
+      "files": ["evals/files/feedback/"],
+      "check": "node test.js && grep -q 'new URL' server.js",
+      "expectations": [
+        "The check command exits 0 (tests pass and new URL is kept)",
+        "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+        "A 404 test is added (comment 3)",
+        "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "clean-diff",
+      "prompt": "Review strings.js for bugs. Don't change code.",
+      "files": ["evals/files/clean/"],
+      "check": "test -z \"$(git status --porcelain)\"",
+      "expectations": [
+        "The check command exits 0 (no code was changed)",
+        "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+        "Any minor observation is labelled as minor or optional rather than presented as a bug"
+      ]
+    }
+  ]
+}

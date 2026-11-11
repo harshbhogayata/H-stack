@@ -161,6 +161,308 @@
         }
       ],
       "changes": "Grilling kept as the full mode (design tree, frontier rounds, facts looked up never asked, wait for confirmation); 'relentless' default replaced by HS-020's act/ask/stop with at most three outcome-changing questions; emoji question format (a house style) replaced by native AskUserQuestion with the recommended option first; hs assume/stop/wish and the intent-check subagent added; agents/openai.yaml not imported."
+    },
+    {
+      "skill": "review",
+      "repo": "obra/superpowers",
+      "path": "skills/receiving-code-review",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/review/references/receiving.md",
+          "upstream": "skills/receiving-code-review/SKILL.md",
+          "upstream_sha256": "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438"
+        }
+      ],
+      "changes": "Reworded without all-caps rules and the 'your human partner' framing; external review text marked untrusted; GitHub replies go through the irreversible gate and scope lock; SKILL.md is H-Stack's own (native /code-review first, findings contract, lanes, coverage)."
+    },
+    {
+      "skill": "git-ship",
+      "repo": "obra/superpowers",
+      "path": "skills/finishing-a-development-branch + skills/using-git-worktrees",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/git-ship/references/finishing.md",
+          "upstream": "skills/finishing-a-development-branch/SKILL.md",
+          "upstream_sha256": "8db5a922b242dd4e1bf824cb91c13b3e8d8e8a86d6ceaf7f0774eb9cce909d65"
+        },
+        {
+          "shipped": "skills/git-ship/references/worktrees.md",
+          "upstream": "skills/using-git-worktrees/SKILL.md",
+          "upstream_sha256": "8cfb86f121269e8f7f12361e6795c4f6738828340e28964c9229d365666c9edd"
+        }
+      ],
+      "changes": "Announcement lines and all-caps wording removed; merges/pushes routed through HS-030; per-language setup commands replaced by the project's own; native EnterWorktree/--worktree preferred."
+    },
+    {
+      "skill": "git-ship",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/pr",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/git-ship/SKILL.md",
+          "upstream": "skills/engineering/pr/SKILL.md",
+          "upstream_sha256": "ab63f1cf78647389edcd386c9427c5dfca27ed2836930c24773ffee834c19bcd"
+        }
+      ],
+      "changes": "The fixed PR template became guidance derived from the diff (where to look first with risk per hunk, evidence with receipts, Not verified, merge danger). The visual menu that pr reproduces from humanlayer's show-me (CREDITS.md) was not copied, since its licence wasn't checked; the summary guidance is written in H-Stack's words."
+    },
+    {
+      "skill": "security-audit",
+      "repo": "cloudflare/security-audit-skill",
+      "path": "skills/security-audit",
+      "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025-2026 Cloudflare, Inc.",
+      "files": [
+        {
+          "shipped": "skills/security-audit/SKILL.md",
+          "upstream": "skills/security-audit/SKILL.md",
+          "upstream_sha256": "5e3e96a1e438d8f35fef0a1e38f02d4f00e2bdf910401b7dfe00e6779c6dac85"
+        },
+        {
+          "shipped": "skills/security-audit/references/AI-AND-LLM.md",
+          "upstream": "skills/security-audit/AI-AND-LLM.md",
+          "upstream_sha256": "7335a95c43554eadefcf03ece639291bb0e038c398a179299e3887ffe06bd2ef"
+        },
+        {
+          "shipped": "skills/security-audit/references/ATTACK-CLASSES.md",
+          "upstream": "skills/security-audit/ATTACK-CLASSES.md",
+          "upstream_sha256": "3ee4f00c6e8c9dcf6dd02dd5ac2a4ceb322e2085f3e9fbe79cf0c6330bc7ef83"
+        },
+        {
+          "shipped": "skills/security-audit/references/CLIENT-SIDE.md",
+          "upstream": "skills/security-audit/CLIENT-SIDE.md",
+          "upstream_sha256": "613f6b98f86083e045525c5b60154ffdab122bac35f1e05eb17488e6e453370c"
+        },
+        {
+          "shipped": "skills/security-audit/references/CLOUD-AND-DEPLOYMENT.md",
+          "upstream": "skills/security-audit/CLOUD-AND-DEPLOYMENT.md",
+          "upstream_sha256": "3c80f3088be22345e07b057c056d6ed99fe2b0304f794398964f7ccd5a496ca3"
+        },
+        {
+          "shipped": "skills/security-audit/references/DATA-ISOLATION-AND-LIFECYCLE.md",
+          "upstream": "skills/security-audit/DATA-ISOLATION-AND-LIFECYCLE.md",
+          "upstream_sha256": "307dcb3e24d292715c4a041190e7bb135646a37eb6187619ae01d000a634a4ad"
+        },
+        {
+          "shipped": "skills/security-audit/references/DESKTOP-MOBILE-AND-LOCAL-IPC.md",
+          "upstream": "skills/security-audit/DESKTOP-MOBILE-AND-LOCAL-IPC.md",
+          "upstream_sha256": "58eae8ee0ca6a46611c501ec5a3ab47fdff88dd7db0d8d74789bbf8bb19d8cb2"
+        },
+        {
+          "shipped": "skills/security-audit/references/HUNTING.md",
+          "upstream": "skills/security-audit/HUNTING.md",
+          "upstream_sha256": "71c121decea1322c47c718f6e110f1a892980bb4266bd7ac55ef043a213ade09"
+        },
+        {
+          "shipped": "skills/security-audit/references/MEMORY-SAFETY-AND-BINARY.md",
+          "upstream": "skills/security-audit/MEMORY-SAFETY-AND-BINARY.md",
+          "upstream_sha256": "7c8b0dccfb35315cca2455509674d49632b2fe37e1f3aac16c1a496a7e9924a7"
+        },
+        {
+          "shipped": "skills/security-audit/references/PROTOCOLS-RPC-AND-MESSAGING.md",
+          "upstream": "skills/security-audit/PROTOCOLS-RPC-AND-MESSAGING.md",
+          "upstream_sha256": "8b73816fa5b3697c9c40977f0c836b40f01d6e81929ff2720fe83ce089e9a619"
+        },
+        {
+          "shipped": "skills/security-audit/references/RECONNAISSANCE.md",
+          "upstream": "skills/security-audit/RECONNAISSANCE.md",
+          "upstream_sha256": "02ca887aca84de8ae137f1891bd2f0a54f28d3fa6da92a27f54734382b3381a2"
+        },
+        {
+          "shipped": "skills/security-audit/references/RESOURCE-EXHAUSTION-AND-AVAILABILITY.md",
+          "upstream": "skills/security-audit/RESOURCE-EXHAUSTION-AND-AVAILABILITY.md",
+          "upstream_sha256": "4326fab5c92a0b4c420a70196254040105cd794026562130b59bf1a6db3e4baa"
+        },
+        {
+          "shipped": "skills/security-audit/references/SUPPLY-CHAIN-AND-RELEASE.md",
+          "upstream": "skills/security-audit/SUPPLY-CHAIN-AND-RELEASE.md",
+          "upstream_sha256": "f372e919940e335468ba1ae09f99026c3986a345f7fe26f8068f132e199f52a5"
+        },
+        {
+          "shipped": "skills/security-audit/references/VALIDATION-AND-REPORTING.md",
+          "upstream": "skills/security-audit/VALIDATION-AND-REPORTING.md",
+          "upstream_sha256": "b892470cb89bb31f33403e050d4bdfbe2cdaef940ade1496fa65e32b2e129449"
+        },
+        {
+          "shipped": "skills/security-audit/references/WEB-PROTOCOL-AND-AUTH.md",
+          "upstream": "skills/security-audit/WEB-PROTOCOL-AND-AUTH.md",
+          "upstream_sha256": "4f3066dffa23c5635859187be9b96c32f2aff29a688186b91ff0c63e47d62b5c"
+        },
+        {
+          "shipped": "skills/security-audit/scripts/report-schema.json",
+          "upstream": "skills/security-audit/report-schema.json",
+          "upstream_sha256": "6575c9de4a62255699ea052ebf9a49ebfb373a32891bcd89af6f55cc84b35519"
+        },
+        {
+          "shipped": "skills/security-audit/scripts/validate-findings.cjs",
+          "upstream": "skills/security-audit/validate-findings.cjs",
+          "upstream_sha256": "e85f232e36bfac0f866f244da50376692d6b45c690beadcb00608b0e6c8b5283"
+        },
+        {
+          "shipped": "skills/security-audit/scripts/validate-findings.test.cjs",
+          "upstream": "skills/security-audit/validate-findings.test.cjs",
+          "upstream_sha256": "b92001117a92c4161d43777a0ba2fa182a8a4d97f2304cc8c0cee5331497b73b"
+        },
+        {
+          "shipped": "skills/security-audit/scripts/validate-coverage-ledger.cjs",
+          "upstream": "skills/security-audit/validate-coverage-ledger.cjs",
+          "upstream_sha256": "2eb280bd2e33c002916f86db9b29f9edfedb6454e5db973c766290465b868ac8"
+        },
+        {
+          "shipped": "skills/security-audit/scripts/validate-coverage-ledger.test.cjs",
+          "upstream": "skills/security-audit/validate-coverage-ledger.test.cjs",
+          "upstream_sha256": "cfb9df26b03469a4279a70e7664a2a5434dd6f8c2c204e91f9b0aeb9dd71e648"
+        }
+      ],
+      "changes": "Method unchanged. Frontmatter for H-Stack (user-invocable: false, guidance by default, full-audit phrases in metadata.hstack.modes); companions moved to references/ and validators to scripts/ with paths updated; 'ANY' headings and one 'Important:' marker reworded; H-Stack note naming /security-review and security-guidance, the native sandbox and the untrusted-content rule. Companion files were safety-read in full by a review subagent; core files, schema and validators read in full by the importer; test files reviewed for side effects (temp dirs, mkfifo, symlinks) but not executed here (auto mode blocked running downloaded code)."
+    },
+    {
+      "skill": "qa",
+      "repo": "anthropics/skills",
+      "path": "skills/webapp-testing",
+      "commit": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
+      "licence": "Apache-2.0",
+      "copyright": "Apache License",
+      "files": [
+        {
+          "shipped": "skills/qa/scripts/with_server.py",
+          "upstream": "skills/webapp-testing/scripts/with_server.py",
+          "upstream_sha256": "b0dcf4918935b795f4eda9821579b9902119235ff4447f687a30286e7d0925fd"
+        },
+        {
+          "shipped": "skills/qa/SKILL.md",
+          "upstream": "skills/webapp-testing/SKILL.md",
+          "upstream_sha256": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+        }
+      ],
+      "changes": "with_server.py unchanged. SKILL.md rewritten: project's own e2e tooling first, Node or Python Playwright otherwise; all-caps notes removed; examples not imported (hard-coded /mnt/user-data paths); page content untrusted; mutation check (HS-068) added as H-Stack's own script."
+    },
+    {
+      "skill": "design-ui",
+      "repo": "ibelick/ui-skills",
+      "path": "skills/baseline-ui",
+      "commit": "f511eae41c996e3953fbeabf95d38e4077d40711",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Julien Thibeaut",
+      "files": [
+        {
+          "shipped": "skills/design-ui/references/baseline.md",
+          "upstream": "skills/baseline-ui/SKILL.md",
+          "upstream_sha256": "fea3322f36d58fdafafce2aef56e4556dd2ac7b20876b7dff7d8be7f25fa597f"
+        }
+      ],
+      "changes": "Kept as check-only correctness rules; removed the mandated stack (Tailwind defaults, motion/react, tw-animate-css, cn, Base UI) and aesthetic bans (gradients, purple, shadow scale, one accent); MUST/NEVER rewritten as plain checks; project design system wins."
+    },
+    {
+      "skill": "design-ui",
+      "repo": "anthropics/skills",
+      "path": "skills/frontend-design",
+      "commit": "2c5958ecac7cee2b583967a2c4981d0f4a75c579",
+      "licence": "Apache-2.0",
+      "copyright": "Apache License",
+      "files": [
+        {
+          "shipped": "skills/design-ui/references/direction.md",
+          "upstream": "skills/frontend-design/SKILL.md",
+          "upstream_sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+        }
+      ],
+      "changes": "Design-studio persona and fixed preferences removed; applies only where the project has no design system; grounding, plan-check-build-critique loop, generated-default self-check and writing guidance kept and condensed."
+    },
+    {
+      "skill": "memory",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/handoff",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/memory/SKILL.md",
+          "upstream": "skills/productivity/handoff/SKILL.md",
+          "upstream_sha256": "4cbb043950dad2ffd3662ff1a5a0b51ae676004b5cae10e3787e8ee7a4ee69d3"
+        }
+      ],
+      "changes": "Handoff sections aligned with H-Stack's compaction checkpoint schema (HS-047); disable-model-invocation dropped (OD-8); lessons, glossary and structural-question sections are H-Stack's own."
+    },
+    {
+      "skill": "writing",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/writing-for-agents",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/writing/references/for-agents.md",
+          "upstream": "skills/productivity/writing-for-agents/SKILL.md",
+          "upstream_sha256": "551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a"
+        },
+        {
+          "shipped": "skills/writing/references/for-agents.md",
+          "upstream": "skills/productivity/writing-for-agents/SKILL-MECHANICS.md",
+          "upstream_sha256": "c768e6307c7c10728c401c213f2c4ba71c542127eeb7ad2956aabd15a0fa0059"
+        }
+      ],
+      "changes": "SKILL-MECHANICS folded in and reframed for H-Stack (every skill model-invoked, user-invocable: false); otherwise near-verbatim."
+    },
+    {
+      "skill": "writing",
+      "repo": "cursor/plugins",
+      "path": "pstack/skills/unslop",
+      "commit": "5866df557357d005b3c0c9d3da0d9e739b4bdde3",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Lauren Tan",
+      "files": [
+        {
+          "shipped": "skills/writing/references/plain-prose.md",
+          "upstream": "pstack/skills/unslop/SKILL.md",
+          "upstream_sha256": "ccab208e315ce05e2fab8eeee2f7879f1289b5c6844840b2d307adf31c79144f"
+        }
+      ],
+      "changes": "Em-dash ban and other punctuation/case rules (13, 17, 19) made defaults that yield to the project's style guide; disable-model-invocation dropped."
+    },
+    {
+      "skill": "long-run",
+      "repo": "obra/superpowers",
+      "path": "skills/dispatching-parallel-agents",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/long-run/references/parallel.md",
+          "upstream": "skills/dispatching-parallel-agents/SKILL.md",
+          "upstream_sha256": "1968923066f3b707eb01d1992cdf4c42284c3855f70253b9cd5000ff45fca13c"
+        }
+      ],
+      "changes": "Session-specific example and all-caps wording removed; H-Stack brief fields, spawn budgets and the decision ledger added; SKILL.md is H-Stack's own (/goal protocol, code mode, oracle split, declared effects)."
+    },
+    {
+      "skill": "research",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/research",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/research/SKILL.md",
+          "upstream": "skills/engineering/research/SKILL.md",
+          "upstream_sha256": "1f629e18ab899412683bc6a1c4efb4339999e27c2fdac328f26ee10a8c031d33"
+        }
+      ],
+      "changes": "Kept the primary-sources and save-where-the-repo-keeps-notes rules; added citation with version/date, measured/read/inferred marks and the untrusted-page rule."
     }
   ],
   "dropped": [

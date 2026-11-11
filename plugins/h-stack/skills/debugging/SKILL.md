@@ -1,7 +1,7 @@
 ---
 name: debugging
-description: Find the root cause of a failing test, error, crash, flaky or slow behaviour before changing code, then prove the fix.
-when_to_use: Tests fail, stack traces, "why does X break", regressions, flaky tests, performance problems.
+description: Find the root cause of a failure, crash, flaky or slow code before fixing; prove the fix.
+when_to_use: Failing tests, errors, regressions.
 user-invocable: false
 metadata:
   hstack:

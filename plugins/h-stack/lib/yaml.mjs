@@ -2,10 +2,24 @@
 // Supports: nested maps by indentation, block lists, flow lists [a, b], flow maps {a: b},
 // quoted and plain scalars, numbers, booleans, null, and > / | block scalars.
 
+function unquoteDouble(s) {
+  let out = '';
+  const map = { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', 0: '\0' };
+  for (let i = 1; i < s.length - 1; i++) {
+    const c = s[i];
+    if (c !== '\\') { out += c; continue; }
+    const n = s[++i];
+    if (n === 'u') { out += String.fromCharCode(parseInt(s.slice(i + 1, i + 5), 16)); i += 4; }
+    else if (n in map) out += map[n];
+    else out += '\\' + n;
+  }
+  return out;
+}
+
 function parseScalar(raw) {
   const s = raw.trim();
   if (s === '') return '';
-  if (s.startsWith('"')) return JSON.parse(s.replace(/\\([^"\\/bfnrtu])/g, '\\\\$1'));
+  if (s.startsWith('"')) return unquoteDouble(s);
   if (s.startsWith("'")) return s.slice(1, -1).replace(/''/g, "'");
   if (s.startsWith('[')) return parseFlow(s);
   if (s.startsWith('{')) return parseFlow(s);

@@ -12,8 +12,8 @@ import { loadIndex } from '../lib/index.mjs';
 export function skillMap(index) {
   const skills = (index.skills || []).filter((s) => !s.hidden);
   if (!skills.length) return '';
-  const rows = skills.map((s) => `${s.name}${s.explicit_only ? '*' : ''}: ${s.short}`);
-  return `H-Stack skills (picked per prompt; no slash commands; * = only when asked): ${rows.join('; ')}. State and notes: the hs command (assume, decide, wish, failed, stop).`;
+  const rows = skills.map((s) => `${s.name}${s.explicit_only ? '*' : ''}`);
+  return `H-Stack skills (descriptions in the skill list; picked per prompt, no slash commands; * = only when asked): ${rows.join(', ')}. Load one with the Skill tool when H-Stack names it. State: the hs command (assume, decide, wish, failed, stop).`;
 }
 
 function devServers() {

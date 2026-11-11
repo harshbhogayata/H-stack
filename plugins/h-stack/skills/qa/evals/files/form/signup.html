@@ -1,0 +1,10 @@
+<!doctype html><html><body>
+<form id="f"><input id="email" type="text" placeholder="email"><button type="submit">Sign up</button><p id="msg"></p></form>
+<script>
+document.getElementById('f').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = document.getElementById('email').value;
+  // Bug: the error only appears when the field contains a space, not when it is empty.
+  document.getElementById('msg').textContent = v.includes(' ') ? 'Please enter a valid email' : 'Thanks!';
+});
+</script></body></html>

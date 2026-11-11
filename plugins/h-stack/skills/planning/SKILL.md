@@ -1,7 +1,7 @@
 ---
 name: planning
-description: Turn a spec or multi-step request into a plan of small, checkable tasks with exact interfaces, then execute it task by task.
-when_to_use: A feature or change spanning several files or steps, a spec to implement, "plan this", "break this down".
+description: Turn a spec into small checkable tasks with exact interfaces, then execute them.
+when_to_use: Multi-step features, specs, plan this.
 user-invocable: false
 metadata:
   hstack:

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // hs: the only way the agent writes H-Stack state (ARCHITECTURE §4.6). Output: one JSON {status, reason}.
 // Commands: assume, verify-assumption, decide, failed, wish, resolve-wish, stop, phase, rubric,
-//           goal, lesson, vote, status.
+//           goal, lesson, vote, manifest, review-override, status.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -162,6 +162,26 @@ switch (cmd) {
     out('ok', `vote recorded (${help} helpful, ${harm} harmful)${harm > help ? '; propose removing this lesson in a PR' : ''}`);
     break;
   }
+  case 'manifest': {
+    const file = path.join(stateDir(proj), 'active-manifest.json');
+    if (pos[0] === 'start') {
+      const { loadManifest } = await import(path.join(here, '..', 'lib', 'effects.mjs'));
+      const m = loadManifest(pos[1]);
+      writeJsonAtomic(file, { ...m, source: pos[1] });
+      out('ok', `manifest ${m.name || pos[1]} armed: actions outside its ${m.effects.length} declared effect(s) are denied until hs manifest stop`);
+    }
+    if (pos[0] === 'stop') { fs.rmSync(file, { force: true }); out('ok', 'manifest disarmed'); }
+    out('error', 'usage: hs manifest start <task.yaml> | hs manifest stop');
+    break;
+  }
+  case 'review-override': {
+    if (!pos[0]) out('error', 'usage: hs review-override "<finding>" --verdict false-positive|missed --why "<reason>"');
+    const verdict = f.verdict;
+    if (!['false-positive', 'missed'].includes(verdict)) out('error', 'verdict must be false-positive or missed');
+    appendLine(path.join(stateDir(proj), 'review-calibration.jsonl'), { finding: pos.join(' '), verdict, why: f.why || '', ts: Date.now() }, proj);
+    out('ok', 'override recorded; the latest overrides are added to review-lane briefs as calibration examples');
+    break;
+  }
   case 'status': {
     const a = latestById(readJsonl(F('assumptions.jsonl')));
     const d = latestById(readJsonl(F('decisions.jsonl')));
@@ -171,5 +191,5 @@ switch (cmd) {
     break;
   }
   default:
-    out('error', 'usage: hs assume|verify-assumption|decide|failed|wish|resolve-wish|stop|phase|rubric|goal|lesson|vote|status');
+    out('error', 'usage: hs assume|verify-assumption|decide|failed|wish|resolve-wish|stop|phase|rubric|goal|lesson|vote|manifest|review-override|status');
 }

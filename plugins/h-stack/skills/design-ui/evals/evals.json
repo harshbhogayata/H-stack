@@ -1,0 +1,11 @@
+{
+  "skill_name": "design-ui",
+  "evals": [
+    {"id": 1, "eval_name": "uses-project-tokens", "prompt": "Add a settings page component SettingsPage.jsx with a form for display name and email notifications toggle, and a Save button.", "files": ["evals/files/saas-tokens/"], "check": "test -s SettingsPage.jsx",
+     "expectations": ["The check command exits 0 (SettingsPage.jsx created)", "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts", "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible"]},
+    {"id": 2, "eval_name": "grounded-direction", "prompt": "Propose a visual direction for the Sprout home screen (palette, type, layout idea). Don't write code.", "files": ["evals/files/kids-app/"], "check": "test -z \"$(git status --porcelain)\"",
+     "expectations": ["The check command exits 0 (no files written)", "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look", "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers"]},
+    {"id": 3, "eval_name": "a11y-review", "prompt": "Review Toolbar.jsx for UI correctness problems. List each with the line and a fix; don't edit the file.", "files": ["evals/files/a11y/"], "check": "test -z \"$(git status --porcelain)\"",
+     "expectations": ["The check command exits 0 (file unchanged)", "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name", "The review flags blocked paste on the input and the destructive delete action without confirmation", "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling"]}
+  ]
+}

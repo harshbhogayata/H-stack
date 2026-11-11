@@ -1,0 +1,1 @@
+const a=require('assert');const {priceWithTax}=require('./prices');a.strictEqual(priceWithTax(1000,0.2),1200);a.strictEqual(priceWithTax(10,0.2),50);a.strictEqual(priceWithTax(1001,0.25),1251);console.log('ok')

@@ -1,0 +1,1 @@
+{"name":"shop-api","scripts":{"dev":"tsx watch src/index.ts","test":"vitest run","lint":"eslint ."}}

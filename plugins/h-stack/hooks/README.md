@@ -30,6 +30,7 @@ Cache effect: Appended after the prompt; nothing for direct prompts. Never edits
 | fixture | tokens | text |
 |---|---:|---|
 | classify-debug | 37 | H-Stack: size=light. Relevant skill: h-stack:debugging (load with the Skill tool) because matched "traceback". |
+| classify-explicit-long-run | 37 | H-Stack: size=light. Relevant skill: h-stack:long-run (load with the Skill tool) because matched "overnight". |
 | classify-full | 58 | H-Stack: size=full. Relevant skills (load with the Skill tool): h-stack:planning (matched "Implement a new feature"), h-stack:clarify (size=full: act/ask/stop check first). |
 | classify-just-do-it | 31 | H-Stack: size=light. User said to proceed without questions; log assumptions with hs assume. |
 | classify-lesson | 138 | H-Stack lesson L-pay-1 Sum money as integer cents in src/payments/total.ts (.claude/rules/lessons/payments.md): editing totals or tax arithmetic in `src/payments/total.ts`; applies when amounts are added, compared or rounded; not when formatting a display string. Evidence: $ npm test -- total.spec.ts \| expected 10.3, received 10.299999999999999 \| fixed by summing cents: Math.round(a * 100) + Math.round(b * 100) |
@@ -54,16 +55,18 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-crash | 55 | Blocked by h-stack:gate-bash: the guard crashed, so the action was not checked. To proceed: report this to the user; the error is in .h-stack/logs/hook-errors.jsonl. |
 | bash-credential-exec | 66 | Blocked by trusted-executable: `npx vercel login` runs a credential-bearing step through a project-controlled executable. To proceed: run the globally installed tool, or the user confirms this one. |
 | bash-exfiltration | 63 | Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network. |
-| bash-force-push | 73 | Blocked by irreversible-gate: irreversible action (effect=force-push; executable=git; target=git push --force; destination=origin feature). To proceed: the user approves this exact command; a changed command asks again. |
+| bash-force-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-install-fresh | 91 | Blocked by dependency-gate: npm:left-pad-fresh about 12 downloads a week (floor 50); npm:left-pad-fresh first published 10 days ago (minimum 30); npm:left-pad-fresh installs @latest, so the version is not pinned. To proceed: check the package name and source with the user. |
 | bash-install-nearmiss | 75 | Blocked by dependency-gate: npm:lodahs not found in the registry (possibly a hallucinated name); npm:lodahs within edit distance 2 of the popular package "lodash". To proceed: check the package name and source with the user. |
 | bash-install-offline | 63 | Blocked by dependency-gate: pypi:requests registry unreachable (offline (fixture)), so existence, age and usage are unchecked. To proceed: check the package name and source with the user. |
+| bash-manifest-undeclared | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-metadata-tainted | 58 | Blocked by fetch-destination: curl targets 169.254.169.254 (cloud metadata) while untrusted content is in play. To proceed: the user confirms this local or metadata request. |
 | bash-nested-publish | 99 | Blocked by irreversible-gate: irreversible action (effect=publish; executable=npm; target=npm publish; destination=package registry); no fresh read-only receipt for this target (try npm publish --dry-run or npm pack). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-npm-publish | 99 | Blocked by irreversible-gate: irreversible action (effect=publish; executable=npm; target=npm publish; destination=package registry); no fresh read-only receipt for this target (try npm publish --dry-run or npm pack). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-plugin-install | 68 | Blocked by supply-chain: `claude plugin install some-skill@some-market` installs third-party instructions or tools. To proceed: the user reviews the source first; H-Stack never installs skills on its own. |
 | bash-protected-redirect | 54 | Blocked by protected-checker: the command writes to .github/workflows/ci.yml, a CI, agent or test-runner config. To proceed: the user approves edits to checkers. |
-| bash-push-main | 71 | Blocked by irreversible-gate: irreversible action (effect=push-default; executable=git; target=git push to main; destination=origin). To proceed: the user approves this exact command; a changed command asks again. |
+| bash-push-feature-trigger | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| bash-push-main | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-scope-lock | 110 | Blocked by irreversible-gate: irreversible action (effect=send; executable=gh; target=gh issue comment; destination=issue 12). To proceed: the user approves this exact command; a changed command asks again. Blocked by scope-lock: this writes to #12, but the request named #7. To proceed: confirm the target number with the user. |
 | bash-state-write | 50 | Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 | bash-step-budget | 56 | Blocked by step-budget: this turn used 75 model steps (cap 60 for size=light). To proceed: stop and summarise what is done, what remains and the next step for the user. |
@@ -102,12 +105,21 @@ Cache effect: Decision text only.
 | mcp-scope-lock | 110 | Blocked by irreversible-gate: effect=send/write; tool=mcp__github__add_issue_comment; arguments={"issue_number":99,"body":"done"}. To proceed: the user approves this exact call; changed arguments ask again. Blocked by scope-lock: this writes to #99, but the request named #42. To proceed: confirm the target number with the user. |
 | mcp-send | 67 | Blocked by irreversible-gate: effect=send/write; tool=mcp__slack__send_message; arguments={"channel":"C1","text":"deployed"}. To proceed: the user approves this exact call; changed arguments ask again. |
 
+## gate-skill.mjs
+
+Cache effect: Decision text only.
+
+| fixture | tokens | text |
+|---|---:|---|
+| skill-explicit-denied | 48 | Blocked by explicit-only: h-stack:long-run runs only when the user asks for it in this turn. To proceed: ask the user, or continue without it. |
+
 ## ledger.mjs
 
 Cache effect: Appended next to the tool result; at most one note per kind per turn.
 
 | fixture | tokens | text |
 |---|---:|---|
+| ledger-edit-path-trigger | 36 | H-Stack: Relevant skill: h-stack:design-ui because src/components/Button.tsx matches its paths (path_edit). |
 | ledger-empty-run | 61 | H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed.<br>H-Stack: Relevant skill: h-stack:debugging because `pytest` failed (test_failed). |
 | ledger-test-failed-trigger | 28 | H-Stack: Relevant skill: h-stack:debugging because `npm test` failed (test_failed). |
 
@@ -125,7 +137,7 @@ Cache effect: Once per session start; static map first and byte-stable, facts so
 
 | fixture | tokens | text |
 |---|---:|---|
-| session-start-facts | 221 | H-Stack skills (picked per prompt; no slash commands; * = only when asked): clarify: act, ask or stop; few questions, each with a recommendation; core-rules: evidence before claims; small surgical changes; debugging: root cause before any fix, then prove it; planning: spec to checkable plan with interfaces, then execute; tdd: test-first in vertical red-green slices. State and notes: the hs command (assume, decide, wish, failed, stop).<br>H-Stack facts: failed approaches so far (do not retry without a new signal): bump node to 22 → native addon fails to build. last checkpoint: .h-stack/sessions/s1/checkpoints/001.md. open wishlist: W1 staging DB password. |
+| session-start-facts | 198 | H-Stack skills (descriptions in the skill list; picked per prompt, no slash commands; * = only when asked): clarify, core-rules, debugging, design-ui, git-ship, long-run*, memory, planning, qa, research, review, security-audit, skill-authoring, tdd, writing. Load one with the Skill tool when H-Stack names it. State: the hs command (assume, decide, wish, failed, stop).<br>H-Stack facts: failed approaches so far (do not retry without a new signal): bump node to 22 → native addon fails to build. last checkpoint: .h-stack/sessions/s1/checkpoints/001.md. open wishlist: W1 staging DB password. |
 
 ## stop.mjs
 

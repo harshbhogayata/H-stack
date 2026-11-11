@@ -3,11 +3,38 @@
     "build_failed": [
       "h-stack:debugging"
     ],
+    "path_edit": [
+      "h-stack:design-ui"
+    ],
+    "pre_push": [
+      "h-stack:review"
+    ],
     "test_failed": [
       "h-stack:debugging"
     ]
   },
-  "paths": [],
+  "paths": [
+    {
+      "glob": "**/*.{tsx,jsx,vue,svelte,astro,css,scss,sass,less}",
+      "skill": "h-stack:design-ui"
+    },
+    {
+      "glob": "**/*.html",
+      "skill": "h-stack:design-ui"
+    },
+    {
+      "glob": "**/tailwind.config.*",
+      "skill": "h-stack:design-ui"
+    },
+    {
+      "glob": "**/theme.*",
+      "skill": "h-stack:design-ui"
+    },
+    {
+      "glob": "**/tokens.*",
+      "skill": "h-stack:design-ui"
+    }
+  ],
   "skills": [
     {
       "category": "03",
@@ -42,7 +69,7 @@
       "name": "clarify",
       "not_for": [],
       "paths": [],
-      "purpose": "Decide act, ask or stop before a large or ambiguous task; ask only outcome-changing questions, each with a recommended answer.",
+      "purpose": "Decide act, ask or stop on big or vague requests; few questions, each with a recommendation.",
       "qualified": "h-stack:clarify",
       "short": "act, ask or stop; few questions, each with a recommendation",
       "sizes": [
@@ -79,7 +106,7 @@
       "name": "core-rules",
       "not_for": [],
       "paths": [],
-      "purpose": "Prove every done, fixed or passing claim with a fresh command; keep changes small, simple and surgical.",
+      "purpose": "Prove done/fixed/passing claims with a fresh command; keep changes small and surgical.",
       "qualified": "h-stack:core-rules",
       "short": "evidence before claims; small surgical changes",
       "sizes": [
@@ -128,9 +155,196 @@
       "name": "debugging",
       "not_for": [],
       "paths": [],
-      "purpose": "Find the root cause of a failing test, error, crash, flaky or slow behaviour before changing code, then prove the fix.",
+      "purpose": "Find the root cause of a failure, crash, flaky or slow code before fixing; prove the fix.",
       "qualified": "h-stack:debugging",
       "short": "root cause before any fix, then prove it",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "10",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [
+        "path_edit"
+      ],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "ui",
+        "design",
+        "frontend",
+        "component",
+        "accessibility",
+        "layout"
+      ],
+      "keywords": [
+        "\\b(landing|home|settings|pricing) page\\b",
+        "\\b(ui|ux)\\b",
+        "\\bredesign\\b",
+        "\\b(component|button|modal|dialog|form|navbar|sidebar|layout)\\b",
+        "\\baccessib(le|ility)\\b",
+        "\\ba11y\\b",
+        "\\bresponsive\\b",
+        "\\bdark mode\\b",
+        "\\bpolish\\b",
+        "\\bstyl(e|ing)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "design-ui",
+      "not_for": [],
+      "paths": [
+        "**/*.{tsx,jsx,vue,svelte,astro,css,scss,sass,less}",
+        "**/*.html",
+        "**/tailwind.config.*",
+        "**/theme.*",
+        "**/tokens.*"
+      ],
+      "purpose": "Build UI from the project's own design system and pass a11y checks.",
+      "qualified": "h-stack:design-ui",
+      "short": "UI from the project's own design system, checked for a11y",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "13",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "pr",
+        "merge",
+        "branch",
+        "worktree",
+        "conflict",
+        "ship"
+      ],
+      "keywords": [
+        "\\b(open|create|write|draft) (a |the )?(pr|pull request)\\b",
+        "\\bpr (body|description)\\b",
+        "\\bmerge conflicts?\\b",
+        "\\bconflict markers?\\b",
+        "\\bworktree\\b",
+        "\\bfinish(ing)? (the |this )?branch\\b",
+        "\\b(squash|rebase) (and|then) merge\\b",
+        "\\bship (it|this)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "git-ship",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Finish branches, write evidence-backed PR bodies, resolve conflicts by intent.",
+      "qualified": "h-stack:git-ship",
+      "short": "finish branches, evidence-backed PRs, conflicts by intent",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "14",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": true,
+      "explicit_phrases": [
+        "\\bovernight\\b",
+        "\\bunattended\\b",
+        "\\blong[- ]run\\b",
+        "/goal\\b",
+        "\\bkeep going until\\b",
+        "\\bin parallel\\b",
+        "\\bfan[- ]out\\b",
+        "\\bschedul(e|ed)\\b",
+        "\\broutine\\b",
+        "\\bevery (night|morning|day|hour)\\b"
+      ],
+      "hidden": false,
+      "intents": [
+        "long-run",
+        "goal",
+        "schedule",
+        "parallel",
+        "overnight"
+      ],
+      "keywords": [
+        "\\bovernight\\b",
+        "\\bunattended\\b",
+        "\\blong[- ]run(ning)?\\b",
+        "/goal\\b",
+        "\\bkeep going until\\b",
+        "\\b(run|do) (this|it) in parallel\\b",
+        "\\bfan[- ]out\\b",
+        "\\bschedul(e|ed) (task|run|job)\\b",
+        "\\broutine\\b",
+        "\\bevery (night|morning|day|hour)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "long-run",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Run /goal, scheduled or parallel work with checkable end states and declared effects.",
+      "qualified": "h-stack:long-run",
+      "short": "/goal, Routines and fan-out with checkable end states",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "11",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "handoff",
+        "memory",
+        "lesson",
+        "glossary",
+        "resume"
+      ],
+      "keywords": [
+        "\\bhand ?off\\b",
+        "\\bremember (this|that)\\b",
+        "\\bnext time\\b",
+        "\\b(lesson|learn(ed)?) from\\b",
+        "\\bglossary\\b",
+        "\\b(adr|decision record)s?\\b",
+        "\\bpick (this|it) up (later|tomorrow)\\b",
+        "\\bfresh session\\b",
+        "\\bwho calls\\b",
+        "\\bwhere is .{1,30} (called|used)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "memory",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Hand off to a fresh session, propose evidence-backed lessons, keep project terms findable.",
+      "qualified": "h-stack:memory",
+      "short": "handoffs, evidence-backed lessons, project terms",
       "sizes": [
         "light",
         "full"
@@ -171,9 +385,206 @@
       "name": "planning",
       "not_for": [],
       "paths": [],
-      "purpose": "Turn a spec or multi-step request into a plan of small, checkable tasks with exact interfaces, then execute it task by task.",
+      "purpose": "Turn a spec into small checkable tasks with exact interfaces, then execute them.",
       "qualified": "h-stack:planning",
       "short": "spec to checkable plan with interfaces, then execute",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "08",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "qa",
+        "e2e",
+        "browser",
+        "ui-test",
+        "mutation"
+      ],
+      "keywords": [
+        "\\b(e2e|end[- ]to[- ]end)\\b",
+        "\\bplaywright\\b",
+        "\\bcypress\\b",
+        "\\b(in|with) (a|the) browser\\b",
+        "\\bscreenshot\\b",
+        "\\bconsole (errors?|logs?)\\b",
+        "\\bclick through\\b",
+        "\\bmutation (test|check)\\b",
+        "\\btests? (actually )?catch\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "qa",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Verify behaviour in a real browser and check that tests can fail.",
+      "qualified": "h-stack:qa",
+      "short": "real-browser checks; tests that can fail",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "16",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "research",
+        "compare",
+        "docs",
+        "investigate"
+      ],
+      "keywords": [
+        "\\bresearch\\b",
+        "\\bfind out (how|what|whether|why)\\b",
+        "\\bcompare (libraries|options|tools|apis)\\b",
+        "\\bwhat do the docs say\\b",
+        "\\bprimary sources?\\b",
+        "\\bwhich (library|package|tool) should\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "research",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Answer questions from primary sources and save cited findings.",
+      "qualified": "h-stack:research",
+      "short": "primary sources, cited findings",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "07",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [
+        "pre_push"
+      ],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "review",
+        "feedback",
+        "pr-comments"
+      ],
+      "keywords": [
+        "\\breview (this|my|the) (diff|change|changes|pr|pull request|code|branch)\\b",
+        "\\bcode review\\b",
+        "\\b(review|pr) (comments?|feedback)\\b",
+        "\\breviewer (said|says|asked|wants)\\b",
+        "\\baddress (the )?(review|comments|feedback)\\b",
+        "\\bbefore (I |we )?merge\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": [
+          "\\b(high[- ]risk|thorough|deep) review\\b",
+          "\\breview lanes?\\b"
+        ]
+      },
+      "name": "review",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Review diffs for real defects with evidence; verify feedback before acting.",
+      "qualified": "h-stack:review",
+      "short": "evidence-backed review; verify feedback before acting",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "09",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "security",
+        "vulnerability",
+        "audit",
+        "pentest"
+      ],
+      "keywords": [
+        "\\bsecurity (audit|review|issue|hole|bug)\\b",
+        "\\bvulnerab",
+        "\\bpen[- ]?test\\b",
+        "\\b(xss|csrf|ssrf|sql injection|rce|idor|path traversal)\\b",
+        "\\bis (this|it) (safe|secure|exploitable)\\b",
+        "\\bthreat model\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": [
+          "\\b(full|complete|comprehensive|end[- ]to[- ]end) (security )?(audit|review)\\b",
+          "\\bpen[- ]?test (this|the) (codebase|repo)\\b",
+          "\\baudit (this|the) (codebase|repo)\\b"
+        ]
+      },
+      "name": "security-audit",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Find real trust-boundary vulnerabilities with source evidence; full audit only on request.",
+      "qualified": "h-stack:security-audit",
+      "short": "boundary-backed security review; full audit on request",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "15",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "skill",
+        "automate",
+        "script",
+        "feedback"
+      ],
+      "keywords": [
+        "\\b(make|turn) (this|it) (into )?(a )?(reusable )?(script|skill)\\b",
+        "\\bwe keep doing this\\b",
+        "\\bautomate (this|it)\\b",
+        "\\bimprove (the|this) skill\\b",
+        "\\bskill (misfired|is wrong|broke)\\b",
+        "\\breport (this|the) skill\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "skill-authoring",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Turn repeated procedures into tested scripts; report skill problems with approved drafts.",
+      "qualified": "h-stack:skill-authoring",
+      "short": "repeated procedures into tested scripts; skill feedback",
       "sizes": [
         "light",
         "full"
@@ -208,9 +619,47 @@
       "name": "tdd",
       "not_for": [],
       "paths": [],
-      "purpose": "Build features or fix bugs test-first in vertical red-green slices, with tests at public seams that survive refactors.",
+      "purpose": "Build features and fix bugs test-first in vertical red-green slices at public seams.",
       "qualified": "h-stack:tdd",
       "short": "test-first in vertical red-green slices",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "12",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "docs",
+        "writing",
+        "readme",
+        "claude-md",
+        "prose"
+      ],
+      "keywords": [
+        "\\b(write|update|edit|rewrite) (the |a |our )?(readme|docs?|documentation|changelog|release notes|claude\\.md|agents\\.md)\\b",
+        "\\bcleaner prose\\b",
+        "\\b(sounds|reads) (like )?(ai|robotic|generated)\\b",
+        "\\bunslop\\b",
+        "\\bproofread\\b",
+        "\\b(docx|pptx|xlsx|pdf)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "writing",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Write plain, specific docs and agent instructions in the project's voice.",
+      "qualified": "h-stack:writing",
+      "short": "plain, specific prose; documents agents can follow",
       "sizes": [
         "light",
         "full"

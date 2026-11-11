@@ -1,0 +1,11 @@
+{
+  "skill_name": "skill-authoring",
+  "evals": [
+    {"id": 1, "eval_name": "script-not-prose", "prompt": "We keep doing the release steps in NOTES.md by hand. Make this reusable.", "files": ["evals/files/deploy-notes/"], "check": "ls scripts/ | grep -v check-bundle-size | grep -q . || grep -q '\"release\"' package.json",
+     "expectations": ["The check command exits 0 (a script or package script was added)", "The result is an executable script (or package script) that runs the steps in order and stops when the bundle-size check fails, rather than only a prose checklist or skill text", "The script keeps the defaults that worked (--max-kb 250, tag from package.json version)"]},
+    {"id": 2, "eval_name": "feedback-redacted", "prompt": "Draft a feedback issue about the skill problem in REPORT.md for the skill's maintainers. Put the draft in ISSUE.md; don't post it.", "files": ["evals/files/misfire/"], "check": "test -s ISSUE.md && ! grep -q 'ana@acme.com' ISSUE.md && ! grep -q '/home/ana' ISSUE.md",
+     "expectations": ["The check command exits 0 (draft written, email and home path removed)", "The draft states the skill, expected behaviour and actual behaviour", "The reply asks the user to approve the exact text before anything is posted"]},
+    {"id": 3, "eval_name": "reject-generic-prose", "prompt": "Create the skill described in REQUEST.md as SKILL.md.", "files": ["evals/files/prose-skill/"], "check": "true",
+     "expectations": ["The check command exits 0", "The reply points out that generic advice ('write good code', 'be careful') adds no behaviour or measurably hurts, and proposes project-specific content, a script, or measuring it with an eval before shipping, instead of silently writing the generic skill"]}
+  ]
+}

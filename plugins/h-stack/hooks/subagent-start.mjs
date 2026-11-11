@@ -22,5 +22,9 @@ await runHook('subagent-start', 'open', async (input) => {
   } catch { /* no auto memory */ }
   const decisions = latestById(readJsonl(path.join(dir, 'decisions.jsonl'))).slice(-2);
   if (decisions.length) parts.push(`Decisions so far: ${decisions.map((d) => `${d.id} ${String(d.what).slice(0, 60)} (${d.evidence})`).join('; ')}.`);
+  if (/review-lane/.test(input.agent_type || '')) {
+    const cal = readJsonl(path.join(proj, '.h-stack', 'review-calibration.jsonl')).slice(-3);
+    if (cal.length) parts.push(`Calibration from this project's overrides: ${cal.map((c) => `${c.verdict}: ${String(c.finding).slice(0, 60)}`).join('; ')}.`);
+  }
   return context('SubagentStart', parts.join(' ').slice(0, 600));
 });

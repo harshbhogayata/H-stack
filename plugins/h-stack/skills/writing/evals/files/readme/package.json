@@ -1,0 +1,1 @@
+{"name":"tidyjson","version":"2.1.0","bin":{"tidyjson":"cli.js"},"scripts":{"test":"node --test"}}

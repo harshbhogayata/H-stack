@@ -1,0 +1,11 @@
+{
+  "skill_name": "qa",
+  "evals": [
+    {"id": 1, "eval_name": "form-in-browser", "prompt": "Check in a real browser that signup.html shows an error when the form is submitted with an empty email. Report what you saw; don't fix anything yet. Playwright for Node is available via require('playwright').", "files": ["evals/files/form/"], "check": "test -z \"$(git status --porcelain -- signup.html)\"",
+     "expectations": ["The check command exits 0 (signup.html not changed)", "The agent drove the page with a browser (a Playwright script that submits the form) rather than only reading the HTML", "The reply reports that submitting an empty email shows 'Thanks!' instead of an error"]},
+    {"id": 2, "eval_name": "tests-have-teeth", "prompt": "Do the tests in test.js actually catch bugs in clamp()? Tell me which behaviour is untested.", "files": ["evals/files/weak-tests/"], "check": "node test.js",
+     "expectations": ["The check command exits 0", "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes"]},
+    {"id": 3, "eval_name": "console-error", "prompt": "Clicking 'Load report' in app.html does nothing. Check it in a browser and tell me what's wrong. Playwright for Node is available via require('playwright').", "files": ["evals/files/console/"], "check": "true",
+     "expectations": ["The check command exits 0", "The reply reports the uncaught JSON parse error (SyntaxError) captured from the page console or page errors after the click", "The reply names the malformed JSON literal (missing closing brace) as the cause"]}
+  ]
+}

@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by explicit-only: h-stack:long-run runs only when the user asks for it in this turn. To proceed: ask the user, or continue without it."}}

@@ -1,0 +1,1 @@
+Earlier today the user corrected you: "Never use float money in src/billing. We store integer cents; round() on floats gave 10.299999 in the March invoice run (npm run invoices showed 10.29 instead of 10.30)."

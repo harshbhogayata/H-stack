@@ -1,7 +1,7 @@
 ---
 name: core-rules
-description: Prove every done, fixed or passing claim with a fresh command; keep changes small, simple and surgical.
-when_to_use: Before claiming success, committing, or making any non-trivial edit.
+description: Prove done/fixed/passing claims with a fresh command; keep changes small and surgical.
+when_to_use: Before claiming success or committing.
 user-invocable: false
 metadata:
   hstack:

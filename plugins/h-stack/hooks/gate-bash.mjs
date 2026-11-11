@@ -14,6 +14,7 @@ import { taintedIn, privateDestination } from '../lib/taint.mjs';
 import { logTool } from '../lib/telemetry.mjs';
 import { testPhaseActive } from '../lib/phase.mjs';
 import { loadIndex } from '../lib/index.mjs';
+import { declared } from '../lib/effects.mjs';
 
 const WRITE_CMDS = new Set(['tee', 'cp', 'mv', 'sed', 'perl', 'truncate', 'dd', 'install', 'rm', 'ln', 'chmod']);
 
@@ -70,6 +71,20 @@ export async function decide(input, proj) {
     }
     asks.push(refusal('irreversible-gate', fact, 'the user approves this exact command; a changed command asks again'));
     appendLine(path.join(dir, 'approvals.jsonl'), { cmd_sha: cmdSha, manifest: manifest(f), ts: Date.now() }, proj);
+  }
+
+  // HS-044 declared effects: while a manifest is armed, irreversible actions and writes must be declared.
+  const manifestFile = path.join(proj, '.h-stack', 'active-manifest.json');
+  const manifestObj = readJson(manifestFile, null);
+  if (manifestObj && Array.isArray(manifestObj.effects)) {
+    const undeclared = [];
+    for (const f of findings) {
+      const kind = /push/.test(f.cls) ? 'push' : f.cls === 'send' ? 'send' : 'bash';
+      const target = kind === 'bash' ? cmd.trim() : `${f.target} ${f.destination}`;
+      if (!declared(manifestObj, { kind, target })) undeclared.push(f.target);
+    }
+    for (const t of writeTargets(cmds)) { const rel = relToProject(proj, t); if (!declared(manifestObj, { kind: 'edit', target: rel })) undeclared.push(`write ${rel}`); }
+    if (undeclared.length) denies.push(refusal('declared-effects', `${undeclared.slice(0, 3).join(', ')} is not declared in ${manifestObj.source || 'the active task manifest'}`, 'add it to the manifest\'s effects with the user, or run hs manifest stop'));
   }
 
   // HS-035 scope lock.

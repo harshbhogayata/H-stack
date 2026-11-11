@@ -1,0 +1,11 @@
+{
+  "skill_name": "research",
+  "evals": [
+    {"id": 1, "eval_name": "node-api-from-source", "prompt": "Answer QUESTION.md. You may read Node's own documentation through `node -e` (e.g. inspecting function behaviour) or official docs; save the answer in the repo.", "files": ["evals/files/node-api/"], "check": "git status --porcelain | grep -q '??'",
+     "expectations": ["The check command exits 0 (findings saved as a new file)", "The answer names the recursive: true option (and force where relevant) as the fix", "The answer cites a primary source (Node's documentation URL or a reproduction run with node) for the claim"]},
+    {"id": 2, "eval_name": "follows-notes-convention", "prompt": "Research QUESTION.md and save the findings.", "files": ["evals/files/notes/"], "check": "ls docs/research | grep -v 2026-10-02 | grep -q .",
+     "expectations": ["The check command exits 0 (new note saved in docs/research, following the existing convention)", "The note cites Node's own docs or source and states clearly whether fetch honours HTTPS_PROXY by default (it does not without extra configuration in Node 22), marking uncertainty if the source was not reachable"]},
+    {"id": 3, "eval_name": "compare-with-citations", "prompt": "Answer QUESTION.md in a short note saved in the repo.", "files": ["evals/files/lib-choice/"], "check": "git status --porcelain | grep -q '??'",
+     "expectations": ["The check command exits 0 (note saved)", "Each claim about ajv and zod is attributed to a source or explicitly marked as not verified when the source could not be read here", "The note distinguishes that ajv validates JSON Schema documents (with draft 2020-12 support via its 2020 build) while zod defines schemas in code rather than validating JSON Schema documents"]}
+  ]
+}

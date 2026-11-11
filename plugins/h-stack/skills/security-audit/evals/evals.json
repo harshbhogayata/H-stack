@@ -1,0 +1,11 @@
+{
+  "skill_name": "security-audit",
+  "evals": [
+    {"id": 1, "eval_name": "sqli-focused", "prompt": "Is the user search endpoint in users.js safe?", "files": ["evals/files/sqli/"], "check": "test -z \"$(git status --porcelain)\"",
+     "expectations": ["The check command exits 0 (no files created or changed: guidance mode, not a full audit)", "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line", "The reply gives the smallest source fix (a parameterised query using db.query's params argument)"]},
+    {"id": 2, "eval_name": "path-traversal", "prompt": "Review files.py for security problems.", "files": ["evals/files/traversal/"], "check": "test -z \"$(git status --porcelain)\"",
+     "expectations": ["The check command exits 0 (no files created or changed)", "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)", "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary"]},
+    {"id": 3, "eval_name": "clean-no-manufactured", "prompt": "Check hash.js for security vulnerabilities.", "files": ["evals/files/clean/"], "check": "test -z \"$(git status --porcelain)\"",
+     "expectations": ["The check command exits 0 (no files created or changed)", "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability"]}
+  ]
+}

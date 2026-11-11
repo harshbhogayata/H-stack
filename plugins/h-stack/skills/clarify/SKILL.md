@@ -1,7 +1,7 @@
 ---
 name: clarify
-description: Decide act, ask or stop before a large or ambiguous task; ask only outcome-changing questions, each with a recommended answer.
-when_to_use: Large or vague requests, new features, "grill me", "stress-test this plan", conflicting requirements.
+description: Decide act, ask or stop on big or vague requests; few questions, each with a recommendation.
+when_to_use: Vague or large asks, grill me, stress-test a plan.
 user-invocable: false
 metadata:
   hstack:

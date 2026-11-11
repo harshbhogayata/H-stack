@@ -1,0 +1,11 @@
+{
+  "skill_name": "writing",
+  "evals": [
+    {"id": 1, "eval_name": "readme-usage", "prompt": "Write README.md for this tool: what it does and how to use it.", "files": ["evals/files/readme/"], "check": "test -s README.md && grep -q -- '--sort-keys' README.md && grep -q -- '--indent' README.md",
+     "expectations": ["The check command exits 0 (README documents both flags)", "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)", "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'"]},
+    {"id": 2, "eval_name": "unslop", "prompt": "Rewrite draft.md so it reads like a plain engineering note. Keep every fact.", "files": ["evals/files/slop/"], "check": "grep -q '10 minutes' draft.md && grep -q '83' draft.md && ! grep -qiE 'pivotal|delve|tapestry|game-changer|landscape|fosters|vibrant|future looks bright' draft.md",
+     "expectations": ["The check command exits 0 (facts kept, AI vocabulary removed)", "The unsupported claim 'Experts believe' is removed or replaced with a sourced statement", "The result states what the cache does in concrete terms (stores rendered pages on disk for 10 minutes, serves them while the database is down, 83% hit rate in staging)"]},
+    {"id": 3, "eval_name": "claude-md", "prompt": "Write a CLAUDE.md for this repo for coding agents.", "files": ["evals/files/claudemd/"], "check": "test -s CLAUDE.md && grep -qi 'cents' CLAUDE.md && grep -qi 'migration' CLAUDE.md && test $(wc -l < CLAUDE.md) -le 60",
+     "expectations": ["The check command exits 0 (short, includes money-as-cents and migration rules)", "CLAUDE.md captures the unwritten conventions (integer cents, never edit shipped migrations, legacy/ frozen) rather than restating every package.json script or describing the directory tree", "CLAUDE.md does not use all-caps imperatives such as NEVER or MUST"]}
+  ]
+}

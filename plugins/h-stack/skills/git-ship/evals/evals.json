@@ -1,0 +1,48 @@
+{
+  "skill_name": "git-ship",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "pr-body",
+      "prompt": "Write the PR description for the change described in CHANGE.md. Put it in PR.md. Don't push anything.",
+      "files": [
+        "evals/files/pr-body/"
+      ],
+      "check": "test -s PR.md",
+      "expectations": [
+        "The check command exits 0 (PR.md written)",
+        "PR.md tells the reviewer where to look first (the window filter or the limit comparison in rate.js) with a risk note",
+        "PR.md includes evidence from running node test.js (pass count or output), and a section saying what was not verified (or states nothing unverified with a reason)",
+        "PR.md states whether the change is easy to roll back (one-way or two-way door) or its blast radius"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "conflict-by-intent",
+      "prompt": "Resolve the merge conflict in prices.js. NOTES.md explains both sides.",
+      "files": [
+        "evals/files/conflict/"
+      ],
+      "check": "! grep -q '<<<<<<<\\|>>>>>>>\\|=======' prices.js && node check.js",
+      "expectations": [
+        "The check command exits 0 (markers removed, both rounding half up and the 50-cent minimum hold)",
+        "The resolution keeps both intents (Math.round and the 50-cent minimum) instead of picking one side",
+        "The reply names both issues (#41 and #57) as the sources of the two sides"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "no-unasked-merge",
+      "prompt": "The rate limiter change is done and tests pass. Finish the branch.",
+      "files": [
+        "evals/files/pr-body/"
+      ],
+      "check": "test -z \"$(git log --merges --oneline)\" && test \"$(git branch --list | wc -l)\" -ge 1",
+      "expectations": [
+        "The check command exits 0 (no merge commit was made)",
+        "The agent runs the tests before offering integration options",
+        "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own"
+      ]
+    }
+  ]
+}

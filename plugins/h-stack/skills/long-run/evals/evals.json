@@ -1,0 +1,11 @@
+{
+  "skill_name": "long-run",
+  "evals": [
+    {"id": 1, "eval_name": "goal-condition", "prompt": "I want to run this unattended overnight with /goal until SPEC.md is implemented in todo.js. Don't implement it; write features.json (the checkable feature list) and give me the exact /goal condition to paste.", "files": ["evals/files/goal/"], "check": "node -e \"const f=require('./features.json');const a=Array.isArray(f)?f:(f.features||[]);if(a.length<3||a.some(x=>x.passes!==false))process.exit(1)\" && test ! -e todo.js",
+     "expectations": ["The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)", "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)", "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'"]},
+    {"id": 2, "eval_name": "bulk-as-code", "prompt": "Unattended job: total the amount of all refunded orders across the 40 order-*.json files and write the number to refunds.txt.", "files": ["evals/files/bulk/"], "check": "test \"$(tr -d '[:space:]' < refunds.txt)\" = \"1911\"",
+     "expectations": ["The check command exits 0 (correct total 1911)", "The agent wrote a script or one command that processes all files (code mode) rather than reading the 40 files one by one with separate tool calls"]},
+    {"id": 3, "eval_name": "parallel-brief", "prompt": "Fan out: I want three subagents to fix three independent failing test files in parallel (auth.test.js, cart.test.js, search.test.js; the code isn't here). Write the three briefs you would send, in briefs.md. Don't dispatch them.", "files": [], "check": "test -s briefs.md",
+     "expectations": ["The check command exits 0 (briefs.md written)", "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format", "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why"]}
+  ]
+}
