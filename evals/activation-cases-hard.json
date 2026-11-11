@@ -1,0 +1,73 @@
+[
+  {
+    "name": "bugfix-regression-test",
+    "expect": [
+      "tdd",
+      "debugging"
+    ],
+    "from": {
+      "skill": "tdd",
+      "eval": "bugfix-regression-test"
+    }
+  },
+  {
+    "name": "shared-defaults",
+    "expect": [
+      "debugging"
+    ],
+    "from": {
+      "skill": "debugging",
+      "eval": "shared-defaults"
+    }
+  },
+  {
+    "name": "cache-key",
+    "expect": [
+      "review"
+    ],
+    "from": {
+      "skill": "review",
+      "eval": "cache-key"
+    }
+  },
+  {
+    "name": "untrusted-page",
+    "expect": [
+      "research"
+    ],
+    "from": {
+      "skill": "research",
+      "eval": "untrusted-page"
+    }
+  },
+  {
+    "name": "claude-md",
+    "expect": [
+      "writing"
+    ],
+    "from": {
+      "skill": "writing",
+      "eval": "claude-md"
+    }
+  },
+  {
+    "name": "lesson-draft",
+    "expect": [
+      "memory"
+    ],
+    "from": {
+      "skill": "memory",
+      "eval": "lesson-draft"
+    }
+  },
+  {
+    "name": "pr-body",
+    "expect": [
+      "git-ship"
+    ],
+    "from": {
+      "skill": "git-ship",
+      "eval": "pr-body"
+    }
+  }
+]

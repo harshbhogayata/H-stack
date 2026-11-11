@@ -74,7 +74,8 @@ async function runOnce(task, arm, n, base) {
   const bare = arm === 'bare';
   const prompt = bare ? task.prompt.replace(/\s+/g, ' ').trim() : task.prompt;
   const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(task.max_turns || MAX_TURNS), '--permission-mode', task.permission_mode || 'acceptEdits'];
-  if (bare) argv.push('--bare', '--tools', 'Bash', '--allowedTools', 'Bash');
+  // The bare arm keeps the task's own Bash allowlist (never unrestricted Bash).
+  if (bare) argv.push('--bare', '--tools', 'Bash', '--allowedTools', ...((task.allowed_tools || []).filter((t) => t.startsWith('Bash(')).length ? task.allowed_tools.filter((t) => t.startsWith('Bash(')) : ['Bash(node:*)']));
   else if (task.allowed_tools) argv.push('--allowedTools', ...task.allowed_tools);
   if (arm === 'with_skill' || arm.startsWith('ablate_')) argv.push('--plugin-dir', path.join(REPO, 'plugins', 'h-stack'));
   if (MODEL) argv.push('--model', MODEL);

@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "tasks": 1,
+    "runs_per_arm": 1,
+    "iteration": 90,
+    "model": "default",
+    "timestamp": "2026-11-11T22:19:41.681Z"
+  },
+  "tasks": [
+    "example-fix"
+  ],
+  "timestamp": "2026-11-11T22:19:41.681Z",
+  "metrics": {
+    "with_skill": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 169422,
+      "seconds_per_solved": 17.2
+    },
+    "without_skill": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 193269,
+      "seconds_per_solved": 9.8
+    },
+    "bare": {
+      "pass_rate": 0,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": null,
+      "seconds_per_solved": null
+    },
+    "ablate_classify": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 199117,
+      "seconds_per_solved": 11.5
+    },
+    "ablate_session-start": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 40940,
+      "seconds_per_solved": 5.9
+    }
+  },
+  "regressions": [],
+  "sameness": {}
+}

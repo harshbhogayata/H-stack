@@ -8,7 +8,9 @@
       "The checkout test is flaky on CI",
       "npm test fails with ENOENT for config.json",
       "There's a regression in the date parser",
-      "Getting a segfault when I load big files"
+      "Getting a segfault when I load big files",
+      "parse_duration('1h30m') returns 30 instead of 90. Fix it.",
+      "The refund test in test/billing.test.js fails: refunds come out in USD instead of EUR."
     ],
     "should_not": [
       "Rename the variable x to total in utils.py",
@@ -161,7 +163,8 @@
     "should": [
       "Write a handoff so another session can pick this up tomorrow",
       "Remember that we always use pnpm in this repo",
-      "Save what we learned from this bug as a lesson for the team"
+      "Save what we learned from this bug as a lesson for the team",
+      "Turn the correction in CONTEXT.md into a lesson the team can share."
     ],
     "should_not": [
       "Fix the null check in parser.js",

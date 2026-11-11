@@ -8,7 +8,7 @@ metadata:
     category: "11"
     short: handoffs, evidence-backed lessons, project terms
     intents: [handoff, memory, lesson, glossary, resume]
-    keywords: ["\\bhand ?off\\b", "\\bremember (this|that)\\b", "\\bnext time\\b", "\\b(lesson|learn(ed)?) from\\b", "\\bglossary\\b", "\\b(adr|decision record)s?\\b", "\\bpick (this|it) up (later|tomorrow)\\b", "\\bfresh session\\b", "\\bwho calls\\b", "\\bwhere is .{1,30} (called|used)\\b"]
+    keywords: ["\\bhand ?off\\b", "\\bremember (this|that)\\b", "\\bnext time\\b", "\\b(lesson|learn(ed)?) from\\b", "\\bglossary\\b", "\\b(into|as) a lesson\\b", "\\blessons? (the|our) team\\b", "\\b(adr|decision record)s?\\b", "\\bpick (this|it) up (later|tomorrow)\\b", "\\bfresh session\\b", "\\bwho calls\\b", "\\bwhere is .{1,30} (called|used)\\b"]
     not_for: []
     events: []
     sizes: [light, full]
