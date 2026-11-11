@@ -1,0 +1,14 @@
+{
+  "name": "h-stack",
+  "description": "H-Stack: a from-scratch Claude Code skill stack",
+  "owner": {
+    "name": "harshbhogayata"
+  },
+  "plugins": [
+    {
+      "name": "h-stack",
+      "source": "./plugins/h-stack",
+      "description": "H-Stack skills, agents and hooks"
+    }
+  ]
+}
