@@ -18,7 +18,7 @@ function listNew(dir, seeded) {
 }
 async function gradeOutcome(c, r) {
   const blind = (t) => String(t).split('\n').filter((l) => !/SKILL\.md|h-stack[:/]|\bthe skill\b|H-Stack/i.test(l)).join('\n');
-  const prompt = `Grade one run of a coding agent strictly from the evidence. If evidence is missing or ambiguous, answer false.\n\nTASK: ${c.prompt}\n\nFINAL MESSAGE:\n${blind(r.final).slice(0, 6000)}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${r.check ? `exit ${r.check.code}\n${r.check.out}` : '(no check)'}\n\nFILES THE AGENT WROTE OR CHANGED:\n${blind(r.diff) || '(none)'}\n\nEXPECTATIONS:\n${c.expectations.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"passed":true|false,"evidence":"short quote"}]} in order.`;
+  const prompt = `Grade one run of a coding agent strictly from the evidence. If evidence is missing or ambiguous, answer false.\n\nTASK: ${c.prompt}\n\nEVERYTHING THE AGENT SAID (in order):\n${blind(r.final).slice(-8000)}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${r.check ? `exit ${r.check.code}\n${r.check.out}` : '(no check)'}\n\nFILES THE AGENT WROTE OR CHANGED:\n${blind(r.diff) || '(none)'}\n\nEXPECTATIONS:\n${c.expectations.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"passed":true|false,"evidence":"short quote"}]} in order.`;
   for (let k = 0; k < 2; k++) {
     const g = spawnSync('claude', ['-p', prompt, '--output-format', 'json', '--max-turns', '1', '--tools', ''], { cwd: os.tmpdir(), encoding: 'utf8', timeout: 300000, maxBuffer: 16 << 20 });
     let text = ''; try { text = String(JSON.parse(g.stdout.trim().split('\n').pop()).result || ''); } catch { /* */ }
@@ -51,7 +51,9 @@ const CASES = JSON.parse(fs.readFileSync(path.resolve(REPO, opt('cases', 'evals/
   return { ...c, prompt: c.prompt || ev.prompt, fixtures: (ev.files || []).map((f) => path.join(SKILLS_DIR, c.from.skill, f)), check: ev.check, expectations: ev.expectations.filter((x) => !/^the check command exits 0/i.test(x)) };
 });
 const expects = (c) => (Array.isArray(c.expect) ? c.expect : [c.expect]);
-const TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(mkdir:*)'];
+// Bash(hs:*) mirrors the allow rule H-Stack's setup proposes (OD-4); without it a headless run cannot
+// declare a test-writing step and the read-only-tests gate has no way through.
+const TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill', 'Bash(hs:*)', 'Bash(python:*)', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(mkdir:*)'];
 
 function run(style, c) {
   return new Promise((resolve) => {
@@ -70,7 +72,11 @@ function run(style, c) {
       const skills = [];
       for (const line of out.split('\n')) { try { const j = JSON.parse(line); for (const b of j.message?.content || []) if (b.type === 'tool_use' && b.name === 'Skill') skills.push(String(b.input?.skill || '')); } catch { /* not json */ } }
       let final = ''; let diff = '';
-      for (const line of out.split('\n')) { try { const j = JSON.parse(line); if (j.type === 'result') final = String(j.result || ''); } catch { /* skip */ } }
+      // Every reply the user would see: a mod can resubmit a follow-up (HS-040), and grading only the last
+      // message would hide the original answer.
+      const replies = [];
+      for (const line of out.split('\n')) { try { const j = JSON.parse(line); if (j.type === 'assistant' && !j.parent_tool_use_id) for (const b of j.message?.content || []) if (b.type === 'text' && b.text.trim()) replies.push(b.text); } catch { /* skip */ } }
+      final = replies.join('\n\n---\n\n').slice(-8000);
       let check = null;
       if (c.fixtures) {
         spawnSync('git', ['-C', dir, 'add', '-A', '-N']); diff = spawnSync('git', ['-C', dir, 'diff'], { encoding: 'utf8', maxBuffer: 16 << 20 }).stdout.slice(0, 12000);

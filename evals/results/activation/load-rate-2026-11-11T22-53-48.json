@@ -1,0 +1,376 @@
+{
+  "summary": {
+    "plugin": {
+      "loaded": 3,
+      "runs": 6,
+      "rate": 0.5,
+      "pass_rate": 0.53,
+      "ungraded": 0,
+      "per_case": {
+        "bugfix-regression-test": 0.56,
+        "shared-defaults": 0.5
+      }
+    },
+    "no-plugin": {
+      "loaded": 0,
+      "runs": 6,
+      "rate": 0,
+      "pass_rate": 0.53,
+      "ungraded": 0,
+      "per_case": {
+        "bugfix-regression-test": 0.56,
+        "shared-defaults": 0.5
+      }
+    }
+  },
+  "runs": [
+    {
+      "style": "plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "The fix passes the existing tests. pytest isn't installed here, so I called each test function in `tests/test_duration.py` directly with Python. Both pass: `test_minutes` (45m → 45) and `test_hours` (2h → 120).\n\nNeither test covers an input with both hours and minutes, like the one that was broken. I tried to add this one to the test file, but a project hook blocks edits to existing test files without your approval:\n\n```python\ndef test_hours_and_minutes():\n    assert parse_duration(\"1h30m\") == 90\n```\n\nThe direct check from before already shows `1h30m` → 90. Should I add the test?",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\n",
+      "check": {
+        "code": 1,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "The diff changes only duration.py and adds a new ignore file; tests/test_duration.py is untouched."
+        },
+        {
+          "passed": true,
+          "evidence": "\"I called each test function in `tests/test_duration.py` directly with Python. Both pass\""
+        }
+      ],
+      "pass": 0.6666666666666666
+    },
+    {
+      "style": "plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "The H-Stack plugin flagged three things from my last reply, not you. None of them can be closed without your go-ahead, so here's where each stands:\n\n1. **Regression test not added.** A hook blocks edits to existing test files unless you approve, and a message from the plugin doesn't count as your approval. It's a 3-line addition to `tests/test_duration.py`:\n   ```python\n   def test_hours_and_minutes():\n       assert parse_duration(\"1h30m\") == 90\n   ```\n   Say yes and I'll add it.\n\n2. **Tests haven't run under pytest.** I tried to install pytest into the scratchpad folder, but H-Stack's dependency gate blocked the install. It misread the package name as `2`. I didn't try to get around the gate. The tests are plain `assert` functions, so calling them directly checks the same thing pytest would. Both pass, and calling the function directly gives `parse_duration('1h30m')` → 90. If you want a real pytest run, approve the install or run `pip install pytest && python3 -m pytest -q tests` yourself.\n\n3. **Fix not committed.** That's on purpose: I only commit when you ask. Say the word and I'll commit on a branch, with the test too if you approve it.\n\nThe code fix itself (`=` → `+=` in `duration.py`) is done.",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\n",
+      "check": {
+        "code": 1,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Diff changes only duration.py and one new ignore-style file; tests/test_duration.py is not modified (\"Regression test not added\")."
+        },
+        {
+          "passed": false,
+          "evidence": "The final message reports no test run or result; it says only \"The code fix itself (`=` → `+=` in `duration.py`) is done.\""
+        }
+      ],
+      "pass": 0.3333333333333333
+    },
+    {
+      "style": "plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "Neither point can be closed from my side.\n\n1. **Regression test:** This one is waiting on you. The `read-only-tests` hook only lets me edit the test file if you approve the diff or if a test step was declared before the code change. The fix is already in, so declaring a test step now would just be a way around the hook, and approving it isn't my call. A message from a plugin doesn't count as your approval either. If you say yes, I'll add the 3-line `test_hours_and_minutes` test from my last reply and run it.\n\n2. **pytest missing:** This doesn't affect the result. The two tests are plain functions that use bare `assert` and have no fixtures or other pytest features. Calling them directly runs exactly the same checks, and a failing assert would have raised an error. Both passed. I didn't install pytest because you didn't ask for any changes to the environment. I can install it if you want the tests run through pytest itself.",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\n",
+      "check": {
+        "code": 1,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Diff only changes duration.py and adds an ignore file; tests/test_duration.py is untouched"
+        },
+        {
+          "passed": true,
+          "evidence": "\"Calling them directly runs exactly the same checks... Both passed.\""
+        }
+      ],
+      "pass": 0.6666666666666666
+    },
+    {
+      "style": "no-plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "I fixed it: `parse_duration('1h30m')` now returns 90.\n\n**The bug:** the loop in `duration.py` set `total = ...` for each part of the string instead of adding to it. So the minutes part replaced the hours part, and only the last part counted. I changed both lines to `total += ...`.\n\n**Check:** `'1h30m'` now gives 90, `'45m'` gives 45 and `'2h'` gives 120. I also added a `test_hours_and_minutes` test to `tests/test_duration.py`. pytest isn't installed here, so I called the three test functions directly with Python, and all of them passed.",
+      "diff": "diff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\ndiff --git a/tests/test_duration.py b/tests/test_duration.py\nindex 8af7e5a..d6643d0 100644\n--- a/tests/test_duration.py\n+++ b/tests/test_duration.py\n@@ -7,3 +7,6 @@ def test_minutes():\n \n def test_hours():\n     assert parse_duration(\"2h\") == 120\n+\n+def test_hours_and_minutes():\n+    assert parse_duration(\"1h30m\") == 90\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Diff only adds test_hours_and_minutes; existing test_hours unchanged"
+        },
+        {
+          "passed": true,
+          "evidence": "called the three test functions directly with Python, and all of them passed"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "I fixed it, and `parse_duration('1h30m')` now returns 90.\n\nThe loop in `duration.py` replaced the running total with each new unit instead of adding to it, so `30m` wrote over the `1h`. It now adds each value with `+=`.\n\nI checked three inputs: `'1h30m'` returns 90, `'45m'` returns 45 and `'2h'` returns 120.",
+      "diff": "diff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\n",
+      "check": {
+        "code": 1,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Only duration.py appears in the changed files; tests/test_duration.py was not touched"
+        },
+        {
+          "passed": false,
+          "evidence": "\"I checked three inputs: '1h30m' returns 90...\" names spot-checked inputs, not a test run with its result. The post-run check also exited 1."
+        }
+      ],
+      "pass": 0.3333333333333333
+    },
+    {
+      "style": "plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "That point doesn't need fixing. Leaving the work uncommitted is deliberate: I only commit when you ask, and you asked for a fix, not a commit.\n\nThe work is complete in the working tree: the change to `lib/settings.js` and the new `test/settings.test.js`. All 6 tests pass. If you want it committed, say so and I'll put it on a branch first.",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..f4bda16 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,9 @@\n const path = require('path');\n \n+// require() caches the parsed JSON, so return a copy: callers that\n+// mutate their result (e.g. Object.assign) must not change app-wide defaults.\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return structuredClone(require(path.join(__dirname, '..', 'config', 'defaults.json')));\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/settings.test.js b/test/settings.test.js\nnew file mode 100644\nindex 0000000..a4a01a0\n--- /dev/null\n+++ b/test/settings.test.js\n@@ -0,0 +1,17 @@\n+const test = require('node:test');\n+const assert = require('node:assert/strict');\n+const { getDefaults } = require('../lib/settings');\n+const { createCustomer } = require('../lib/customers');\n+const { refundTotal } = require('../lib/money');\n+\n+test('mutating the returned defaults does not change later defaults', () => {\n+  const d = getDefaults();\n+  d.currency = 'XXX';\n+  assert.equal(getDefaults().currency, 'EUR');\n+});\n+\n+test('customer preferences do not leak into app-wide defaults', () => {\n+  createCustomer({ id: 'c2', name: 'Bob', prefs: { currency: 'USD' } });\n+  assert.equal(getDefaults().currency, 'EUR');\n+  assert.equal(refundTotal([{ cents: 100 }]), '-1.00 EUR');\n+});\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "lib/settings.js: `return structuredClone(require(...defaults.json))` with comment that callers mutating via Object.assign must not change app-wide defaults; no refund special-casing or test reordering"
+        },
+        {
+          "passed": false,
+          "evidence": "Final message only says \"The work is complete in the working tree: the change to `lib/settings.js` and the new `test/settings.test.js`\"; it never explains how the cause was located"
+        },
+        {
+          "passed": false,
+          "evidence": "Only \"All 6 tests pass.\"; there is no mention of running the new test against the unfixed code or seeing it fail"
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "That point doesn't need a fix. The user asked me to fix the bug, not to commit it, and I only commit or push when asked. Leaving the changes uncommitted on `master` was deliberate: the user can review the diff first. The fix itself is complete and the full suite passes 6/6.\n\nIf you want it committed, say so. I'll put it on a new branch rather than `master`, with a message explaining the shared-defaults mutation.",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/lib/customers.js b/lib/customers.js\nindex b3815fc..c41fbd3 100644\n--- a/lib/customers.js\n+++ b/lib/customers.js\n@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');\n \n function createCustomer({ id, name, prefs = {} }) {\n   if (!id) throw new Error('customer id is required');\n-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };\n+  return { id, name, prefs: { ...getDefaults(), ...prefs } };\n }\n \n module.exports = { createCustomer };\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..83323d4 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,11 @@\n const path = require('path');\n \n+// require() caches the parsed JSON, so hand out a fresh copy each time;\n+// callers mutating the result must never change defaults for everyone else.\n+const DEFAULTS = Object.freeze(require(path.join(__dirname, '..', 'config', 'defaults.json')));\n+\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return structuredClone(DEFAULTS);\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/billing.test.js b/test/billing.test.js\nindex 091559a..600040e 100644\n--- a/test/billing.test.js\n+++ b/test/billing.test.js\n@@ -2,6 +2,7 @@ const test = require('node:test');\n const assert = require('node:assert/strict');\n const { formatTotal, refundTotal } = require('../lib/money');\n const { createCustomer } = require('../lib/customers');\n+const { getDefaults } = require('../lib/settings');\n \n test('formats an invoice total', () => {\n   assert.equal(formatTotal(1230), '12.30 EUR');\n@@ -17,6 +18,17 @@ test('creates a customer with their own preferences', () => {\n   assert.equal(c.prefs.precision, 2);\n });\n \n+test('customer preferences do not leak into global defaults', () => {\n+  createCustomer({ id: 'c2', name: 'Bo', prefs: { currency: 'JPY', precision: 0 } });\n+  assert.equal(formatTotal(1230), '12.30 EUR');\n+});\n+\n+test('getDefaults returns a copy that callers cannot use to change defaults', () => {\n+  const d = getDefaults();\n+  d.currency = 'XXX';\n+  assert.equal(getDefaults().currency, 'EUR');\n+});\n+\n test('formats a refund', () => {\n   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');\n });\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "createCustomer now uses `{ ...getDefaults(), ...prefs }` instead of `Object.assign(getDefaults(), prefs)`, and getDefaults returns `structuredClone(DEFAULTS)` of a frozen object, so the shared defaults are no longer mutated"
+        },
+        {
+          "passed": false,
+          "evidence": "The final message only says \"The fix itself is complete and the full suite passes 6/6\" and mentions \"the shared-defaults mutation\"; it does not explain how the cause was found"
+        },
+        {
+          "passed": false,
+          "evidence": "The final message reports only \"the full suite passes 6/6\"; it never says the new tests were run against the unfixed code or that they failed there"
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "bugfix-regression-test",
+      "expect": [
+        "tdd",
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "I fixed it in `duration.py:8-10`. The loop used `total = ...` where it needed `total += ...`, so each part of the string replaced the running total. For `'1h30m'`, the `30m` overwrote the `1h`.\n\nI checked it on three inputs: `'1h30m'` now returns 90, `'45m'` returns 45 and `'2h'` returns 120.",
+      "diff": "diff --git a/duration.py b/duration.py\nindex d4f9c3e..b953602 100644\n--- a/duration.py\n+++ b/duration.py\n@@ -5,7 +5,7 @@ def parse_duration(text):\n     total = 0\n     for value, unit in re.findall(r\"(\\d+)([hm])\", text):\n         if unit == \"h\":\n-            total = int(value) * 60\n+            total += int(value) * 60\n         else:\n-            total = int(value)\n+            total += int(value)\n     return total\n",
+      "check": {
+        "code": 1,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Diff only modifies duration.py; tests/test_duration.py is untouched"
+        },
+        {
+          "passed": false,
+          "evidence": "Only 'I checked it on three inputs'; no test suite run is reported (and the post-run check exited 1)"
+        }
+      ],
+      "pass": 0.3333333333333333
+    },
+    {
+      "style": "plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "That caveat is fixed: the config lock in `lib/settings.js` now covers every level, not just the top one.\n\nThe shared config is now locked at every level of nesting when it loads. `getDefaults()` still returns a full fresh copy each time, so code can merge into that copy freely while the shared config stays unchanged.\n\n**Checks:**\n- `npm test`: 6 of 6 pass.\n- A quick check on a nested sample object `{a:{b:{c:1}}}`: the inner levels are locked, and changing a value in the copy (setting it to 2) left the original at 1.\n\n`defaults.json` has no nested values today, so I didn't add a nested-config test to the suite.",
+      "diff": "diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore\nnew file mode 100644\nindex 0000000..1d9df9a\n--- /dev/null\n+++ b/.h-stack/.gitignore\n@@ -0,0 +1,3 @@\n+*\n+!.gitignore\n+!config.json\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..7a20496 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,22 @@\n const path = require('path');\n \n+// Freeze every level, so nested config values are protected too.\n+function deepFreeze(value) {\n+  if (value && typeof value === 'object') {\n+    Object.values(value).forEach(deepFreeze);\n+    Object.freeze(value);\n+  }\n+  return value;\n+}\n+\n+// Loaded once and frozen: nothing may mutate the shared config in place.\n+const DEFAULTS = deepFreeze(\n+  require(path.join(__dirname, '..', 'config', 'defaults.json'))\n+);\n+\n+// Always return a fresh copy so callers can merge into it safely.\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return structuredClone(DEFAULTS);\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/billing.test.js b/test/billing.test.js\nindex 091559a..bec197d 100644\n--- a/test/billing.test.js\n+++ b/test/billing.test.js\n@@ -20,3 +20,16 @@ test('creates a customer with their own preferences', () => {\n test('formats a refund', () => {\n   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');\n });\n+\n+test('customer preferences never leak into global defaults', () => {\n+  createCustomer({ id: 'c2', name: 'Bo', prefs: { currency: 'JPY', precision: 0 } });\n+  assert.equal(formatTotal(1230), '12.30 EUR');\n+  assert.equal(refundTotal([{ cents: 100 }]), '-1.00 EUR');\n+});\n+\n+test('getDefaults hands out copies that cannot corrupt the shared config', () => {\n+  const { getDefaults } = require('../lib/settings');\n+  const d = getDefaults();\n+  d.currency = 'USD';\n+  assert.equal(getDefaults().currency, 'EUR');\n+});\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "lib/settings.js now deep-freezes the cached defaults.json and `getDefaults()` returns `structuredClone(DEFAULTS)`, so createCustomer can no longer mutate the shared object; no refund special-casing or test reordering"
+        },
+        {
+          "passed": false,
+          "evidence": "Final message only describes the lock and copy fix and the test results; it never explains how the cause was found (e.g. refund test passing alone but failing after createCustomer)"
+        },
+        {
+          "passed": false,
+          "evidence": "Message reports only '`npm test`: 6 of 6 pass' and a nested-object check; no mention of running the new tests against unfixed code (e.g. via git stash) and seeing them fail"
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "I fixed the refund bug. All 5 tests pass now, including a new one I added to stop it coming back.\n\n**Cause:** `createCustomer` was quietly changing the shared default settings. `getDefaults()` in `lib/settings.js` handed out the same settings object to every caller, the one Node keeps after reading `config/defaults.json`. `createCustomer` then wrote each customer's preferences straight into it with `Object.assign(getDefaults(), prefs)`. So once the test created a USD customer, everything formatted afterwards came out in USD, refunds included. It only showed up in the refund test because that test happens to run after the customer test.\n\n**Fix:**\n- **`lib/settings.js`:** loads the defaults once, locks them so they can't be changed, and gives every caller a fresh copy from `getDefaults()`. Callers can edit their copy without affecting anyone else, which is what stops this happening again.\n- **`lib/customers.js`:** now builds the customer's preferences as a new object instead of writing into the defaults.\n- **`test/billing.test.js`:** I added a test that creates a customer, edits both that customer's preferences and a copy of the defaults, then checks the defaults are still EUR with 2 decimal places. It would fail if anything changed the shared defaults again.\n\nI didn't run the new test against the old code: the command to temporarily undo my changes needed your approval, so I skipped it. Reading the code, it should fail there, because the earlier USD customer would already have changed the defaults. I haven't committed anything.",
+      "diff": "diff --git a/lib/customers.js b/lib/customers.js\nindex b3815fc..c41fbd3 100644\n--- a/lib/customers.js\n+++ b/lib/customers.js\n@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');\n \n function createCustomer({ id, name, prefs = {} }) {\n   if (!id) throw new Error('customer id is required');\n-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };\n+  return { id, name, prefs: { ...getDefaults(), ...prefs } };\n }\n \n module.exports = { createCustomer };\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..71bf566 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,14 @@\n const path = require('path');\n \n+// Load once and freeze so no caller can mutate the shared defaults.\n+// (require() caches the parsed JSON, so mutating it leaks into every caller.)\n+const DEFAULTS = Object.freeze({\n+  ...require(path.join(__dirname, '..', 'config', 'defaults.json')),\n+});\n+\n+// Always hand out a fresh copy; callers may safely modify the result.\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return { ...DEFAULTS };\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/billing.test.js b/test/billing.test.js\nindex 091559a..45fce80 100644\n--- a/test/billing.test.js\n+++ b/test/billing.test.js\n@@ -17,6 +17,16 @@ test('creates a customer with their own preferences', () => {\n   assert.equal(c.prefs.precision, 2);\n });\n \n+test('customer prefs do not leak into global defaults', () => {\n+  const { getDefaults } = require('../lib/settings');\n+  const c = createCustomer({ id: 'c2', name: 'Bob', prefs: { currency: 'JPY' } });\n+  c.prefs.precision = 0;\n+  getDefaults().currency = 'CHF';\n+  assert.equal(getDefaults().currency, 'EUR');\n+  assert.equal(getDefaults().precision, 2);\n+  assert.equal(formatTotal(100), '1.00 EUR');\n+});\n+\n test('formats a refund', () => {\n   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');\n });\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "createCustomer now uses `{ ...getDefaults(), ...prefs }` and getDefaults returns `{ ...DEFAULTS }` from a frozen copy; no refund special-casing or test reordering"
+        },
+        {
+          "passed": false,
+          "evidence": "Only states the cause (\"It only showed up in the refund test because that test happens to run after the customer test\"); never says the refund test was run alone or before the customer test to locate it"
+        },
+        {
+          "passed": false,
+          "evidence": "\"I didn't run the new test against the old code: the command to temporarily undo my changes needed your approval, so I skipped it.\""
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "The refund test passes now, and the full suite passes (6 of 6, including 2 new regression tests). I haven't committed anything.\n\n**What was wrong:** `createCustomer` in `lib/customers.js` merged a customer's preferences into the global default settings instead of into a copy. Those defaults come from `require()` of `config/defaults.json`, which returns one object shared by every caller. So once a test created a USD customer, the default currency for the whole process became USD, and the refund test, which runs later, formatted in USD. The refund code itself was fine.\n\n**Fix:**\n- **`lib/settings.js`:** loads the defaults once, freezes them so they can't be modified, and makes `getDefaults()` return a fresh copy on every call. This is what stops the bug coming back: no caller can corrupt the shared defaults, whatever it does with the object it gets.\n- **`lib/customers.js`:** builds preferences as `{ ...getDefaults(), ...prefs }`, a new object, instead of changing the defaults.\n- **`test/billing.test.js`:** two new tests:\n  - After creating a JPY customer with precision 0, the defaults are still EUR with precision 2, and `formatTotal` still prints EUR.\n  - Changing the object `getDefaults()` returns doesn't affect the next call.\n\n  Both run before the refund test, so a leak like this will fail a test that names the real cause. I didn't run the new tests against the old code, but going by that code, both would have failed.",
+      "diff": "diff --git a/lib/customers.js b/lib/customers.js\nindex b3815fc..c41fbd3 100644\n--- a/lib/customers.js\n+++ b/lib/customers.js\n@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');\n \n function createCustomer({ id, name, prefs = {} }) {\n   if (!id) throw new Error('customer id is required');\n-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };\n+  return { id, name, prefs: { ...getDefaults(), ...prefs } };\n }\n \n module.exports = { createCustomer };\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..b92b879 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,14 @@\n const path = require('path');\n \n+// Loaded once and frozen: these are process-wide defaults and must never be\n+// mutated by callers. getDefaults() hands out a fresh copy so callers can\n+// safely merge overrides into the result.\n+const DEFAULTS = Object.freeze(\n+  { ...require(path.join(__dirname, '..', 'config', 'defaults.json')) }\n+);\n+\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return { ...DEFAULTS };\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/billing.test.js b/test/billing.test.js\nindex 091559a..3954380 100644\n--- a/test/billing.test.js\n+++ b/test/billing.test.js\n@@ -2,6 +2,7 @@ const test = require('node:test');\n const assert = require('node:assert/strict');\n const { formatTotal, refundTotal } = require('../lib/money');\n const { createCustomer } = require('../lib/customers');\n+const { getDefaults } = require('../lib/settings');\n \n test('formats an invoice total', () => {\n   assert.equal(formatTotal(1230), '12.30 EUR');\n@@ -17,6 +18,19 @@ test('creates a customer with their own preferences', () => {\n   assert.equal(c.prefs.precision, 2);\n });\n \n+test('customer preferences do not leak into global defaults', () => {\n+  createCustomer({ id: 'c2', name: 'Bob', prefs: { currency: 'JPY', precision: 0 } });\n+  const d = getDefaults();\n+  assert.equal(d.currency, 'EUR');\n+  assert.equal(d.precision, 2);\n+  assert.equal(formatTotal(100), '1.00 EUR');\n+});\n+\n+test('getDefaults returns an independent copy', () => {\n+  getDefaults().currency = 'XXX';\n+  assert.equal(getDefaults().currency, 'EUR');\n+});\n+\n test('formats a refund', () => {\n   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');\n });\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "customers.js now uses `{ ...getDefaults(), ...prefs }` and settings.js freezes DEFAULTS and returns `{ ...DEFAULTS }`; refund code and test order are unchanged"
+        },
+        {
+          "passed": false,
+          "evidence": "The message explains the cause (\"once a test created a USD customer, the default currency for the whole process became USD\") but never says how it was found, such as running the refund test alone or before the customer test"
+        },
+        {
+          "passed": false,
+          "evidence": "\"I didn't run the new tests against the old code, but going by that code, both would have failed.\""
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "shared-defaults",
+      "expect": [
+        "debugging"
+      ],
+      "skills": [],
+      "loaded": false,
+      "final": "I fixed the refund bug and added a test for it. All 5 tests now pass, including the refund test.\n\n**Cause:** `getDefaults()` in `lib/settings.js` handed every caller the same defaults object. `createCustomer` then wrote the customer's preferences into that object. After the customer test set USD, every later `formatTotal` call, including refunds, used USD as its default. The refund test only failed because it runs after the customer test.\n\n**Fix:**\n- **`lib/settings.js`:** the defaults are loaded once and locked. `getDefaults()` now gives each caller its own copy, so changing what you get back can't affect anyone else. This is the change that stops the bug coming back from any caller, not just `createCustomer`.\n- **`lib/customers.js`:** `createCustomer` builds a new preferences object (`{ ...getDefaults(), ...prefs }`) instead of writing into the defaults.\n- **`test/billing.test.js`:** a new test creates a customer with JPY and changes a returned copy of the defaults. It then checks that the defaults are still EUR with 2 decimals.\n\nI haven't seen the new test fail without the fix. My attempt to temporarily undo the library changes and re-run was blocked, so that run still had the fix in place. Your working tree is unchanged. The test should catch the old behaviour, since it runs the same steps that caused the bug. To check, run `git stash push -- lib && npm test; git stash pop`.\n\nNothing is committed yet.",
+      "diff": "diff --git a/lib/customers.js b/lib/customers.js\nindex b3815fc..c41fbd3 100644\n--- a/lib/customers.js\n+++ b/lib/customers.js\n@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');\n \n function createCustomer({ id, name, prefs = {} }) {\n   if (!id) throw new Error('customer id is required');\n-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };\n+  return { id, name, prefs: { ...getDefaults(), ...prefs } };\n }\n \n module.exports = { createCustomer };\ndiff --git a/lib/settings.js b/lib/settings.js\nindex db4b0af..a2e3c65 100644\n--- a/lib/settings.js\n+++ b/lib/settings.js\n@@ -1,7 +1,15 @@\n const path = require('path');\n \n+// Loaded once and frozen so nothing can mutate the shared defaults in place.\n+const DEFAULTS = Object.freeze(\n+  require(path.join(__dirname, '..', 'config', 'defaults.json'))\n+);\n+\n+// Always hand out a fresh copy: callers may freely modify what they get back\n+// without leaking changes into other callers (e.g. one customer's currency\n+// becoming everyone's default).\n function getDefaults() {\n-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));\n+  return structuredClone(DEFAULTS);\n }\n \n module.exports = { getDefaults };\ndiff --git a/test/billing.test.js b/test/billing.test.js\nindex 091559a..b5906d4 100644\n--- a/test/billing.test.js\n+++ b/test/billing.test.js\n@@ -17,6 +17,16 @@ test('creates a customer with their own preferences', () => {\n   assert.equal(c.prefs.precision, 2);\n });\n \n+test('customer preferences do not leak into global defaults', () => {\n+  const { getDefaults } = require('../lib/settings');\n+  createCustomer({ id: 'c2', name: 'Bo', prefs: { currency: 'JPY', precision: 0 } });\n+  const d = getDefaults();\n+  d.currency = 'CHF'; // mutating a returned copy must not affect anyone else\n+  assert.equal(getDefaults().currency, 'EUR');\n+  assert.equal(getDefaults().precision, 2);\n+  assert.equal(formatTotal(100), '1.00 EUR');\n+});\n+\n test('formats a refund', () => {\n   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');\n });\n",
+      "check": {
+        "code": 0,
+        "out": ""
+      },
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "createCustomer now uses `{ ...getDefaults(), ...prefs }` and getDefaults returns `structuredClone(DEFAULTS)` of a frozen object, so the shared defaults are no longer mutated; no refund special-casing or test reordering"
+        },
+        {
+          "passed": false,
+          "evidence": "Message states the conclusion \"The refund test only failed because it runs after the customer test\" but shows no locating step, such as running the refund test alone or in a different order"
+        },
+        {
+          "passed": false,
+          "evidence": "\"I haven't seen the new test fail without the fix. My attempt to temporarily undo the library changes and re-run was blocked\""
+        }
+      ],
+      "pass": 0.5
+    }
+  ]
+}
