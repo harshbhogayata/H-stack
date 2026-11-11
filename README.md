@@ -50,7 +50,7 @@ Optional project setup (shown before anything is written): `node plugins/h-stack
 
 **Sameness check.** The same request ran in three very different projects, graded blind. Each skill fits the project better than no skill does: design-ui 0.93 vs 0.73, writing 0.92 vs 0.85, planning 0.97 vs 0.80. Cross-context similarity stays at or below 0.20.
 
-**Activation.** In real `claude -p` sessions, Claude loads the skill H-Stack names in 16 of 18 runs (`evals/activation-bench.mjs`).
+**Activation.** In real `claude -p` sessions, Claude loads the skill H-Stack names in 16–17 of 18 runs. The six activation cases pass 1.00 with the plugin vs 0.89 without (3 runs per arm, blind grading); review and research make the difference, and the other four tie (`evals/activation-bench.mjs --outcome`).
 
 **Not yet measured:** the whole-stack smoke test on ~10 of the user's real tasks (HS-001, M1 and M9). The runner and release gate are ready (`evals/run-smoke.mjs`, `evals/release-gate.mjs`).
 

@@ -1,0 +1,790 @@
+{
+  "summary": {
+    "plugin": {
+      "loaded": 17,
+      "runs": 18,
+      "rate": 0.94,
+      "pass_rate": 1,
+      "ungraded": 0,
+      "per_case": {
+        "tdd-leap": 1,
+        "debug-typeerror": 1,
+        "plan-feature": 1,
+        "review-feedback": 1,
+        "writing-skill-doc": 1,
+        "research-cited": 1
+      }
+    },
+    "no-plugin": {
+      "loaded": 0,
+      "runs": 18,
+      "rate": 0,
+      "pass_rate": 0.89,
+      "ungraded": 0,
+      "per_case": {
+        "tdd-leap": 1,
+        "debug-typeerror": 1,
+        "plan-feature": 1,
+        "review-feedback": 0.5,
+        "writing-skill-doc": 1,
+        "research-cited": 0.83
+      }
+    }
+  },
+  "runs": [
+    {
+      "style": "plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "I haven't seen your code, so this is the plan I'd follow. I wouldn't change anything until step 4.\n\n**1. Reproduce it with one command**\n```\npytest path/to/failing_test.py::test_name -x --tb=long -l\n```\n`-l` prints the local variables in each frame. That shows the actual values on both sides of the `+` at totals.py:12, so you can see which one is the string (for example, a running total of `0` plus `\"12.50\"`).\n\n**2. Read the whole traceback, not just the last line**\nNote which test fails, which function in `totals.py` calls line 12, and how the data got there from the parser. Line 12 is where the error shows up, but the bad value probably came from somewhere earlier.\n\n**3. Look at what changed**\n`git diff` (or `git log -p`) on the CSV parser. When this error appears right after a parser change, the usual cause is that the parser used to convert fields and now returns raw strings. Things to look for:\n- a removed `int()`, `float()` or `Decimal()` call\n- switching from a hand-written split to `csv.reader` or `csv.DictReader`, which always return strings\n- a `dtype` or `converters` setting that was dropped (if it's pandas)\n- a renamed column, so the numeric field now falls back to a string default\n- whitespace or a header row now being read as data\n\n**4. Trace the bad value back to where it starts**\nPut a breakpoint at line 12 (`pytest --pdb`, or `breakpoint()` on line 11) and check `type()` and `repr()` of both operands. Then go up the call chain until you find the first place the value is a `str` when it should be a number. That's the cause. Line 12 is just where it fails.\n\n**5. Compare with code that works**\nIs there another caller of `totals.py`, or a test fixture, that builds rows by hand with real numbers? List every difference between that data and what the new parser produces. Also check whether all rows break or only some (blank cells, `\"N/A\"`, thousands separators like `\"1,200\"`).\n\n**6. Write down ranked hypotheses before fixing**\nFor example:\n- (a) The parser no longer converts the amount column. If so, every row's value is a `str`.\n- (b) It converts, but returns `\"\"` or `\"N/A\"` for empty cells. If so, only some rows fail.\n- (c) The column name changed and a string default is used instead. If so, the key lookup misses.\n\nTest the top one with the smallest possible check. If it's wrong, form a new hypothesis rather than piling up fixes.\n\n**Then the fix:**\n- Write a test that feeds a small CSV sample through the parser and asserts the numeric fields are numbers. Make sure it fails for the right reason.\n- Fix the type conversion in the parser. Don't add `int()` at line 12: that hides a parser bug that will break other code that uses the data.\n- Show the new test fails without the fix and passes with it, then run the full suite.\n\nIf you paste the full traceback and the parser diff (or point me to the repo), I can start with steps 1 and 3 right away.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"pytest path/to/failing_test.py::test_name -x --tb=long -l\" ... \"`git diff` (or `git log -p`) on the CSV parser\" ... \"I wouldn't change anything until step 4.\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"Don't add `int()` at line 12: that hides a parser bug that will break other code that uses the data.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "I haven't seen the code because it isn't in this folder, so this is the plan rather than a diagnosis. I wouldn't change anything until step 4 points to a specific bad value.\n\n**1. Reproduce it on its own**\n- Run only the failing test: `pytest path/to/test_x.py::test_name -x --tb=long`. That gives one fast command that fails the same way every time.\n- Read the whole traceback, not just the last line. The frames above `totals.py:12` show which caller passed the data in and which test fixture or CSV file it came from.\n\n**2. Look at what changed**\n- `git diff` (or `git log -p -- <parser file>`) on the CSV parser change.\n- Check that the test still fails with the parser change reverted (`git stash` it, run the test again). If the error goes away, the change caused it and the rest is finding where.\n\n**3. Look at the data at line 12, not at the fix**\n- Line 12 is probably something like `total += row[\"amount\"]`, where `total` is an int and the value is a str.\n- Run `pytest --pdb` (or put a breakpoint just before line 12) and check `type()` and `repr()` of both values on the failing row. `'12'`, `' 12'`, `''` and `'1,200'` each point to a different cause.\n\n**4. Follow the bad value back to where it comes from**\nGo back up the call chain from `totals.py` to the parser and find the first place the value is a `str` when it should be a number. Likely causes, roughly most likely first, each easy to check:\n- **The parser no longer converts types.** For example, it moved from a typed or custom reader to plain `csv.DictReader`, which returns only strings. If so, every row should fail, not just one.\n- **A column name changed** (case, extra spaces, a BOM on the first header such as `'\\ufeffamount'`). The conversion runs on the wrong key, so the real field stays a string.\n- **Only some rows convert.** Empty cells, thousands separators or a trailing blank line leave some values as strings. If so, only certain rows fail. Find the first bad row index.\n- **The test data no longer matches.** Fixtures or mocks still return the old shape (already numeric), or the reverse.\n- **A different code path runs.** The new parser returns a different structure, so `totals.py` reads a different field than before.\n\n**5. Compare with code that works**\nIf another caller of `totals.py` still passes, or the old parser is in git history, list every difference in what each one returns for the same input.\n\n**6. Fix it only then (test first)**\n- Write a small test that feeds the parser one sample CSV row and checks that `amount` comes out numeric. Confirm it fails for the same reason.\n- Make one fix where the bad value starts. Most likely that's converting types in the parser, not adding `int()` at `totals.py:12`, which would hide the cause.\n- Check that the new test fails without the fix and passes with it, then run the full suite.\n\nTo check these against the code, copy the project into this folder (or tell me where it is) and I'll run step 1. Also useful: the full traceback and the parser diff.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Run only the failing test: `pytest path/to/test_x.py::test_name -x --tb=long`\" ... \"Follow the bad value back to where it comes from ... to the parser\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"Most likely that's converting types in the parser, not adding `int()` at `totals.py:12`, which would hide the cause.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true,
+      "final": "I'll start from what the error already tells us. In `int + str`, the left side is the int and the right side is the str. So line 12 of `totals.py` is almost certainly adding to a running total, something like `total += row[\"amount\"]` or `sum(...)`, which starts at `0`. The value coming from the parser is a string where it used to be a number. The bug is probably in the parser change, not in `totals.py`, and casting to `int` at line 12 would only hide it.\n\nHere's how I'd track it down without changing any code:\n\n**1. Reproduce it and look at the actual values**\n```\npytest path/to/test_file.py::test_name -x -l --tb=long\n```\n`-l` prints the local variables in each frame. That shows the exact string being added (`'42'`, `''`, `'1,234'`, `' 42'`?) and which field it came from.\n\n**2. Look at what changed**\n```\ngit diff HEAD -- <parser file>      # or git log -p -3 -- <parser file>\n```\nCheck for removed `int()`/`float()` calls, a switch to `csv.DictReader` (it always returns strings), renamed columns or headers, and changed handling of empty cells.\n\n**3. Check the boundary between the two files**\nRun the parser alone on the test fixture and print `{k: (v, type(v)) for k, v in row.items()}` for the first few rows. This shows whether every row is wrong or only some. Then check the same fixture against the old parser (`git stash`, or `git show HEAD~1:parser.py`) and compare the two outputs.\n\n**4. Likely causes, most likely first. Each one predicts something different:**\n1. **The numeric conversion was dropped or bypassed.** Every value is a str, on every row.\n2. **A key or header changed** (renamed, extra whitespace, BOM on the first column), so the conversion targets a key that no longer exists. Only one field is a str, and its key looks slightly different.\n3. **Empty or malformed cells now come through as `''`** instead of `0`/`None`. Only some rows fail, and the bad value is `''`.\n4. **The fixture data changed** (`\"1,234\"`, `\"$5\"`), and a try/except falls back to the raw string. The bad value contains non-digit characters.\n5. **A test mock or fixture builds the parser's output by hand with strings.** The real parser is fine, and only the mocked test fails.\n\nI'd test them in that order, one at a time, and record each as measured or guessed.\n\n**5. Only after the cause is confirmed:**\n- Write a failing test against the parser that checks the numeric field's type and value. This is the right place for the test, since that's where the contract broke.\n- Make one fix in the parser.\n- Show the test fails without the fix and passes with it, then run the full suite.\n\nTo start, I need one of these: the repo path (or have it mounted in this session), or the full traceback plus the parser diff. With either, steps 1–3 should narrow it to one cause quickly.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"pytest path/to/test_file.py::test_name -x -l --tb=long\" ... \"git diff HEAD -- <parser file>\" ... \"Run the parser alone on the test fixture\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"casting to `int` at line 12 would only hide it\"; fix goes in the parser only after the cause is confirmed"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true,
+      "final": "I can't fix any of these myself, because all three come from the same thing: commands here need approval, and I don't have it.\n\n- **The tests haven't run.** I've tried three times and every run was blocked. Trying again won't change that until someone approves Python commands.\n- **`hs stop` wasn't recorded.** It's a shell command too, so the same approval block applies. My replies already say plainly why I stopped, which is what `hs stop` would have recorded.\n- **Test 1 wasn't seen failing against the stub.** This also needs a run. And since `leap.py` now holds the full implementation, I'd have to put the stub back to show the failure.\n\nNot verified: test 1 failing against the stub, and all four tests passing against the final `is_leap_year`.\n\nTo finish, approve Python commands for this session and I'll do both runs and report the results. Or run `python3 test_leap.py` yourself from the project folder.",
+      "diff": "--- leap.py\ndef is_leap_year(year):\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\n\n    A year is a leap year if it is divisible by 4, except century years\n    (divisible by 100), which are leap years only if divisible by 400.\n    \"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_divisible_by_4_is_leap():\n    assert is_leap_year(2024) is True\n    assert is_leap_year(1996) is True\n    assert is_leap_year(4) is True\n\n\ndef test_year_not_divisible_by_4_is_common():\n    assert is_leap_year(2023) is False\n    assert is_leap_year(2021) is False\n    assert is_leap_year(1) is False\n\n\ndef test_century_not_divisible_by_400_is_common():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(1800) is False\n    assert is_leap_year(2100) is False\n\n\ndef test_century_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n    assert is_leap_year(2400) is True\n\n\nif __name__ == \"__main__\":\n    for name, fn in list(globals().items()):\n        if name.startswith(\"test_\") and callable(fn):\n            fn()\n            print(f\"PASS {name}\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "assert is_leap_year(1900) is False ... assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py def is_leap_year(year) / --- test_leap.py assert is_leap_year(2024) is True"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true,
+      "final": "I couldn't base this plan on your code. The working directory (`/tmp/hs-act-4iTpDT`) has no Flask app in it, only tooling metadata. So the file paths below assume a common blueprint layout and are marked as assumptions. If you point me at the repo, I'll replace them with real paths, line ranges and your actual test command.\n\n# Plan: CSV export for the reports page\n\n**Goal:** Users can download whatever the reports page is currently showing as a CSV file. That means the same filters, the same permissions and the same columns.\n\n**Approach:** Add a sibling route, `GET /reports/export.csv`, that reuses the page's existing query and filter parsing. Pass the rows to a small, pure CSV-writing function, and send the output back as a streamed download. The only UI change is a \"Download CSV\" link that carries the current query string.\n\n**Assumed layout (to confirm):**\n\n| File | Change | Responsibility |\n|---|---|---|\n| `app/reports/routes.py` | modify | add the `export_csv` view; move filter parsing into a shared helper if it's currently inline in the page view |\n| `app/reports/csv_export.py` | create | pure function that turns rows into CSV text; no Flask imports |\n| `app/templates/reports/index.html` | modify | add the \"Download CSV\" link |\n| `tests/reports/test_csv_export.py` | create | unit tests for the writer |\n| `tests/reports/test_export_route.py` | create | route tests using Flask's `test_client` |\n\n**Interfaces that cross task boundaries**\n- `parse_report_filters(args: MultiDict) -> ReportFilters`: used by both the page view and the export view.\n- `get_report_rows(filters: ReportFilters, user) -> Iterable[ReportRow]`: the existing query, reused as is.\n- `REPORT_COLUMNS: list[tuple[str, str]]`: pairs of (header label, row attribute). The page table and the CSV both use this list, so their columns can't drift apart.\n- `iter_csv(rows, columns) -> Iterator[str]`: yields the header line first, then one line per row.\n- Route: `GET /reports/export.csv?<same params as the page>` returns `200`, with `Content-Type: text/csv; charset=utf-8` and `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"`.\n\n**Review focus.** These are the risks most likely to be missed. Each one gets its own test.\n1. **Formula injection:** a cell starting with `=`, `+`, `-`, `@`, tab or CR gets a leading `'`, so Excel won't run it as a formula.\n2. **Permissions:** the export must apply the same auth and row scoping as the page. A user must not be able to export rows the page would hide from them.\n3. **Filter drift:** a filtered export must match the filtered page exactly.\n4. **Messy values:** commas, quotes, newlines, non-ASCII text and `None` must come out as valid CSV.\n5. **Large reports:** stream the response instead of building the whole file in memory.\n\n## Tasks\n\n**Task 1: Pull filter parsing and the column list out of the page view**\n- Move the page's inline filter parsing into `parse_report_filters`, and its column definitions into `REPORT_COLUMNS`. Behaviour stays exactly the same.\n- **Test:** before the refactor, add a characterisation test that requests `/reports?<a filter>` and checks the rendered rows. It should pass before and after the change. Run the full existing reports test suite too.\n\n**Task 2: CSV writer (`csv_export.py`)**\n- Write `iter_csv` using the standard library's `csv.writer` over a reusable buffer, with `QUOTE_MINIMAL`. `None` becomes an empty string, and every cell goes through `_sanitize_cell` (review focus item 1).\n- **Tests to write first:**\n  - The header row matches the `REPORT_COLUMNS` labels.\n  - A value containing `a,\"b\"\\nc` survives a round trip through `csv.reader`.\n  - `=SUM(A1)` comes out as `'=SUM(A1)`, and the same goes for `+`, `-` and `@`.\n  - `None` becomes an empty cell.\n  - `\"café\"` round-trips unchanged.\n  - An empty input yields only the header line.\n- Run them and watch them fail (`ImportError`), implement, then run them and watch them pass.\n\n**Task 3: Export route**\n- Add `export_csv()` to the same blueprint, with the same login and permission decorators as the page view. It calls `parse_report_filters` and `get_report_rows`, then returns `Response(stream_with_context(iter_csv(...)), mimetype=\"text/csv\")` with the headers listed above.\n- **Tests to write first (`test_client`):**\n  - A logged-in user gets `200`, the `text/csv` content type, and an `attachment; filename=\"report-` disposition header.\n  - An anonymous user gets the same redirect or `401` the page itself returns.\n  - A user from another tenant or role gets only their own rows (review focus item 2).\n  - With a filter applied, the CSV's row IDs equal the page's row IDs (review focus item 3).\n  - Invalid filter params get the same `400` or fallback behaviour the page has.\n- Fail, implement, pass.\n\n**Task 4: UI link**\n- In `index.html`, add `<a href=\"{{ url_for('reports.export_csv', **request.args) }}\">Download CSV</a>`, placed next to the filters.\n- **Test:** render `/reports?status=open` and check the response contains `href` set to `/reports/export.csv?status=open`.\n- **Manual check:** open the downloaded file in Excel or LibreOffice and confirm that accented characters display correctly and that an `=` cell shows as text.\n\n**Task 5: Large-report check**\n- **Test:** seed about 10k rows, or mock `get_report_rows` to return a generator, and check that the response is streamed (`response.is_streamed`) and contains the right number of lines. Skip this task if reports are always small.\n\n## Open decisions\n\nI'd go with my recommendation on each unless you say otherwise:\n- **Excel encoding:** add a UTF-8 BOM so Excel on Windows shows accented characters correctly? *Recommend yes.* It's one line, and other tools ignore the BOM.\n- **Row cap:** none, because the response is streamed. If the query itself is slow, the better fix is a background job, which is out of scope here.\n- **Export format:** dates in ISO 8601 and raw numbers, with no currency formatting. *Recommend yes*, because formatted numbers break sorting in spreadsheets.\n\nSend the repo path or paste in the reports blueprint, template and test setup, and I'll fill in the real file names, line ranges and test command. Then I'll ask you to confirm the plan before writing any code.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Table names files (app/reports/routes.py, csv_export.py, index.html, tests); each Task 1-5 has a **Test:** entry"
+        },
+        {
+          "passed": true,
+          "evidence": "Open decisions: \"Excel encoding: add a UTF-8 BOM... Recommend yes\"; \"Row cap: none, because the response is streamed\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true,
+      "final": "None of these three points can be fixed from my side, so they stay open. They all have the same cause: every shell command in this session needs approval, and none has been given.\n\n- **Tests not run:** I can't run them until Python runs are approved. Running `python3 test_leap.py` should print `4 passed`, but I haven't seen that output.\n- **Approval not given:** only you can grant it. I tried three times, and trying again without approval would just be blocked the same way.\n- **`hs stop` not logged:** `hs` is also a shell command, so it's blocked in the same way. My previous reply stated the stop openly instead.\n\nNot verified: `leap.py` and `test_leap.py` have never been run.\n\nIf you approve running `python3`, I'll run the tests, show the result, and log or clear the stop. If you want proper red-green, I'll first put back the placeholder that raises `NotImplementedError` so each test can be seen failing before it passes.",
+      "diff": "--- leap.py\ndef is_leap_year(year):\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_not_divisible_by_4_is_not_leap():\n    assert is_leap_year(2023) is False\n    assert is_leap_year(1997) is False\n\n\ndef test_year_divisible_by_4_is_leap():\n    assert is_leap_year(2024) is True\n    assert is_leap_year(1996) is True\n\n\ndef test_century_year_is_not_leap():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(2100) is False\n    assert is_leap_year(1800) is False\n\n\ndef test_year_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n    assert is_leap_year(2400) is True\n\n\nif __name__ == \"__main__\":\n    tests = [f for name, f in sorted(globals().items()) if name.startswith(\"test_\")]\n    for t in tests:\n        t()\n        print(f\"PASS {t.__name__}\")\n    print(f\"{len(tests)} passed\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "def test_century_year_is_not_leap(): assert is_leap_year(1900) is False ... def test_year_divisible_by_400_is_leap(): assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py def is_leap_year(year): ... --- test_leap.py ... assert is_leap_year(2023) is False"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true,
+      "final": "I tried again and the tests still haven't run, because `python3` is still blocked waiting for permission. The `hs stop` command I tried, to record that I was stopping, was blocked the same way.\n\nThese three points can't be closed from my side. They all come down to one missing step, running the tests, and that needs your approval. The code and tests are written (`leap.py`, `test_leap.py`); none of them has been run.\n\nTo finish it, approve `python3` and I'll do the red-green cycle properly. For each Gregorian rule I'll run its test and show it failing against a stub, then show it passing against the implementation, then run the whole suite. Or run `python3 test_leap.py` yourself and send me the output.\n\nNot verified: no test has failed or passed in front of me, the tests were never run against the stub, and the full suite hasn't been run.",
+      "diff": "--- leap.py\ndef is_leap_year(year):\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\n\n    A year is a leap year if it is divisible by 4, except years divisible\n    by 100, which are leap years only if also divisible by 400.\n    \"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_not_divisible_by_4_is_common():\n    assert is_leap_year(2023) is False\n    assert is_leap_year(2026) is False\n    assert is_leap_year(1) is False\n\n\ndef test_year_divisible_by_4_is_leap():\n    assert is_leap_year(2024) is True\n    assert is_leap_year(1996) is True\n    assert is_leap_year(4) is True\n\n\ndef test_year_divisible_by_100_but_not_400_is_common():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(2100) is False\n    assert is_leap_year(1800) is False\n\n\ndef test_year_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n    assert is_leap_year(2400) is True\n\n\nif __name__ == \"__main__\":\n    for name, fn in list(globals().items()):\n        if name.startswith(\"test_\") and callable(fn):\n            fn()\n            print(f\"PASS {name}\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "assert is_leap_year(1900) is False ... assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py def is_leap_year(year) / --- test_leap.py uses `assert is_leap_year(...) is ...`"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true,
+      "final": "The working directory (`/tmp/hs-act-X666Nm`) has no Flask app in it, only H-Stack session files. So this plan is based on a typical Flask layout. Every path and name below is an assumption until I can see your repo; the list at the end says what I need to pin them down.\n\n---\n\n# Plan: CSV export for the reports page\n\n**Goal:** A user on the reports page can download the rows they're looking at as a CSV file.\n\n**Approach:** Add a `GET /reports/export.csv` route next to the existing reports view. It reuses the same query, filters and permission check as the page and streams the rows through Python's built-in `csv` module. A \"Download CSV\" link on the page carries the current filter query string. No new dependencies.\n\n**Global constraints (assumed, please confirm):**\n- No new packages: use stdlib `csv` and Flask's `Response` / `stream_with_context`.\n- The export applies the same filters and access control as the reports page. It must never return rows the page wouldn't show.\n- Columns and their order match the on-screen table.\n\n**Interfaces (cross-task):**\n- `build_report_query(filters: ReportFilters) -> Query`: pulled out of the existing view in Task 1. Both the page and the export use it.\n- `ReportFilters`: the filter values parsed from `request.args` (whatever the view parses today, e.g. `start`, `end`, `status`).\n- `REPORT_COLUMNS: list[tuple[str, Callable[[Row], Any]]]`: header label plus value getter. One source of truth for the HTML table and the CSV.\n- `rows_to_csv(rows: Iterable[Row]) -> Iterator[str]`: yields the header line, then one line per row.\n- Route: `GET /reports/export.csv?<same params as /reports>` returns `200`, `Content-Type: text/csv; charset=utf-8`, `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"`.\n\n**Review focus (risks the happy path won't catch):**\n1. **CSV/formula injection:** a cell starting with `=`, `+`, `-`, `@`, tab or CR runs as a formula in Excel. Pinned in Task 2.\n2. **Authorization drift:** if the export route skips the page's decorator, any logged-in user can export everything. Pinned in Task 3.\n3. **Filter drift:** the export ignores a filter the page applies. Pinned in Task 3.\n4. **Large reports:** building the whole file in memory can time out or exhaust memory. Pinned in Task 3 (streaming).\n5. **Non-ASCII text in Excel:** without a UTF-8 BOM, Excel garbles accented characters. Pinned in Task 2.\n\n## File map (assumed paths)\n\n| File | Change |\n|---|---|\n| `app/reports/queries.py` (new, or the existing service module) | `build_report_query`, `REPORT_COLUMNS` |\n| `app/reports/csv_export.py` (new) | `rows_to_csv`: pure function with no Flask imports |\n| `app/reports/views.py` (or `routes.py`) | Page view switches to `build_report_query`; new export route |\n| `app/templates/reports/index.html` | \"Download CSV\" link |\n| `tests/reports/test_csv_export.py` (new) | Unit tests for `rows_to_csv` |\n| `tests/reports/test_reports_views.py` | Route tests for the export and the page |\n\n## Tasks\n\n**Task 1: Pull the report query out of the view (refactor, no behavior change)**\n- Produces: `build_report_query`, `ReportFilters`, `REPORT_COLUMNS`.\n- Steps:\n  1. Run the existing reports-page tests and record that they pass. If there are none, first add `test_reports_page_lists_filtered_rows`: seed 3 rows, filter so 2 match, and assert only those 2 appear.\n  2. Move the query and filter parsing into `build_report_query`, and the table columns into `REPORT_COLUMNS`. Have the view and template use them.\n  3. Re-run the same tests. They must pass unchanged.\n- How it's tested: the existing page tests still pass. Nothing new is needed because the behavior doesn't change.\n\n**Task 2: CSV serializer**\n- Consumes: `REPORT_COLUMNS`. Produces: `rows_to_csv`.\n- Write these tests first and watch them fail with `ImportError`:\n  - `test_header_matches_report_columns`: the first line equals the `REPORT_COLUMNS` labels in order.\n  - `test_quotes_commas_quotes_and_newlines`: a value `a,\"b\"\\nc` reads back intact through `csv.reader`.\n  - `test_neutralizes_formula_prefixes`: values starting with `=`, `+`, `-`, `@`, `\\t`, `\\r` come out with a leading `'`. Negative numbers are an open question: either let true numeric values through unchanged or prefix them too. Decide and pin it with a test.\n  - `test_none_becomes_empty_and_dates_iso`: `None` becomes `\"\"`, and dates use ISO 8601.\n  - `test_starts_with_utf8_bom`: the output starts with `\\ufeff`, and `\"Zoë\"` round-trips.\n  - `test_empty_rows_yields_header_only`.\n- Implement it with `csv.writer` over a reusable `io.StringIO` buffer, yielding one line per row.\n- Run the tests and see them pass.\n\n**Task 3: Export route**\n- Consumes: `build_report_query`, `rows_to_csv`. Produces: `GET /reports/export.csv`.\n- Write these tests first (Flask test client, failing with 404):\n  - `test_export_returns_csv_attachment`: status 200, `text/csv` content type, and a `Content-Disposition` header containing `report-` and `.csv`.\n  - `test_export_applies_same_filters_as_page`: same seed and filter as Task 1, so the CSV has the header plus exactly 2 data rows.\n  - `test_export_requires_login`: anonymous users get the same response as on the page (redirect or 401).\n  - `test_export_forbidden_without_report_permission`: if the page has a role or ownership check, the export returns 403 and no rows.\n  - `test_export_streams`: `response.is_streamed` is true. Optional: seed 10k rows and check the row count.\n  - `test_invalid_filter_returns_400`: a bad date returns the same error the page gives.\n- Implement it with the page's auth decorators and `Response(stream_with_context(rows_to_csv(query.yield_per(1000))), mimetype=\"text/csv\")`. Drop `yield_per` if you aren't using SQLAlchemy.\n- Run the tests and see them pass.\n\n**Task 4: Download link on the page**\n- Write the test first: `test_page_has_export_link_with_current_filters`. GET `/reports?status=open` and assert the HTML contains `href` pointing to `/reports/export.csv?status=open`.\n- Implement it with `url_for('reports.export_csv', **request.args)` in the template.\n- Run the test, then the full suite. Finally, check by hand that the file opens in Excel or Sheets with correct accents and that a seeded `=1+1` value isn't run as a formula.\n\n**Done when:** the full test suite passes using your project's test command (assumed `pytest`, to be confirmed from your Makefile or CI), plus the manual open in Excel.\n\n---\n\n**What I need to finalize this:**\n1. **The repo:** point me at it or clone it into this workspace. Then I'll replace the assumed paths, names and test command with the real ones.\n2. **Scope:** should the export contain the current page or all filtered rows (my assumption: all filtered rows)? Is there a row cap?\n3. **Formula injection policy:** should negative numbers be left as numbers or prefixed? Prefixing is safer; leaving them alone keeps them usable as numbers in Excel.\n\nOnce you confirm or correct these, I'll tighten the plan against your actual code before starting on it.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "File map lists `app/reports/csv_export.py (new)`, `app/reports/views.py`, and others. Each task has tests, e.g. Task 1 'How it's tested: the existing page tests still pass' and Task 4 'test_page_has_export_link_with_current_filters'."
+        },
+        {
+          "passed": true,
+          "evidence": "'Global constraints (assumed, please confirm)' and 'Negative numbers are an open question… Decide and pin it with a test'. Review focus also covers encoding (UTF-8 BOM), large reports (streaming), and authorization."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true,
+      "final": "I couldn't base this plan on your code. The working directory (`/tmp/hs-act-vdzTHQ`) has no Flask app in it, only H-Stack session files. So every file path below is a guess at a typical Flask layout. Each guessed path is marked *(assumed)*. If you point me at the repo, I'll replace them with the real paths and test commands.\n\n# Plan: CSV export for the reports page\n\n**Goal:** A user on the reports page can download the report they're looking at, with the same filters applied, as a CSV file.\n\n**Approach:** Add a `GET /reports/export.csv` route next to the existing reports view. It uses the same query function and filter parsing as the page, so the page and the CSV can't drift apart. Rows are written with Python's built-in `csv` module (no new dependencies) and streamed to the browser, so large reports don't sit in memory. The page gets an \"Export CSV\" link that passes along the current filters.\n\n**Global constraints**\n- No new dependencies; use the built-in `csv` module.\n- Only users who can view the reports page can export (same access check).\n- The CSV has the same columns, in the same order, as the table on the page.\n- The download is UTF-8. Whether to add a byte-order mark (BOM) so Excel opens it cleanly is open question 3.\n\n**Interfaces (passed between tasks)**\n- `parse_report_filters(args: MultiDict) -> ReportFilters`: raises `ValueError` on bad input *(assumed name; there may be existing inline parsing to pull out)*\n- `get_report_rows(filters: ReportFilters) -> Iterable[dict]`: the existing query, pulled out if it lives inside the view\n- `REPORT_COLUMNS: list[tuple[str, str]]`: (dict key, header label) pairs, used by both the HTML table and the CSV\n- `iter_csv(rows: Iterable[dict], columns) -> Iterator[str]`: yields one encoded CSV line at a time, header first\n- Route: `GET /reports/export.csv?<same params as /reports>` returns `200 text/csv; charset=utf-8` with `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"`\n\n**Review focus (each one is tested in the task that owns it)**\n1. **Formula injection:** a cell starting with `=`, `+`, `-`, `@`, tab or carriage return runs as a formula when opened in Excel. Prefix it with `'` (Task 2).\n2. **Filters ignored:** the export returns the whole table instead of the filtered view (Task 3).\n3. **Access check skipped** on the new route (Task 3).\n4. **Commas, quotes, newlines, `None` and non-ASCII text** in cell values (Task 2).\n5. **No rows:** the file should still have the header row (Task 3).\n\n## Files\n\n| File | Change |\n|---|---|\n| `app/reports/queries.py` *(assumed)* | Modify: pull out `parse_report_filters`, `get_report_rows` and `REPORT_COLUMNS` from the view if they're inline |\n| `app/reports/csv_export.py` *(assumed)* | Create: `iter_csv`, a pure function with no Flask dependency |\n| `app/reports/routes.py` *(assumed)* | Modify: add the export route; the existing view calls the pulled-out functions |\n| `app/templates/reports/index.html` *(assumed)* | Modify: add the \"Export CSV\" link |\n| `tests/reports/test_queries.py`, `test_csv_export.py`, `test_routes.py` *(assumed)* | Create or extend |\n\nThe test command is assumed to be `pytest`. I'll use whatever runner the project's CI config or Makefile actually uses.\n\n## Tasks\n\n### Task 1: Share the query between the page and the export\n- **Produces:** `parse_report_filters`, `get_report_rows`, `REPORT_COLUMNS`\n- **Steps:**\n  1. Before changing anything, write a test that pins current behavior: request `/reports` with known fixture data and filters, and check which rows and columns appear. Run it and confirm it passes against the current code.\n  2. Pull the filter parsing and the query out of the view into `queries.py`, and have the view call them.\n  3. Re-run the test from step 1 and confirm it still passes.\n  4. Add unit tests for `parse_report_filters`: valid params give the expected `ReportFilters`, and a bad date raises `ValueError`.\n- **Skip:** if the query is already a separate function, this task shrinks to adding `REPORT_COLUMNS`.\n\n### Task 2: CSV writer\n- **Consumes:** `REPORT_COLUMNS` (only the shape of it). **Produces:** `iter_csv`.\n- **Tests** in `test_csv_export.py`, written first and seen to fail with `ImportError`:\n  - The header row matches the column labels exactly.\n  - A value containing `,` `\"` or a newline round-trips through `csv.reader`.\n  - `None` comes out as an empty cell.\n  - `\"=SUM(A1)\"` comes out as `'=SUM(A1)`; also check `+`, `-`, `@`, tab and carriage return. A negative number such as `-5` stays as-is.\n  - Non-ASCII text (`\"Zürich\"`) survives.\n  - It's a generator, not a list.\n- **Implement:** use `csv.writer` on a `StringIO` buffer, and yield and clear the buffer after each row. Escape formula-starting text only when the value is a string.\n- **Done when:** all tests pass.\n\n### Task 3: Export route\n- **Consumes:** everything from Tasks 1 and 2. **Produces:** the route.\n- **Tests** in `test_routes.py`, run with Flask's test client and seen to fail with 404 first:\n  - A logged-in user gets 200, the `text/csv` content type, and a `Content-Disposition` header with the dated filename.\n  - The body parsed back with `csv.reader` has the same rows as `/reports` with the same filters (this reuses the Task 1 fixture).\n  - A logged-out user gets the same redirect or 401 as `/reports`.\n  - Bad filter params get the same 400 response as `/reports`.\n  - No matching rows gives a header-only file.\n- **Implement:** `Response(stream_with_context(iter_csv(...)), mimetype=\"text/csv\")`, using the same access-check decorator as the page view.\n\n### Task 4: Export link on the page\n- **Test:** the rendered `/reports?from=…&status=…` page has a link to `/reports/export.csv` with the same query string.\n- **Implement:** `url_for('reports.export_csv', **request.args)` in the template.\n- **Manual check:** run the app, apply a filter, click the link, and open the file in Excel or Sheets to confirm the encoding and that the formula escaping displays sensibly.\n\n## Open questions (my default if you don't say)\n1. **Where is the code?** Every path above depends on it.\n2. **One reports page or several?** If several, the route becomes `/reports/<report_id>/export.csv` with a column list per report. Default: one page.\n3. **Excel BOM:** add one so Excel opens UTF-8 correctly? Default: yes, if your users use Excel.\n4. **Row limit or async export for very large reports?** Default: streaming, no limit.\n\nDoes this plan work for you? Once you share the repo (or confirm the layout), I'll swap in the real paths and commands before writing any code.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Files table lists `app/reports/queries.py`, `csv_export.py`, `routes.py`, `index.html`, and test files; each task has tests, e.g. Task 4 \"Test: the rendered `/reports?from=…&status=…` page has a link to `/reports/export.csv`\""
+        },
+        {
+          "passed": true,
+          "evidence": "Open questions: \"1. Where is the code? Every path above depends on it.\" and \"3. Excel BOM: add one so Excel opens UTF-8 correctly?\"; also \"Only users who can view the reports page can export\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false,
+      "final": "The original sentence doesn't say what the tool does, so I can't write a plain version without a placeholder. Here's the template:\n\n> **[Tool name]** helps developers [do one specific thing], so they can [concrete result].\n\nFor example:\n\n> **Shipwright** builds and deploys your app from one config file, so you don't have to maintain separate CI scripts.\n\nHere's what I took out and why:\n- **\"In today's fast-paced world\"** is filler. A README doesn't need to set the scene.\n- **\"cutting-edge,\" \"seamlessly,\" \"empowers,\" \"unlock their full potential\"** are vague praise words. None of them tells a reader what the tool does.\n- **\"Our\"** goes too. Saying what the tool does reads better than talking about yourselves.\n\nIf you tell me what the tool actually does, I'll write the final sentence.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Template and example omit all filler: '**Shipwright** builds and deploys your app from one config file'"
+        },
+        {
+          "passed": true,
+          "evidence": "\"The original sentence doesn't say what the tool does, so I can't write a plain version without a placeholder.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true,
+      "final": "There's no PR code here. The directory only has `notes.md` and H-Stack's `.h-stack` state folder, so I checked comment 2 against what I know about Node.js, and comments 1 and 3 still need checking against the code.\n\n## The comments\n\n**1. \"Rename fetchData to loadData.\"** Accept only if the rest of your code uses `load*` names.\nThis is a naming preference, not a bug. If your other data functions are `loadX`, rename it. If they're `fetchX`, or if `fetchData` is exported and other code calls it, push back.\n- Reply if it matches your naming: *\"Done, renamed to `loadData` to match `loadUser`/`loadConfig`.\"*\n- Reply if it doesn't: *\"I kept `fetchData` because the sibling helpers use `fetch*` (`fetchUser`, …) and it's exported. Happy to rename them all in a follow-up if we want `load*` everywhere.\"*\n\n**2. \"Use URL.parse instead of new URL (project supports Node 18).\"** Reject. The reasoning is backwards.\n`URL.parse()` was added in Node 22.1.0 (and backported to 20.18). Node 18 doesn't have it, so on Node 18 the call throws `TypeError: URL.parse is not a function`. Because you support Node 18, you should keep `new URL()`. The two also behave differently on a bad URL: `new URL()` throws, while `URL.parse()` returns `null`. Switching would change how errors are handled even on newer Node versions.\n- Reply: *\"I'm keeping `new URL()` because `URL.parse()` only exists from Node 22.1 (backported to 20.18), so it would throw on Node 18, which we support. It also returns `null` instead of throwing on bad input, which would change how errors are handled here. I can switch once Node 18 support is dropped.\"*\n\n**3. \"Add a 404 test.\"** Accept, if the code handles a 404 case.\nIf `fetchData` or the route it uses has a not-found branch, a test for it costs little and catches regressions. Write the test, run it, and check that it fails if you remove the 404 handling. If nothing in the code handles a 404, ask the reviewer what result they expect before you write anything.\n- Reply: *\"Added `returns 404 when the resource is missing` in `<test file>`. It fails if the not-found branch is removed.\"*\n\n## Summary\n- **Accept:** 3, and 1 if it matches your naming.\n- **Reject with reasoning:** 2.\n\nIf you point me at the PR (repo path or PR number), I'll check comments 1 and 3 against the actual code, make the changes and run the tests.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Reject. The reasoning is backwards. `URL.parse()` was added in Node 22.1.0 ... Node 18 doesn't have it"
+        },
+        {
+          "passed": true,
+          "evidence": "No praise phrases; replies start e.g. \"I'm keeping `new URL()` because...\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true,
+      "final": "I only have the comments to go on. The working directory contains `notes.md` and some tool state, but none of the PR's code, so I couldn't check any comment against the actual diff. Comment 2 doesn't need the code, though: it's wrong as written.\n\n**1. Rename `fetchData` to `loadData`: probably accept, if it matches your naming.**\nThis is a naming preference, not a bug. Accept it if your codebase already uses `load*` for this kind of function, or if `fetch` is misleading (for example, if the function also reads from a cache or disk). Push back if your other functions use `fetch*`. Either way, rename every call site in the same commit.\n> Reply: \"Done, renamed and updated all call sites.\" Or: \"The rest of the module uses `fetch*` for network calls, so I'd keep this one consistent. Happy to change it if you feel strongly.\"\n\n**2. Use `URL.parse` instead of `new URL` \"because the project supports Node 18\": reject.**\nThe reasoning is backwards. `URL.parse()` was added in Node 22.1.0 and backported to 20.18.0. It doesn't exist in Node 18, so on Node 18 the call would throw `TypeError: URL.parse is not a function`. `new URL()` works on every supported version. If the reviewer's real concern is that `new URL()` throws on bad input, you can wrap it in `try/catch`. `URL.canParse()` is another option: it's available from Node 18.17, but only if your minimum is 18.17 or later.\n> Reply: \"`URL.parse` was only added in Node 22.1 (backported to 20.18), so it would break on Node 18, which we still support. I've kept `new URL()`. If the concern is invalid input, it's handled with try/catch on line X.\" (Only say that last part if it's true.)\n\n**3. Add a 404 test: accept.**\nIf the code handles a not-found response, it should have a test. Write it so it can actually fail: return a 404 from the mock or server, then check the exact behaviour you expect (thrown error type, returned `null`, logged message). Before you push, break the 404 handling once and confirm the test fails.\n> Reply: \"Added. The test covers the 404 path and checks [the specific behaviour].\"\n\nIf you share the diff or the PR number, I can check 1 and 3 against the code. That means seeing whether the name fits your conventions, whether 404 handling exists, and whether `new URL()` errors are already caught.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"`URL.parse` was only added in Node 22.1 (backported to 20.18), so it would break on Node 18, which we still support.\""
+        },
+        {
+          "passed": true,
+          "evidence": "Replies are plain, e.g. \"Done, renamed and updated all call sites.\"; no 'Great point' or 'You're absolutely right' anywhere"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [
+        "h-stack:writing"
+      ],
+      "loaded": true,
+      "final": "Once you cut the filler, that sentence says nothing. \"Fast-paced world\", \"cutting-edge\", \"seamlessly\", \"empowers\" and \"unlock their full potential\" could describe any tool, so a plain rewrite has to say what this tool actually does. There's no README or code in the working directory for me to check against, so here's a template with placeholders:\n\n> **[Tool name]** [does X] for [who]. For example, it [one concrete thing it does, like \"generates typed API clients from an OpenAPI spec\"], so you don't have to [the manual step it replaces].\n\nA filled-in example to show the level of detail:\n\n> **Specgen** turns an OpenAPI spec into a typed TypeScript client. Run `specgen api.yaml` and you get request functions and types that match the spec, so you don't have to write them by hand or keep them in sync.\n\nIf you tell me what the tool does or point me at the repo, I'll write the real version.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Template and example contain none of the filler: \"Specgen turns an OpenAPI spec into a typed TypeScript client.\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"a plain rewrite has to say what this tool actually does... If you tell me what the tool does or point me at the repo, I'll write the real version.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true,
+      "final": "The folder only has `notes.md`. There's no PR diff, source code or git repo, so I couldn't check any comment against your actual code. My calls below are based on the comments alone.\n\n| # | Comment | Recommendation |\n|---|---|---|\n| 1 | Rename `fetchData` → `loadData` | **Accept if it matches the codebase's naming**, otherwise ask why |\n| 2 | Use `URL.parse` instead of `new URL` (Node 18) | **Push back.** The reasoning works against the suggestion. |\n| 3 | Add a 404 test | **Accept** |\n\n**1. Rename.** This is a naming preference, not a defect. If other loaders in the repo use `load*`, rename it, and update every call site and any exports. If the codebase uses `fetch*`, ask what the rename is for.\n> Reply (if accepting): \"Done, renamed to `loadData` and updated the call sites.\"\n> Reply (if not): \"Other helpers here use the `fetch*` prefix (e.g. …). Is there a reason to switch for this one?\"\n\n**2. `URL.parse`.** Node added the static `URL.parse()` in v22.1.0, and as far as I know it was never backported to 18. Since the project supports Node 18, this change would make the call throw `TypeError: URL.parse is not a function` on Node 18. There's also a behaviour change: `URL.parse` returns `null` on bad input, while `new URL` throws. Any `try/catch` around it would quietly stop catching bad URLs unless you add a null check.\n> Reply: \"I'd keep `new URL` here. `URL.parse` was added in Node 22.1, so it doesn't exist on Node 18, which we still support. It also returns `null` rather than throwing, which would bypass our existing error handling. Happy to revisit when we drop Node < 22.\"\n\nCheck your `engines` field or CI matrix first. If Node 18 support is actually already gone, the comment becomes reasonable.\n\n**3. 404 test.** Testing the not-found path is cheap and catches real regressions. Accept it. Make sure the test asserts what your code does on a 404 (throws a specific error, returns `null`, etc.), not just that the request happened. Also check that the test fails if you break the 404 handling.\n> Reply: \"Added a test covering the 404 response; it asserts [the specific behaviour].\"\n\nIf you share the PR (diff or branch), I can confirm #1 against your naming and #2 against the `engines` and CI config, and write the 404 test.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Push back.\" ... \"`URL.parse` was added in Node 22.1, so it doesn't exist on Node 18, which we still support.\""
+        },
+        {
+          "passed": true,
+          "evidence": "Replies like \"Done, renamed to `loadData` and updated the call sites.\" and \"I'd keep `new URL` here.\" contain no praise phrases"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [
+        "h-stack:writing"
+      ],
+      "loaded": true,
+      "final": "Every phrase in that sentence is filler: \"In today's fast-paced world,\" \"cutting-edge,\" \"seamlessly,\" \"empowers,\" and \"unlock their full potential.\" Once you remove them, nothing is left, because the sentence never says what the tool does. I couldn't fill that in myself, since there's no README or code in this directory to check. Here's a plain version with placeholders:\n\n> **[Tool name] [does X] so you don't have to [do Y by hand].**\n\nHere's an example of the shape, using a made-up tool:\n\n> **Snapcheck runs your test suite on every save and shows only the tests that changed result.**\n\nIf you tell me what the tool does, who uses it and what it replaces, I'll write the actual sentence.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Every phrase in that sentence is filler: \"In today's fast-paced world,\" \"cutting-edge,\" \"seamlessly,\" \"empowers,\" and \"unlock their full potential.\""
+        },
+        {
+          "passed": true,
+          "evidence": "the sentence never says what the tool does... If you tell me what the tool does, who uses it and what it replaces, I'll write the actual sentence."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false,
+      "final": "I've written `leap.py` and `test_leap.py`, but I haven't run the tests. Each attempt to run them was blocked waiting for approval, so I never saw the red step fail or the green step pass.\n\n**How I followed the cycle**\n1. **Tests first:** `test_leap.py` uses plain asserts and has one test per Gregorian rule:\n   - not divisible by 4 → not a leap year (2023, 1999)\n   - divisible by 4 but not by 100 → leap year (2024, 1996)\n   - divisible by 100 but not by 400 → not a leap year (1900, 2100)\n   - divisible by 400 → leap year (2000, 1600)\n2. **Red:** I first made `leap.py` a stub that raises `NotImplementedError`, so every test should fail. The approval block stopped me from running it to confirm.\n3. **Green:** `leap.py` now has the real implementation:\n   ```python\n   return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n   ```\n\n**To check it yourself**, from `/tmp/hs-act-UzaGfB`:\n```\npython -m pytest -q test_leap.py   # or, without pytest:\npython test_leap.py\n```\nTo see the red step, temporarily put the stub back (`raise NotImplementedError`) and run the tests once before restoring the implementation. If you approve test commands, I can run both steps myself.",
+      "diff": "--- leap.py\ndef is_leap_year(year):\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_not_divisible_by_4_is_not_leap():\n    assert is_leap_year(2023) is False\n    assert is_leap_year(1999) is False\n\n\ndef test_year_divisible_by_4_not_by_100_is_leap():\n    assert is_leap_year(2024) is True\n    assert is_leap_year(1996) is True\n\n\ndef test_year_divisible_by_100_not_by_400_is_not_leap():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(2100) is False\n\n\ndef test_year_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n\n\nif __name__ == \"__main__\":\n    for name, fn in list(globals().items()):\n        if name.startswith(\"test_\") and callable(fn):\n            fn()\n            print(f\"PASS {name}\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "assert is_leap_year(1900) is False ... assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py def is_leap_year(year) ... --- test_leap.py uses plain `assert` statements"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false,
+      "final": "I wrote `test_leap.py` and `leap.py`, but I haven't run either stage of the TDD cycle. Running commands here needs your approval and none was given, so I couldn't watch the tests fail before writing the code or pass after.\n\n**Tests (`test_leap.py`, written first, plain asserts):**\n- Years not divisible by 4 are common years: 2023, 1999\n- Years divisible by 4 but not by 100 are leap years: 2024, 1996, 4\n- Years divisible by 100 but not by 400 are common years: 1900, 2100, 1800\n- Years divisible by 400 are leap years: 2000, 1600, 2400\n\nThe file also has a small `__main__` block, so it runs without pytest.\n\n**Implementation (`leap.py`):**\n```python\ndef is_leap_year(year: int) -> bool:\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n```\n\n**To check both stages yourself**, from `/tmp/hs-act-dlNYwR`:\n1. **Red:** rename `leap.py` to something else, then run `python3 test_leap.py`. It should fail with `ModuleNotFoundError: No module named 'leap'`.\n2. **Green:** rename it back, then run `python3 test_leap.py` (or `python3 -m pytest test_leap.py`). It should print a PASS line for each test.\n\nIf you approve the commands, I can run both stages for you.",
+      "diff": "--- leap.py\ndef is_leap_year(year: int) -> bool:\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\n\n    A year is a leap year if it is divisible by 4, except century years,\n    which are leap years only if divisible by 400.\n    \"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_not_divisible_by_4_is_common():\n    assert is_leap_year(2023) is False\n    assert is_leap_year(1999) is False\n\n\ndef test_year_divisible_by_4_not_by_100_is_leap():\n    assert is_leap_year(2024) is True\n    assert is_leap_year(1996) is True\n    assert is_leap_year(4) is True\n\n\ndef test_year_divisible_by_100_not_by_400_is_common():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(2100) is False\n    assert is_leap_year(1800) is False\n\n\ndef test_year_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n    assert is_leap_year(2400) is True\n\n\nif __name__ == \"__main__\":\n    for name, fn in list(globals().items()):\n        if name.startswith(\"test_\") and callable(fn):\n            fn()\n            print(f\"PASS {name}\")\n    print(\"All tests passed.\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "assert is_leap_year(1900) is False ... assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py / --- test_leap.py shown; tests use plain `assert is_leap_year(...) is ...`"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false,
+      "final": "I wrote `leap.py` and `test_leap.py`, but I couldn't run any tests. Running Python needs your approval and it wasn't granted, so I never saw the tests fail (red) or pass (green).\n\n**Steps taken:**\n1. **Red:** I wrote the tests in `test_leap.py` first, with a placeholder `is_leap_year` in `leap.py` that only raises `NotImplementedError`. Every test should fail against it, but I didn't get to confirm that.\n2. **Green:** I replaced the placeholder with the Gregorian rule:\n   ```python\n   return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n   ```\n   Checked by hand, it gives the expected answer for every year in the tests.\n\n**Tests** (plain asserts, one per Gregorian rule):\n- Not divisible by 4 is a normal year: 2015, 1970\n- Divisible by 4 but not by 100 is a leap year: 1996, 2024\n- Divisible by 100 but not by 400 is a normal year: 1900, 2100, 1800\n- Divisible by 400 is a leap year: 2000, 1600, 2400\n\nThe test file has a small `__main__` runner, so it works without pytest. To run it:\n```\npython3 test_leap.py      # or: pytest test_leap.py\n```\n\nTo see the red step for real, put `raise NotImplementedError` back as the body of `is_leap_year` and run it first. Or approve Python and I'll run both steps for you.",
+      "diff": "--- leap.py\ndef is_leap_year(year):\n    \"\"\"Return True if `year` is a leap year in the Gregorian calendar.\n\n    A year is a leap year if it is divisible by 4, except years divisible\n    by 100, which are leap years only if they are also divisible by 400.\n    \"\"\"\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n\n--- test_leap.py\nfrom leap import is_leap_year\n\n\ndef test_year_not_divisible_by_4_is_common():\n    assert is_leap_year(2015) is False\n    assert is_leap_year(1970) is False\n\n\ndef test_year_divisible_by_4_not_by_100_is_leap():\n    assert is_leap_year(1996) is True\n    assert is_leap_year(2024) is True\n\n\ndef test_year_divisible_by_100_not_by_400_is_common():\n    assert is_leap_year(1900) is False\n    assert is_leap_year(2100) is False\n    assert is_leap_year(1800) is False\n\n\ndef test_year_divisible_by_400_is_leap():\n    assert is_leap_year(2000) is True\n    assert is_leap_year(1600) is True\n    assert is_leap_year(2400) is True\n\n\nif __name__ == \"__main__\":\n    tests = [obj for name, obj in list(globals().items()) if name.startswith(\"test_\")]\n    for test in tests:\n        test()\n        print(f\"PASS {test.__name__}\")\n    print(f\"{len(tests)} tests passed\")\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "assert is_leap_year(1900) is False ... assert is_leap_year(2000) is True"
+        },
+        {
+          "passed": true,
+          "evidence": "--- leap.py / --- test_leap.py shown; tests use `assert is_leap_year(...) is True/False`"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [],
+      "loaded": false,
+      "final": "The error means line 12 of `totals.py` is adding a string to a number, and the most likely cause is that the new CSV parser now returns raw strings where the old one returned numbers. CSV values always come out as text unless something converts them. Since I can't see the code, here's how I'd confirm that before changing anything.\n\n## 1. Read the full traceback\nRun just the failing test with full output:\n```\npytest path/to/test_file.py::test_name -x -vv --tb=long\n```\nLook at what line 12 actually does, e.g. `total = 0` followed by `total += row[\"amount\"]`, or `sum(...)`. In `int + str`, the left side is the number (often a `0` starting value or a running total) and the right side is the string from the parsed data. That tells you which field is wrong.\n\n## 2. Check the values when it fails\n```\npytest path/to/test_file.py::test_name -x --pdb\n```\nWhen it stops at line 12, print the operands and their types: `p total, type(total)`, then `p row, type(row[\"amount\"])`. You're looking for whether the value is a number-looking string like `'12.50'`, an empty string `''`, or something unexpected like a header value or `'N/A'`.\n\n## 3. Compare the old parser with the new one\n- `git diff` (or `git log -p` on the parser file) to see exactly what the parser change did.\n- Typical regressions:\n  - The old code had `int(...)`/`float(...)` and the change dropped it.\n  - It moved from a converting or typed reader (pandas `read_csv`, which infers types) to `csv.DictReader` (all strings).\n  - Converters stopped running because column names changed (case, whitespace, BOM on the first header).\n  - Blank cells used to become `0` or `None` and now come through as `''`.\n- If the diff isn't clear, `git stash` or check out the previous commit and run the same test to confirm the parser change caused it.\n\n## 4. Find where types should be set\nDecide whether the parser is supposed to return typed values or `totals.py` is supposed to convert them. Check what other code and the tests expect. A quick `grep` for other places that use parser output shows whether other code will break the same way. That decides where the fix goes:\n- **In the parser** (usually right): convert numeric columns there, so every caller gets numbers.\n- **In `totals.py`**: only if the parser is meant to return raw strings.\n\n## 5. Pin it down with a test before fixing\nAdd or adjust a small test that asserts the parser returns numbers (e.g. `isinstance(row[\"amount\"], (int, float, Decimal))`). Include an edge-case row: blank cell, whitespace, decimal values. If they're money, consider `Decimal` instead of `float`. The test should fail now and pass after the fix, which keeps the bug from coming back.\n\nIf you paste the traceback, `totals.py` around line 12, and the parser diff, I can point to the exact cause.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Run just the failing test with full output: pytest ... --tb=long\" ... \"Compare the old parser with the new one - git diff\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"In the parser (usually right): convert numeric columns there\" ... preceded by diagnosis steps; no int()/str() wrap as main fix"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [],
+      "loaded": false,
+      "final": "Here's how I'd track it down, cheapest checks first. I'm not changing any code until one of these steps points at the cause.\n\n**1. Read the full traceback.**\nRun the failing test with full output: `pytest path/to/test_x.py::test_name -x --tb=long -vv`. Line 12 of `totals.py` is where the error surfaced, but the traceback shows how execution got there: which test ran, what called the totals function, and which data was passed in.\n\n**2. Look at the values at line 12.**\n`int + str` almost always means a running total like `total += row[\"amount\"]`, where the total is an int and the field is now a string. To see the actual values at the failure:\n- `pytest --pdb` drops you into the debugger at the exception. Then `p total`, `p row` and `p type(row[\"amount\"])`.\n- Or `pytest --showlocals` (`-l`) prints the local variables in the traceback.\n\nYou're checking which field is a string and what it contains: `\"42\"`, `\"1,200\"`, `\"\"`, `\" 42 \"` or `\"N/A\"`.\n\n**3. Diff the parser change.**\nBecause this started right after the CSV parser change, that change is the main suspect. `git diff` (or `git log -p -- parser.py`) on the parser. Common ways a parser change does this:\n- It switched to `csv.DictReader` or `csv.reader`, which returns every field as a string. The old code may have used `pandas.read_csv`, which infers numeric types, or cast with `int(...)`.\n- An `int()` or `float()` conversion was removed or moved, or now runs on only some columns.\n- A column was renamed, so the conversion targets the wrong key and the real field stays a string.\n- Changed handling of headers, delimiters or blank lines, so a header row or an empty cell reaches the data.\n\n**4. Confirm the parser output in isolation.**\nCall the parser on the test's CSV fixture and print the types:\n```python\nrows = parse(fixture_path)\nprint({k: type(v).__name__ for k, v in rows[0].items()})\n```\nIf you can, run the same thing on the commit before the change (`git stash` or `git worktree`) and compare. This shows whether the parser's output changed, as opposed to the test fixture or `totals.py`.\n\n**5. Decide where the fix belongs.**\n- If the parser used to return numbers and now doesn't, fix the parser. Other code that uses its output probably depends on the old types too, so grep for other callers.\n- If the parser intentionally returns strings now, convert at the parser boundary rather than scattering `int()` calls through `totals.py`. Also decide how to handle empty or malformed values.\n- Either way, add a test that asserts the parser's output types so this fails at the parser next time, not downstream.\n\nIf you point me at the repo or paste the traceback, the parser diff and lines 1–15 of `totals.py`, I can probably find the cause directly.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Run the failing test with full output: `pytest path/to/test_x.py::test_name -x --tb=long -vv`\" ... \"Diff the parser change... that change is the main suspect.\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"convert at the parser boundary rather than scattering `int()` calls through `totals.py`\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [],
+      "loaded": false,
+      "final": "Since I can't see the code, this is how I'd track it down. Nothing gets edited until the cause is confirmed.\n\n**1. Read the full traceback, not just the last line.**\nRun `pytest -x --tb=long path/to/test_file.py::failing_test`. The frames above `totals.py:12` show which test and which call path passed in the data. That tells you whether the bad value came straight from the new CSV parser or through some other code first.\n\n**2. Look at what's actually being added on line 12.**\nThe error means an `int` (often a `0` accumulator, as in `sum(...)` or `total = 0; total += row[...]`) was added to a `str`. Rerun with `pytest -x --pdb`, and at the breakpoint check:\n- `type()` and `repr()` of both operands\n- which row or field the string came from\n\n`repr` matters because it shows hidden problems like `'12 '`, `'1,200'`, `''` or `'\\ufeff12'`.\n\n**3. Diff the parser change.**\n`git diff` (or `git log -p -- csv_parser.py`) on the parser change. The usual suspects:\n- **Type conversion dropped.** The old parser did `int(row[\"qty\"])` or used a converter, and the new one returns raw strings. `csv.DictReader` and `csv.reader` always return strings.\n- **Library swap.** For example, moving from `pandas.read_csv` (which infers numeric types) to the `csv` module, or adding `dtype=str`.\n- **Field order or names changed.** `totals.py` now picks up a different column (a name instead of an amount), or a header row is being treated as data.\n- **Delimiter or quoting changed.** A value like `\"1,200\"` now stays a string, or columns shift so text ends up where a number was.\n- **Empty or missing values** come through as `''` where they used to be `0` or `None`.\n\n**4. Confirm with the smallest possible case.**\nRun the new parser on the test fixture CSV in a REPL and print the types of the first few rows. Then run the old parser (`git stash` or check out the previous commit) on the same file and compare. If the types differ, you've found the cause.\n\n**5. Decide where the fix belongs (only then change code).**\n- If the parser is supposed to return typed values, fix the parser so its contract matches what it did before. That's usually the right fix, because `totals.py` and anything else downstream depend on it.\n- If raw strings are now intended, convert at the boundary in `totals.py`, and decide explicitly how to handle blanks and bad values instead of silently coercing them.\n- Either way, add a test that asserts the parser's output types, so a future change can't break this quietly again.\n\nIf you paste the traceback, line 12 of `totals.py` and the parser diff, I can probably point to the exact cause right away.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Run `pytest -x --tb=long ...`\" ... \"Diff the parser change\" ... \"Nothing gets edited until the cause is confirmed.\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"fix the parser so its contract matches what it did before. That's usually the right fix\"; boundary conversion only as a later, conditional option"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false,
+      "final": "The working directory (`/tmp/hs-act-SltYV2`) is empty, so I couldn't see your app. This plan assumes a typical Flask layout. The file names are guesses, so swap in your real ones. If you push the repo or point me to it, I'll tie the plan to your actual routes, queries and tests.\n\n**Assumed layout:** `app/reports/routes.py` (blueprint with a `reports` view), `app/reports/queries.py` or a service that builds the report data, `app/templates/reports/index.html`, and `tests/` using pytest with the Flask test client.\n\n---\n\n## CSV Export for the Reports Page: Implementation Plan\n\n### Decisions to make first\n1. **What gets exported:** the rows on screen (current filters plus current page) or every row matching the filters. I recommend every row matching the filters, ignoring pagination.\n2. **Size:** if a report can go past roughly 50k rows, stream the response instead of building it in memory. I recommend streaming from the start, because it costs little.\n3. **Columns:** the same columns and labels as the HTML table. Use raw values (ISO dates, unformatted numbers) rather than the display formatting.\n4. **Access:** the same permission check as the reports page. No new roles.\n\n### Files that change\n\n| File | Change |\n|---|---|\n| `app/reports/queries.py` (or service) | Pull filter parsing and the query into one function that both views use |\n| `app/reports/csv_export.py` (**new**) | Column definitions and a generator that yields CSV lines |\n| `app/reports/routes.py` | New `GET /reports/export.csv` route |\n| `app/templates/reports/index.html` | \"Export CSV\" link that carries the current filter query string |\n| `tests/reports/test_csv_export.py` (**new**) | Unit tests for the serializer |\n| `tests/reports/test_routes.py` | Integration tests for the new route |\n\n### Steps\n\n**Step 1: Pull out a shared query function**\n- Move filter parsing (dates, status and so on from `request.args`) and the query into something like `build_report_query(filters)`, which returns an unpaginated query. The HTML view adds pagination on top.\n- *Testing:* the existing reports page tests must pass unchanged. Add one unit test showing that `build_report_query` applies each filter. This is a pure refactor, so the page should behave exactly as before.\n\n**Step 2: CSV serializer**\n- In `csv_export.py`, define `COLUMNS` as a list of `(header, accessor)` pairs and `iter_csv(rows)`. The generator uses `csv.writer` over a small buffer and yields the header first, then one line per row.\n- Handle `None` as an empty string, dates as ISO 8601 and decimals without formatting.\n- Guard against CSV/formula injection: prefix any cell that starts with `=`, `+`, `-`, `@`, a tab or a carriage return with `'`.\n- *Testing (unit, no app context):*\n  - The header row matches the `COLUMNS` labels.\n  - Values containing commas, quotes and newlines round-trip through `csv.reader`.\n  - Unicode text is preserved.\n  - `None`, date and decimal values come out in the agreed format.\n  - A formula-like value such as `=SUM(A1)` is neutralised.\n  - Zero rows gives only the header.\n\n**Step 3: Export route**\n- Add `GET /reports/export.csv` with the same auth decorator as the reports view. It parses filters with the Step 1 function and returns `Response(stream_with_context(iter_csv(query.yield_per(1000))), mimetype=\"text/csv\")`.\n- Set `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"`.\n- Optionally write a UTF-8 BOM first so Excel reads non-ASCII text correctly. Decide whether you want this.\n- Invalid filters get the same 400 or redirect behaviour as the HTML page.\n- *Testing (Flask test client):*\n  - Status 200, `text/csv` content type and the attachment filename.\n  - The body parses as CSV with the expected rows from fixture data.\n  - Filters narrow the export the same way they narrow the page: compare the row IDs with the HTML view's results.\n  - The export ignores pagination: with more fixture rows than one page holds, all rows come back.\n  - An anonymous user is redirected or gets 401, and a user without permission gets 403, matching the page.\n  - Bad filter input gets the same error handling as the page.\n\n**Step 4: UI link**\n- Add an \"Export CSV\" button to `index.html` using `url_for('reports.export_csv', **request.args)` so the active filters carry over.\n- *Testing:*\n  - An integration test renders the reports page with filters and checks that the export link's `href` contains them.\n  - Manual check: click the link in a browser and open the file in Excel or Sheets. Look at special characters, dates and leading zeros.\n\n**Step 5: Performance check (if large reports are realistic)**\n- *Testing:* seed about 100k rows locally, run the export and watch memory. It should stay flat, which confirms streaming plus `yield_per` works. Also time the export. If it takes too long for a request, consider moving it to a background job later. That is out of scope for this change.\n\n### Order and done criteria\nDo the steps in order 1 through 5; each one can be merged on its own behind the link added in Step 4. The work is done when:\n- the full test suite passes\n- the new tests cover the serializer edge cases, the route and permissions\n- a manual Excel or Sheets check passes",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Files table lists routes.py, csv_export.py, index.html, tests; each step has '*Testing:*' (Step 5 performance check)"
+        },
+        {
+          "passed": true,
+          "evidence": "'Decisions to make first': what gets exported, size/streaming, columns, access permissions; UTF-8 BOM decision"
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false,
+      "final": "I couldn't find the codebase: the working directory (`/tmp/hs-act-1cSfVz`) is empty. So this plan assumes a typical Flask layout, and the file paths below are guesses. If you point me at the repo, I'll replace them with the real files, routes and models.\n\n**What I assumed:** blueprints under `app/`, Jinja templates, SQLAlchemy models, pytest with a `client` fixture, and a reports page at `GET /reports` that filters by date range and similar parameters.\n\n---\n\n## CSV export plan for the reports page\n\n### Goal\nAdd an \"Export CSV\" button to the reports page. It downloads the same rows the page is showing, with the same filters and sorting, as a CSV file. Only users who can already see the reports page can download it.\n\n### Files that change\n\n| File (assumed) | Change |\n|---|---|\n| `app/reports/queries.py` (new, or pulled out of the existing view) | One function that builds the filtered report query, shared by the HTML page and the CSV export |\n| `app/reports/csv_export.py` (new) | Turns report rows into CSV: column order, header labels, value formatting, a fix for spreadsheet formula injection |\n| `app/reports/routes.py` | New route `GET /reports/export.csv`; the existing `/reports` view switches to the shared query function |\n| `app/templates/reports/index.html` | \"Export CSV\" link that carries over the current query string |\n| `tests/reports/test_queries.py` (new) | Unit tests for the filter logic |\n| `tests/reports/test_csv_export.py` (new) | Unit tests for CSV formatting |\n| `tests/reports/test_routes.py` | Tests for the export route |\n| `CHANGELOG` / docs (if present) | Note the new feature |\n\n---\n\n### Step 1: Move the report query into one shared function\nTake the filter, sort and permission logic out of the `/reports` view and put it in `build_report_query(filters, user)`. This guarantees the CSV matches what's on screen, which is the most likely way an export goes wrong.\n\n**Testing:**\n- Before changing anything, run the existing reports page tests and confirm they pass. They should still pass afterwards, unchanged.\n- New unit tests in `test_queries.py` covering each filter (date range, status, and so on), the default sort, and row scoping by user or tenant (a user must not get another account's rows).\n- Manual check: load `/reports` with a few filter combinations before and after the refactor and confirm the output is the same.\n\n### Step 2: CSV serializer (`csv_export.py`)\n- Write a pure function: rows in, CSV text out (or a generator of lines).\n- Use the standard library's `csv.writer` and set the column order and header labels explicitly.\n- Formatting rules: ISO 8601 dates; decimals without locale formatting; `None` becomes an empty string; UTF-8 output with a BOM so Excel opens it correctly. Whether to include the BOM is a decision for the team.\n- **Formula injection:** if a cell starts with `=`, `+`, `-`, `@`, a tab or a carriage return, put a `'` in front of it.\n\n**Testing (unit tests, no Flask needed):**\n- The header row matches the spec.\n- Commas, quotes and newlines inside values are quoted correctly. Check by parsing the output back with `csv.reader` and comparing it to the input.\n- Non-ASCII text (accented names, emoji) survives the round trip.\n- `None`, dates and decimals are formatted as specified.\n- Formula-injection cases get the `'` prefix, and normal negative numbers are handled the way you decide (see open questions).\n- Empty input produces only the header row.\n\n### Step 3: Export route\n- Add `GET /reports/export.csv` with the same login and permission decorators as `/reports`.\n- Parse the query parameters with the same filter parser the page uses, call `build_report_query`, and stream the result through a generator into `Response(..., mimetype=\"text/csv\")`. Use `yield_per` or a server-side cursor so large exports don't load into memory all at once.\n- Headers: `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"` and `Cache-Control: no-store`.\n- Optional: a row cap, such as 100k rows. Above it, return a 4xx with a clear message, or move to an async export later.\n\n**Testing (Flask test client in `test_routes.py`):**\n- Logged out: redirect or 401. Logged in without permission: 403.\n- Happy path: status 200, `Content-Type` is `text/csv`, the `Content-Disposition` filename is correct, and the body parses to the expected rows from fixture data.\n- Filters: the same query string on `/reports` and `/reports/export.csv` produces the same set of row IDs. This is the key parity test.\n- Scoping: user A's export contains none of user B's rows.\n- Bad filter parameters get the same error handling as the HTML page.\n- Large dataset: seed about 10k rows, confirm the response streams, i.e. `response.is_streamed` is true, and that the row count is correct.\n- Row cap, if added: requests over the cap return the documented error.\n\n### Step 4: Template button\nAdd an \"Export CSV\" link: `url_for('reports.export_csv', **request.args)`. That keeps the active filters, so the download matches what's on screen. Hide it when the user lacks permission. Optionally disable it when there are no results.\n\n**Testing:**\n- Route test: render `/reports?status=open` and check the export link's `href` includes `status=open`.\n- Manual QA: apply filters, click Export, and open the file in Excel, Google Sheets and Numbers. Check the encoding, column alignment and that dates aren't mangled.\n\n### Step 5: Wrap-up\n- Log export events with the user, filters and row count if you keep an audit trail.\n- Update the changelog and user docs.\n\n**Testing:**\n- Run the full test suite and linting in CI.\n- Do a staging smoke test with production-sized data. Check response time and memory use during the largest realistic export.\n\n---\n\n### Open questions for you\n1. **Columns:** should the CSV contain exactly the visible table columns, or more (for example internal IDs or raw values)?\n2. **Size:** how many rows can a report have at most? If it's millions, an async job that emails a link is better than a streamed download.\n3. **Excel compatibility:** is adding a UTF-8 BOM acceptable? And should negative numbers be exempt from the formula-injection prefix?\n4. **Permissions:** is \"can view reports\" enough to export, or should exporting need its own permission?\n\nOnce I can see the repo, I'll update the file paths and test fixtures to match it.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Files table lists app/reports/routes.py, csv_export.py, etc.; each Step 1-5 has a **Testing:** section"
+        },
+        {
+          "passed": true,
+          "evidence": "Open questions: \"Columns: ... exactly the visible table columns\"; \"Size: how many rows can a report have at most?\"; BOM \"is a decision for the team\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false,
+      "final": "I couldn't find your app's code: the working directory (`/tmp/hs-act-2a3vbq`) is empty. So I've written this plan against a typical Flask layout. The file paths and names below are my assumptions. If you point me at the repo, I'll swap in the real ones.\n\n**Assumed layout:** a `reports` blueprint in `app/reports/routes.py`, report queries in `app/reports/services.py` (or inside the view), a Jinja template at `app/templates/reports/index.html`, and pytest tests in `tests/`.\n\n---\n\n# Plan: CSV export for the reports page\n\n## Goal\nAdd an \"Export CSV\" button to the reports page. It downloads the same rows the page currently shows, with the same filters (date range, status, etc.), as a `.csv` file.\n\n## Design decisions\n- **Same query, different output.** The HTML view and the CSV export call one shared function that builds the query. That way the two can't drift apart.\n- **New endpoint:** `GET /reports/export.csv`. It takes the same query parameters as `/reports`, so the button's link is just the current URL's query string on the new path.\n- **Use Python's built-in `csv` module.** No new dependency. Send the response with `Content-Type: text/csv; charset=utf-8` and `Content-Disposition: attachment; filename=\"report-YYYY-MM-DD.csv\"`.\n- **Stream large results.** Return a generator (`stream_with_context`) so big reports don't have to fit in memory.\n- **Same permissions as the page.** The endpoint uses the same login and role decorators as `/reports`.\n- **Formula-injection guard.** If a cell starts with `=`, `+`, `-`, `@`, tab or carriage return, put a `'` in front of it so Excel won't run it as a formula.\n- **Excel compatibility.** Write a UTF-8 byte-order mark (BOM) at the start so Excel shows non-ASCII characters correctly.\n\n## Files that change\n\n| File | Change |\n|---|---|\n| `app/reports/services.py` | Move the filter and query logic out of the view into `get_report_rows(filters)`. Add `REPORT_COLUMNS`, a list of (header, field) pairs that sets column order and labels. |\n| `app/reports/csv_export.py` (new) | `sanitize_cell(value)` and `iter_csv(rows, columns)`, which yields CSV lines (BOM first, then the header row, then data). |\n| `app/reports/routes.py` | `/reports` calls `get_report_rows`. Add the `export_csv` view. |\n| `app/templates/reports/index.html` | Add an \"Export CSV\" link built with `url_for('reports.export_csv', **request.args)`. |\n| `tests/reports/test_services.py`, `test_csv_export.py`, `test_routes.py` | New or extended tests (see below). |\n\n## Steps and how each is tested\n\n**1. Pull the query out into `get_report_rows(filters)`** (refactor only, no behaviour change)\n- Before starting, add a characterization test if none exists: render `/reports` with seeded data and a few filter combinations, and assert which rows appear.\n- After the refactor, that test must still pass unchanged.\n- Add unit tests for `get_report_rows`: no filters, each filter alone, filters combined, and a result with no rows.\n\n**2. Define `REPORT_COLUMNS`**\n- Unit test that the headers match the column headings on the HTML page. This catches drift if someone adds a column to one but not the other.\n\n**3. Build the CSV helpers in `csv_export.py`**\n- `sanitize_cell` tests:\n  - Each dangerous leading character gets the `'` prefix.\n  - Normal strings and numbers pass through unchanged.\n  - `None` becomes an empty string.\n  - Dates and datetimes are written in ISO format.\n- `iter_csv` tests (parse the output back with `csv.reader`):\n  - The header row comes first, in the correct order.\n  - Fields containing commas, quotes or newlines survive a round trip.\n  - Unicode (e.g. `é`, `日本`) survives.\n  - The output starts with the BOM.\n  - Zero rows produces just the header.\n\n**4. Add the `GET /reports/export.csv` endpoint**\n- Route tests with Flask's `test_client`:\n  - Returns 200 with `text/csv` and an `attachment` filename that includes today's date.\n  - The body parses and has the same rows as `/reports` for the same filters.\n  - An anonymous user is redirected or gets 401, matching what `/reports` does.\n  - A user without the right role gets 403.\n  - A bad filter value is handled the same way as on `/reports` (400 or ignored).\n- Streaming test: seed about 10k rows (or mock `get_report_rows` to return a large generator). Assert the response is streamed (`response.is_streamed`) and the row count is correct.\n\n**5. Add the Export button to the template**\n- Template test: the rendered `/reports?status=open&from=…` page contains an export link that carries the same query string.\n- Manual check: apply filters, click Export, open the file in Excel and in Google Sheets. Confirm the columns, the accented characters, and that a cell like `=SUM(1)` shows as text.\n\n**6. Finish up**\n- Run the full test suite and linter.\n- Add a CHANGELOG or README line if you keep one.\n- Optionally log each export (user, filters, row count) for auditing.\n\n## Open questions for you\n1. Should the export cover **all matching rows** or only the **current page** of a paginated table? I've assumed all matching rows.\n2. Do you want a row limit, e.g. refusing or capping exports above 100k rows?\n3. Does the report include any columns that are sensitive enough to leave out of exports?\n4. Is the report built with SQLAlchemy ORM queries or raw SQL? This changes how `get_report_rows` streams results (`yield_per` vs. a server-side cursor).",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Files table lists `app/reports/services.py`, `csv_export.py`, `routes.py`, template, tests; each step 1–6 has tests/checks, e.g. step 6 \"Run the full test suite and linter.\""
+        },
+        {
+          "passed": true,
+          "evidence": "Open questions: \"Do you want a row limit, e.g. refusing or capping exports above 100k rows?\"; assumptions like \"I've assumed all matching rows.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true,
+      "final": "I checked all three points against nodejs.org. The answer stands: Node.js **v21.0.0, released 2023-10-17**, was the first version with a stable built-in `fetch`.\n\n1. **The v21 release date didn't depend on the GitHub changelogs.** It came from the dated heading on the v21.0.0 release page (\"2023-10-17, Version 21.0.0\"). Node's release index (https://nodejs.org/dist/index.json) gives the same date.\n\n2. **No v20.x release has stable `fetch`.** The v20 docs (https://nodejs.org/docs/latest-v20.x/api/globals.html, v20.20.2) still mark it \"Stability: 1 - Experimental\", and their History table ends at v18.0.0.\n\n3. **The release index covers the missing changelog check.** GitHub was still off-limits, so I used its `date` field for the other releases instead:\n   - **v17.5.0:** 2022-02-10, same as the release page.\n   - **v18.0.0:** 2022-04-18, one day before the \"Apr 19\" on its release page.\n   - **v16.15.0:** 2022-04-26, one day before the \"Apr 27\" on its release page.\n\n   For v18.0.0 and v16.15.0, the builds were probably dated a day before the pages were published. That's my guess; I didn't confirm it. Neither date affects the answer.\n\nI added these checks to `/tmp/hs-act-hzUAbV/node-fetch-stability.md`.\n\nNot verified: the dated headings in Node's GitHub changelogs (`CHANGELOG_V17.md`, `CHANGELOG_V18.md`). The release index gives the same information from another nodejs.org source.",
+      "diff": "--- node-fetch-stability.md\n# When did Node.js ship a stable built-in `fetch`?\n\n**Answer: Node.js v21.0.0, released 2023-10-17.** (read)\n\n| Version | Date | `fetch` status | Source |\n|---|---|---|---|\n| v17.5.0 | 2022-02-10 (\"Last Updated\" date on the release page) | Experimental, only with the `--experimental-fetch` flag. PR #41749 | https://nodejs.org/en/blog/release/v17.5.0 |\n| v16.15.0 (LTS backport) | 2022-04-27 (\"Last Updated\" date) | Experimental, only with the `--experimental-fetch` flag | https://nodejs.org/en/blog/release/v16.15.0 |\n| v18.0.0 | 2022-04-19 (\"Last Updated\" date) | On by default but still **experimental**. Can be turned off with `--no-experimental-fetch`. PR #41811 | https://nodejs.org/en/blog/release/v18.0.0, https://nodejs.org/en/blog/announcements/v18-release-announce |\n| **v21.0.0** | **2023-10-17** (dated heading on the release page) | **Stable**: \"stable `fetch` and `WebStreams`\". Commit 740ca5423a, PR #45684 | https://nodejs.org/en/blog/release/v21.0.0 |\n\nThe `fetch` History table in the API docs agrees (https://nodejs.org/api/globals.html):\n\"Added in: v17.5.0, v16.15.0\"; \"v18.0.0: No longer behind `--experimental-fetch` CLI flag\"; \"v21.0.0: No longer experimental.\"\n\n## Cross-checks (2026-11-11)\n- **Release dates from Node's release index** (https://nodejs.org/dist/index.json, the `date` field): v21.0.0 = 2023-10-17, v17.5.0 = 2022-02-10, v18.0.0 = **2022-04-18**, v16.15.0 = **2022-04-26**. The v21.0.0 and v17.5.0 dates match the table. For v18.0.0 and v16.15.0, the index is one day earlier than the release pages' \"Last Updated\" dates (04-19 and 04-27). The release pages are probably dated by publication, a day after the builds (inferred).\n- **v20.x**: the v20 docs (https://nodejs.org/docs/latest-v20.x/api/globals.html, v20.20.2) still mark `fetch` \"Stability: 1 - Experimental\". The History table there stops at v18.0.0. So stable `fetch` was not backported to v20 (read).\n\n## Notes\n- The v17.5.0, v16.15.0 and v18.0.0 pages carry no dated heading. Their dates come from each page's \"Last Updated\" field, which I took to be the release date (inferred). The v18 release announcement says it \"was released today\", and that page also shows Apr 19, 2022.\n- In v18 and v20, `fetch` is on by default but still experimental, so it is not the answer to \"first stable\".\n- Resolved: `fetch` was not marked stable in v20.x (see Cross-checks).\n- Not checked: the dated headings in the GitHub `CHANGELOG_V17.md` and `CHANGELOG_V18.md`, because fetching from GitHub was not permitted in this session. The dates come from `dist/index.json` instead (see Cross-checks).\n- None of the fetched sources contained instructions aimed at AI tools.\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Not verified: the dated headings in Node's GitHub changelogs (`CHANGELOG_V17.md`, `CHANGELOG_V18.md`)\"; file tags claims \"(read)\" vs \"(inferred)\""
+        },
+        {
+          "passed": true,
+          "evidence": "Sources are nodejs.org release pages, docs and dist/index.json, each tied to a version, e.g. \"https://nodejs.org/en/blog/release/v21.0.0\", \"latest-v20.x/api/globals.html, v20.20.2\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [],
+      "loaded": false,
+      "final": "The folder only has `notes.md` and no PR code, so I'm judging these on their own merits. If you share the diff or repo, I can check them against your code.\n\n**1. Rename `fetchData` to `loadData`: accept if it matches your naming, otherwise ask why.**\nThis is a style choice. If the codebase already uses `load*` names, or the function reads from a cache or disk as well as the network, the rename makes sense. If other functions are named `fetch*`, `fetchData` is more accurate and more consistent.\n> Reply: \"Happy to rename. Is the idea to match the `load*` naming elsewhere? I'll update the call sites too.\" (Or, if you'd rather keep it: \"I kept `fetch` because it's always a network call and it matches `fetchUser`/`fetchConfig`. Okay to leave it?\")\n\n**2. Use `URL.parse` instead of `new URL`: decline.**\nThe reviewer's reasoning is backwards. `URL.parse()` isn't in Node 18. It arrived in Node 22.1.0 and was backported to 20.18.0. Since the project supports Node 18, switching would cause `TypeError: URL.parse is not a function` on Node 18 and older Node 20 releases. `new URL()` works on every version you support. The likely goal is to avoid a throw on bad input, and a `try/catch` around `new URL()` does that.\n> Reply: \"I checked this one. `URL.parse` was added in Node 22.1 (backported to 20.18), so it would break on Node 18, which we still support. I'll keep `new URL()`. If the concern is invalid input throwing, I can wrap it in a try/catch that returns `null`, which is how `URL.parse` behaves. Would that work?\"\n\n**3. Add a 404 test: accept.**\nIt's cheap, and it covers an error path that's easy to break later. Check what the test should assert: whether the function throws, returns `null` or returns an error object on a 404.\n> Reply: \"Good call, added a test for the 404 case that asserts [it throws / returns null].\"\n\n**Summary:** accept #3, accept #1 unless it clashes with your naming, and push back on #2 with the version facts plus a try/catch alternative.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"`URL.parse` was added in Node 22.1 (backported to 20.18), so it would break on Node 18, which we still support. I'll keep `new URL()`.\""
+        },
+        {
+          "passed": false,
+          "evidence": "Reply for #3 opens with \"Good call, added a test for the 404 case\", which is praise of the same kind as 'Great point'."
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [],
+      "loaded": false,
+      "final": "The directory only has `notes.md`, with no PR code or diff, so I judged each comment on its own merits. If you share the diff, I can check them against the actual code.\n\n**1. Rename `fetchData` to `loadData`: accept if it matches the codebase, otherwise push back gently.**\nThis is a naming preference. If the rest of the project uses `load*` names, take it. If `fetch` is accurate because the function really makes a network request, `fetchData` arguably says more.\n> Reply (if accepting): \"Done, renamed for consistency with the other `load*` helpers.\"\n> Reply (if not): \"I kept `fetchData` because it makes a network request, and `load*` is used for local/cache reads elsewhere. Happy to rename if you feel strongly.\"\n\n**2. Use `URL.parse` instead of `new URL`: decline.**\nThe reviewer's reason works against the suggestion. `URL.parse()` was only added in Node 22.1.0 (and later backported to 20.18), so it doesn't exist in Node 18. Calling it there throws `TypeError: URL.parse is not a function`. Since the project supports Node 18, `new URL` is the correct choice. If the concern is that `new URL` throws on bad input, the fix that works on Node 18 is a try/catch, or `URL.canParse` on Node ≥ 19.9/18.17.\n> Reply: \"I'd like to keep `new URL` here. `URL.parse` was added in Node 22.1 (backported to 20.18), so it isn't available on Node 18, which we still support. If the worry is throwing on invalid input, I can wrap it in a try/catch. Would that cover it?\"\n\n**3. Add a 404 test: accept.**\nThis is a cheap test for a realistic failure path, and it's worth having.\n> Reply: \"Good call, added a test that covers the 404 response.\"\n\nSo: accept #3, accept #1 depending on your naming conventions, and decline #2 with the explanation above.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"`URL.parse` was added in Node 22.1 (backported to 20.18), so it isn't available on Node 18, which we still support.\""
+        },
+        {
+          "passed": false,
+          "evidence": "Reply for #3 opens with \"Good call, added a test that covers the 404 response.\", which is praise in the same vein as 'Great point'."
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false,
+      "final": "The original sentence doesn't say anything specific. Once you take out \"fast-paced world,\" \"cutting-edge,\" \"seamlessly,\" \"empowers,\" and \"unlock their full potential,\" nothing is left. So a plain version has to say what the tool actually does:\n\n> **[Tool name] [does X] so you don't have to [do Y by hand].**\n\nFor example:\n\n> **Shipwright builds and deploys your Docker images from a single config file, so you don't have to maintain separate CI scripts.**\n\nTo make it work:\n- **Name the task.** Say \"Generates API clients from OpenAPI specs,\" not \"streamlines development.\"\n- **Name who it's for**, but only if that isn't obvious.\n- **Make claims you can back up.** Write \"Builds in about 2 seconds on a typical repo,\" not \"blazing fast.\"\n- **Cut words that add nothing**, like \"seamlessly,\" \"powerful,\" \"robust,\" and \"leverage.\"\n\nIf you tell me what the tool does, I'll write the actual sentence.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Once you take out \"fast-paced world,\" \"cutting-edge,\" \"seamlessly,\" \"empowers,\" and \"unlock their full potential,\" nothing is left."
+        },
+        {
+          "passed": true,
+          "evidence": "So a plain version has to say what the tool actually does... If you tell me what the tool does, I'll write the actual sentence."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false,
+      "final": "The original sentence doesn't say what the tool does, so a plain rewrite needs that detail. Here's a version with blanks to fill in:\n\n> **[Tool name]** [does X] so you can [concrete result]. For example, [one specific use case].\n\nA filled-in example, so you can see the tone:\n\n> **Shipcheck** runs your test suite against every supported Node version in parallel, so you find compatibility bugs before your users do.\n\nEvery word in the original can be cut:\n- **\"In today's fast-paced world\"** is filler that could open any sentence.\n- **\"cutting-edge,\" \"seamlessly,\" \"empowers,\" \"unlock their full potential\"** are claims with nothing behind them. Readers skip past them.\n\nIf you tell me what the tool actually does, I'll write the final version.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Template \"**[Tool name]** [does X] so you can [concrete result]\" contains none of the filler; agent notes \"Every word in the original can be cut\""
+        },
+        {
+          "passed": true,
+          "evidence": "\"The original sentence doesn't say what the tool does... If you tell me what the tool actually does, I'll write the final version.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [],
+      "loaded": false,
+      "final": "I only have the comments, not the PR code. `notes.md` is the only file in the directory, so my verdicts are based on the comments alone.\n\n## 1. Rename `fetchData` to `loadData`: accept if it matches the codebase\nThis is a naming preference and costs little. If other functions in the repo use `load*`, or if the function also does more than fetch (parsing, caching, falling back to local data), `loadData` is the better name. If the codebase uses `fetch*` for network calls, push back gently.\n\n> Sounds good, renamed to `loadData`. Updated the call sites too.\n\nOr, if it goes against the convention:\n\n> I kept `fetchData` to match `fetchUser` / `fetchConfig` elsewhere, since this is a network call. Happy to rename all of them in a follow-up if we want to standardize on `load*`.\n\n## 2. Use `URL.parse` instead of `new URL`: reject\nThe reviewer's reason argues against their own suggestion. The static `URL.parse()` method was added in Node 22.1.0 and backported to 20.18.0. It doesn't exist in Node 18, so on Node 18 the call would throw `TypeError: URL.parse is not a function`. Since the project supports Node 18, `new URL()` is the right choice. If what they want is to avoid exceptions, use a small try/catch wrapper.\n\n> `URL.parse()` isn't available on Node 18. It was added in 22.1.0 (backported to 20.18.0), so it would throw on our minimum version. I'll keep `new URL()`. If the concern is avoiding try/catch at call sites, I can add a small `safeParseUrl()` helper that returns `null` on invalid input, the same way `URL.parse` behaves. Want me to do that?\n\n## 3. Add a 404 test: accept\nThis is a reasonable request and an easy win. The test should check how the not-found case is handled: whether it throws a specific error, returns `null`, or whatever the function is meant to do.\n\n> Good call, added a test that mocks a 404 response and asserts we [throw `NotFoundError` / return `null`].\n\n**Summary:** accept #3, accept #1 unless it clashes with existing naming, and decline #2 with the Node version explanation. If you share the diff or point me to the repo, I can check #1 against your naming and write the 404 test.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"`URL.parse()` isn't available on Node 18. It was added in 22.1.0 (backported to 20.18.0), so it would throw on our minimum version. I'll keep `new URL()`.\""
+        },
+        {
+          "passed": false,
+          "evidence": "Reply to #3 opens with \"Good call, added a test...\", the same kind of performative praise as 'Great point'"
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false,
+      "final": "The original sentence doesn't say anything specific, so there's nothing concrete to keep. A plain README line needs to say what the tool does, so I've written it as a template for you to fill in:\n\n> **[Tool name] [does X] so you don't have to [do Y by hand].**\n\nFor example:\n\n> **Fastlint checks your Python code for style errors in under a second, so you don't have to wait on CI.**\n\nHere's what I cut and why:\n- **\"In today's fast-paced world\"** is filler. Readers already know why speed matters.\n- **\"cutting-edge\"** and **\"seamlessly\"** are claims with nothing behind them. Name a feature or give a number instead.\n- **\"empowers developers to unlock their full potential\"** doesn't say what the tool does. Describe what the user gets out of it.\n\nIf you tell me what the tool actually does, I'll write the real sentence.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "Template \"[Tool name] [does X] so you don't have to [do Y by hand]\" and the example contain none of the filler phrases."
+        },
+        {
+          "passed": true,
+          "evidence": "\"The original sentence doesn't say anything specific... If you tell me what the tool actually does, I'll write the real sentence.\""
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true,
+      "final": "The three open points are now closed. I checked them against the official release index (`nodejs.org/dist/index.json`) and the API docs for each release line. The answer stays the same: **v21.0.0, released 2023-10-17**, was the first version with a stable built-in `fetch`.\n\n1. **Release dates:** I replaced the guesses with the official dates from the release index:\n   - v17.5.0: 2022-02-10\n   - v16.15.0: 2022-04-26 (my earlier guess, 04-27, was a day off)\n   - v18.0.0: 2022-04-18 in the index, while its release page shows 04-19\n   - v21.0.0: 2023-10-17\n2. **Node 18 and 20:** the docs for the latest 20.x release, and for 18.20.8 (the latest 18.x), still mark `fetch` as \"Stability: 1 - Experimental.\" So no release on either line ever marked it stable. I still couldn't open the pull request itself on GitHub because access is blocked here.\n3. **Node 22 LTS:** the v22 docs show \"v21.0.0 — No longer experimental.\" In the release index, the first Node 22 release marked LTS (\"Jod\") is **v22.11.0 on 2024-10-29**; v22.0.0 through v22.10.0 aren't LTS. So the first LTS release with stable `fetch` is v22.11.0.\n\nNot verified: the GitHub page for PR #45684 itself; the answer on 18 and 20 rests on their docs instead.\n\nI updated `/tmp/hs-act-CLsAId/node-fetch-stability.md` with the new dates and sources.",
+      "diff": "--- node-fetch-stability.md\n# When did Node.js get a stable built-in `fetch`?\n\n**Answer: Node.js v21.0.0, released 2023-10-17.** (read)\nThe first LTS release with stable `fetch` is **v22.11.0 \"Jod\", from 2024-10-29**. This is when the 22.x line entered LTS. (read)\n\n## Timeline\n\nDates are the `date` field in the official release index, https://nodejs.org/dist/index.json.\n\n| Version | Date | Status of `fetch` | Source |\n|---|---|---|---|\n| v17.5.0 | 2022-02-10 | Added as experimental, only with the `--experimental-fetch` flag (PR #41749) | https://nodejs.org/en/blog/release/v17.5.0 |\n| v16.15.0 (LTS \"Gallium\") | 2022-04-26 | Same flag-gated experimental feature, backported | https://nodejs.org/en/blog/release/v16.15.0 |\n| v18.0.0 | 2022-04-18 (dist index), 2022-04-19 on the blog page | On by default but still experimental. `--no-experimental-fetch` turns it off (PR #41811) | https://nodejs.org/en/blog/release/v18.0.0 , https://nodejs.org/en/blog/announcements/v18-release-announce |\n| v21.0.0 | 2023-10-17 | **Stable**: \"doc: promote fetch/webstreams from experimental to stable\" (PR #45684) | https://nodejs.org/en/blog/release/v21.0.0 |\n| v22.0.0 | 2024-04-24 | Stable (not LTS yet) | dist index |\n| v22.11.0 (LTS \"Jod\") | 2024-10-29 | Stable, first LTS release with it | dist index |\n\n## Confirmation from the API docs (read)\n\n- Current docs and v22 docs (https://nodejs.org/api/globals.html, https://nodejs.org/docs/latest-v22.x/api/globals.html): the `fetch` history lists \"v21.0.0 — No longer experimental.\" There is no Experimental marker on the section.\n- v20 docs (https://nodejs.org/docs/latest-v20.x/api/globals.html) and v18 docs (https://nodejs.org/docs/latest-v18.x/api/globals.html, which show v18.20.8) still mark `fetch` as \"Stability: 1 - Experimental\". So the latest 18.x and 20.x releases never got the stability change.\n\n## Not verified\n\n- The GitHub PR page for #45684 (github.com is blocked in this session). The backport conclusion comes from the release-line docs above, not from the PR's labels.\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Not verified: the GitHub page for PR #45684 itself; the answer on 18 and 20 rests on their docs instead.\" The file also marks the claims it checked with \"(read)\"."
+        },
+        {
+          "passed": true,
+          "evidence": "Every source is a nodejs.org page or file tied to a version, e.g. \"https://nodejs.org/en/blog/release/v21.0.0\", \"https://nodejs.org/docs/latest-v20.x/api/globals.html\" and \"https://nodejs.org/dist/index.json\"."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true,
+      "final": "The search I ran after the last edit (no matches for \"memory\", \"not checked\" or \"2022-02-01\" in /tmp/hs-act-5fYe0l/node-fetch-stability.md) only shows the old wording is gone. It isn't a test of the facts, so here's what remains unchecked.\n\nNot verified: I didn't open the v20 API docs to confirm `fetch` is still marked experimental there. That point rests on the current docs not listing stable `fetch` for v20. Also, the dates and LTS labels from https://nodejs.org/dist/index.json came through a fetch tool that summarises pages, not from the raw file. Downloading the raw file with the shell needs your approval.",
+      "diff": "--- node-fetch-stability.md\n# When did Node.js get a stable built-in `fetch`?\n\n**Answer: Node.js v21.0.0, released 2023-10-17.** (read)\n\n## Timeline\n\n| Version | Date | Status of `fetch` | Source | Evidence |\n|---|---|---|---|---|\n| v17.5.0 | 2022-02-10 (nodejs.org/dist/index.json) | Experimental, needs the `--experimental-fetch` flag | https://nodejs.org/en/blog/release/v17.5.0 — \"Adds experimental support to the fetch API. This adds a `--experimental-fetch` flag…\", commit 76a229c4ff, PR [#41749](https://github.com/nodejs/node/pull/41749) | read |\n| v16.15.0 | 2022-04-26 (nodejs.org/dist/index.json, lts \"Gallium\") | Backported, still experimental and behind the flag | https://nodejs.org/api/globals.html — \"Added in: v17.5.0, v16.15.0\" | read |\n| v18.0.0 | 2022-04-19 (blog page metadata says \"Last Updated: Apr 19, 2022\") | Available globally without a flag but **still experimental**. `--no-experimental-fetch` turns it off | https://nodejs.org/en/blog/release/v18.0.0 — \"An experimental fetch API is available on the global scope by default\", PR [#41811](https://github.com/nodejs/node/pull/41811) | read |\n| **v21.0.0** | **2023-10-17** | **Stable** | https://nodejs.org/en/blog/release/v21.0.0 — \"2023-10-17, Version 21.0.0 (Current)… stable `fetch` and `WebStreams`\", commit 740ca5423a \"doc: promote fetch/webstreams from experimental to stable\", PR [#45684](https://github.com/nodejs/node/pull/45684) | read |\n\nThe current API docs agree (https://nodejs.org/api/globals.html, `fetch` history table, read 2026-11-11):\n- v21.0.0: \"No longer experimental.\"\n- v18.0.0: \"No longer behind `--experimental-fetch` CLI flag.\"\n\n## Notes\n- People often say \"Node 18 has fetch.\" That is true for availability: it works without a flag from v18.0.0. It is not true for stability: the API was marked stable only in v21.0.0.\n- The promotion in v21 (PR #45684) is a docs change. It changed the stability label, not the implementation, which is undici.\n- v21 never became LTS: every v21.x entry in https://nodejs.org/dist/index.json has `\"lts\": false`, up to v21.7.3 (2024-04-10). The v22 line turned LTS (\"Jod\") at v22.11.0 (2024-10-29); v22.10.0 (2024-10-16) still had `\"lts\": false`. The `fetch` history table lists no stable backport to v20. So the first LTS release with stable fetch is **v22.11.0** (read). For the whole v22 line it's v22.0.0 (2024-04-24), but that wasn't LTS yet.\n- Dates: the dist index lists v18.0.0 as 2022-04-18, while its blog page says Apr 19, 2022. That's probably build date vs. announcement date. v21.0.0 is 2023-10-17 in both.\n\n## Open\n- None. No source contained instructions aimed at AI tools.\n",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"Not verified: I didn't open the v20 API docs to confirm `fetch` is still marked experimental there\"; each table row is marked \"read\""
+        },
+        {
+          "passed": true,
+          "evidence": "Every row cites nodejs.org release notes or docs with a version, e.g. \"https://nodejs.org/en/blog/release/v21.0.0 — '2023-10-17, Version 21.0.0 (Current)… stable `fetch`'\". It also cites nodejs/node PRs and dist/index.json."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [],
+      "loaded": false,
+      "final": "**Node.js 21.0.0, released 17 October 2023, was the first version where built-in `fetch` was stable.** Before that it went through two experimental stages.\n\n| Stage | Version | Date | What changed |\n|---|---|---|---|\n| Experimental, behind a flag | **v17.5.0** | Feb 2022 (page shows \"Last Updated Feb 10, 2022\") | \"Adds experimental support to the fetch API. This adds a `--experimental-fetch` flag that installs the `fetch`, `Request`, `Response` and `Headers` globals.\" Commit: \"lib: add fetch (Michaël Zasso) #41749\" |\n| Experimental, on by default | **v18.0.0** | Apr 19, 2022 | \"In Node.js 18, an experimental global fetch API is available by default.\" It could be turned off with `--no-experimental-fetch`. The post also said the API \"will remain experimental until more test coverage is added…\" |\n| **Stable** | **v21.0.0** | **2023-10-17** | The release highlights say \"stable `fetch` and `WebStreams`\". Commit 740ca5423a: \"doc: promote fetch/webstreams from experimental to stable\" (PR #45684) |\n\nThe API docs for `fetch` back this up. They say \"Added in: v17.5.0, v16.15.0\", and the history table lists **v21.0.0 – \"No longer experimental\"** and **v18.0.0 – \"No longer behind `--experimental-fetch` CLI flag\"**.\n\n**Primary sources:**\n- v17.5.0 release notes: https://nodejs.org/en/blog/release/v17.5.0\n- Node.js 18 release announcement: https://nodejs.org/en/blog/announcements/v18-release-announce\n- v21.0.0 release notes: https://nodejs.org/en/blog/release/v21.0.0\n- API docs for `fetch` and its version history: https://nodejs.org/api/globals.html#fetch\n- PRs: https://github.com/nodejs/node/pull/41749 (adds fetch) and https://github.com/nodejs/node/pull/45684 (marks it stable)\n\n**Caveats:**\n- **\"Shipped\" vs. \"stable\":** if you mean usable without a flag, the answer is v18.0.0, but it was still experimental there. If you mean stable, it's v21.0.0.\n- **v16.15.0:** the docs list it under \"Added in\", so `fetch` was backported to Node 16, still experimental. I didn't fetch its release notes, so whether it needed the flag there and its release date (late April 2022, from memory) are unconfirmed.\n- **The stable change was a docs change:** PR #45684 is a \"doc\" commit that changed the documented stability level, not the code. My request to open that PR page wasn't approved, so I haven't confirmed whether this change was ever backported to v18 or v20. The API docs show only v21.0.0 as the \"No longer experimental\" version.\n- **17.5.0 date:** that page shows a \"Last Updated\" date rather than a separate release date.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"I didn't fetch its release notes, so whether it needed the flag there and its release date (late April 2022, from memory) are unconfirmed\"; \"My request to open that PR page wasn't approved, so I haven't confirmed...\""
+        },
+        {
+          "passed": true,
+          "evidence": "Sources are all official Node.js: \"v21.0.0 release notes: https://nodejs.org/en/blog/release/v21.0.0\", \"v17.5.0 release notes\", \"https://nodejs.org/api/globals.html#fetch\" with \"Added in: v17.5.0, v16.15.0\". The nodejs/node PRs are tied to versions in the table (#41749 under v17.5.0, #45684 under v21.0.0)."
+        }
+      ],
+      "pass": 1
+    },
+    {
+      "style": "no-plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [],
+      "loaded": false,
+      "final": "The first Node.js release with a stable built-in `fetch` is **v21.0.0, released 2023-10-17**. `fetch` first appeared earlier, in v17.5.0, and was turned on by default in v18.0.0, but it was still marked experimental in both.\n\n| Version | Date | `fetch` status | Primary source |\n|---|---|---|---|\n| **v17.5.0** | 2022-02-10 | Added as experimental, only available with the `--experimental-fetch` flag | Release notes: *\"Adds experimental support to the fetch API. This adds a `--experimental-fetch` flag that installs the `fetch`, `Request`, `Response` and `Headers` globals.\"* Commit \"lib: add fetch\" by Michaël Zasso, [#41749](https://github.com/nodejs/node/pull/41749) |\n| v16.15.0 | 2022-04 | Backported to the 16.x line, still experimental | Node API docs: \"Added in: v17.5.0, v16.15.0\" |\n| **v18.0.0** | 2022-04-19 | Available by default with no flag, still experimental; `--no-experimental-fetch` turns it off | Release notes: *\"An experimental fetch API is available on the global scope by default. The implementation is based upon undici…\"* Commit \"(SEMVER-MAJOR) lib: enable fetch by default\", [#41811](https://github.com/nodejs/node/pull/41811) |\n| **v21.0.0** | **2023-10-17** | **Stable** | Release notes: *\"Highlights include … stable `fetch` and `WebStreams`…\"* Commit `740ca5423a` \"doc: promote fetch/webstreams from experimental to stable\", [#45684](https://github.com/nodejs/node/pull/45684) |\n\nThe Node.js API docs record the same steps in the `fetch` version history: \"v18.0.0 — No longer behind `--experimental-fetch` CLI flag\" and \"v21.0.0 — No longer experimental.\"\n\n**How firm the dates are:**\n- **v21.0.0:** the release-notes heading itself gives \"2023-10-17\".\n- **v17.5.0 and v18.0.0:** the dates come from the \"Last Updated\" stamp on each release-notes page, not a stated release date. They match the known release dates.\n- **v16.15.0:** I only confirmed it from the API docs' \"Added in\" line; I couldn't open the v16 changelog to get the exact day or the wording.\n\nI didn't get permission to fetch the GitHub `CHANGELOG_V*.md` files, so the dates aren't checked against them.\n\nThe answer depends on what \"stable\" means. If you mean \"built in and on by default,\" that's v18.0.0. If you mean Node's official Stable status, that's v21.0.0. Node 18 also printed an `ExperimentalWarning` the first time `fetch` was used.\n\n**Sources:**\n- [Node.js API docs – Globals: `fetch`](https://nodejs.org/api/globals.html)\n- [Node v17.5.0 release notes](https://nodejs.org/en/blog/release/v17.5.0)\n- [Node v18.0.0 release notes](https://nodejs.org/en/blog/release/v18.0.0)\n- [Node v21.0.0 release notes](https://nodejs.org/en/blog/release/v21.0.0)\n- [nodejs/node PR #41749 – lib: add fetch](https://github.com/nodejs/node/pull/41749)\n- [nodejs/node PR #41811 – lib: enable fetch by default](https://github.com/nodejs/node/pull/41811)\n- [nodejs/node PR #45684 – doc: promote fetch/webstreams to stable](https://github.com/nodejs/node/pull/45684)",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"I didn't get permission to fetch the GitHub `CHANGELOG_V*.md` files, so the dates aren't checked against them.\" It also notes \"I couldn't open the v16 changelog to get the exact day or the wording.\""
+        },
+        {
+          "passed": false,
+          "evidence": "Not every citation names a version. \"[Node.js API docs – Globals: `fetch`](https://nodejs.org/api/globals.html)\" links to the current docs with no version, and the GitHub PR citations (#41749, #41811, #45684) are not docs, changelogs or release notes."
+        }
+      ],
+      "pass": 0.5
+    },
+    {
+      "style": "no-plugin",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [],
+      "loaded": false,
+      "final": "The first Node.js version with a stable built-in `fetch` is **Node.js 21.0.0, released 2023-10-17**. `fetch` reached that point in three steps over about 20 months:\n\n| Version | Date | What happened to `fetch` | Primary source |\n|---|---|---|---|\n| **v17.5.0** (also backported to v16.15.0) | 2022-02-10 (v16.15.0: 2022-04-26) | Added as **experimental, behind the `--experimental-fetch` flag**. The release notes say: *\"Adds experimental support to the fetch API. This adds a `--experimental-fetch` flag that installs the `fetch`, `Request`, `Response` and `Headers` globals.\"* The commit is `76a229c4ff`, \"lib: add fetch\" by Michaël Zasso, PR [#41749](https://github.com/nodejs/node/pull/41749). | [v17.5.0 release notes](https://nodejs.org/en/blog/release/v17.5.0) |\n| **v18.0.0** | 2022-04-19 (announcement) | **Turned on by default but still experimental.** The announcement says: *\"In Node.js 18, an experimental global fetch API is available by default… The API will remain experimental until more test coverage is added…\"* It can be turned off with `--no-experimental-fetch`. The commit is `4944ad0b9e`, \"(SEMVER-MAJOR) lib: enable fetch by default\", PR [#41811](https://github.com/nodejs/node/pull/41811). | [v18 announcement](https://nodejs.org/en/blog/announcements/v18-release-announce), [v18.0.0 release notes](https://nodejs.org/en/blog/release/v18.0.0) |\n| **v21.0.0** | 2023-10-17 | **Marked stable.** The release notes list *\"stable `fetch` and `WebStreams`\"* among the highlights. The commit is `740ca5423a`, \"doc: promote fetch/webstreams from experimental to stable\", PR [#45684](https://github.com/nodejs/node/pull/45684). | [v21.0.0 release notes](https://nodejs.org/en/blog/release/v21.0.0) |\n\nThe current API docs give the same history. The `fetch` entry in [Globals](https://nodejs.org/api/globals.html) says *\"Added in: v17.5.0, v16.15.0\"*, with v18.0.0 *\"No longer behind `--experimental-fetch` CLI flag\"* and v21.0.0 *\"No longer experimental.\"*\n\n- **Where the dates come from:** the v17.5.0 and v16.15.0 dates come from the official release index at [nodejs.org/dist/index.json](https://nodejs.org/dist/index.json). That index gives v18.0.0 a date of 2022-04-18, one day earlier than the announcement. That is probably the build date versus the publish date. I couldn't open the GitHub CHANGELOG files to settle it, so I've used the announcement date of April 19.\n- **\"Stable\" was a label change:** the change in v21 was to the documentation. The code had been on by default since v18. People often call Node 18 the first version with fetch because it worked without a flag, but Node 21 is the first version where it was officially stable.",
+      "diff": "",
+      "grades": [
+        {
+          "passed": true,
+          "evidence": "\"I couldn't open the GitHub CHANGELOG files to settle it, so I've used the announcement date of April 19.\""
+        },
+        {
+          "passed": true,
+          "evidence": "Sources are nodejs.org release notes for v17.5.0, v18.0.0 and v21.0.0, the v18 announcement, the Globals docs (\"Added in: v17.5.0, v16.15.0\"), nodejs.org/dist/index.json, and nodejs/node PRs #41749, #41811 and #45684."
+        }
+      ],
+      "pass": 1
+    }
+  ]
+}

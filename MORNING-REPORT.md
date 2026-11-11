@@ -24,13 +24,17 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
    - the side pane (HS-057), which opens by itself during a long run with a recorded goal (`"pane": "auto"`; `true` always, `false` never).
 
    Both are built and pass the mod tests (10/10); HS-056 and HS-057 are needs-user only for this check.
-5. **Model-call features to watch in the smoke test.**
+5. **Running the bare and ablation arms (HS-006).**
+   - `evals/run-smoke.mjs --arms with,without,bare,ablate:<component>` is built. `--dry-run` prints each arm's exact command and environment.
+   - Claude Code's auto mode refused to run the bare and ablation arms ("Create Unsafe Agents"), because they start sessions with H-Stack's guards switched off.
+   - To run them, allow it (for example a permission rule for that command), then run them alongside the smoke test.
+6. **Model-call features to watch in the smoke test.**
    - The concern check (HS-040) is on by default and costs one Haiku-class call per edited turn.
    - The classifier model fallback (HS-019) stays off: its spec keeps it off until trigger evals show a recall gain, and the rules already reach recall ≥ 0.8 on all 15 skills.
 
    Switch either with `concerns` or `classifier.fallback` in `.h-stack/config.json`.
-6. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
-7. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
+7. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
+8. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
    - edits to `CLAUDE.md`, `.claude/rules/**` and `.h-stack/config.json`;
    - MCP tools whose names carry no recognisable verb.
 
@@ -43,7 +47,7 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 | M1 baseline | HS-001, 003, 005, 082 | Skipped per the goal, apart from what it needs:<br>• smoke runner `evals/run-smoke.mjs` (skill-creator layout; false-done, tampering, questions, unaided, cost per solved task, sameness), self-tested in both arms;<br>• task format and validator;<br>• judge hygiene;<br>• native map (ARCHITECTURE §2).<br>HS-001 is needs-user. |
 | M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 994/1,500 tokens, listing 738/900), 96 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
 | M3 core imports | IM-01, 04, 05, 06, 07, 11, 15; HS-002 | core-rules (verification-before-completion and the Karpathy rules, plus 4 opt-in path-scoped rule templates), planning, tdd, debugging (with `verify-fix.mjs`), clarify. Each has evals and a benchmark. |
-| M4 activation | HS-017, 018, 020, 022 | Exit criterion met; see Activation below.<br>• SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
+| M4 activation | HS-017, 018, 020, 022 | Exit criterion: every activation case passes with the plugin (1.00 vs 0.89 without, real sessions, 3 runs per arm). Per case only 2 of 6 differ; the other 4 tie at 1.00. See Activation below.<br>• SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
 | M5 guards I | HS-027, 028, 029 | • Receipts ledger and a Stop gate (blocks once on unbacked "done").<br>• Read-only tests outside `hs phase test`.<br>• Tamper scan (8 patterns).<br>• Protected checkers and paths, plus opt-in permission rules (`setup.mjs`, OD-4). |
 | M6 guards II | HS-030, 031, 033 | • Irreversible-action gate: shell unwrapping, effect classes, dry-run receipts, approval binding; exfiltration always denied.<br>• Dependency gate: exists, age, downloads, near-miss; offline ⇒ ask.<br>• MCP tool-description firewall (mods `tool.describe`). |
 | M7 state and memory | HS-046, 048, 049 | • Assumption ledger (blocks Stop while open).<br>• Committed path-scoped lessons with evidence and provenance, and a validator.<br>• At most 2 trigger-matched lessons per prompt.<br>• Native auto memory configured by setup. |
@@ -208,7 +212,7 @@ No skill produces near-identical output across contexts: similarity stays at or 
 
 I did not set frontmatter `effort: low`. The field overrides your session effort for the whole turn, and 3 small fixtures are too little evidence for that.
 
-**Activation (HS-018, M4).** There are two measures. Only the first exercises H-Stack's classifier.
+**Activation (HS-018, M4).** There are three measures. Only the first two exercise H-Stack's classifier.
 
 1. **Real sessions** (`evals/activation-bench.mjs`): `claude -p` with the plugin, 6 prompts (tdd, debugging, planning, review, writing, research). It counts whether Claude called the Skill tool for the skill H-Stack named.
 
@@ -220,7 +224,24 @@ I did not set frontmatter `effort: low`. The field overrides your session effort
 
    The two misses were one debugging run and one writing run. The research cites "84% with forced evaluation"; the plain factual pointer does as well here, so it ships unchanged.
 
-2. **`claude plugin eval`.** Its traces show the classifier hook never runs inside plugin eval: 0 classifier events, against 1 in a plain `claude -p` trace. So its skill-fired grader measures only the session-start skill map and the skill descriptions. Its scored cases, 3 runs per arm, with the final code:
+2. **Outcomes in real sessions (the M4 check)** (`evals/activation-bench.mjs --outcome`).
+   - Setup: the same six cases with the plugin and without it, 3 runs per arm, a 20-turn budget.
+   - Grading: each case has two expectations about what its skill teaches. A fresh grader with no tools, not told the arm, grades the final message and the files written.
+
+   | Case | Plugin | No plugin |
+   |---|---:|---:|
+   | review-feedback (reject `URL.parse` on Node 18, no praise) | **1.00** | **0.50** |
+   | research-cited (separate verified from recalled, primary sources) | **1.00** | **0.83** |
+   | tdd-leap, debug-typeerror, plan-feature, writing-skill-doc | 1.00 each | 1.00 each |
+   | **All six** | **1.00** | **0.89** |
+
+   Claude loaded the named skill in 17 of 18 plugin runs.
+
+   **What this shows:** every case passes with the plugin, and the suite differs from no-plugin, but only two of six cases differ individually. The other four tie at the ceiling.
+
+   **A cost the first pass exposed:** with a 6-turn budget, tdd fell to 0.67 vs 1.00. Slice-by-slice red-green ran out of turns before covering the century years.
+
+3. **`claude plugin eval`.** Its traces show the classifier hook never runs inside plugin eval: 0 classifier events, against 1 in a plain `claude -p` trace. So its skill-fired grader measures only the session-start skill map and the skill descriptions. Its scored cases, 3 runs per arm, with the final code:
 
    | Case | With | Without |
    |---|---:|---:|
@@ -252,8 +273,8 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 | lint | 15 skills, 4 agents, 0 problems |
 | THIRD_PARTY | 19 import rows, 0 problems |
 | egress inventory | 9 points, 0 outside the inventory |
-| unit and validator tests | 37 pass, 0 fail (trigger sets cover all 15 skills) |
-| mod tests (`claude plugin test`) | 10 pass |
+| unit and validator tests | 39 pass, 0 fail (trigger sets cover all 15 skills) |
+| mod tests (`claude plugin test`) | 11 pass |
 | smoke-test task file | valid; 0 real tasks |
 
 `claude plugin validate .` passes. `node evals/release-gate.mjs`: CI ok; smoke check fails (no real tasks), as expected.
@@ -307,12 +328,14 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 11. **Solo-boundary pass signal (HS-025)** is "the next prompt is not a correction". That is a proxy until smoke-test data exists; cold start is `medium` as specified.
 12. **Activation is measured in real `claude -p` sessions, not plugin eval** (HS-018). Plugin eval doesn't run UserPromptSubmit hooks (0 classifier events in its traces), so it can't measure H-Stack's classifier.
 
+13. **HS-006's bare and ablation arms are built but not run.** Auto mode refused to start sessions with H-Stack's guards off; see Needs you, item 5.
+
 ## Next steps
 
 1. Add your ~10 real tasks to `evals/tasks.json`.
 2. Run the M1 baseline, then the full stack, with `node evals/run-smoke.mjs --runs 3`.
 3. Drop any piece that makes results worse (CLAUDE.md), then commit the results.
 4. Raise runs per arm to 3 for the nine skills still measured at 1 run, if you want tighter numbers. Each takes about 15 minutes.
-5. Re-run `node evals/activation-bench.mjs` on each new model; the other wordings stay selectable through `HSTACK_LINE_STYLE`.
+5. Run the bare and ablation arms with the smoke test once allowed (`--arms with,without,bare,ablate:<component>`). Re-run `node evals/activation-bench.mjs` (and `--outcome`) on each new model; the other wordings stay selectable through `HSTACK_LINE_STYLE`.
 6. Use the smoke test to decide whether the concern check earns its model call, and whether the classifier fallback should come on.
 7. Once `node evals/release-gate.mjs` passes, bump `plugins/h-stack/.claude-plugin/plugin.json` from 0.0.1 and put the smoke numbers, regressions included, in the README.

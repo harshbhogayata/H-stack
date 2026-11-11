@@ -180,6 +180,10 @@ export async function runHook(name, mode, body) {
   let input = {};
   try {
     input = readStdin();
+    // HS-006 ablation: HSTACK_DISABLE=<hook names, comma-separated> or "all"/"hooks" turns hooks off for
+    // a measurement run. It comes from Claude Code's own environment, which the agent's shell cannot set.
+    const off = String(process.env.HSTACK_DISABLE || '').split(',').map((x) => x.trim()).filter(Boolean);
+    if (off.includes('all') || off.includes('hooks') || off.includes(name)) { process.exitCode = 0; return; }
     if (process.env.HSTACK_TEST_CRASH === name) throw new Error('test crash');
     const out = await body(input);
     emit(out);

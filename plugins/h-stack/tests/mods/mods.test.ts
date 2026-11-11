@@ -130,3 +130,14 @@ test('classifier fallback (when switched on) adds size, decision and skill for p
   expect(ctx).toContain('h-stack:planning')
   expect(ctx).toContain('clarify')
 })
+
+test('HSTACK_DISABLE=firewall switches the firewall off for an ablation run', async ($, on) => {
+  mock.env(on, { HSTACK_DISABLE: 'firewall' })
+  mock.clock(on)
+  on('fs.read', () => ({ deny: 'not found' }))
+  on('session.start', ($, e) => ({ cwd: e.cwd || '/proj' }))
+  on('tool.describe', ($, e) => ({ description: e.description }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  const r = await $.tool.describe({ tool: 'mcp__calc__add', description: POISON })
+  expect(r.isDeferred).toBeUndefined()
+})

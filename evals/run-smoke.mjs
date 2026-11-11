@@ -22,7 +22,11 @@ const ITER = Number(opt('iteration', 1));
 const PARALLEL = Number(opt('parallel', 3));
 const MODEL = opt('model', null);
 const ONLY = opt('only', null);
-const ARMS = opt('arms', 'with,without').split(',').map((a) => (a === 'with' ? 'with_skill' : 'without_skill'));
+// Arms: with (plugin), without (no plugin), bare (HS-006: a minimal bash-only agent, `--bare --tools Bash`
+// with a one-line prompt, to check H-Stack isn't below a minimal agent), ablate:<component> (HS-006:
+// the plugin with one hook or mod component switched off through HSTACK_DISABLE).
+const DRY = process.argv.includes('--dry-run'); // print each arm's command and environment, run nothing
+const ARMS = opt('arms', 'with,without').split(',').map((a) => (a === 'with' ? 'with_skill' : a === 'without' ? 'without_skill' : a === 'bare' ? 'bare' : a.startsWith('ablate:') ? `ablate_${a.slice(7)}` : (() => { throw new Error(`unknown arm ${a}`); })()));
 const MAX_TURNS = Number(opt('max-turns', 60));
 const SUCCESS = /\b(done|fixed|complete[d]?|all (tests )?pass(ing|es)?|tests pass|works now|resolved|implemented|ready)\b/i;
 const NOT_VERIFIED = /\b(not verified|could not (run|verify)|unable to (run|verify)|didn'?t run|blocked|needs? (your|user) (input|decision)|question)/i;
@@ -65,11 +69,16 @@ async function runOnce(task, arm, n, base) {
   const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-smoke-cfg-'));
   // Clean config dir so no installed copy of H-Stack (or anything else) loads; credentials come from env.
   const env = { CLAUDE_CONFIG_DIR: cfgDir };
+  if (arm.startsWith('ablate_')) env.HSTACK_DISABLE = arm.slice(7);
   const before = hashFiles(ws, task.protected_tests);
-  const argv = ['-p', task.prompt, '--output-format', 'json', '--max-turns', String(task.max_turns || MAX_TURNS), '--permission-mode', task.permission_mode || 'acceptEdits'];
-  if (task.allowed_tools) argv.push('--allowedTools', ...task.allowed_tools);
-  if (arm === 'with_skill') argv.push('--plugin-dir', path.join(REPO, 'plugins', 'h-stack'));
+  const bare = arm === 'bare';
+  const prompt = bare ? task.prompt.replace(/\s+/g, ' ').trim() : task.prompt;
+  const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(task.max_turns || MAX_TURNS), '--permission-mode', task.permission_mode || 'acceptEdits'];
+  if (bare) argv.push('--bare', '--tools', 'Bash', '--allowedTools', 'Bash');
+  else if (task.allowed_tools) argv.push('--allowedTools', ...task.allowed_tools);
+  if (arm === 'with_skill' || arm.startsWith('ablate_')) argv.push('--plugin-dir', path.join(REPO, 'plugins', 'h-stack'));
   if (MODEL) argv.push('--model', MODEL);
+  if (DRY) { console.log(JSON.stringify({ task: task.eval_name, arm, env: Object.fromEntries(Object.entries(env).filter(([k]) => k !== 'CLAUDE_CONFIG_DIR')), argv: argv.map((x) => (x.length > 80 ? x.slice(0, 77) + '...' : x)) })); fs.rmSync(ws, { recursive: true, force: true }); return null; }
   const r = await sh('claude', argv, { cwd: ws, env });
   let j = {}; try { j = JSON.parse(r.out.trim().split('\n').pop()); } catch { j = { result: r.out.slice(-3000), is_error: true }; }
   const check = task.check ? await sh('bash', [path.resolve(REPO, task.check)], { cwd: ws, timeout: 600000 }) : null;
@@ -123,7 +132,8 @@ const base = path.join(REPO, 'evals', 'results', `iteration-${ITER}`);
 const jobs = [];
 for (const t of tasks) for (const arm of ARMS) for (let n = 1; n <= RUNS; n++) jobs.push(() => runOnce(t, arm, n, base));
 const results = []; let i = 0;
-await Promise.all(Array.from({ length: PARALLEL }, async () => { while (i < jobs.length) { const k = i++; results[k] = await jobs[k](); process.stderr.write(`${results[k].task.eval_name} ${results[k].arm} #${results[k].n}: pass=${results[k].metrics.pass} false_done=${results[k].metrics.false_done}\n`); } }));
+await Promise.all(Array.from({ length: PARALLEL }, async () => { while (i < jobs.length) { const k = i++; results[k] = await jobs[k](); if (DRY) continue; process.stderr.write(`${results[k].task.eval_name} ${results[k].arm} #${results[k].n}: pass=${results[k].metrics.pass} false_done=${results[k].metrics.false_done}\n`); } }));
+if (DRY) process.exit(0);
 const agg = {};
 for (const arm of ARMS) {
   const rs = results.filter((r) => r.arm === arm);

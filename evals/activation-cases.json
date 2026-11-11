@@ -1,8 +1,59 @@
 [
-  { "name": "tdd-leap", "expect": "tdd", "prompt": "Using red-green TDD, write is_leap_year(year) in leap.py with tests in test_leap.py (plain asserts). Follow the Gregorian rules." },
-  { "name": "debug-typeerror", "expect": "debugging", "prompt": "My pytest run fails with `TypeError: unsupported operand type(s) for +: 'int' and 'str'` at totals.py line 12, right after I changed the CSV parser. The code isn't in this folder; tell me how you would track this down before changing anything." },
-  { "name": "plan-feature", "expect": "planning", "prompt": "Write an implementation plan for adding CSV export to the reports page of our Flask app: which files change, the steps, and how each step is tested. Don't write code yet." },
-  { "name": "review-feedback", "expect": "review", "files": { "notes.md": "Reviewer comments on PR 12:\n1. Rename fetchData to loadData.\n2. Use URL.parse instead of new URL (project supports Node 18).\n3. Add a 404 test.\n" }, "prompt": "A reviewer left the comments in notes.md on my PR. Go through them and tell me which ones to accept and how you'd reply." },
-  { "name": "writing-skill-doc", "expect": "writing", "prompt": "Rewrite this paragraph for our README so it reads plainly and has no AI tells: 'In today's fast-paced world, our cutting-edge tool seamlessly empowers developers to unlock their full potential.'" },
-  { "name": "research-cited", "expect": "research", "prompt": "Research which Node.js version first shipped a stable built-in fetch, and cite primary sources with versions and dates." }
+  {
+    "name": "tdd-leap",
+    "expect": "tdd",
+    "prompt": "Using red-green TDD, write is_leap_year(year) in leap.py with tests in test_leap.py (plain asserts). Follow the Gregorian rules.",
+    "expectations": [
+      "test_leap.py has test cases for century years (for example 1900 is not a leap year and 2000 is)",
+      "leap.py and test_leap.py both exist and the tests use plain asserts"
+    ]
+  },
+  {
+    "name": "debug-typeerror",
+    "expect": "debugging",
+    "prompt": "My pytest run fails with `TypeError: unsupported operand type(s) for +: 'int' and 'str'` at totals.py line 12, right after I changed the CSV parser. The code isn't in this folder; tell me how you would track this down before changing anything.",
+    "expectations": [
+      "Before any code change, the reply sets out how to reproduce the failure and find where the string value comes from (for example the CSV parser change)",
+      "The reply does not make wrapping the value in int() or str() its first or main recommendation"
+    ]
+  },
+  {
+    "name": "plan-feature",
+    "expect": "planning",
+    "prompt": "Write an implementation plan for adding CSV export to the reports page of our Flask app: which files change, the steps, and how each step is tested. Don't write code yet.",
+    "expectations": [
+      "The plan names the files to change and gives a test or check for each step",
+      "The plan names at least one decision or assumption to settle (for example encoding, large exports, permissions) before building"
+    ]
+  },
+  {
+    "name": "review-feedback",
+    "expect": "review",
+    "files": {
+      "notes.md": "Reviewer comments on PR 12:\n1. Rename fetchData to loadData.\n2. Use URL.parse instead of new URL (project supports Node 18).\n3. Add a 404 test.\n"
+    },
+    "prompt": "A reviewer left the comments in notes.md on my PR. Go through them and tell me which ones to accept and how you'd reply.",
+    "expectations": [
+      "The reply rejects or questions comment 2 (URL.parse) because the project supports Node 18, where URL.parse does not exist",
+      "The reply has no performative praise such as 'Great point' or 'You're absolutely right'"
+    ]
+  },
+  {
+    "name": "writing-skill-doc",
+    "expect": "writing",
+    "prompt": "Rewrite this paragraph for our README so it reads plainly and has no AI tells: 'In today's fast-paced world, our cutting-edge tool seamlessly empowers developers to unlock their full potential.'",
+    "expectations": [
+      "The rewrite drops the filler phrases (fast-paced world, cutting-edge, seamlessly, empower, unlock potential)",
+      "The rewrite says concretely what the tool does, or says plainly what information is missing to say it"
+    ]
+  },
+  {
+    "name": "research-cited",
+    "expect": "research",
+    "prompt": "Research which Node.js version first shipped a stable built-in fetch, and cite primary sources with versions and dates.",
+    "expectations": [
+      "The answer separates what it verified from what it recalls, or says it could not check a primary source in this environment",
+      "Any cited source is a primary one (nodejs.org docs, changelog or release notes) with a version"
+    ]
+  }
 ]

@@ -26,6 +26,7 @@ const state = {
   concernAsked: '',
   concernPending: false,
   paneOpen: false,
+  disabled: new Set(),
   pane: { receipts: [], assumptions: [], decisions: [], wishes: [] },
   overseerNoted: '',
 }
@@ -36,6 +37,14 @@ async function readJson($, path, fallback) {
 
 async function readJsonl($, path) {
   try { return String(await $.fs.read(path)).split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean) } catch { return [] }
+}
+
+// HS-006 ablation: HSTACK_DISABLE=<components> switches mod components off for a measurement run:
+// firewall, governor, fallback, steps, telemetry, announce, offers, concerns, spinner, pane, overseer,
+// or mods/all for every one. Read from Claude Code's environment, not from anything the agent writes.
+const off = (c) => state.disabled.has(c) || state.disabled.has('mods') || state.disabled.has('all')
+async function loadDisabled($) {
+  try { state.disabled = new Set(String((await $.env.get('HSTACK_DISABLE')) || '').split(',').map((x) => x.trim()).filter(Boolean)) } catch { state.disabled = new Set() }
 }
 
 async function loadState($) {
@@ -94,11 +103,12 @@ async function overseerTick($) {
 
 export function register(on) {
   on('session.start', async ($, e, next) => {
+    await loadDisabled($)
     await loadState($)
     state.index = await readJson($, new URL('../index.json', import.meta.url).pathname, { skills: [] })
     // HS-042: the timer runs every session but acts only during a long run (a recorded /goal).
-    if (!state.config.long_run || state.config.long_run.overseer !== false) $.clock.every(30000, async () => { await overseerTick($) })
-    if (state.config.pane === true) { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true }
+    if (!off('overseer') && (!state.config.long_run || state.config.long_run.overseer !== false)) $.clock.every(30000, async () => { await overseerTick($) })
+    if (state.config.pane === true && !off('pane')) { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true }
     return next(e)
   })
 
@@ -106,7 +116,7 @@ export function register(on) {
   on('tool.describe', async ($, e, next) => {
     const name = e.tool || e.name || ''
     const server = serverOf(name)
-    if (!server) return next(e)
+    if (!server || off('firewall')) return next(e)
     const findings = scanDescription(e.description)
     if (!findings.length) return next(e)
     await $.ui.toast(`H-Stack deferred ${name} from MCP server "${server}": ${findings.map((f) => f.rule).join(', ')}`)
@@ -115,7 +125,7 @@ export function register(on) {
 
   // HS-041: spawn budget by task size; model per role. Resumed runs are not counted.
   on('agent.spawn', async ($, e, next) => {
-    if (e.resume) return next(e)
+    if (e.resume || off('governor')) return next(e)
     const size = state.route.size || 'light'
     const verdict = spawnBudget(size, state.spawned, state.config.budgets.spawn)
     if (verdict.deny) return { deny: verdict.deny }
@@ -127,7 +137,7 @@ export function register(on) {
 
   // HS-019: small-model fallback when the rules found nothing (off unless config.classifier.fallback).
   on('prompt.submit', async ($, e, next) => {
-    if (!state.config.classifier || !state.config.classifier.fallback) return next(e)
+    if (!state.config.classifier || !state.config.classifier.fallback || off('fallback')) return next(e)
     const { route } = classify(e.text, state.index, state.route)
     if (route.size === 'direct' || route.skills.length) return next(e)
     const catalogue = state.index.skills.map((s) => `${s.qualified}: ${s.purpose}`).join('\n')
@@ -164,7 +174,7 @@ export function register(on) {
     state.calls = []
     state.tools = {}
     // HS-057: the pane opens by itself once a long run (a recorded /goal) is in progress (pane: 'auto').
-    if (state.config.pane === 'auto' && !state.paneOpen && state.session && await readJson($, `.h-stack/sessions/${state.session}/goal.json`, null)) {
+    if (state.config.pane === 'auto' && !off('pane') && !state.paneOpen && state.session && await readJson($, `.h-stack/sessions/${state.session}/goal.json`, null)) {
       try { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true } catch { /* no pane support */ }
     }
     return next(e)
@@ -187,21 +197,21 @@ export function register(on) {
 
   on('turn.step', async function* ($, e, next) {
     const result = yield* next(e)
-    if (!e.agentId) { state.steps += 1; await writeSteps($) }
+    if (!e.agentId && !off('steps')) { state.steps += 1; await writeSteps($) }
     return result
   })
 
   on('turn.complete', async ($, e, next) => {
     if (e.agentId) return next(e)
     const u = e.usage || {}
-    await appendTelemetry($, { turn: state.turn, prompt_id: state.route.prompt_id || null, size: state.route.size || null, skills: state.route.skills || [], steps: state.steps, input_tokens: u.input_tokens || 0, output_tokens: u.output_tokens || 0, cache_read: u.cache_read_input_tokens || 0, cache_write: u.cache_creation_input_tokens || 0, duration_ms: e.durationMs || 0, edits: state.edits, tools: state.tools, aborted: Boolean(e.isAborted) })
+    if (!off('telemetry')) await appendTelemetry($, { turn: state.turn, prompt_id: state.route.prompt_id || null, size: state.route.size || null, skills: state.route.skills || [], steps: state.steps, input_tokens: u.input_tokens || 0, output_tokens: u.output_tokens || 0, cache_read: u.cache_read_input_tokens || 0, cache_write: u.cache_creation_input_tokens || 0, duration_ms: e.durationMs || 0, edits: state.edits, tools: state.tools, aborted: Boolean(e.isAborted) })
     await refreshPane($)
     $.ui.invalidate('ui.render')
     if (e.isAborted) return next(e)
     // HS-040: once per prompt, and never on the turn that answers H-Stack's own note (no resubmit loop:
     // the resubmitted turn gets a new prompt_id, so the pending flag is what stops a second note).
     if (state.concernPending) state.concernPending = false
-    else if (state.config.concerns !== false && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
+    else if (state.config.concerns !== false && !off('concerns') && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
       state.concernAsked = state.route.prompt_id
       const open = await concernCheck($, e.answer)
       if (open.length) state.concernPending = true
@@ -209,14 +219,14 @@ export function register(on) {
     }
     const lines = []
     const skills = (state.route.skills || []).join(', ')
-    if (skills && skills !== state.announced) { state.announced = skills; lines.push(`H-Stack used ${skills} (${(state.route.rules || [])[0] || 'routing rule'}).`) }
-    if (state.config.offers !== false) { const offer = offerFor(state); if (offer) lines.push(offer) }
+    if (skills && skills !== state.announced && !off('announce')) { state.announced = skills; lines.push(`H-Stack used ${skills} (${(state.route.rules || [])[0] || 'routing rule'}).`) }
+    if (state.config.offers !== false && !off('offers')) { const offer = offerFor(state); if (offer) lines.push(offer) }
     return lines.length ? { text: lines.join(' ') } : next(e)
   })
 
   on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
     const skills = state.route.skills || []
-    if (!skills.length) return next(e)
+    if (!skills.length || off('spinner')) return next(e)
     const suffix = ` · H-Stack · ${state.route.size || 'light'} · ${skills[0].replace('h-stack:', '')}${state.steps ? ` · step ${state.steps}` : ''}`
     return next({ ...e, props: { ...e.props, suffix: (e.props.suffix || '') + suffix } })
   })
