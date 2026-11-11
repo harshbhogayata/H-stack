@@ -2,6 +2,8 @@
 
 A Claude Code skill stack, built from scratch, one category at a time.
 
+**North star:** get as much real capability out of the model as a harness can, measured on our own eval suite: reliability, autonomy horizon, learning over time, judgment, cost. Nothing ships unless it moves those numbers. Details in [`CLAUDE.md`](CLAUDE.md#north-star).
+
 ## Install
 
 In Claude Code (desktop app, CLI or web):

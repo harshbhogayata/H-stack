@@ -2,6 +2,22 @@
 
 H-Stack is a Claude Code skill stack built **from scratch**. Other stacks (superpowers, gstack, pstack, mattpocock/skills, ...) are reference material only; see `research/`.
 
+## North star
+Get as much real capability out of the model as a harness can, and prove it with numbers. A skill stack cannot exceed the model's ceiling; it decides how much of that ceiling is reached. Every change must move a metric below or it is cut.
+
+| Metric | Measured as |
+|---|---|
+| Reliability | Pass rate on the H-Stack eval suite; false-"done" rate; test-tampering rate |
+| Autonomy horizon | Steps / hours of work per human intervention; tasks finished unaided |
+| Learning | Pass rate on repeat tasks over time, with no regressions |
+| Judgment | Necessary vs unnecessary questions; wrong assumptions caught before acting |
+| Cost | Tokens and wall-clock per solved task |
+
+Rules that follow from it:
+- **Evals before skills.** The eval suite (real tasks, each with a pass/fail check) is built first. A skill, hook or rule ships only if it beats the no-change baseline on it; it is retired when the model passes without it.
+- **Evidence over opinion.** Design choices cite a primary source or a measurement from our own evals.
+- **Report honestly.** Results are reported with numbers, including regressions and failures.
+
 ## Before doing anything
 - Read first. Check this file, `README.md`, and the relevant `research/NN-*.md` before acting.
 - Ask when the request is ambiguous instead of guessing and running.
