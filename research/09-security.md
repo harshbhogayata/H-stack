@@ -2,26 +2,31 @@
 
 Finding vulnerabilities in code, and keeping the agent's own setup (skills, hooks, MCP) safe.
 
-★ = GitHub stars on 2026-11-11 (for a skill inside a pack, the stars are the whole repo's).
+★ = GitHub stars, read from each repo page on 2026-11-11 (for a skill inside a pack, the whole repo's). Installs = skills.sh all-time installs (`s.sh`) or claude.com/plugins installs (`plugin`) on 2026-11-11; n/a = not listed. Last active = latest commit on the default branch. Score = rubric total out of 45; rubric, candidates and score sheets in [top10-method.md](top10-method.md).
 
-| # | Name | Source | ★ | License | What it does | Why it ranks here |
-|---|---|---|---|---|---|---|
-| 1 | security-audit-skill | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) | 70k | MIT | 6-phase audit: recon → coverage-led hunting → independent validation → schema-checked findings → fresh re-verification → report | Seeded Cloudflare's production vulnerability harness; most rigorous open method found (deep dive below) |
-| 2 | claude-security (official) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) | 47k | Apache-2.0 | Deep vulnerability scan in-session at a chosen effort level | Reasons through data flow, validates each finding |
-| 3 | Trail of Bits skills | [trailofbits/skills](https://github.com/trailofbits/skills) | 8k | **CC BY-SA 4.0** | CodeQL/Semgrep, differential review, supply-chain audit, insecure defaults | Pro-grade; share-alike, so ideas only |
-| 4 | security-guidance (official) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) | 47k | Apache-2.0 | Warnings on edits, diff review on stop | Always-on, low cost |
-| 5 | /cso | [garrytan/gstack](https://github.com/garrytan/gstack) | 141k | MIT | OWASP + STRIDE audit, independent challenge, runtime scanners | Threat-model framing |
-| 6 | security-and-hardening | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 115k | MIT | OWASP Top 10, auth, secrets, dependency audit | Good baseline checklist |
-| 7 | AgentShield | [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 301k | MIT | Scans prompts, hooks, MCP config, permissions, secrets in agent files | Protects the stack itself |
-| 8 | mantis | [google/mantis](https://github.com/google/mantis) | 2.8k | Apache-2.0 | ~15 skills to find, reproduce and fix vulnerabilities | Find → reproduce → fix loop |
-| 9 | VulnHunter | [capitalone/vulnhunter](https://github.com/capitalone/vulnhunter) | 1.2k | Apache-2.0 | Attacker-first find/fix/verify skills | Remediation loop |
-| 10 | Built-in `/security-review` | Claude Code | — | — | Reviews pending changes for security issues | Already available |
+| # | Name | Source | ★ | Installs | Licence | Last active | What it does | Score | Why it ranks here |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | claude-security (official) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/HEAD/plugins/claude-security) | 47k | 8.6k plugin | Apache-2.0 | 2026-11-10 | Scan repo or diff; verifier panel; patch files you apply yourself | 40/45 | Official; inventory → research → verify → redact pipeline with scripts |
+| 2 | security-guidance (official) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/HEAD/plugins/security-guidance) | 47k | 242k plugin | Apache-2.0 | 2026-11-10 | Pattern warnings on edits, LLM diff review on stop, agentic commit review | 40/45 | Always-on via hooks, zero prompt cost; 242k installs |
+| 3 | security-audit-skill (Cloudflare) | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill/tree/HEAD/skills/security-audit) | 70k | n/a | MIT | 2026-09-14 | Recon → coverage-led hunting → independent validation → schema-checked findings → report | 37/45 | Most rigorous open method; seeded Cloudflare’s production harness (deep dive below) |
+| 4 | Built-in /security-review | [docs](https://code.claude.com/docs/en/slash-commands) (built-in) | n/a | built-in | n/a (built-in) | built-in | Reviews pending changes for security issues | 37/45 | Built-in |
+| 5 | Trail of Bits skills | [trailofbits/skills](https://github.com/trailofbits/skills) | 8.1k | 10k s.sh | **CC BY-SA 4.0** | 2026-11-06 | Semgrep/CodeQL, differential review, supply-chain audit, insecure defaults, fp-check | 36/45 | Pro-grade; "the request is not approval" for scans; CC BY-SA so ideas only |
+| 6 | SkillSpector (NVIDIA) | [NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector) | 25k | 1.7k s.sh | Apache-2.0 | 2026-11-11 | Static + YARA + LLM scanner for malicious skills | 36/45 | Scans third-party skills before install |
+| 7 | mantis (Google) | [google/mantis](https://github.com/google/mantis) | 2.8k | 1.9k s.sh | Apache-2.0 | 2026-11-10 | Threat model, research, reproduce, critic, calibrate, report | 35/45 | Find → reproduce → calibrate loop; 26 KB skills |
+| 8 | security-review (Sentry) | [getsentry/skills](https://github.com/getsentry/skills/tree/HEAD/skills/security-review) | 1.1k | 23k s.sh | Apache-2.0 | 2026-11-05 | Diff security review with exploitability triage | 35/45 | Production use at Sentry; most-installed Sentry skill |
+| 9 | snyk agent-scan | [snyk/agent-scan](https://github.com/snyk/agent-scan) | 3.2k | n/a | Apache-2.0 | 2026-11-09 | Scans MCP servers and skills for injection and tool poisoning | 35/45 | CLI from the team behind the 36% injection study |
+| 10 | /cso (gstack) | [garrytan/gstack](https://github.com/garrytan/gstack/tree/HEAD/cso) | 141k | 446 s.sh | MIT | 2026-11-10 | OWASP + STRIDE audit with independent challenge | 34/45 | Threat-model framing |
+
+**Also considered (11–15):** **security-and-hardening** (34) — Good baseline checklist; **stride-analysis-patterns (wshobson)** (34) — Compact reference; **AgentShield** (33) — 147 rules for the agent setup itself; **skill-scanner (Sentry)** (32) — Useful for vetting skills; **claude-code-security-review (Action)** (31) — Official CI action.
 
 ## Ideas worth stealing
 - **User approves the scan plan** before scanners run (Trail of Bits semgrep: "the request is not approval").
-- **Adversarial validation:** a second agent tries to disprove each finding.
+- **Adversarial validation:** a second agent tries to disprove each finding; official `claude-security` adds a verifier panel and writes patches as files the user applies.
+- **Always-on review through hooks** (official `security-guidance`): pattern warnings on edit, LLM diff review at Stop, agentic review at commit. Zero prompt cost.
 - **Telemetry off** for any scanner (`--metrics=off`).
-- **Scan our own skills and hooks** for prompt injection; Snyk found injection in 36% of third-party skills tested.
+- **Scan our own skills and hooks** for prompt injection; Snyk found injection in 36% of third-party skills tested. SkillSpector, snyk `agent-scan` and Sentry `skill-scanner` do this.
+- **Calibrate severity and de-duplicate** before reporting (Google mantis critic / calibrate / dedupe steps).
+- **Never load instructions from a remote URL at run time.** Vercel `web-design-guidelines` and Orca's orchestration skill do; pin and vendor instead.
 - **Fail-open defaults** check: what happens when config is missing?
 
 ## Cloudflare deep dive
