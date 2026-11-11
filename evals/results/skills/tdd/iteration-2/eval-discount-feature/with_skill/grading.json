@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+      "passed": true,
+      "evidence": "check exit 0: \nok 4 - subtotal multiplies price by quantity\n  ---\n  duration_ms: 0.984119\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 79.558565\n"
+    },
+    {
+      "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+      "passed": true,
+      "evidence": "test/discount.test.js imports `{ discount } from '../src/pricing.js'` and asserts literals such as `assert.equal(discount(1000, 'SAVE10'), 900)` and `assert.equal(discount(999, 'SAVE10'), 899)`."
+    },
+    {
+      "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+      "passed": true,
+      "evidence": "The final message has a table showing each test failing first with a specific reason (\"`discount` didn't exist yet\", \"got `899.1` instead of `899`\", \"got `900` instead of `1000`\") and then passing. The check command's final run shows 4/4 passing. Only the agent's own account backs up the failing run"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "skill_name": "planning",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "plan-node-csv",
+      "prompt": "Write an implementation plan for SPEC.md in this repo. Don't implement anything yet; I want to review the plan first.",
+      "files": ["evals/files/node-csv/"],
+      "check": "test -z \"$(git diff --name-only -- src test)\"",
+      "expectations": [
+        "The check command exits 0 (no source or test files were changed)",
+        "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+        "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+        "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+        "The final message asks the user to review or confirm the plan before implementation"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "plan-python-csv",
+      "prompt": "Write an implementation plan for SPEC.md in this repo. Don't implement anything yet.",
+      "files": ["evals/files/py-csv/"],
+      "check": "test -z \"$(git diff --name-only -- app tests)\"",
+      "expectations": [
+        "The check command exits 0 (no source or test files were changed)",
+        "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+        "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+        "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "execute-plan",
+      "prompt": "Execute PLAN.md.",
+      "files": ["evals/files/exec-plan/"],
+      "check": "node --test && node -e \"import('./src/slug.js').then(m=>{if(m.slugify('Hello, World!')!=='hello-world'||m.uniqueSlug('Hello World',new Set(['hello-world','hello-world-2']))!=='hello-world-3')process.exit(1)})\"",
+      "expectations": [
+        "The check command exits 0 (both tasks implemented and all tests pass)",
+        "Both new tests named in the plan exist in test/slug.test.js",
+        "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)"
+      ]
+    }
+  ]
+}

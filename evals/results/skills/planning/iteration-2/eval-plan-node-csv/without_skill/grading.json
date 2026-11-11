@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no source or test files were changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+      "passed": true,
+      "evidence": "The plan names `src/invoices.js`, `src/server.js` and `test/server.test.js`, and says \"Run with `npm test` (`node --test`), no new dependencies.\""
+    },
+    {
+      "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+      "passed": false,
+      "evidence": "The plan gives `invoicesToCsv(invoices)` with a name and a parameter, but it never states a return type, and it has no interfaces section."
+    },
+    {
+      "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+      "passed": false,
+      "evidence": "The tests use the spec's exact values (for example `inv-1,12.50,2026-01-31,\"Acme, Inc.\"`), but they come as step 3 after the implementation steps, and the plan never says to write a failing test first (\"I'll implement steps 1–3 in that order\")."
+    },
+    {
+      "text": "The final message asks the user to review or confirm the plan before implementation",
+      "passed": true,
+      "evidence": "The message ends with \"If those defaults work for you, I'll implement steps 1–3 in that order.\" and lists \"Open questions for you\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  }
+}

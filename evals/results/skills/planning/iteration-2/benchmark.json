@@ -1,0 +1,289 @@
+{
+  "metadata": {
+    "skill_name": "planning",
+    "skill_path": "plugins/h-stack/skills/planning",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T14:35:40.370Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "plan-node-csv",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1,
+        "time_seconds": 34.541,
+        "tokens": 208466,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+          "passed": true,
+          "evidence": "The plan names `src/server.js` and the `test/` folder, and says \"`npm test` runs `node --test`\"; it uses `listInvoices` but never names `src/invoices.js` explicitly, and it mentions no invented runner such as jest or pytest."
+        },
+        {
+          "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+          "passed": true,
+          "evidence": "Its \"Interfaces\" section lists `export function invoicesToCsv(invoices: Array<{id: string, amountCents: number, issuedAt: string, customer: string}>): string`."
+        },
+        {
+          "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+          "passed": true,
+          "evidence": "Task 1 step 1, \"Write the failing tests\", includes `1250→\"12.50\"`, `\"Acme, Inc.\"→\"\\\"Acme, Inc.\\\"\"` and an expected string that starts with `id,amount,issued_at,customer`."
+        },
+        {
+          "text": "The final message asks the user to review or confirm the plan before implementation",
+          "passed": true,
+          "evidence": "The message ends: \"Do you approve this plan, and how do you want the four open decisions settled? I won't write any code until you confirm.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "plan-node-csv",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6,
+        "time_seconds": 23.872,
+        "tokens": 117498,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+          "passed": true,
+          "evidence": "The plan names `src/invoices.js`, `src/server.js` and `test/server.test.js`, and says \"Run with `npm test` (`node --test`), no new dependencies.\""
+        },
+        {
+          "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+          "passed": false,
+          "evidence": "The plan gives `invoicesToCsv(invoices)` with a name and a parameter, but it never states a return type, and it has no interfaces section."
+        },
+        {
+          "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+          "passed": false,
+          "evidence": "The tests use the spec's exact values (for example `inv-1,12.50,2026-01-31,\"Acme, Inc.\"`), but they come as step 3 after the implementation steps, and the plan never says to write a failing test first (\"I'll implement steps 1–3 in that order\")."
+        },
+        {
+          "text": "The final message asks the user to review or confirm the plan before implementation",
+          "passed": true,
+          "evidence": "The message ends with \"If those defaults work for you, I'll implement steps 1–3 in that order.\" and lists \"Open questions for you\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "plan-python-csv",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 48.589,
+        "tokens": 251264,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+          "passed": true,
+          "evidence": "The plan says \"**Test command:** `make test` (runs `python3 -m pytest -q tests`)\" and its file map lists `app/invoices.py`, `app/web.py`, `tests/test_invoices.py` and `tests/test_web.py`, with no JavaScript or npm anywhere."
+        },
+        {
+          "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+          "passed": true,
+          "evidence": "The plan defines `invoices_to_csv(invoices: list[dict]) -> str` and `format_amount(cents: int) -> str`, and it reads `format_amount(inv[\"amount_cents\"])` in the implementation step."
+        },
+        {
+          "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+          "passed": true,
+          "evidence": "`test_csv_quotes_comma_and_doubles_quotes` expects a customer of `'Say \"hi\", Bob'` to become `'\"Say \"\"hi\"\", Bob\"'`, and the fixture test expects `\"Acme, Inc.\"` to be quoted."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "plan-python-csv",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 28.492,
+        "tokens": 196848,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+          "passed": true,
+          "evidence": "The plan says \"Run `make test`\" and lists only Python paths: `app/csv_export.py`, `app/web.py`, `tests/test_csv_export.py`, `tests/test_web.py`."
+        },
+        {
+          "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+          "passed": true,
+          "evidence": "It defines `format_amount(cents: int) -> str` and `invoices_to_csv(invoices) -> str`, and computes amount via `format_amount(inv[\"amount_cents\"])`."
+        },
+        {
+          "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+          "passed": true,
+          "evidence": "The test table includes `Acme, Inc.` → `\"Acme, Inc.\"` for commas and `Say \"hi\"` → `\"Say \"\"hi\"\"\"` for quote escaping."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "execute-plan",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 35.972,
+        "tokens": 482505,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+          "passed": true,
+          "evidence": "check exit 0: hen taken\nok 3 - appends a counter when taken\n  ---\n  duration_ms: 0.146436\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 97.501236\n"
+        },
+        {
+          "text": "Both new tests named in the plan exist in test/slug.test.js",
+          "passed": true,
+          "evidence": "The diff adds `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and the check run shows both passing (ok 2, ok 3)."
+        },
+        {
+          "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+          "passed": true,
+          "evidence": "The final message says \"all 3 tests pass on `npm test`\". Under \"Decisions I made\" it lists the deviations: \"No branch and no commits\", the skipped `hs`/receipt steps, and \"I also didn't run the separate final review.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "execute-plan",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 29.462,
+        "tokens": 406988,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+          "passed": true,
+          "evidence": "check exit 0: hen taken\nok 3 - appends a counter when taken\n  ---\n  duration_ms: 0.210784\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 92.752969\n"
+        },
+        {
+          "text": "Both new tests named in the plan exist in test/slug.test.js",
+          "passed": true,
+          "evidence": "The diff adds both `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and the TAP output shows both passing (ok 2 and ok 3)."
+        },
+        {
+          "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+          "passed": true,
+          "evidence": "The message says \"`npm test` now passes all 3 tests\" after both tasks were done. It says \"I followed the plan's order\" and calls out the one gap the plan left open: \"The plan doesn't say to remove hyphens at the start or end of a slug, so I left them\". The diff shows no other departures from the pla"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 39.701,
+        "stddev": 6.312,
+        "min": 34.541,
+        "max": 48.589
+      },
+      "tokens": {
+        "mean": 314078.333,
+        "stddev": 120370.466,
+        "min": 208466,
+        "max": 482505
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.867,
+        "stddev": 0.189,
+        "min": 0.6,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 27.275,
+        "stddev": 2.439,
+        "min": 23.872,
+        "max": 29.462
+      },
+      "tokens": {
+        "mean": 240444.667,
+        "stddev": 122138.22,
+        "min": 117498,
+        "max": 406988
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.13",
+      "time_seconds": "+12.4",
+      "tokens": "+73634"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

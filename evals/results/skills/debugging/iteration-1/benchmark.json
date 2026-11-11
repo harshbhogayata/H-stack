@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "skill_name": "debugging",
+    "skill_path": "plugins/h-stack/skills/debugging",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T14:31:42.760Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.148,
+        "tokens": 292029,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff swaps `fs.readFileSync('src/config.json', 'utf8')` for `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')` and changes nothing else; the test and the location of config.json are untouched."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says \"Node looks for that path starting from wherever the command is run, not from where `config.js` lives. The test script does `cd test && node run.js`, so Node looked for `test/src/config.json`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 10.077,
+        "tokens": 156631,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff swaps `fs.readFileSync('src/config.json', 'utf8')` for `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')`, and the agent says \"I didn't change the test script.\""
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says the relative path is resolved \"from the folder the command runs in, not from where the code lives. The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 72.96,
+        "tokens": 479582,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": false,
+          "evidence": "check exit 1: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff replaces the fixed `setTimeout(r, 25)` with `await waitFor(() => q.done.length === 3, ...)`, which checks every 5 ms and has a 2 s timeout. That waits for the jobs to finish instead of just sleeping longer (though the check command still exited 1, which this expectation doesn't cover)."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says \"each job finishes after a random 5–44 ms... The test pushed three jobs, waited a fixed 25 ms, then checked that all three were done.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 50.899,
+        "tokens": 237415,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": false,
+          "evidence": "check exit 1: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await q.drain();`, and `drain()` loops until every pending job promise has resolved (`while (this.pending.size) await Promise.all(this.pending);`), so the test now waits for the jobs to finish. The check command still exited 1, b"
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The final message says \"each job in `src/queue.js` finishes after a random delay of 5–44 ms. The test waited a fixed 25 ms ... If any job took longer than 25 ms, the check failed\"; 44 ms is the true maximum of `5 + Math.floor(Math.random() * 40)`, so this matches the expected 'up to 45 ms'."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 63.289,
+        "tokens": 531501,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"`node bench.js`: 1191.7 ms before; 12.6, 12.6 and 8.4 ms after.\""
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the cause\" (0.7–1.3 ms) and names `customers.includes` and \"`orders.filter` run once per customer\" as the slow steps, explaining that \"the cost grows with orders × customers.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 31.985,
+        "tokens": 278777,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"`buildReport` now takes about 8.7 ms on the benchmark, down from about 1260 ms.\""
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the cause\", times it at \"about 1 ms\", and blames `filter` scanning \"all 20,000 orders once per customer, about 100 million checks\" plus the per-order `includes` scan."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 52.466,
+        "stddev": 22.494,
+        "min": 21.148,
+        "max": 72.96
+      },
+      "tokens": {
+        "mean": 434370.667,
+        "stddev": 102858.343,
+        "min": 292029,
+        "max": 531501
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 30.987,
+        "stddev": 16.68,
+        "min": 10.077,
+        "max": 50.899
+      },
+      "tokens": {
+        "mean": 224274.333,
+        "stddev": 50724.216,
+        "min": 156631,
+        "max": 278777
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+21.5",
+      "tokens": "+210096"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

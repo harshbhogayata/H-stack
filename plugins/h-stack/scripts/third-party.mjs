@@ -13,11 +13,11 @@ const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest
 export function render(data) {
   const out = ['# Third-party skills', '', 'Every imported file, pinned to an upstream commit, with the SHA-256 of the shipped file and of the upstream original. Generated from `third-party.json` by `scripts/third-party.mjs --write`; CI fails if a shipped file no longer matches.', '', '| skill | upstream repo › path | commit | licence | sha256 (per file) | changes |', '|---|---|---|---|---|---|'];
   for (const r of data.imports) {
-    const files = r.files.map((f) => `\`skills/${r.skill}/${f.shipped}\` sha256:${sha(path.join(ROOT, 'skills', r.skill, f.shipped))}`).join('<br>');
+    const files = r.files.map((f) => `\`${f.shipped}\` sha256:${sha(path.join(ROOT, f.shipped))}`).join('<br>');
     out.push(`| ${r.skill} | ${r.repo} › \`${r.path}\` | \`${r.commit}\` | ${r.licence} | ${files} | ${r.changes} |`);
   }
   out.push('', '## Upstream originals', '', 'SHA-256 of each upstream file at the pinned commit, so the source can be re-checked.', '');
-  for (const r of data.imports) for (const f of r.files) if (f.upstream) out.push(`- ${r.repo}@${r.commit.slice(0, 12)} \`${f.upstream}\` upstream-sha256:${f.upstream_sha256} → \`skills/${r.skill}/${f.shipped}\``);
+  for (const r of data.imports) for (const f of r.files) if (f.upstream) out.push(`- ${r.repo}@${r.commit.slice(0, 12)} \`${f.upstream}\` upstream-sha256:${f.upstream_sha256} → \`${f.shipped}\``);
   if (data.dropped?.length) {
     out.push('', '## Considered and not shipped', '');
     for (const d of data.dropped) out.push(`- ${d.repo} › \`${d.path}\` (${d.licence}): ${d.reason}`);
@@ -33,7 +33,7 @@ export function check(data) {
     const dir = path.join(ROOT, 'skills', r.skill);
     if (!fs.existsSync(path.join(dir, 'LICENSE'))) errs.push(`${r.skill}: LICENSE missing`);
     else if (!fs.readFileSync(path.join(dir, 'LICENSE'), 'utf8').includes(r.copyright || '')) errs.push(`${r.skill}: LICENSE lacks the upstream copyright notice`);
-    for (const f of r.files) if (!fs.existsSync(path.join(dir, f.shipped))) errs.push(`${r.skill}: ${f.shipped} listed but missing`);
+    for (const f of r.files) if (!fs.existsSync(path.join(ROOT, f.shipped))) errs.push(`${r.skill}: ${f.shipped} listed but missing`);
     if (!r.changes) errs.push(`${r.skill}: changes not recorded`);
   }
   const md = path.join(ROOT, 'THIRD_PARTY.md');

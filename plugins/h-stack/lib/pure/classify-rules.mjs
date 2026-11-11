@@ -8,6 +8,14 @@ export const OVERRIDES = [
   { id: 'stop-using', re: /\bstop using (?:h-stack:)?([a-z0-9-]+)/i, effect: { exclude: true } },
 ];
 
+// Native skills H-Stack routes to instead of duplicating (IM-07, IM-09, IM-15). Used only when no
+// H-Stack skill with the same job matched, so a plugin skill that covers the job wins.
+export const NATIVE = [
+  { name: 'code-review', label: 'built-in code-review skill', re: /\b(review (this|my|the) (diff|change|changes|pr|pull request|code|branch)|code review|review before (merge|merging|push))\b/i, unless: 'h-stack:review' },
+  { name: 'security-review', label: 'built-in security-review skill', re: /\b(security review|review (this|the|my) .{0,20}for (security|vulnerabilit))/i, unless: 'h-stack:security-audit' },
+  { name: 'skill-creator', label: 'skill-creator (official plugin)', re: /\b(create|write|scaffold|benchmark|eval) (a |an |the )?(new )?skill\b|\bskill evals?\b|\boptimi[sz]e (the )?(skill )?description\b/i, unless: 'h-stack:skill-authoring' },
+];
+
 const CONTINUATION = /^\s*(continue|next|go on|keep going|carry on|proceed|fix that|do that|do it|yes|yep|ok(ay)?|sounds good|go ahead|resume)\b[\s.!]*$/i;
 const CODE_NOUNS = /(`|\b(function|class|method|file|test|tests|bug|error|exception|stack ?trace|api|endpoint|component|module|repo|build|deploy|commit|pr|branch|query|schema|migration|css|html|script|config|lint|type ?check|refactor|crash|regression|dependency|package)\b|\w\.(js|ts|tsx|jsx|py|go|rs|rb|java|kt|cs|php|md|json|ya?ml|toml|sql|sh)\b|\w\/\w)/i;
 const FULL_CUES = /\b(implement|build (a|an|the|out)|add (a |an |the )?(new )?(feature|endpoint|page|screen|service|integration|command)|new feature|from scratch|refactor|migrat(e|ion)|redesign|rewrite|architecture|across (the )?(code ?base|files|modules|services)|multiple files|end[- ]to[- ]end|overhaul|port (it |this )?to)\b/i;
@@ -95,7 +103,8 @@ export function classify(prompt, index, state = {}, opts = {}) {
   // not_for: drop a skill when a sibling it says it is not for also matched.
   const names = new Set(scored.map((x) => x.s.qualified));
   let kept = scored.filter((x) => !(x.s.not_for || []).some((n) => names.has(n)));
-  const size = route.size || sizeOf(text, kept.length);
+  const nativeHits = NATIVE.filter((n) => n.re.test(text) && !route.excluded.includes(n.name));
+  const size = route.size || sizeOf(text, kept.length + nativeHits.length);
   route.size = size;
   if (size === 'direct' && !route.override) {
     route.playbook = null;
@@ -114,13 +123,20 @@ export function classify(prompt, index, state = {}, opts = {}) {
   if (size === 'full' && !route.no_questions && clarify && !route.excluded.includes(clarify.qualified) && !route.skills.includes(clarify.qualified)) {
     if (route.skills.length >= 2) route.skills.pop(), route.rules.pop();
     route.skills.push(clarify.qualified);
-    route.rules.push('size=full needs an act/ask/stop check before the first edit');
+    route.rules.push('size=full: act/ask/stop check first');
+  }
+
+  // Native routes fill a free slot when no H-Stack skill with that job matched.
+  for (const n of nativeHits) {
+    if (route.skills.length >= 2 || route.skills.includes(n.unless) || route.excluded.includes(n.name)) continue;
+    route.skills.push(n.name);
+    route.rules.push(`matched "${(text.match(n.re) || [''])[0].slice(0, 40)}" (${n.label})`);
   }
 
   const parts = [`H-Stack: size=${size}.`];
   if (route.no_questions) parts.push('User said to proceed without questions; log assumptions with hs assume.');
-  if (route.skills.length === 1) parts.push(`Relevant skill: ${route.skills[0]} because ${route.rules[0]}.`);
-  else if (route.skills.length === 2) parts.push(`Relevant skills: ${route.skills[0]} (${route.rules[0]}), ${route.skills[1]} (${route.rules[1]}).`);
+  if (route.skills.length === 1) parts.push(`Relevant skill: ${route.skills[0]} (load with the Skill tool) because ${route.rules[0]}.`);
+  else if (route.skills.length === 2) parts.push(`Relevant skills (load with the Skill tool): ${route.skills[0]} (${route.rules[0]}), ${route.skills[1]} (${route.rules[1]}).`);
   if (opts.secretKind) parts.push(`The prompt appears to contain a ${opts.secretKind}; H-Stack did not store it. Rotating it is safer.`);
   const line = route.skills.length || route.no_questions || opts.secretKind ? parts.join(' ') : '';
   return { route, line };

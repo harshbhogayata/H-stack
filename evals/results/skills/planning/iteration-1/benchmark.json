@@ -1,0 +1,289 @@
+{
+  "metadata": {
+    "skill_name": "planning",
+    "skill_path": "plugins/h-stack/skills/planning",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T14:31:42.756Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "plan-node-csv",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1,
+        "time_seconds": 41.235,
+        "tokens": 165206,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+          "passed": true,
+          "evidence": "The plan names `src/server.js` lines 4–9, `src/invoices.js` and new files under `test/`, and states \"**Test command:** `npm test` (runs `node --test test/`)\"."
+        },
+        {
+          "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+          "passed": true,
+          "evidence": "Its Interfaces section gives `export function invoicesToCsv(invoices: Array<{id, amountCents, issuedAt, customer}>): string`, along with `formatCents` and `csvField` signatures."
+        },
+        {
+          "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+          "passed": true,
+          "evidence": "Task 1 step 1 says \"Write the failing tests\" with `1250→\"12.50\"`, `\"Acme, Inc.\"→\"\\\"Acme, Inc.\\\"\"` and the expected output `'id,amount,issued_at,customer\\r\\ninv-1,12.50,2026-01-31,\"Acme, Inc.\"...'`, and step 2 expects `npm test` to fail."
+        },
+        {
+          "text": "The final message asks the user to review or confirm the plan before implementation",
+          "passed": true,
+          "evidence": "The message says \"Nothing has been implemented\" and includes a section headed \"Decisions the spec doesn't make (please confirm or override)\". The message is cut off at the self-review, though, so any closing request to review the whole plan can't be seen."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "plan-node-csv",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6,
+        "time_seconds": 21.975,
+        "tokens": 117253,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+          "passed": true,
+          "evidence": "The plan names `src/invoices.js`, `src/server.js` and `test/invoices.test.js`, says \"Tests run with `node --test`\", and ends its test step with \"Run `npm test`.\""
+        },
+        {
+          "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+          "passed": false,
+          "evidence": "The plan gives `invoicesToCsv(invoices)` with a name and parameter but no stated return type (only `formatCents(cents)` is marked \"→ string\"), so the conversion function's signature is incomplete."
+        },
+        {
+          "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+          "passed": false,
+          "evidence": "The tests do use the spec's values, but \"**3. Tests:**\" comes after the source changes in steps 1 and 2, and nothing says to write tests first or watch them fail."
+        },
+        {
+          "text": "The final message asks the user to review or confirm the plan before implementation",
+          "passed": true,
+          "evidence": "The message ends with \"Tell me if you'd change any of the defaults above, or say go and I'll implement it.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "plan-python-csv",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 46.969,
+        "tokens": 293760,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+          "passed": true,
+          "evidence": "The plan says \"Test command: `make test` (runs `python3 -m pytest -q tests`)\" and its file map lists `app/export.py`, `tests/test_export.py`, `app/web.py` and `tests/test_web.py`, with no JavaScript files or npm."
+        },
+        {
+          "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+          "passed": true,
+          "evidence": "The plan defines `app.export.invoices_to_csv(invoices: list[dict]) -> str` where \"each dict has `id`, `amount_cents`, `issued_at` and `customer`\", plus `format_amount(cents: int) -> str`, all snake_case with Python type hints; app/invoices.py itself is not shown, so consistency rests on the plan's u"
+        },
+        {
+          "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+          "passed": true,
+          "evidence": "Task 1 lists `test_comma_quoted` (customer `Acme, Inc.` -> `\"Acme, Inc.\"`), `test_quote_doubled` (`Bob \"B\" Ltd` -> `\"Bob \"\"B\"\" Ltd\"`) and `test_comma_and_quote` (`He said \"hi\", ok`)."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "plan-python-csv",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 26.783,
+        "tokens": 197004,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no source or test files were changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+          "passed": true,
+          "evidence": "The plan says 'Run `make test`' and lists files 'app/csv_export.py, tests/test_csv_export.py, tests/test_web.py' and 'app/web.py', with no mention of JS or npm."
+        },
+        {
+          "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+          "passed": true,
+          "evidence": "The plan defines 'format_amount(cents: int) -> str', 'escape_field(value) -> str' and 'invoices_to_csv(invoices) -> str', and says the 'amount' column is built from 'amount_cents'."
+        },
+        {
+          "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+          "passed": true,
+          "evidence": "The escape_field tests include '`Acme, Inc.` becomes `\"Acme, Inc.\"`' and '`say \"hi\"` becomes `\"say \"\"hi\"\"\"`'."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "execute-plan",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 58.458,
+        "tokens": 662485,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+          "passed": false,
+          "evidence": "check exit 1: stCodeFailure'\n  exitCode: 1\n  signal: ~\n  error: 'test failed'\n  code: 'ERR_TEST_FAILURE'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 47.657889\n"
+        },
+        {
+          "text": "Both new tests named in the plan exist in test/slug.test.js",
+          "passed": true,
+          "evidence": "The diff adds `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and the second test includes both assertions the plan asks for."
+        },
+        {
+          "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+          "passed": true,
+          "evidence": "The message says \"`npm test` passes: 3 tests, 0 failures\" and lists its deviations under \"Decisions I made\": the test script was changed to `node --test`, the work was done on `main`, and two planning-skill steps were skipped. The external check failed, but it ran `node --test test` directly rather "
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "execute-plan",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 38.07,
+        "tokens": 499342,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+          "passed": false,
+          "evidence": "check exit 1: stCodeFailure'\n  exitCode: 1\n  signal: ~\n  error: 'test failed'\n  code: 'ERR_TEST_FAILURE'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 48.734865\n"
+        },
+        {
+          "text": "Both new tests named in the plan exist in test/slug.test.js",
+          "passed": true,
+          "evidence": "The diff adds both `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and their assertions match the plan."
+        },
+        {
+          "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+          "passed": true,
+          "evidence": "The message says \"all 3 tests now pass\" after the `uniqueSlug` change, and it flags one deviation, \"One change outside the plan,\" for the package.json test script. The check command still failed, because it ran `node --test` on `test` directly, so this only shows that the agent reported a run, not t"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 48.887,
+        "stddev": 7.161,
+        "min": 41.235,
+        "max": 58.458
+      },
+      "tokens": {
+        "mean": 373817,
+        "stddev": 210758.066,
+        "min": 165206,
+        "max": 662485
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.756,
+        "stddev": 0.175,
+        "min": 0.6,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 28.943,
+        "stddev": 6.746,
+        "min": 21.975,
+        "max": 38.07
+      },
+      "tokens": {
+        "mean": 271199.667,
+        "stddev": 164573.689,
+        "min": 117253,
+        "max": 499342
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.13",
+      "time_seconds": "+19.9",
+      "tokens": "+102617"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

@@ -1,0 +1,1 @@
+I renamed `x` to `total` in `sum_prices` in `utils.py`. It changed in all three places it appears: where it's set to 0, where prices are added to it, and the return. Nothing else in the file was touched.

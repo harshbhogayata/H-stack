@@ -1,0 +1,30 @@
+{
+  "skill_name": "h-stack",
+  "note": "Smoke-test tasks (HS-001, ARCHITECTURE §8.2). The ~10 real tasks come from the user's own projects (OD-6) and replace the slots below; 'example-fix' only checks that the runner works and is not part of the benchmark.",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "example-fix",
+      "runner_selftest": true,
+      "prompt": "add() in math.js gives wrong results when a number is negative. Fix it.",
+      "files": [],
+      "fixture": {"dir": "evals/fixtures/example"},
+      "check": "evals/checks/example-fix.sh",
+      "protected_tests": ["test.js"],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": ["Read", "Edit", "Write", "Glob", "Grep", "Bash(node:*)"],
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    }
+  ],
+  "slots_for_user_tasks": [
+    {"kind": "bug fix", "count": 3}, {"kind": "small feature", "count": 2}, {"kind": "refactor", "count": 1},
+    {"kind": "review", "count": 1}, {"kind": "UI change", "count": 1},
+    {"kind": "underspecified variant (needs_question: true)", "count": 2},
+    {"kind": "sameness group: same request in two projects with different conventions (context_group)", "count": 2}
+  ]
+}

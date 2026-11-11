@@ -1,0 +1,38 @@
+diff --git a/src/queue.js b/src/queue.js
+index 1d07d0c..5c81b9a 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -1,8 +1,19 @@
+ class Queue {
+-  constructor() { this.done = []; }
++  constructor() {
++    this.done = [];
++    this.pending = new Set();
++  }
+   push(job) {
+     // Jobs finish after a variable delay, like real I/O.
+-    setTimeout(() => { this.done.push(job); }, 5 + Math.floor(Math.random() * 40));
++    const p = new Promise((resolve) => {
++      setTimeout(() => { this.done.push(job); resolve(); }, 5 + Math.floor(Math.random() * 40));
++    });
++    this.pending.add(p);
++    p.finally(() => this.pending.delete(p));
++  }
++  // Resolves once every job pushed so far (and any pushed while waiting) has finished.
++  async drain() {
++    while (this.pending.size) await Promise.all(this.pending);
+   }
+ }
+ module.exports = { Queue };
+diff --git a/test/queue.test.js b/test/queue.test.js
+index ee2a039..a81bf3c 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -5,6 +5,6 @@ const { Queue } = require('../src/queue');
+ test('processes all jobs', async () => {
+   const q = new Queue();
+   q.push('a'); q.push('b'); q.push('c');
+-  await new Promise((r) => setTimeout(r, 25));
++  await q.drain();
+   assert.equal(q.done.length, 3);
+ });

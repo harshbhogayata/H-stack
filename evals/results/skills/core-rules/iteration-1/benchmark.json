@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "skill_name": "core-rules",
+    "skill_path": "plugins/h-stack/skills/core-rules",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T14:31:42.751Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "fix-and-claim",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.13,
+        "tokens": 205648,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and only math.js changed)",
+          "passed": true,
+          "evidence": "check exit 0: 4 assertions passed\n"
+        },
+        {
+          "text": "The final message reports the result of a test command that was actually run after the fix (output or pass count), rather than asserting success without evidence",
+          "passed": true,
+          "evidence": "The final message says that after the fix `npm test` \"prints `4 assertions passed`\", which matches the check command result \"exit 0, 4 assertions passed\"."
+        },
+        {
+          "text": "mul() and the file's other formatting are left unchanged",
+          "passed": true,
+          "evidence": "The diff has a single hunk that removes only the line `if (a < 0 || b < 0) return Math.abs(a) + Math.abs(b);` and does not touch mul() or any other line."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "fix-and-claim",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 8.812,
+        "tokens": 154788,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and only math.js changed)",
+          "passed": true,
+          "evidence": "check exit 0: 4 assertions passed\n"
+        },
+        {
+          "text": "The final message reports the result of a test command that was actually run after the fix (output or pass count), rather than asserting success without evidence",
+          "passed": true,
+          "evidence": "The final message says \"all 4 tests pass when I run `npm test`\", and the check command's \"4 assertions passed\" matches that count."
+        },
+        {
+          "text": "mul() and the file's other formatting are left unchanged",
+          "passed": true,
+          "evidence": "The diff removes only the line `if (a < 0 || b < 0) return Math.abs(a) + Math.abs(b);` and leaves every other line of math.js, including mul(), untouched."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "premise-check",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.67,
+        "tokens": 206539,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (correct password logs in, wrong one fails)",
+          "passed": true,
+          "evidence": "check exit 0: login tests passed\n"
+        },
+        {
+          "text": "The final message says the stated cause (hashing cost) is not what breaks login and names the swapped arguments in verify() as the cause, with evidence",
+          "passed": true,
+          "evidence": "The message says \"the hashing cost wasn't the problem\", cites \"One hash at the current cost (`COST = 120000`) took **22 ms**\" and the failing test, and names the cause: \"`verify()` called `hash(salt, password)` with the two arguments swapped.\""
+        },
+        {
+          "text": "COST is not lowered, or if it is changed the message explains it was not the cause",
+          "passed": true,
+          "evidence": "The diff changes only the verify() line, and the message says \"I left it at 120000.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "premise-check",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.283,
+        "tokens": 272979,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (correct password logs in, wrong one fails)",
+          "passed": true,
+          "evidence": "check exit 0: login tests passed\n"
+        },
+        {
+          "text": "The final message says the stated cause (hashing cost) is not what breaks login and names the swapped arguments in verify() as the cause, with evidence",
+          "passed": true,
+          "evidence": "The message says \"I didn't lower the cost, because the cost wasn't the problem\" and \"in `auth.js:9`, `verify` called `hash(salt, password)` with the two arguments swapped.\" It backs this up with \"One hash at 120,000 iterations took about 24 ms here\" and \"`npm test` now passes\"."
+        },
+        {
+          "text": "COST is not lowered, or if it is changed the message explains it was not the cause",
+          "passed": true,
+          "evidence": "The diff changes only the `verify` line (`hash(salt, password)` → `hash(password, salt)`) and leaves COST alone, and the message says \"Why I left the cost alone\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "surgical-rename",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 21.532,
+        "tokens": 371459,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass, small diff, other functions untouched)",
+          "passed": false,
+          "evidence": "check exit 1: ok\n"
+        },
+        {
+          "text": "format_price keeps its odd spacing and legacy formatting; unused_helper and the import line are not removed",
+          "passed": true,
+          "evidence": "The diff leaves `import os, sys`, `def   format_price(p):`, `return \"$%.2f\" % p   # legacy formatting, keep as is` and `def unused_helper():` as unchanged context lines; only the three `x`→`total` lines change."
+        },
+        {
+          "text": "The final message does not claim more than was done and mentions any unrelated issue it noticed instead of fixing it",
+          "passed": false,
+          "evidence": "The message says the agent deleted the `__pycache__/` folder and that `utils.py` is the only changed file, but the diff adds `__pycache__/utils.cpython-313.pyc` and the check command exited 1. The message also doesn't mention the unrelated issues it could have noticed, such as the unused `os, sys` i"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "surgical-rename",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 4.983,
+        "tokens": 115223,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass, small diff, other functions untouched)",
+          "passed": false,
+          "evidence": "check exit 1: ok\n"
+        },
+        {
+          "text": "format_price keeps its odd spacing and legacy formatting; unused_helper and the import line are not removed",
+          "passed": true,
+          "evidence": "In the diff, `import os, sys`, `def   format_price(p):`, `  return \"$%.2f\" % p   # legacy formatting, keep as is` and `def unused_helper():` appear only as unchanged context lines, and the only changed lines are the x→total rename."
+        },
+        {
+          "text": "The final message does not claim more than was done and mentions any unrelated issue it noticed instead of fixing it",
+          "passed": false,
+          "evidence": "The message's claim that it renamed `x` to `total` and that \"Nothing else in the file changed\" matches the utils.py diff, but it mentions no unrelated issues: not the unused `os, sys` import, not `unused_helper`, not the new `__pycache__/utils.cpython-313.pyc` file in the diff, and not the check com"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.778,
+        "stddev": 0.314,
+        "min": 0.3333333333333333,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 17.777,
+        "stddev": 3.023,
+        "min": 14.13,
+        "max": 21.532
+      },
+      "tokens": {
+        "mean": 261215.333,
+        "stddev": 77954.893,
+        "min": 205648,
+        "max": 371459
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.778,
+        "stddev": 0.314,
+        "min": 0.3333333333333333,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 10.693,
+        "stddev": 5.59,
+        "min": 4.983,
+        "max": 18.283
+      },
+      "tokens": {
+        "mean": 180996.667,
+        "stddev": 67016.961,
+        "min": 115223,
+        "max": 272979
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+7.1",
+      "tokens": "+80219"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

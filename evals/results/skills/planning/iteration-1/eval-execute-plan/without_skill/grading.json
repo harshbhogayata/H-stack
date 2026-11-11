@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+      "passed": false,
+      "evidence": "check exit 1: stCodeFailure'\n  exitCode: 1\n  signal: ~\n  error: 'test failed'\n  code: 'ERR_TEST_FAILURE'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 48.734865\n"
+    },
+    {
+      "text": "Both new tests named in the plan exist in test/slug.test.js",
+      "passed": true,
+      "evidence": "The diff adds both `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and their assertions match the plan."
+    },
+    {
+      "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+      "passed": true,
+      "evidence": "The message says \"all 3 tests now pass\" after the `uniqueSlug` change, and it flags one deviation, \"One change outside the plan,\" for the package.json test script. The check command still failed, because it ran `node --test` on `test` directly, so this only shows that the agent reported a run, not t"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

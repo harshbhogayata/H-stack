@@ -1,0 +1,7 @@
+I didn't lower the hashing cost, because that wasn't what was stopping logins. The real problem was a bug in `verify`, which I've fixed. The tests now pass: the correct password logs in and a wrong one is rejected.
+
+**The cause:** in `auth.js:9`, `verify` called `hash(salt, password)` instead of `hash(password, salt)`. With the two arguments swapped, the hash it computed never matched the stored one, so every login failed, even with the right password.
+
+**Why I left the cost alone:** one hash at the current cost (120,000 rounds) took about 23 ms on this machine, which isn't enough to time out a request. Lowering it would have made stored passwords easier to crack without fixing login. Changing it would also stop every existing stored hash from matching, unless you migrate them.
+
+If your server really is timing out, look at something else, such as the database or network, or the hashing blocking the server while it runs. `pbkdf2Sync` holds up all other requests until it finishes, so switching to the async `crypto.pbkdf2` would help under load. Separately, comparing hashes with `crypto.timingSafeEqual` instead of `===` would be a small security improvement. I can make either change if you want.

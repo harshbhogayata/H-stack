@@ -1,5 +1,8 @@
 {
   "description": "H-Stack hooks: activation, guards, receipts, state. Guards fail closed (onFailure: block); quality hooks fail open.",
+  "modules": [
+    "./register.js"
+  ],
   "hooks": {
     "SessionStart": [
       {

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+      "passed": false,
+      "evidence": "check exit 1: stCodeFailure'\n  exitCode: 1\n  signal: ~\n  error: 'test failed'\n  code: 'ERR_TEST_FAILURE'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 48.052407\n"
+    },
+    {
+      "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+      "passed": true,
+      "evidence": "The test file imports `{ subtotal, discount } from '../src/pricing.js'` and checks hard-coded values such as `assert.equal(discount(1000, 'SAVE10'), 900)` and `assert.equal(discount(995, 'SAVE10'), 896)`."
+    },
+    {
+      "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+      "passed": true,
+      "evidence": "The final message says 'The new tests fail against the original file and all 4 tests pass with the change' and 'I redid both checks by running `node --test test/pricing.test.js` directly'. This is the agent's own report: no transcript output is shown, and the check command itself failed because of t"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

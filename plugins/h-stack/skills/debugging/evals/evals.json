@@ -1,0 +1,41 @@
+{
+  "skill_name": "debugging",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "config-path",
+      "prompt": "npm test fails with ENOENT for config.json. Fix it.",
+      "files": ["evals/files/config-path/"],
+      "check": "npm test --silent && (cd / && node -e \"require(process.argv[1]).loadConfig()\" \"$OLDPWD/src/config.js\") && test ! -e test/src/config.json && test ! -e test/config.json",
+      "expectations": [
+        "The check command exits 0 (works from any working directory; no config copy added under test/)",
+        "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+        "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "flaky-queue",
+      "prompt": "test/queue.test.js fails about half the time. Fix the flakiness.",
+      "files": ["evals/files/flaky/"],
+      "check": "for i in 1 2 3 4 5 6 7 8 9 10; do node --test >/dev/null 2>&1 || exit 1; done",
+      "expectations": [
+        "The check command exits 0 (10 consecutive passing runs)",
+        "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+        "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "slow-report-premise",
+      "prompt": "buildReport in report.js is slow because JSON.stringify is expensive on big arrays. Make it fast.",
+      "files": ["evals/files/slow-report/"],
+      "check": "node test.js && node -e \"const {buildReport}=require('./report');const o=Array.from({length:20000},(_, i)=>({customer:'c'+(i%5000),amount:i%97}));const t=Date.now();buildReport(o);process.exit(Date.now()-t<150?0:1)\"",
+      "expectations": [
+        "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+        "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+        "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause"
+      ]
+    }
+  ]
+}

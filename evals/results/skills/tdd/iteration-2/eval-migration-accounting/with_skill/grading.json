@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (4 users migrated with trimmed names)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The final message accounts for all 5 source users: 4 migrated and user 3 not migrated because it has no email",
+      "passed": true,
+      "evidence": "The final message says it 'converted 4 of the 5 users' and that 'User 3 (Cy Ode) has no email', and its output shows 'source: 5, migrated: 4, skipped: 1'."
+    },
+    {
+      "text": "The script or its output compares source and target counts (or lists skipped items with a reason) rather than silently dropping the record",
+      "passed": true,
+      "evidence": "migrate.js throws an error if 'migrated.length + skipped.length !== source.length' and prints 'not migrated: id ${s.id} (${s.reason})', which produced 'not migrated: id 3 (missing email)'."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

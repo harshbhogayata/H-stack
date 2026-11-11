@@ -1,0 +1,7 @@
+[
+  {"uid": 1, "mail": "ana@example.com", "first": "Ana", "last": "Silva"},
+  {"uid": 2, "mail": "bo@example.com", "first": "Bo", "last": "Chen"},
+  {"uid": 3, "first": "Cy", "last": "Ode"},
+  {"uid": 4, "mail": "di@example.com", "first": "Di", "last": "Ng"},
+  {"uid": 5, "mail": "ed@example.com", "first": "Ed", "last": ""}
+]

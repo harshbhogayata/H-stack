@@ -1,0 +1,35 @@
+exit 0
+TAP version 13
+# Subtest: subtotal multiplies price by quantity
+ok 1 - subtotal multiplies price by quantity
+  ---
+  duration_ms: 0.683956
+  type: 'test'
+  ...
+# Subtest: discount SAVE10 takes 10% off
+ok 2 - discount SAVE10 takes 10% off
+  ---
+  duration_ms: 0.787445
+  type: 'test'
+  ...
+# Subtest: discount SAVE10 rounds to the nearest cent
+ok 3 - discount SAVE10 rounds to the nearest cent
+  ---
+  duration_ms: 0.563563
+  type: 'test'
+  ...
+# Subtest: discount with unknown code returns total unchanged
+ok 4 - discount with unknown code returns total unchanged
+  ---
+  duration_ms: 0.142622
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 86.377684

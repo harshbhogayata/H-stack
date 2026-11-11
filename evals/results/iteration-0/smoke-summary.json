@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "tasks": 1,
+    "runs_per_arm": 1,
+    "iteration": 0,
+    "model": "default",
+    "timestamp": "2026-11-11T14:43:38.010Z"
+  },
+  "metrics": {
+    "with_skill": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 238288,
+      "seconds_per_solved": 15.1
+    },
+    "without_skill": {
+      "pass_rate": 1,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 193323,
+      "seconds_per_solved": 11.6
+    }
+  },
+  "sameness": {}
+}

@@ -1,0 +1,1 @@
+I renamed `x` to `total` in `sum_prices` in `utils.py` (lines 3–6). Nothing else in the file changed.

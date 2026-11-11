@@ -1,0 +1,114 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..527af81
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,38 @@
++import { readFileSync, writeFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++export function migrateUsers(users) {
++  const migrated = [];
++  const skipped = [];
++  for (const u of users) {
++    if (typeof u.mail !== 'string' || u.mail.trim() === '') {
++      skipped.push({ id: u.uid, reason: 'missing email' });
++      continue;
++    }
++    migrated.push({ id: u.uid, email: u.mail, name: `${u.first ?? ''} ${u.last ?? ''}`.trim() });
++  }
++  return { migrated, skipped };
++}
++
++function main(inputPath = 'users.json', outputPath = 'users-v2.json') {
++  const source = JSON.parse(readFileSync(inputPath, 'utf8'));
++  const { migrated, skipped } = migrateUsers(source);
++
++  if (migrated.length + skipped.length !== source.length) {
++    throw new Error(`Count mismatch: source ${source.length} != migrated ${migrated.length} + skipped ${skipped.length}`);
++  }
++
++  writeFileSync(outputPath, JSON.stringify(migrated, null, 2) + '\n');
++  const written = JSON.parse(readFileSync(outputPath, 'utf8')).length;
++  if (written !== migrated.length) {
++    throw new Error(`Write mismatch: expected ${migrated.length} records in ${outputPath}, found ${written}`);
++  }
++
++  console.log(`source: ${source.length}, migrated: ${migrated.length}, skipped: ${skipped.length}, written: ${written}`);
++  for (const s of skipped) console.log(`  not migrated: id ${s.id} (${s.reason})`);
++}
++
++if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  main(process.argv[2], process.argv[3]);
++}
+diff --git a/migrate.test.js b/migrate.test.js
+new file mode 100644
+index 0000000..e95554d
+--- /dev/null
++++ b/migrate.test.js
+@@ -0,0 +1,36 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { execFileSync } from 'node:child_process';
++import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { migrateUsers } from './migrate.js';
++
++test('a user with an email becomes {id, email, name}', () => {
++  const { migrated } = migrateUsers([{ uid: 1, mail: 'ana@example.com', first: 'Ana', last: 'Silva' }]);
++  assert.deepEqual(migrated, [{ id: 1, email: 'ana@example.com', name: 'Ana Silva' }]);
++});
++
++test('name is trimmed when last name is empty', () => {
++  const { migrated } = migrateUsers([{ uid: 5, mail: 'ed@example.com', first: 'Ed', last: '' }]);
++  assert.equal(migrated[0].name, 'Ed');
++});
++
++test('a user without an email is not migrated and is reported with a reason', () => {
++  const result = migrateUsers([{ uid: 3, first: 'Cy', last: 'Ode' }]);
++  assert.deepEqual(result, { migrated: [], skipped: [{ id: 3, reason: 'missing email' }] });
++});
++
++test('CLI writes the v2 file and reports source/migrated/skipped counts', () => {
++  const dir = mkdtempSync(join(tmpdir(), 'migrate-'));
++  const input = join(dir, 'in.json');
++  const output = join(dir, 'out.json');
++  writeFileSync(input, JSON.stringify([
++    { uid: 1, mail: 'a@x.com', first: 'A', last: 'B' },
++    { uid: 2, first: 'C', last: 'D' },
++  ]));
++  const stdout = execFileSync('node', [fileURLToPath(new URL('./migrate.js', import.meta.url)), input, output], { encoding: 'utf8' });
++  assert.deepEqual(JSON.parse(readFileSync(output, 'utf8')), [{ id: 1, email: 'a@x.com', name: 'A B' }]);
++  assert.match(stdout, /source: 2, migrated: 1, skipped: 1/);
++});
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

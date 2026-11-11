@@ -52,3 +52,35 @@ export function validateFindings(obj, proj, opts = {}) {
   const shallow = errors.length === 0 && kept.length === 0 && cleared.length < minCleared;
   return { ok: errors.length === 0, errors, shallow, kept: kept.length, cleared: cleared.length };
 }
+
+// Schemas for the other structured subagents (HS-020, HS-060).
+export function validateIntent(obj) {
+  const errors = [];
+  if (!obj || !['act', 'ask', 'stop'].includes(obj.decision)) errors.push('decision must be act, ask or stop');
+  if (!Array.isArray(obj?.questions)) errors.push('questions must be an array');
+  else if (obj.questions.length > 3) errors.push('at most three questions');
+  else obj.questions.forEach((q, i) => { if (!q.text || !q.recommended) errors.push(`questions[${i}] needs text and recommended`); });
+  if (obj?.decision === 'ask' && !(obj.questions || []).length) errors.push('ask needs at least one question');
+  if (obj?.decision === 'stop' && !obj.stop_reason) errors.push('stop needs stop_reason');
+  if (!Array.isArray(obj?.assumptions)) errors.push('assumptions must be an array');
+  return { ok: errors.length === 0, errors, shallow: false };
+}
+export function validateRubric(obj) {
+  const errors = [];
+  const items = obj?.items;
+  if (!Array.isArray(items) || !items.length) errors.push('items must be a non-empty array');
+  else {
+    if (items.length > 12) errors.push('at most 12 items');
+    if (!items.some((i) => i.level === 'must')) errors.push('at least one must item');
+    items.forEach((it, i) => { if (!it.id || !['must', 'important', 'nice'].includes(it.level) || !it.text || !it.check) errors.push(`items[${i}] needs id, level, text and check`); });
+  }
+  return { ok: errors.length === 0, errors, shallow: false };
+}
+export function validateGrades(obj, rubricIds = null) {
+  const errors = [];
+  const g = obj?.graded;
+  if (!g || typeof g !== 'object') errors.push('graded must be an object keyed by item id');
+  else for (const [id, v] of Object.entries(g)) { if (typeof v?.pass !== 'boolean' || !v.evidence) errors.push(`${id} needs pass (boolean) and evidence`); }
+  if (g && rubricIds) for (const id of rubricIds) if (!(id in g)) errors.push(`item ${id} not graded`);
+  return { ok: errors.length === 0, errors, shallow: false };
+}

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (tests pass and only math.js changed)",
+      "passed": true,
+      "evidence": "check exit 0: 4 assertions passed\n"
+    },
+    {
+      "text": "The final message reports the result of a test command that was actually run after the fix (output or pass count), rather than asserting success without evidence",
+      "passed": true,
+      "evidence": "The final message says \"all 4 tests pass when I run `npm test`\", and the check command's \"4 assertions passed\" matches that count."
+    },
+    {
+      "text": "mul() and the file's other formatting are left unchanged",
+      "passed": true,
+      "evidence": "The diff removes only the line `if (a < 0 || b < 0) return Math.abs(a) + Math.abs(b);` and leaves every other line of math.js, including mul(), untouched."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

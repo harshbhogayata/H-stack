@@ -100,22 +100,22 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 | IM | Cat. | Job | Pick | Repo › path | Licence | Mode | Adaptations needed | Pri. | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| IM-01 | 01 | Never claim done without fresh evidence | verification-before-completion | [obra/superpowers](https://github.com/obra/superpowers) › `skills/verification-before-completion` | MIT | Import | Reword iron-law prose (A4). The Stop gate (HS-027) enforces it; the skill teaches the "name the proving command" habit | P0 |  |
-| IM-01 | 01 | Small, testable working principles | Karpathy guidelines (four rules) | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) › `CLAUDE.md` | MIT | Import → `.claude/rules/` (opt-in, OD-4) or skill | Split into path-scoped rule files of a few lines each; no always-on block | P0 |  |
-| IM-02 | 02 | Pick the right skill, no slash commands | — (nothing qualifies: every router in 02 assumes slash commands or a fixed pipeline) | — | — | **Build** (HS-015, 017, 018, 022) | Ideas taken: superpowers SessionStart router, pstack router + playbooks, mattpocock `ask-matt` | P0 |  |
-| IM-03 | 03 | Clarify before building | grilling | [mattpocock/skills](https://github.com/mattpocock/skills) › `skills/productivity/grilling` | MIT | Import | Feeds the "ask" branch of HS-020; keep the frontier-round exit rule | P1 |  |
-| IM-04 | 04 | Plans with checkable steps | writing-plans + executing-plans | obra/superpowers › `skills/writing-plans`, `skills/executing-plans` | MIT | Import | Plans must use the project's own layout and test commands, not fixed code templates. Add the Interfaces section (HS-060) | P0 |  |
-| IM-05 | 05 | Test-first implementation | tdd | mattpocock/skills › `skills/engineering/tdd` | MIT | Import | Declares the "test-writing step" that HS-028 reads | P0 |  |
+| IM-01 | 01 | Never claim done without fresh evidence | verification-before-completion | [obra/superpowers](https://github.com/obra/superpowers) › `skills/verification-before-completion` | MIT | Import | Reword iron-law prose (A4). The Stop gate (HS-027) enforces it; the skill teaches the "name the proving command" habit | P0 | done — skills/core-rules (benchmark iteration-2: 0.89 vs 0.78, +0.11) |
+| IM-01 | 01 | Small, testable working principles | Karpathy guidelines (four rules) | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) › `CLAUDE.md` | MIT | Import → `.claude/rules/` (opt-in, OD-4) or skill | Split into path-scoped rule files of a few lines each; no always-on block | P0 | done — skills/core-rules sections 2-5 + rules-templates/*.md path-scoped, opt-in via scripts/setup.mjs |
+| IM-02 | 02 | Pick the right skill, no slash commands | — (nothing qualifies: every router in 02 assumes slash commands or a fixed pipeline) | — | — | **Build** (HS-015, 017, 018, 022) | Ideas taken: superpowers SessionStart router, pstack router + playbooks, mattpocock `ask-matt` | P0 | done — built: hooks/session-start.mjs (router), hooks/classify.mjs (classifier), event triggers in ledger.mjs/gate-bash.mjs, index.json |
+| IM-03 | 03 | Clarify before building | grilling | [mattpocock/skills](https://github.com/mattpocock/skills) › `skills/productivity/grilling` | MIT | Import | Feeds the "ask" branch of HS-020; keep the frontier-round exit rule | P1 | done — skills/clarify full mode (benchmark iteration-2: 1.00 vs 0.89, +0.11) |
+| IM-04 | 04 | Plans with checkable steps | writing-plans + executing-plans | obra/superpowers › `skills/writing-plans`, `skills/executing-plans` | MIT | Import | Plans must use the project's own layout and test commands, not fixed code templates. Add the Interfaces section (HS-060) | P0 | done — skills/planning + references/executing.md (benchmark iteration-2: 1.00 vs 0.87, +0.13) |
+| IM-05 | 05 | Test-first implementation | tdd | mattpocock/skills › `skills/engineering/tdd` | MIT | Import | Declares the "test-writing step" that HS-028 reads | P0 | done — skills/tdd (benchmark iteration-2: 0.89 vs 0.78, +0.11) |
 | IM-05 | 05 | Simplify after green | code-simplifier (official plugin) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) › `plugins/code-simplifier` | Apache-2.0 | Native — configure only (recommend installing it) | — | P1 |  |
-| IM-06 | 06 | Root cause before fix | systematic-debugging | obra/superpowers › `skills/systematic-debugging` | MIT | Import | Add the new-signal retry rule (HS-069), the counterfactual check (HS-066) and the repro harvest (HS-067). Reword the iron law | P0 |  |
-| IM-07 | 07 | Code review | built-in `/code-review` skill | Claude Code built-in | n/a | Native — configure only | Routed by the classifier; the review lanes (HS-061) sit on top | P0 |  |
+| IM-06 | 06 | Root cause before fix | systematic-debugging | obra/superpowers › `skills/systematic-debugging` | MIT | Import | Add the new-signal retry rule (HS-069), the counterfactual check (HS-066) and the repro harvest (HS-067). Reword the iron law | P0 | done — skills/debugging + scripts/verify-fix.mjs (benchmark iteration-2: 1.00 vs 1.00, tie at ceiling; kept: not worse, but no measured gain yet) |
+| IM-07 | 07 | Code review | built-in `/code-review` skill | Claude Code built-in | n/a | Native — configure only | Routed by the classifier; the review lanes (HS-061) sit on top | P0 | done — native: classifier routes review requests to the built-in code-review skill (lib/pure/classify-rules.mjs NATIVE) |
 | IM-07 | 07 | Receiving review well | receiving-code-review | obra/superpowers › `skills/receiving-code-review` | MIT | Import | — | P1 |  |
 | IM-08 | 08 | Verify UI in a real browser | webapp-testing | [anthropics/skills](https://github.com/anthropics/skills) › `skills/webapp-testing` | Apache-2.0 | Import | Treat page content as untrusted (HS-032) | P1 |  |
 | IM-09 | 09 | Always-on security review | security-guidance (official plugin) + built-in `/security-review` | claude-plugins-official › `plugins/security-guidance` | Apache-2.0 | Native — configure only | — | P1 |  |
 | IM-09 | 09 | Full audits on request | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) › `skills/security-audit` | MIT | Import (source of HS-062, HS-063) | Guidance mode by default (HS-016). Wire its validators into SubagentStop | P1 |  |
 | IM-10 | 10 | UI correctness (a11y, motion, metadata) | baseline-ui | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) › `skills/baseline-ui` | MIT | Import | Check-only rules, no style | P1 |  |
 | IM-10 | 10 | Design direction | frontend-design | anthropics/skills › `skills/frontend-design` | Apache-2.0 | Import | **Strip the fixed aesthetic bans and preferences.** Derive the direction from the project's own design files, brand and users; the sameness check applies | P1 |  |
-| IM-11 | 11 | Memory across sessions | auto memory + CLAUDE.md + claude-md-management (official plugin) | Claude Code built-in; claude-plugins-official › `plugins/claude-md-management` | n/a; Apache-2.0 | Native — configure only, plus the thin pieces in HS-048…HS-050 | — | P0 |  |
+| IM-11 | 11 | Memory across sessions | auto memory + CLAUDE.md + claude-md-management (official plugin) | Claude Code built-in; claude-plugins-official › `plugins/claude-md-management` | n/a; Apache-2.0 | Native — configure only, plus the thin pieces in HS-048…HS-050 | — | P0 | done — native: scripts/setup.mjs enables auto memory and raises cleanupPeriodDays; claude-md-management recommended; thin pieces HS-048/049/050 |
 | IM-11 | 11 | Handoff to another session | handoff | mattpocock/skills › `skills/productivity/handoff` | MIT | Import | Align its sections with the checkpoint schema (HS-047) | P1 |  |
 | IM-12 | 12 | Office files and PDFs | docx, pdf, pptx, xlsx (official) | anthropics/skills › `skills/docx` and siblings | Apache-2.0 (LICENSE.txt in `skills/docx` read 2026-11-11) | Native — configure only (install the official plugin; don't copy) | — | P2 |  |
 | IM-12 | 12 | Writing for agents (skills, rules, docs) | writing-for-agents | mattpocock/skills › `skills/productivity/writing-for-agents` | MIT | Import | Used when H-Stack writes rules, lessons and skills | P1 |  |
@@ -124,7 +124,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 | IM-13 | 13 | PR bodies with evidence; merge conflicts | pr, resolving-merge-conflicts | mattpocock/skills › `skills/engineering/pr`, and the resolving-merge-conflicts skill (path to confirm at import) | MIT | Import (pr is the base of HS-065) | Add receipts and the "Not verified" section | P1 |  |
 | IM-14 | 14 | Long runs, scheduling, fan-out | `/goal`, cloud scheduled tasks (Routines), Workflows, subagents, worktrees, `/batch`, agent view | Claude Code built-in | n/a | Native — configure only, plus the thin pieces in HS-071 and HS-041 | — | P1 |  |
 | IM-14 | 14 | Parallel agents on independent work | dispatching-parallel-agents | obra/superpowers › `skills/dispatching-parallel-agents` | MIT | Import | Add the decision ledger (HS-052) to its brief | P2 |  |
-| IM-15 | 15 | Skill scaffolding, evals, benchmark, trigger tuning | skill-creator | anthropics/skills › `skills/skill-creator` (also `skill-creator@claude-plugins-official`) | Apache-2.0 | Native — configure only | Used for every skill (HS-002) | P0 |  |
+| IM-15 | 15 | Skill scaffolding, evals, benchmark, trigger tuning | skill-creator | anthropics/skills › `skills/skill-creator` (also `skill-creator@claude-plugins-official`) | Apache-2.0 | Native — configure only | Used for every skill (HS-002) | P0 | done — native: classifier routes skill authoring to skill-creator; its evals.json format and benchmark layout are used for every skill (evals/skill-bench.mjs); recommended companion in setup |
 | IM-16 | 16 | Research with cited primary sources | research | mattpocock/skills › `skills/engineering/research` | MIT | Import | — | P2 |  |
 
 **Not imported** (ideas only):
@@ -181,6 +181,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-001 · Whole-stack smoke test (~10 real tasks, with vs without H-Stack)
 **Evals · Thin · P0 · M · Reliability (reads all five) · Depends on: — · Sources: N41, D15**
+- **Status.** needs-user (smoke-test tasks: evals/run-smoke.mjs, evals/tasks.json format and evals/check-tasks.mjs are built and the runner self-test passes in both arms (evals/results/iteration-0); the ~10 real tasks from the user's projects and their results need the user (OD-6, M1))
 - **Problem.** Nothing about H-Stack can be claimed without a with/without comparison on real work.
 - **Mechanism.**
   - **Tasks.** About 10 of the user's real tasks. Each has a prompt (skill-creator `evals.json` format), a fixture (repo at a commit) and a `check` script.
@@ -197,6 +198,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-002 · Per-skill evals and trigger tuning with skill-creator
 **Evals · Native — configure only · P0 · S per skill · Reliability · Depends on: HS-001 · Sources: N123, C27**
+- **Status.** done — every skill has evals/evals.json (>=3 prompts, objective checks); evals/skill-bench.mjs runs skill-creator's with/without benchmark (results in evals/results/skills/); tests/triggers/*.json should/should-not sets checked against the classifier in CI; plugins/h-stack/evals/ holds claude plugin eval activation cases with tool_used: Skill graders. Deviation: skill-creator's description optimiser loop was not run (cost); keyword routing is tuned on the trigger sets instead
 - **Problem.** Activation without slash commands depends on descriptions that trigger when they should and stay quiet when they shouldn't. One-sided tests reward one-sided behaviour.
 - **Mechanism.**
   - **Per skill.** Every skill keeps `evals/evals.json` (2–3 real prompts, objective assertions) and runs skill-creator's with-skill vs without-skill benchmark (pass rate, tokens, time).
@@ -214,6 +216,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-003 · Objective assertions and judge hygiene
 **Evals · Native — configure only · P0 · S · Reliability · Depends on: HS-001 · Sources: N124**
+- **Status.** done — checks run outside the agent and grade first (exit codes, file bytes, regex); judge grading is binary with evidence and 'Unknown' allowed in the smoke runner; pairwise grading not used; plugin-eval cases use regex/tool_used graders on the trace
 - **Problem.** An LLM judge from the same family grades Claude's output leniently.
 - **Mechanism.**
   - **Assertions.** Deterministic wherever possible: exit codes, file bytes, regex. skill-creator asks for "objectively verifiable" assertions.
@@ -235,6 +238,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-005 · Smoke-test assertions for the five metrics and the sameness check
 **Evals · Thin · P0 · S · All five · Depends on: HS-001 · Sources: CLAUDE.md North star (no idea ID)**
+- **Status.** done — evals/run-smoke.mjs grades false-done, tampering (protected tests byte-identical), necessary vs unnecessary questions, unaided, cost per solved task and sameness (Jaccard of the two contexts' diffs per context_group)
 - **Problem.** skill-creator's benchmark reports pass rate, tokens and time, but not false-done, tampering, questions or sameness.
 - **Mechanism.** Standard assertions added to every task's grading:
   - **False-done.** The final message claims success while `check` fails.
@@ -374,6 +378,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-015 · Skill index in frontmatter and a generated catalogue
 **Skill index · Build · P0 · M · Reliability · Depends on: HS-010 · Sources: the 00 §4 rule "each skill declares its own triggers in one place" (no ID)**
+- **Status.** done — metadata.hstack in every SKILL.md; scripts/gen-index.mjs writes a byte-stable index.json; CI fails when stale
 - **Problem.** Description matching alone activates the right skill about 20% of the time, and a separate rules file drifts.
 - **Mechanism.** Each SKILL.md declares its routing data:
   - **Native fields:** `description`, `when_to_use`, `paths`, `model`, `effort`, `context`.
@@ -403,6 +408,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-017 · SessionStart router and briefing
 **Activation · Build · P0 · M · Autonomy · Depends on: HS-010, HS-011, HS-015, HS-045 · Sources: E7, D17**
+- **Status.** done — hooks/session-start.mjs: byte-stable skill map + facts (open PR, dev ports, wishlist, checkpoint pointer, failure tail after compact, outcome-unknown on resume, digest check); no git status or repo overview
 - **Problem.** Without slash commands, Claude needs a compact map of what exists. It also needs runtime facts it can't infer.
 - **Mechanism.** A SessionStart hook (`startup|resume|clear|compact`) emits:
   - **(a) Skill map.** A byte-stable, compact map (≤ budget). Cut if the smoke test shows no gain (K4).
@@ -422,6 +428,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-018 · Per-prompt rules classifier: size gate, sticky mode, overrides
 **Activation · Build · P0 · M · Reliability · Depends on: HS-015, HS-045 · Sources: E1, E2, E3**
+- **Status.** done — hooks/classify.mjs + lib/pure/classify-rules.mjs: overrides, sticky playbook, direct/light/full size gate, <=2 skills, native routes (code-review, security-review, skill-creator), one factual line, nothing for direct prompts; trigger sets in CI. Measured: on 4 real fixture tasks the suggested skill was loaded 2/4 times (tdd, planning yes; debugging no), on 4 brief questions 0/4
 - **Problem.** The right skill must be in front of Claude with no slash commands, and trivial requests must skip process.
 - **Mechanism.** A `UserPromptSubmit` command hook works in this order:
   1. Plain-language overrides ("just do it", "go deep", "why that?").
@@ -446,6 +453,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-020 · Act / ask / stop with a separate intent check
 **Activation · Build (with IM-03 grilling for the ask flow) · P0 · M · Judgment · Depends on: HS-018, HS-046 · Sources: N1, E4, N32, D12**
+- **Status.** done — skills/clarify (act/ask/stop, <=3 questions with recommendations, grilling full mode) + agents/intent-check.md (read-only JSON) validated by hooks/agent-result.mjs; classifier adds clarify for size=full unless the user said just do it
 - **Problem.** Agents guess or over-ask, and ask about things they could look up.
 - **Mechanism.** For `full` or ambiguous prompts, a forked read-only skill (`context: fork`) sees only the prompt and the discoverable facts. It returns one of:
   - **act**;
@@ -475,6 +483,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-022 · Event triggers
 **Activation · Build · P0 · M · Reliability · Depends on: HS-015, HS-027 · Sources: 00 §4 L3 (no ID)**
+- **Status.** done — ledger.mjs: test_failed/build_failed -> debugging, path_edit via skill paths; gate-bash.mjs: pre_push -> review via additionalContext; one note per kind per turn
 - **Problem.** The best moment to suggest a skill is often a tool event.
 - **Mechanism.** Index `events` map hook events to skills:
   - a test or build failure (PostToolUse / PostToolUseFailure on Bash) → the debugging skill;
@@ -533,6 +542,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-027 · Evidence receipts and the Stop verification gate
 **Guards · Build · P0 · M · Reliability · Depends on: HS-012, HS-045 · Sources: N100, E6, C13, D6**
+- **Status.** done — hooks/ledger.mjs receipts {id, cmd, exit, out_sha, tree, kinds}; batch.mjs receipt line; hooks/stop.mjs blocks once on unbacked claims, no receipt and no Not verified line, running background tasks; snapshot cases cover each path
 - **Problem.** Agents claim checks passed that never ran, or ran on older code. `/goal`'s evaluator reads only the transcript.
 - **Mechanism.**
   - **Receipts.** PostToolUse on Bash appends a receipt `{id, cmd, exit, out_sha, tree, ts}` to the session ledger. A one-line receipt is added to context via PostToolBatch, digest-gated. Later edits mark receipts stale.
@@ -552,6 +562,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-028 · Test-integrity triad: read-only tests, tamper scan, contradiction stop
 **Guards · Build · P0 · M · Reliability · Depends on: HS-012, HS-027, HS-029 · Sources: N13, N14, N15**
+- **Status.** done — (a) read-only tests in gate-edit/gate-bash with hs phase test as the declared test-writing step; (b) lib/tamper.mjs scan at Stop (skips, weakened asserts, timeouts, clocks, special-cased literals, overloads, call counters, env sniffing); (c) hs stop as the contradiction path
 - **Problem.** Claude's main way of cheating is editing tests. Read-only tests don't stop special-casing, and LLM monitors miss about half of cheating.
 - **Mechanism.**
   - **(a) Read-only tests.** During implementation, PreToolUse on Edit, Write and Bash redirects into test files asks, showing the diff. Exception: the test-writing step that the TDD skill (IM-05) declares.
@@ -575,6 +586,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-029 · Protected checkers and paths
 **Guards · Native — configure only · P0 · S · Reliability · Depends on: HS-012 · Sources: N101, C3**
+- **Status.** done — scripts/setup.mjs proposes native ask/deny rules (OD-4, shown before writing); gate-bash redirect check for protected paths and .h-stack state; gate-edit asks on checkers
 - **Problem.** An optimiser that can edit its checker learns to satisfy the checker.
 - **Mechanism.** Native permission rules, set at install (OD-4), with `ask` for:
   - `Edit(.github/workflows/**)` and CODEOWNERS;
@@ -591,6 +603,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-030 · Irreversible-action gate with a dry-run receipt and approval binding
 **Guards · Thin · P0 · M · Autonomy · Depends on: HS-012, HS-027 · Sources: E5, N104, C4, C5, D10**
+- **Status.** done — lib/irreversible.mjs parser (unwraps bash -c, env, sudo, xargs, substitutions) with effect classes; gate-bash asks with a manifest and the dry-run receipt (or its absence), records approvals.jsonl; exfiltration denied; gate-mcp asks on send/post tools; per-project allowlist
 - **Problem.** Agents run the irreversible step and find out afterwards, and a general "go ahead" gets reused for a different command.
 - **Mechanism.**
   - **Native (configure).** Auto mode blocks destructive git you didn't ask for and asks before `rm -rf` on unresolved variables. Permission `ask` rules cover `gh pr merge`, `npm publish` and similar.
@@ -608,6 +621,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-031 · Dependency gate
 **Guards · Build · P0 (00b gave no priority; raised because 19.7% of recommended packages don't exist and no native check exists) · M · Reliability · Depends on: HS-012 · Sources: N22**
+- **Status.** done — lib/deps.mjs: install commands, manifest edits and new imports; exists / age >= 30 days / weekly downloads / near-miss of top packages / @latest; 7-day cache; offline => ask; registry fixtures in tests
 - **Problem.** Models recommend packages that don't exist, and attackers register those names.
 - **Mechanism.** A PreToolUse hook checks install commands, manifest edits and new import lines. A package passes only if it:
   - exists in the registry;
@@ -639,6 +653,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-033 · Tool-description firewall
 **Guards · Build · P0 · M · Reliability · Depends on: HS-012 · Sources: N119**
+- **Status.** done — hooks/register.js tool.describe + lib/pure/firewall.mjs: imperatives, secret paths, hidden Unicode, cross-tool references; suspicious MCP tools deferred with a neutralised description and a toast; .catch defers unknown MCP tools; claude plugin test cases pass. Deviation: tested with the mods test kit, not plugin-eval mock MCP servers (H-Stack declares no MCP server to mock)
 - **Problem.** A poisoned MCP tool description steers the agent without the tool ever running, and nothing native inspects descriptions.
 - **Mechanism.** The mod `tool.describe` scans each description, including deferred tools loaded by tool search, for:
   - imperatives aimed at other tools or at the session;
@@ -766,6 +781,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-046 · Assumption ledger
 **State & memory · Build · P0 · S · Judgment · Depends on: HS-045, HS-027 · Sources: N2**
+- **Status.** done — hs assume/verify-assumption (verified needs a passing receipt); open assumptions block the Stop gate; listed in replies per core-rules
 - **Problem.** When the agent proceeds without asking, its assumptions are invisible and never checked.
 - **Mechanism.** `hs assume "<a>" --check "<how>"`. The list is shown in the reply. At Stop, each assumption must be verified (with a receipt), refuted, or handed to the user.
 - **Evidence.** The "just build it" escape hatch lists assumptions ([03](research/03-ideation-product.md)). AgentAbstain: conflicting evidence 28%.
@@ -790,6 +806,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-048 · Raw evidence behind memory, with provenance
 **State & memory · Thin · P0 (00c: P0) · M · Learning · Depends on: HS-045, HS-049 · Sources: N25, N108, N112**
+- **Status.** done — lessons carry a <=300-token evidence excerpt with provenance user|executed (untrusted rejected by lib/lessons.mjs); lib/retrieve.mjs injects <=2 trigger-matched lessons with their excerpt; setup raises cleanupPeriodDays to 90 (OD-10); no parallel episode store
 - **Problem.** Consolidated lessons get ignored and degrade, and native auto memory keeps only consolidated notes. Memory is also a target for prompt injection.
 - **Mechanism.**
   - **No parallel store.** Native session transcripts are the raw episodes; H-Stack does not build its own episode store.
@@ -808,6 +825,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-049 · Lessons: native auto memory plus committed, path-scoped lesson rules
 **State & memory · Thin · P0 (00c: P0 for N110) · M · Learning · Depends on: HS-045 · Sources: N26, N110, E10**
+- **Status.** done — committed .claude/rules/lessons/*.md with paths: frontmatter; lib/lessons.mjs validator (CI fixtures) rejects always-on, generic, untrusted or evidence-less lessons; hs lesson propose/check; hs vote appends to lessons-votes.jsonl and proposes removal when harmful > helpful; native auto memory and claude-md-management configured/recommended by setup
 - **Problem.** Corrections need to persist, be shared with the team and cloud sessions, keep their applicability conditions, and never be rewritten wholesale.
 - **Mechanism.**
   - **Native (configure).**
@@ -925,6 +943,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-060 · Rubric before code: spec, contract and interfaces
 **Skills (04) · Build (on top of IM-04 writing-plans) · P0 (00c: P0; top-3 differentiator) · L · Reliability · Depends on: HS-027, HS-018 (lanes HS-061 and solo-boundary HS-025 refine it later) · Sources: N102, N130, N132**
+- **Status.** done — planning skill references/rubric.md; agents/rubric-writer.md and rubric-grader.md (blind, diff + rubric only); hs rubric set/strike/grade; agent-result.mjs validates both; unmet must-haves block the Stop gate
 - **Problem.** "Done" is decided after the fact by the agent that did the work, and tests miss root causes and scope creep.
 - **Mechanism.** For `full` tasks (at P0 by size label; HS-025 later narrows this to tasks below the measured solo boundary):
   1. A product-level spec with an Interfaces section (signatures, endpoints, data shapes).
@@ -1150,6 +1169,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-083 · Supply chain: third-party record, pins and scan
 **Distribution · Thin · P0 · S (record) / M (scan) · Reliability · Depends on: HS-012 · Sources: N24, C34**
+- **Status.** done — third-party.json -> THIRD_PARTY.md with per-file SHA-256 of shipped and upstream files, checked in CI; SessionStart verifies digests; gate-bash asks on skill/plugin/MCP installs; scripts/scan-skill.mjs scans third-party skills, hooks and MCP configs; nothing loads instructions from a URL
 - **Problem.** Imported skills and third-party configs are a supply-chain attack surface, and some stacks fetch their instructions at run time.
 - **Mechanism.**
   - **P0.** `plugins/h-stack/THIRD_PARTY.md` lists each import's repo, path, commit, licence, per-file SHA-256 and changes; CI checks it against the files.

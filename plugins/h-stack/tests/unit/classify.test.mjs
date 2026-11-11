@@ -15,7 +15,7 @@ test('direct prompts add nothing', () => {
 test('matches at most two skills with a factual line', () => {
   const r = classify('the build is slow and tests fail with a traceback', index);
   assert.ok(r.route.skills.length <= 2);
-  assert.match(r.line, /^H-Stack: size=light\. Relevant skills?: /);
+  assert.match(r.line, /^H-Stack: size=light\. Relevant skills? /);
 });
 test('full prompts get the intent check', () => {
   const r = classify('Implement a new feature: CSV export across the API and the web app', index);

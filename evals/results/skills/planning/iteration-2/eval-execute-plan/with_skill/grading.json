@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+      "passed": true,
+      "evidence": "check exit 0: hen taken\nok 3 - appends a counter when taken\n  ---\n  duration_ms: 0.146436\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 97.501236\n"
+    },
+    {
+      "text": "Both new tests named in the plan exist in test/slug.test.js",
+      "passed": true,
+      "evidence": "The diff adds `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and the check run shows both passing (ok 2, ok 3)."
+    },
+    {
+      "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+      "passed": true,
+      "evidence": "The final message says \"all 3 tests pass on `npm test`\". Under \"Decisions I made\" it lists the deviations: \"No branch and no commits\", the skipped `hs`/receipt steps, and \"I also didn't run the separate final review.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

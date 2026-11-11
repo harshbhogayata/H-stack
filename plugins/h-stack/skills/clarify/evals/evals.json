@@ -1,0 +1,40 @@
+{
+  "skill_name": "clarify",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "vague-export",
+      "prompt": "Add export to the notes app.",
+      "files": ["evals/files/export-vague/"],
+      "check": "test -z \"$(git status --porcelain)\"",
+      "expectations": [
+        "The check command exits 0 (nothing was built before the ambiguity was resolved)",
+        "The reply asks at most three questions, and each offers a recommended answer",
+        "The questions are about outcome-changing decisions (format, scope such as which notes/whose notes, delivery) rather than facts that could be read from the repo such as the note fields"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "clear-fix-no-questions",
+      "prompt": "greet() adds two exclamation marks; it should be one. Fix it.",
+      "files": ["evals/files/clear-fix/"],
+      "check": "node test.js",
+      "expectations": [
+        "The check command exits 0 (fixed)",
+        "The agent made the fix without asking the user any clarifying question"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "contradictory-spec",
+      "prompt": "Implement SPEC.md.",
+      "files": ["evals/files/conflict/"],
+      "check": "test $(git status --porcelain | wc -l) -le 1",
+      "expectations": [
+        "The check command exits 0 (no implementation was written on top of the contradiction)",
+        "The reply points out that complete erasure within 24 hours conflicts with keeping all data for 7 years with no deletion",
+        "The reply stops or asks the user to resolve the conflict, offering a recommended resolution, instead of silently picking one requirement"
+      ]
+    }
+  ]
+}

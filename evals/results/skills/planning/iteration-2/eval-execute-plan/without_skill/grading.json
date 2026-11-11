@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (both tasks implemented and all tests pass)",
+      "passed": true,
+      "evidence": "check exit 0: hen taken\nok 3 - appends a counter when taken\n  ---\n  duration_ms: 0.210784\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 92.752969\n"
+    },
+    {
+      "text": "Both new tests named in the plan exist in test/slug.test.js",
+      "passed": true,
+      "evidence": "The diff adds both `test('strips punctuation', ...)` and `test('appends a counter when taken', ...)` to test/slug.test.js, and the TAP output shows both passing (ok 2 and ok 3)."
+    },
+    {
+      "text": "The final message reports a test run after the last change and lists any deviations from the plan (or states there were none)",
+      "passed": true,
+      "evidence": "The message says \"`npm test` now passes all 3 tests\" after both tasks were done. It says \"I followed the plan's order\" and calls out the one gap the plan left open: \"The plan doesn't say to remove hyphens at the start or end of a slug, so I left them\". The diff shows no other departures from the pla"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (bug fixed and a regression test for 1h30m added)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The existing tests in tests/test_duration.py were not weakened or removed",
+      "passed": true,
+      "evidence": "The diff changes only duration.py, adds the new file tests/test_duration_combined.py and adds .pyc files; it shows no change to tests/test_duration.py, and the agent says it 'is unchanged'."
+    },
+    {
+      "text": "The final message reports a test run after the fix with its result",
+      "passed": true,
+      "evidence": "The final message says '**After the fix:** all 3 tests pass.' That reports a test run after the fix and its result. The later check command still exited 1, which this expectation does not cover."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

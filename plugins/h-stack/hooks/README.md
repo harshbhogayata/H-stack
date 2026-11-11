@@ -9,6 +9,8 @@ Cache effect: Only when a validated subagent output is malformed or thin.
 | fixture | tokens | text |
 |---|---:|---|
 | agent-result-bad-line | 65 | H-Stack: h-stack:review-lane output failed validation (findings[0].line 40 is past the end of src/index.js (2 lines)). Discard it and re-run a fresh h-stack:review-lane; do not repair the output. |
+| agent-result-grader-missing | 52 | H-Stack: h-stack:rubric-grader output failed validation (item M2 not graded). Discard it and re-run a fresh h-stack:rubric-grader; do not repair the output. |
+| agent-result-intent-invalid | 53 | H-Stack: h-stack:intent-check output failed validation (at most three questions). Discard it and re-run a fresh h-stack:intent-check; do not repair the output. |
 | agent-result-invalid | 52 | H-Stack: h-stack:review-lane output failed validation (no JSON object found). Discard it and re-run a fresh h-stack:review-lane; do not repair the output. |
 | agent-result-shallow | 63 | H-Stack: h-stack:review-lane returned no findings and only 1 cleared unit(s), which is thin coverage. Re-run a fresh h-stack:review-lane from a different angle before treating it as clear. |
 
@@ -27,7 +29,10 @@ Cache effect: Appended after the prompt; nothing for direct prompts. Never edits
 
 | fixture | tokens | text |
 |---|---:|---|
+| classify-debug | 37 | H-Stack: size=light. Relevant skill: h-stack:debugging (load with the Skill tool) because matched "traceback". |
+| classify-full | 58 | H-Stack: size=full. Relevant skills (load with the Skill tool): h-stack:planning (matched "Implement a new feature"), h-stack:clarify (size=full: act/ask/stop check first). |
 | classify-just-do-it | 31 | H-Stack: size=light. User said to proceed without questions; log assumptions with hs assume. |
+| classify-lesson | 138 | H-Stack lesson L-pay-1 Sum money as integer cents in src/payments/total.ts (.claude/rules/lessons/payments.md): editing totals or tax arithmetic in `src/payments/total.ts`; applies when amounts are added, compared or rounded; not when formatting a display string. Evidence: $ npm test -- total.spec.ts \| expected 10.3, received 10.299999999999999 \| fixed by summing cents: Math.round(a * 100) + Math.round(b * 100) |
 | classify-secret | 38 | H-Stack: size=light. The prompt appears to contain a GitHub token; H-Stack did not store it. Rotating it is safer. |
 | classify-sticky | 19 | H-Stack: size=light. Continuing with h-stack:debugging. |
 | classify-why-that | 25 | H-Stack picked h-stack:debugging because matched "traceback" (size=light). |
@@ -60,7 +65,7 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-protected-redirect | 54 | Blocked by protected-checker: the command writes to .github/workflows/ci.yml, a CI, agent or test-runner config. To proceed: the user approves edits to checkers. |
 | bash-push-main | 71 | Blocked by irreversible-gate: irreversible action (effect=push-default; executable=git; target=git push to main; destination=origin). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-scope-lock | 110 | Blocked by irreversible-gate: irreversible action (effect=send; executable=gh; target=gh issue comment; destination=issue 12). To proceed: the user approves this exact command; a changed command asks again. Blocked by scope-lock: this writes to #12, but the request named #7. To proceed: confirm the target number with the user. |
-| bash-state-write | 54 | Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use ${CLAUDE_PLUGIN_ROOT}/bin/hs instead. |
+| bash-state-write | 50 | Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 | bash-step-budget | 56 | Blocked by step-budget: this turn used 75 model steps (cap 60 for size=light). To proceed: stop and summarise what is done, what remains and the next step for the user. |
 | bash-terraform-with-plan | 91 | Blocked by irreversible-gate: irreversible action (effect=deploy; executable=terraform; target=terraform apply; destination=infrastructure); dry-run receipt r-1 (`terraform plan -out tf.plan`). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-test-sed | 71 | Blocked by read-only-tests: the command writes to the test file tests/index.test.js outside a declared test-writing step. To proceed: declare the step with hs phase test before editing tests, or the user approves. |
@@ -103,7 +108,8 @@ Cache effect: Appended next to the tool result; at most one note per kind per tu
 
 | fixture | tokens | text |
 |---|---:|---|
-| ledger-empty-run | 34 | H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed. |
+| ledger-empty-run | 61 | H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed.<br>H-Stack: Relevant skill: h-stack:debugging because `pytest` failed (test_failed). |
+| ledger-test-failed-trigger | 28 | H-Stack: Relevant skill: h-stack:debugging because `npm test` failed (test_failed). |
 
 ## pre-compact.mjs
 
@@ -119,7 +125,7 @@ Cache effect: Once per session start; static map first and byte-stable, facts so
 
 | fixture | tokens | text |
 |---|---:|---|
-| session-start-facts | 74 | H-Stack facts: failed approaches so far (do not retry without a new signal): bump node to 22 → native addon fails to build. last checkpoint: .h-stack/sessions/s1/checkpoints/001.md. open wishlist: W1 staging DB password. |
+| session-start-facts | 221 | H-Stack skills (picked per prompt; no slash commands; * = only when asked): clarify: act, ask or stop; few questions, each with a recommendation; core-rules: evidence before claims; small surgical changes; debugging: root cause before any fix, then prove it; planning: spec to checkable plan with interfaces, then execute; tdd: test-first in vertical red-green slices. State and notes: the hs command (assume, decide, wish, failed, stop).<br>H-Stack facts: failed approaches so far (do not retry without a new signal): bump node to 22 → native addon fails to build. last checkpoint: .h-stack/sessions/s1/checkpoints/001.md. open wishlist: W1 staging DB password. |
 
 ## stop.mjs
 

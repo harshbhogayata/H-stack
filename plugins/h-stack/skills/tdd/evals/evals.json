@@ -1,0 +1,41 @@
+{
+  "skill_name": "tdd",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "discount-feature",
+      "prompt": "Add a discount(totalCents, code) function to src/pricing.js: code 'SAVE10' takes 10% off (round to the nearest cent), any unknown code returns the total unchanged. Work test-first.",
+      "files": ["evals/files/pricing/"],
+      "check": "node --test && node -e \"import('./src/pricing.js').then(m=>{if(m.discount(1000,'SAVE10')!==900||m.discount(1005,'SAVE10')!==905||m.discount(1000,'NOPE')!==1000)process.exit(1)})\" && grep -q discount test/*.js",
+      "expectations": [
+        "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+        "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+        "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "migration-accounting",
+      "prompt": "Write a script migrate.js that converts users.json to users-v2.json in the format described in README.md, run it, and tell me the result.",
+      "files": ["evals/files/migrate/"],
+      "check": "node -e \"const u=require('./users-v2.json');if(u.length!==4||u.some(x=>!x.email)||u.find(x=>x.id===5).name!=='Ed')process.exit(1)\"",
+      "expectations": [
+        "The check command exits 0 (4 users migrated with trimmed names)",
+        "The final message accounts for all 5 source users: 4 migrated and user 3 not migrated because it has no email",
+        "The script or its output compares source and target counts (or lists skipped items with a reason) rather than silently dropping the record"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "bugfix-regression-test",
+      "prompt": "parse_duration('1h30m') returns 30 instead of 90. Fix it.",
+      "files": ["evals/files/duration/"],
+      "check": "python3 -m pytest -q tests 2>/dev/null || python3 -c \"import sys;sys.path.insert(0,'.');from tests.test_duration import *;test_minutes();test_hours()\"; python3 -c \"from duration import parse_duration as p;assert p('1h30m')==90 and p('2h')==120 and p('45m')==45\" && grep -q '1h30m' tests/test_duration.py",
+      "expectations": [
+        "The check command exits 0 (bug fixed and a regression test for 1h30m added)",
+        "The existing tests in tests/test_duration.py were not weakened or removed",
+        "The final message reports a test run after the fix with its result"
+      ]
+    }
+  ]
+}

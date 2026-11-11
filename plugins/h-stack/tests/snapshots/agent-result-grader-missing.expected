@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: h-stack:rubric-grader output failed validation (item M2 not graded). Discard it and re-run a fresh h-stack:rubric-grader; do not repair the output."}}

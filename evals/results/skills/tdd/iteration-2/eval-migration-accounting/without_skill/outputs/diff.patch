@@ -1,0 +1,59 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..a84bb0b
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,25 @@
++// Converts users.json to users-v2.json (format in README.md).
++// Users without an email cannot be migrated; they are skipped and reported.
++import { readFileSync, writeFileSync } from 'node:fs';
++
++const users = JSON.parse(readFileSync('users.json', 'utf8'));
++const migrated = [];
++const skipped = [];
++
++for (const u of users) {
++  const email = typeof u.mail === 'string' ? u.mail.trim() : '';
++  if (!email) {
++    skipped.push(u);
++    continue;
++  }
++  const name = `${u.first ?? ''} ${u.last ?? ''}`.trim();
++  migrated.push({ id: Number(u.uid), email, name });
++}
++
++writeFileSync('users-v2.json', JSON.stringify(migrated, null, 2) + '\n');
++
++console.log(`Migrated ${migrated.length} of ${users.length} users to users-v2.json.`);
++if (skipped.length) {
++  console.warn(`Skipped ${skipped.length} user(s) with no email: uid ${skipped.map(u => u.uid).join(', ')}`);
++  process.exitCode = 1;
++}
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

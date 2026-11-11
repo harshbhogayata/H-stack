@@ -7,6 +7,7 @@ import { runHook, projectDir, stateDir, sessionDir, readJson, writeJsonAtomic, c
 import { loadIndex } from '../lib/index.mjs';
 import { classify } from '../lib/pure/classify-rules.mjs';
 import { logActivation } from '../lib/telemetry.mjs';
+import { retrieveLessons } from '../lib/retrieve.mjs';
 
 const SECRET_KINDS = [[/sk-ant-/, 'Anthropic API key'], [/\bgh[pousr]_|github_pat_/, 'GitHub token'], [/\bAKIA[0-9A-Z]{16}/, 'AWS access key'], [/xox[abprs]-/, 'Slack token'], [/-----BEGIN [A-Z ]*PRIVATE KEY/, 'private key'], [/\bsk-[A-Za-z0-9]{20,}/, 'API key'], [/\bAIza/, 'Google API key']];
 const CORRECTION = /^\s*(no[,.! ]|nope|wrong|not that|that'?s not|don'?t use|stop using|why (did|are) you)/i;
@@ -45,5 +46,6 @@ await runHook('classify', 'open', async (input) => {
     session: sid, prompt, size: route.size, picked: route.skills, rules: route.rules, override: route.override,
     correction_of_previous: CORRECTION.test(prompt) ? (prev.skills || []) : null,
   });
-  return context('UserPromptSubmit', line);
+  const lessons = route.size === 'direct' ? [] : retrieveLessons(proj, prompt);
+  return context('UserPromptSubmit', [line, ...lessons].filter(Boolean).join('\n'));
 });

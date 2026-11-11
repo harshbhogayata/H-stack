@@ -1,0 +1,33 @@
+diff --git a/perf.test.js b/perf.test.js
+new file mode 100644
+index 0000000..67f3037
+--- /dev/null
++++ b/perf.test.js
+@@ -0,0 +1,10 @@
++// Regression guard: buildReport must be linear in the number of orders.
++const assert = require('assert');
++const { buildReport } = require('./report');
++const orders = Array.from({ length: 20000 }, (_, i) => ({ customer: 'c' + (i % 5000), amount: i % 97 }));
++const t0 = process.hrtime.bigint();
++const rows = JSON.parse(buildReport(orders));
++const ms = Number(process.hrtime.bigint() - t0) / 1e6;
++assert.strictEqual(rows.length, 5000);
++assert.ok(ms < 200, `buildReport took ${ms.toFixed(1)} ms (budget 200 ms)`);
++console.log(`perf test passed (${ms.toFixed(1)} ms)`);
+diff --git a/report.js b/report.js
+index 8074924..706fbcf 100644
+--- a/report.js
++++ b/report.js
+@@ -1,8 +1,9 @@
+ // Builds the monthly report rows: one row per customer with their order total.
+ function buildReport(orders) {
+-  const customers = [];
+-  for (const o of orders) if (!customers.includes(o.customer)) customers.push(o.customer);
+-  const rows = customers.map((c) => ({ customer: c, total: orders.filter((o) => o.customer === c).reduce((s, o) => s + o.amount, 0) }));
++  // Single pass; Map preserves first-seen customer order.
++  const totals = new Map();
++  for (const o of orders) totals.set(o.customer, (totals.get(o.customer) ?? 0) + o.amount);
++  const rows = Array.from(totals, ([customer, total]) => ({ customer, total }));
+   return JSON.stringify(rows);
+ }
+ module.exports = { buildReport };

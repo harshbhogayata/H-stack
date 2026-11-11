@@ -1,0 +1,114 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..b102e0b
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,37 @@
++import { readFileSync, writeFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++export function migrate(users) {
++  const migrated = [];
++  const skipped = [];
++  for (const u of users) {
++    if (!u.mail) {
++      skipped.push({ uid: u.uid, reason: 'missing email' });
++      continue;
++    }
++    migrated.push({ id: u.uid, email: u.mail, name: `${u.first ?? ''} ${u.last ?? ''}`.trim() });
++  }
++  return { migrated, skipped };
++}
++
++function main(inputPath = 'users.json', outputPath = 'users-v2.json') {
++  const source = JSON.parse(readFileSync(inputPath, 'utf8'));
++  const { migrated, skipped } = migrate(source);
++
++  if (migrated.length + skipped.length !== source.length) {
++    throw new Error(`Count mismatch: source ${source.length} != migrated ${migrated.length} + skipped ${skipped.length}`);
++  }
++  writeFileSync(outputPath, JSON.stringify(migrated, null, 2) + '\n');
++  const written = JSON.parse(readFileSync(outputPath, 'utf8')).length;
++  if (written !== migrated.length) {
++    throw new Error(`Count mismatch: migrated ${migrated.length} != written ${written}`);
++  }
++
++  console.log(`source ${source.length}, migrated ${migrated.length}, skipped ${skipped.length}, written ${written} -> ${outputPath}`);
++  for (const s of skipped) console.log(`  not migrated: uid ${s.uid}: ${s.reason}`);
++}
++
++if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  main(process.argv[2], process.argv[3]);
++}
+diff --git a/migrate.test.js b/migrate.test.js
+new file mode 100644
+index 0000000..ec721b9
+--- /dev/null
++++ b/migrate.test.js
+@@ -0,0 +1,37 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { execFileSync } from 'node:child_process';
++import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { migrate } from './migrate.js';
++
++test('a user with an email maps to {id, email, name}', () => {
++  const result = migrate([{ uid: 1, mail: 'ana@example.com', first: 'Ana', last: 'Silva' }]);
++  assert.deepEqual(result.migrated, [{ id: 1, email: 'ana@example.com', name: 'Ana Silva' }]);
++});
++
++test('a user without an email is not migrated and is reported with a reason', () => {
++  const result = migrate([{ uid: 3, first: 'Cy', last: 'Ode' }]);
++  assert.deepEqual(result.migrated, []);
++  assert.deepEqual(result.skipped, [{ uid: 3, reason: 'missing email' }]);
++});
++
++test('name is trimmed when a name part is empty', () => {
++  const result = migrate([{ uid: 5, mail: 'ed@example.com', first: 'Ed', last: '' }]);
++  assert.equal(result.migrated[0].name, 'Ed');
++});
++
++test('running the script writes the v2 file and reports skipped users', () => {
++  const dir = mkdtempSync(join(tmpdir(), 'migrate-'));
++  const input = join(dir, 'in.json');
++  const output = join(dir, 'out.json');
++  writeFileSync(input, JSON.stringify([
++    { uid: 1, mail: 'a@x.com', first: 'A', last: 'B' },
++    { uid: 2, first: 'No', last: 'Mail' },
++  ]));
++  const stdout = execFileSync('node', ['migrate.js', input, output], { encoding: 'utf8' });
++  assert.deepEqual(JSON.parse(readFileSync(output, 'utf8')), [{ id: 1, email: 'a@x.com', name: 'A B' }]);
++  assert.match(stdout, /source 2, migrated 1, skipped 1/);
++  assert.match(stdout, /uid 2: missing email/);
++});
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

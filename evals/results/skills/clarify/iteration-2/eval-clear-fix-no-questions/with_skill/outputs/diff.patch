@@ -1,0 +1,10 @@
+diff --git a/greet.js b/greet.js
+index dec3fc4..1e5e685 100644
+--- a/greet.js
++++ b/greet.js
+@@ -1,4 +1,4 @@
+ function greet(name) {
+-  return 'Hello, ' + name + '!!';
++  return 'Hello, ' + name + '!';
+ }
+ module.exports = { greet };

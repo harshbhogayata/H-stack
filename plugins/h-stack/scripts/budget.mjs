@@ -33,8 +33,10 @@ export function measure() {
   const ss = render((c) => c.hook === 'session-start.mjs');
   const ssMax = Math.max(0, ...ss.map((x) => tokens(x.text)));
   rows.push({ item: 'SessionStart output (largest fixture)', tokens: ssMax, budget: BUDGET.sessionStart });
-  const cl = render((c) => c.hook === 'classify.mjs' && c.name !== 'classify-why-that');
-  const clMax = Math.max(0, ...cl.map((x) => tokens(x.text)));
+  const cl = render((c) => c.hook === 'classify.mjs' && c.name !== 'classify-why-that' && c.name !== 'classify-lesson');
+  const ls = render((c) => c.name === 'classify-lesson');
+  for (const x of ls) { const lessonLines = x.text.split('\n').filter((l) => l.startsWith('H-Stack lesson')); rows.push({ item: 'lesson retrieval (<=2 lessons with excerpts)', tokens: tokens(lessonLines.join('\n')), budget: 840 }); rows.push({ item: 'lessons per prompt', tokens: lessonLines.length, budget: 2 }); }
+  const clMax = Math.max(0, ...cl.map((x) => tokens(x.text.split('\n').filter((l) => !l.startsWith('H-Stack lesson')).join('\n'))));
   rows.push({ item: 'classifier line (largest fixture)', tokens: clMax, budget: BUDGET.classifierLine });
   rows.push({ item: 'always-on total (listing + SessionStart + one classifier line)', tokens: listing + ssMax + clMax, budget: BUDGET.alwaysOn });
   const sa = render((c) => c.hook === 'subagent-start.mjs');

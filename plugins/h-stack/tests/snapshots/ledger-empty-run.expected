@@ -1,1 +1,1 @@
-{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed."}}
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed.\nH-Stack: Relevant skill: h-stack:debugging because `pytest` failed (test_failed)."}}

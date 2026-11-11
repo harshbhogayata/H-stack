@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (10 consecutive passing runs)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+      "passed": true,
+      "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await q.drain();`, and `drain()` loops until every pending job promise has resolved (`while (this.pending.size) await Promise.all(this.pending);`), so the test now waits for the jobs to finish. The check command still exited 1, b"
+    },
+    {
+      "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+      "passed": true,
+      "evidence": "The final message says \"each job in `src/queue.js` finishes after a random delay of 5–44 ms. The test waited a fixed 25 ms ... If any job took longer than 25 ms, the check failed\"; 44 ms is the true maximum of `5 + Math.floor(Math.random() * 40)`, so this matches the expected 'up to 45 ms'."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

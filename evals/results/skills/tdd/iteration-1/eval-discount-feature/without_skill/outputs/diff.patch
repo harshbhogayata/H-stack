@@ -1,0 +1,46 @@
+diff --git a/src/pricing.js b/src/pricing.js
+index 136e93d..fa5783d 100644
+--- a/src/pricing.js
++++ b/src/pricing.js
+@@ -1,3 +1,12 @@
+ export function subtotal(lines) {
+   return lines.reduce((sum, l) => sum + l.priceCents * l.qty, 0);
+ }
++
++// Percent off for each known code. Unknown codes leave the total unchanged.
++const DISCOUNT_PERCENT = { SAVE10: 10 };
++
++export function discount(totalCents, code) {
++  const percent = Object.hasOwn(DISCOUNT_PERCENT, code) ? DISCOUNT_PERCENT[code] : 0;
++  // Integer multiply before dividing avoids float error (e.g. 995 * 0.9 = 895.4999...).
++  return Math.round((totalCents * (100 - percent)) / 100);
++}
+diff --git a/test/pricing.test.js b/test/pricing.test.js
+index 159dcf1..a4fab10 100644
+--- a/test/pricing.test.js
++++ b/test/pricing.test.js
+@@ -1,6 +1,23 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+-import { subtotal } from '../src/pricing.js';
++import { subtotal, discount } from '../src/pricing.js';
+ test('subtotal multiplies price by quantity', () => {
+   assert.equal(subtotal([{ priceCents: 250, qty: 2 }, { priceCents: 100, qty: 1 }]), 600);
+ });
++
++test('discount SAVE10 takes 10% off', () => {
++  assert.equal(discount(1000, 'SAVE10'), 900);
++});
++
++test('discount SAVE10 rounds to the nearest cent', () => {
++  assert.equal(discount(999, 'SAVE10'), 899); // 899.1 -> 899
++  assert.equal(discount(995, 'SAVE10'), 896); // 895.5 -> 896
++  assert.equal(discount(1, 'SAVE10'), 1); // 0.9 -> 1
++});
++
++test('discount with unknown code returns total unchanged', () => {
++  assert.equal(discount(1000, 'BOGUS'), 1000);
++  assert.equal(discount(1000, 'save10'), 1000);
++  assert.equal(discount(1000, ''), 1000);
++  assert.equal(discount(1000, undefined), 1000);
++});

@@ -1,0 +1,22 @@
+{
+  "h-stack:debugging": {
+    "should": ["The tests fail with a traceback after my change", "Why does the login endpoint crash with a 500?", "CI is red since yesterday, find out why", "This query got 10x slower after the upgrade", "The checkout test is flaky on CI", "npm test fails with ENOENT for config.json", "There's a regression in the date parser", "Getting a segfault when I load big files"],
+    "should_not": ["Rename the variable x to total in utils.py", "Write a README section about installation", "What's the difference between merge and rebase?", "Add a dark-mode toggle to settings", "Draft a commit message for this change"]
+  },
+  "h-stack:tdd": {
+    "should": ["Add is_leap_year using TDD", "Work test-first on the new discount function", "Do red-green on this feature", "Write a failing test first, then fix the bug", "Migrate users.json to the v2 format without losing records"],
+    "should_not": ["Explain what this regex does", "The tests fail with a traceback", "Plan the multi-currency feature"]
+  },
+  "h-stack:planning": {
+    "should": ["Write an implementation plan for SPEC.md", "Break this feature down into steps", "Implement a new feature: CSV export for invoices across the API", "Execute the plan in docs/plan.md", "Create a step-by-step plan for the migration"],
+    "should_not": ["Fix the typo in the footer", "Why does this test fail?", "What time zone does the server use?"]
+  },
+  "h-stack:clarify": {
+    "should": ["Grill me on this design", "Stress-test my plan for the billing rewrite", "I'm not sure what the requirements are for the export", "Implement a new feature: user roles across the app"],
+    "should_not": ["Fix the typo in the footer, just do it", "Run the tests", "thanks!"]
+  },
+  "h-stack:core-rules": {
+    "should": ["Is it done? Make sure it works before you say so", "Verify the fix before we commit", "It's slow because of the cache, remove it", "Ready to commit?"],
+    "should_not": ["What's a monad?", "Write a haiku about deploys"]
+  }
+}

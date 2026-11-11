@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (nothing was built before the ambiguity was resolved)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply asks at most three questions, and each offers a recommended answer",
+      "passed": false,
+      "evidence": "The reply asks four numbered questions (\"1. **Interface:**\", \"2. **Format:**\", \"3. **Scope:**\", \"4. **Plan gating:**\"), which is more than three, and the recommendations come as one combined default at the end rather than with each question."
+    },
+    {
+      "text": "The questions are about outcome-changing decisions (format, scope such as which notes/whose notes, delivery) rather than facts that could be read from the repo such as the note fields",
+      "passed": true,
+      "evidence": "The questions cover delivery (\"HTTP endpoint (e.g. `GET /notes/export`) or a command-line script\"), format (\"JSON, Markdown ... CSV\"), scope (\"one user's notes (by `ownerId`) or all notes\") and plan gating; none ask about facts the repo already shows, and the agent cites repo fields such as `plan` i"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

@@ -1,0 +1,62 @@
+diff --git a/PLAN.md b/PLAN.md
+index 4c281b0..a5e6866 100644
+--- a/PLAN.md
++++ b/PLAN.md
+@@ -7,13 +7,13 @@ Goal: slugs safe for URLs. Test command: `npm test`.
+ - `uniqueSlug(title: string, taken: Set<string>): string` in `src/slug.js` (new)
+ 
+ ## Task 1: strip punctuation
+-- [ ] Step 1: add test `strips punctuation` in `test/slug.test.js`: `slugify('Hello, World!')` === `'hello-world'`
+-- [ ] Step 2: run `npm test`, expect the new test to fail
+-- [ ] Step 3: make `slugify` drop every character that is not a-z, 0-9 or a hyphen, and collapse repeated hyphens
+-- [ ] Step 4: run `npm test`, expect pass
++- [x] Step 1: add test `strips punctuation` in `test/slug.test.js`: `slugify('Hello, World!')` === `'hello-world'`
++- [x] Step 2: run `npm test`, expect the new test to fail
++- [x] Step 3: make `slugify` drop every character that is not a-z, 0-9 or a hyphen, and collapse repeated hyphens
++- [x] Step 4: run `npm test`, expect pass
+ 
+ ## Task 2: unique slugs
+-- [ ] Step 1: add test `appends a counter when taken`: `uniqueSlug('Hello World', new Set(['hello-world']))` === `'hello-world-2'`; and with `['hello-world','hello-world-2']` === `'hello-world-3'`
+-- [ ] Step 2: run `npm test`, expect fail
+-- [ ] Step 3: implement `uniqueSlug`
+-- [ ] Step 4: run `npm test`, expect pass
++- [x] Step 1: add test `appends a counter when taken`: `uniqueSlug('Hello World', new Set(['hello-world']))` === `'hello-world-2'`; and with `['hello-world','hello-world-2']` === `'hello-world-3'`
++- [x] Step 2: run `npm test`, expect fail
++- [x] Step 3: implement `uniqueSlug`
++- [x] Step 4: run `npm test`, expect pass
+diff --git a/src/slug.js b/src/slug.js
+index 935ab6e..78488b7 100644
+--- a/src/slug.js
++++ b/src/slug.js
+@@ -1,3 +1,15 @@
+ export function slugify(title) {
+-  return title.toLowerCase().replace(/\s+/g, '-');
++  return title
++    .toLowerCase()
++    .replace(/\s+/g, '-')
++    .replace(/[^a-z0-9-]/g, '')
++    .replace(/-+/g, '-');
++}
++
++export function uniqueSlug(title, taken) {
++  const base = slugify(title);
++  if (!taken.has(base)) return base;
++  let n = 2;
++  while (taken.has(`${base}-${n}`)) n++;
++  return `${base}-${n}`;
+ }
+diff --git a/test/slug.test.js b/test/slug.test.js
+index 9cab08f..560ce34 100644
+--- a/test/slug.test.js
++++ b/test/slug.test.js
+@@ -1,4 +1,9 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+-import { slugify } from '../src/slug.js';
++import { slugify, uniqueSlug } from '../src/slug.js';
+ test('lowercases and joins words', () => { assert.equal(slugify('Hello World'), 'hello-world'); });
++test('strips punctuation', () => { assert.equal(slugify('Hello, World!'), 'hello-world'); });
++test('appends a counter when taken', () => {
++  assert.equal(uniqueSlug('Hello World', new Set(['hello-world'])), 'hello-world-2');
++  assert.equal(uniqueSlug('Hello World', new Set(['hello-world', 'hello-world-2'])), 'hello-world-3');
++});

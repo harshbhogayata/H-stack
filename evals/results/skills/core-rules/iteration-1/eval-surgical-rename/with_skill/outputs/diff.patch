@@ -1,0 +1,21 @@
+diff --git a/__pycache__/utils.cpython-313.pyc b/__pycache__/utils.cpython-313.pyc
+new file mode 100644
+index 0000000..a345894
+Binary files /dev/null and b/__pycache__/utils.cpython-313.pyc differ
+diff --git a/utils.py b/utils.py
+index 54dc7cb..cadd7ee 100644
+--- a/utils.py
++++ b/utils.py
+@@ -1,9 +1,9 @@
+ import os, sys
+ def sum_prices(items):
+-    x = 0
++    total = 0
+     for i in items:
+-        x += i['price']
+-    return x
++        total += i['price']
++    return total
+ def   format_price(p):
+   return "$%.2f" % p   # legacy formatting, keep as is
+ def unused_helper():

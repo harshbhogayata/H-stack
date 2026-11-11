@@ -1,1 +1,174 @@
-{"imports": [], "dropped": []}
+{
+  "imports": [
+    {
+      "skill": "core-rules",
+      "repo": "obra/superpowers",
+      "path": "skills/verification-before-completion",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/core-rules/SKILL.md",
+          "upstream": "skills/verification-before-completion/SKILL.md",
+          "upstream_sha256": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3"
+        }
+      ],
+      "changes": "Merged into one core-rules skill with the Karpathy rules and the premise check; iron-law and all-caps prose reworded as plain statements (A4); claim/evidence table kept; red flags and rationalisation tables cut; receipts, Not verified line and hs assume/failed/stop added; signal rules (HS-069) added."
+    },
+    {
+      "skill": "core-rules",
+      "repo": "multica-ai/andrej-karpathy-skills",
+      "path": "CLAUDE.md",
+      "commit": "2c606141936f1eeef17fa3043a72095b4765b9c2",
+      "licence": "MIT",
+      "copyright": "Copyright (c) forrestchang",
+      "files": [
+        {
+          "shipped": "skills/core-rules/SKILL.md",
+          "upstream": "CLAUDE.md",
+          "upstream_sha256": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+        },
+        {
+          "shipped": "rules-templates/think-before-coding.md",
+          "upstream": "CLAUDE.md",
+          "upstream_sha256": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+        },
+        {
+          "shipped": "rules-templates/simplicity.md",
+          "upstream": "CLAUDE.md",
+          "upstream_sha256": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+        },
+        {
+          "shipped": "rules-templates/surgical-changes.md",
+          "upstream": "CLAUDE.md",
+          "upstream_sha256": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+        },
+        {
+          "shipped": "rules-templates/goal-driven.md",
+          "upstream": "CLAUDE.md",
+          "upstream_sha256": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+        }
+      ],
+      "changes": "Four principles condensed into core-rules sections 2-5 and split into four path-scoped one-line rule files installed only by the opt-in setup (OD-4); no always-on block. Upstream ships no LICENSE file; MIT is declared in README.md and plugin.json, so the MIT text is reproduced with that attribution."
+    },
+    {
+      "skill": "core-rules",
+      "repo": "cursor/plugins",
+      "path": "pstack/skills/principle-attack-the-premise",
+      "commit": "5866df557357d005b3c0c9d3da0d9e739b4bdde3",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Lauren Tan",
+      "files": [
+        {
+          "shipped": "skills/core-rules/SKILL.md",
+          "upstream": "pstack/skills/principle-attack-the-premise/SKILL.md",
+          "upstream_sha256": "6a932884daad4aa189e9b5d1665226bbc75621d4d2a398fd4003bebd382f4599"
+        }
+      ],
+      "changes": "Folded into core-rules section 7 (premise check, HS-070) together with the user-stated-cause case; links to other pstack principles removed; disable-model-invocation dropped (OD-8)."
+    },
+    {
+      "skill": "planning",
+      "repo": "obra/superpowers",
+      "path": "skills/writing-plans + skills/executing-plans",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/planning/SKILL.md",
+          "upstream": "skills/writing-plans/SKILL.md",
+          "upstream_sha256": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a"
+        },
+        {
+          "shipped": "skills/planning/references/executing.md",
+          "upstream": "skills/executing-plans/SKILL.md",
+          "upstream_sha256": "deaf176fa179827e80f2ea3101db3ea90fdf562ebef340eba761e4687940f5f5"
+        }
+      ],
+      "changes": "Fixed save path (docs/superpowers/plans) and Python code templates removed: plan location, commands and layout are derived from the project; announcement line, superpowers sub-skill references and the sdd workspace scripts (task-start/task-done) dropped; ledger rulings become hs decide; completion contract tied to receipts; Interfaces section kept and promoted (HS-060); rubric step added (references/rubric.md is H-Stack's own)."
+    },
+    {
+      "skill": "tdd",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/tdd",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/tdd/SKILL.md",
+          "upstream": "skills/engineering/tdd/SKILL.md",
+          "upstream_sha256": "5505d25bbaa8fc14a79e4d20163936958992a2995b7f1dd1d6197edc9ed722e0"
+        },
+        {
+          "shipped": "skills/tdd/references/tests.md",
+          "upstream": "skills/engineering/tdd/tests.md",
+          "upstream_sha256": "859f9e592c188fda4fc7277dd180e4ce9c7a2e13f6efe1f6f29eccc9d28c106a"
+        },
+        {
+          "shipped": "skills/tdd/references/mocking.md",
+          "upstream": "skills/engineering/tdd/mocking.md",
+          "upstream_sha256": "3ceb807fdf4a47d6a93d4d9a891e5ba6d362a6247bd08adc451feebfc17361ef"
+        }
+      ],
+      "changes": "Reshaped into Gate/Contract/Retrieve/Before you finish; the codebase-design and code-review skill references replaced; seams agreed with the user unless the user said to proceed (then logged with hs assume); declared test-writing step (hs phase test) added for the read-only-tests guard (HS-028, K6); migration accounting rule (HS-079) added; agents/openai.yaml not imported; references prefixed with an illustration note."
+    },
+    {
+      "skill": "debugging",
+      "repo": "obra/superpowers",
+      "path": "skills/systematic-debugging",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "files": [
+        {
+          "shipped": "skills/debugging/SKILL.md",
+          "upstream": "skills/systematic-debugging/SKILL.md",
+          "upstream_sha256": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202"
+        },
+        {
+          "shipped": "skills/debugging/references/root-cause-tracing.md",
+          "upstream": "skills/systematic-debugging/root-cause-tracing.md",
+          "upstream_sha256": "75b933b6a8c40bdb2031b10f21654395b56ec6ab6bc7b018c18d3fe57aeb7fb8"
+        },
+        {
+          "shipped": "skills/debugging/references/defense-in-depth.md",
+          "upstream": "skills/systematic-debugging/defense-in-depth.md",
+          "upstream_sha256": "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7"
+        },
+        {
+          "shipped": "skills/debugging/references/condition-based-waiting.md",
+          "upstream": "skills/systematic-debugging/condition-based-waiting.md",
+          "upstream_sha256": "e89fec8400d6cd50f43407cec9fab50976ba4d55d0ec2eb51c0bd68036b54c26"
+        }
+      ],
+      "changes": "Iron law and all-caps prose reworded; red-loop exit criterion, ranked falsifiable hypotheses, tagged debug logs and measured/inferred/guessed marks added from research/06; counterfactual proof via scripts/verify-fix.mjs (HS-066) and repro harvest (HS-067) added; npm-specific find-polluter.sh and the project-specific condition-based-waiting-example.ts not imported; performance reference written from research/06 ideas."
+    },
+    {
+      "skill": "clarify",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/grilling",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "licence": "MIT",
+      "copyright": "Copyright (c) 2026 Matt Pocock",
+      "files": [
+        {
+          "shipped": "skills/clarify/SKILL.md",
+          "upstream": "skills/productivity/grilling/SKILL.md",
+          "upstream_sha256": "a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2"
+        }
+      ],
+      "changes": "Grilling kept as the full mode (design tree, frontier rounds, facts looked up never asked, wait for confirmation); 'relentless' default replaced by HS-020's act/ask/stop with at most three outcome-changing questions; emoji question format (a house style) replaced by native AskUserQuestion with the recommended option first; hs assume/stop/wish and the intent-check subagent added; agents/openai.yaml not imported."
+    }
+  ],
+  "dropped": [
+    {
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/resolving-merge-conflicts",
+      "licence": "MIT",
+      "reason": "Archived upstream (removed in v1.3.0); only docs/engineering/resolving-merge-conflicts.md remains, so there is no SKILL.md to import. Its idea (trace each side to its primary source before resolving) is written into h-stack:git-ship in H-Stack's words."
+    }
+  ]
+}

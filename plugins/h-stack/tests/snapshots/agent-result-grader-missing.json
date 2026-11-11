@@ -1,0 +1,33 @@
+{
+  "hook": "agent-result.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Agent",
+    "tool_input": {
+      "subagent_type": "h-stack:rubric-grader"
+    },
+    "tool_response": "{\"graded\":{\"M1\":{\"pass\":true,\"evidence\":\"ok\"}}}"
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/rubric.json": {
+        "items": [
+          {
+            "id": "M1",
+            "level": "must",
+            "text": "a"
+          },
+          {
+            "id": "M2",
+            "level": "must",
+            "text": "b"
+          }
+        ],
+        "graded": {}
+      }
+    }
+  }
+}

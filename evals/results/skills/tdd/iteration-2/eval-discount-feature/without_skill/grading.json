@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+      "passed": true,
+      "evidence": "check exit 0: unt with unknown code returns total unchanged\n  ---\n  duration_ms: 0.142622\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 86.377684\n"
+    },
+    {
+      "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+      "passed": true,
+      "evidence": "The tests import `{ subtotal, discount } from '../src/pricing.js'` and assert fixed numbers, such as `assert.equal(discount(1000, 'SAVE10'), 900)`, `assert.equal(discount(995, 'SAVE10'), 896)` and `assert.equal(discount(1234, 'BOGUS'), 1234)`."
+    },
+    {
+      "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+      "passed": true,
+      "evidence": "The final message says 'Before any code existed, the test run failed because `discount` didn't exist yet' and 'All 4 tests pass', and the check command shows '# pass 4 / # fail 0' with exit 0; the failing run is only the agent's own claim, with no test output shown."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

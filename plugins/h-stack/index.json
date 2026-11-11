@@ -1,6 +1,221 @@
 {
-  "events": {},
+  "events": {
+    "build_failed": [
+      "h-stack:debugging"
+    ],
+    "test_failed": [
+      "h-stack:debugging"
+    ]
+  },
   "paths": [],
-  "skills": [],
+  "skills": [
+    {
+      "category": "03",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "clarify",
+        "ambiguous",
+        "requirements",
+        "grill"
+      ],
+      "keywords": [
+        "\\bgrill( me)?\\b",
+        "\\bstress[- ]test (this|my|the) (plan|idea|design)\\b",
+        "\\bnot sure (what|how|whether)\\b",
+        "\\bwhat do you think\\b",
+        "\\brequirements?\\b",
+        "\\bunclear\\b",
+        "\\bpoke holes\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": [
+          "\\bgrill( me)?\\b",
+          "\\bstress[- ]test\\b"
+        ]
+      },
+      "name": "clarify",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Decide act, ask or stop before a large or ambiguous task; ask only outcome-changing questions, each with a recommended answer.",
+      "qualified": "h-stack:clarify",
+      "short": "act, ask or stop; few questions, each with a recommendation",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "01",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "verify",
+        "done",
+        "commit",
+        "assumption"
+      ],
+      "keywords": [
+        "\\b(is it|are we) (done|working|fixed)\\b",
+        "\\bverify\\b",
+        "\\bmake sure (it|this) works\\b",
+        "\\bready to (commit|merge|ship)\\b",
+        "\\b(the|its) (cause|problem|issue) is\\b",
+        "\\bbecause of\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "core-rules",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Prove every done, fixed or passing claim with a fresh command; keep changes small, simple and surgical.",
+      "qualified": "h-stack:core-rules",
+      "short": "evidence before claims; small surgical changes",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "06",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [
+        "test_failed",
+        "build_failed"
+      ],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "bug",
+        "debug",
+        "regression",
+        "crash",
+        "flaky",
+        "slow",
+        "performance"
+      ],
+      "keywords": [
+        "\\btraceback\\b",
+        "\\bstack ?trace\\b",
+        "\\b(tests?|build|ci|it) (is |are )?(fail(s|ing|ed)?|broken|red)\\b",
+        "\\bfail(s|ing|ed)? (with|on)\\b",
+        "\\bwhy (does|is|did) .{0,40}(break|fail|crash|wrong|slow)",
+        "\\bregression\\b",
+        "\\bflaky\\b",
+        "\\b(exception|segfault|panic|crash(es|ed)?)\\b",
+        "\\b(too )?slow(er)?\\b",
+        "\\bbug\\b",
+        "\\bdoesn'?t work\\b",
+        "\\berror\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "debugging",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Find the root cause of a failing test, error, crash, flaky or slow behaviour before changing code, then prove the fix.",
+      "qualified": "h-stack:debugging",
+      "short": "root cause before any fix, then prove it",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "04",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "plan",
+        "spec",
+        "feature",
+        "breakdown"
+      ],
+      "keywords": [
+        "\\bimplement (a |an |the )?(new )?(feature|endpoint|service|integration|page|screen)\\b",
+        "\\bnew feature\\b",
+        "\\b(write|make|draft|create) (a |an |the )?(implementation )?plan\\b",
+        "\\bbreak (this|it) down\\b",
+        "\\bspec\\b",
+        "\\bimplement(ation)? plan\\b",
+        "\\bstep[- ]by[- ]step plan\\b",
+        "\\bexecute the plan\\b",
+        "\\brubric\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": [
+          "\\bgo deep\\b",
+          "\\brubric\\b"
+        ]
+      },
+      "name": "planning",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Turn a spec or multi-step request into a plan of small, checkable tasks with exact interfaces, then execute it task by task.",
+      "qualified": "h-stack:planning",
+      "short": "spec to checkable plan with interfaces, then execute",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    },
+    {
+      "category": "05",
+      "context": "inline",
+      "eval": "evals/evals.json",
+      "events": [],
+      "explicit_only": false,
+      "explicit_phrases": [],
+      "hidden": false,
+      "intents": [
+        "tdd",
+        "test-first",
+        "feature",
+        "migration"
+      ],
+      "keywords": [
+        "\\btdd\\b",
+        "\\bred[- ]green\\b",
+        "\\btest[- ]first\\b",
+        "\\bwrite (a |the )?(failing |unit |integration )?tests? (for|first)\\b",
+        "\\badd (a )?regression test\\b",
+        "\\bmigrat(e|ion)\\b"
+      ],
+      "modes": {
+        "default": "guidance",
+        "full_on": []
+      },
+      "name": "tdd",
+      "not_for": [],
+      "paths": [],
+      "purpose": "Build features or fix bugs test-first in vertical red-green slices, with tests at public seams that survive refactors.",
+      "qualified": "h-stack:tdd",
+      "short": "test-first in vertical red-green slices",
+      "sizes": [
+        "light",
+        "full"
+      ]
+    }
+  ],
   "version": 1
 }

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+      "passed": true,
+      "evidence": "check exit 0: config test passed\n"
+    },
+    {
+      "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+      "passed": true,
+      "evidence": "The diff replaces `fs.readFileSync('src/config.json', 'utf8')` with `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')`, and it adds no copied file, no try/catch and no change to the test script."
+    },
+    {
+      "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+      "passed": true,
+      "evidence": "The message says `loadConfig()` opened `'src/config.json'`, 'a path that Node resolves from whatever folder the process is running in. The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`.'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: h-stack:intent-check output failed validation (at most three questions). Discard it and re-run a fresh h-stack:intent-check; do not repair the output."}}

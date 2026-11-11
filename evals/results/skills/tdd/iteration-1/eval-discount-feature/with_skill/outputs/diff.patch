@@ -1,0 +1,36 @@
+diff --git a/src/pricing.js b/src/pricing.js
+index 136e93d..21a4baf 100644
+--- a/src/pricing.js
++++ b/src/pricing.js
+@@ -1,3 +1,8 @@
+ export function subtotal(lines) {
+   return lines.reduce((sum, l) => sum + l.priceCents * l.qty, 0);
+ }
++
++export function discount(totalCents, code) {
++  if (code !== 'SAVE10') return totalCents;
++  return Math.round((totalCents * 9) / 10);
++}
+diff --git a/test/discount.test.js b/test/discount.test.js
+new file mode 100644
+index 0000000..054be78
+--- /dev/null
++++ b/test/discount.test.js
+@@ -0,0 +1,17 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { discount } from '../src/pricing.js';
++
++test('SAVE10 takes 10% off the total', () => {
++  assert.equal(discount(1000, 'SAVE10'), 900);
++});
++
++test('SAVE10 rounds the discounted total to the nearest cent', () => {
++  assert.equal(discount(1995, 'SAVE10'), 1796);
++  assert.equal(discount(1994, 'SAVE10'), 1795);
++});
++
++test('an unknown code returns the total unchanged', () => {
++  assert.equal(discount(1000, 'BOGUS'), 1000);
++  assert.equal(discount(1995, ''), 1995);
++});

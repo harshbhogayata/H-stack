@@ -32,6 +32,6 @@ export function proposedPermissionRules() {
       'Edit(.h-stack/*.jsonl)', 'Write(.h-stack/*.jsonl)',
       'Read(~/.ssh/**)', 'Read(~/.aws/**)', 'Read(**/.env)', 'Read(**/.env.*)',
     ],
-    allow: ['Bash(${CLAUDE_PLUGIN_ROOT}/bin/hs:*)'],
+    allow: ['Bash(hs:*)'],
   };
 }

@@ -13,7 +13,7 @@ export function skillMap(index) {
   const skills = (index.skills || []).filter((s) => !s.hidden);
   if (!skills.length) return '';
   const rows = skills.map((s) => `${s.name}${s.explicit_only ? '*' : ''}: ${s.short}`);
-  return `H-Stack skills (picked per prompt; no slash commands; * = only when asked): ${rows.join('; ')}. State and notes: \${CLAUDE_PLUGIN_ROOT}/bin/hs (assume, decide, wish, failed, stop).`;
+  return `H-Stack skills (picked per prompt; no slash commands; * = only when asked): ${rows.join('; ')}. State and notes: the hs command (assume, decide, wish, failed, stop).`;
 }
 
 function devServers() {
@@ -67,13 +67,13 @@ function digestProblems() {
   let text = '';
   try { text = fs.readFileSync(file, 'utf8'); } catch { return []; }
   const bad = [];
-  for (const m of text.matchAll(/`(skills\/[^`]+)`\s*sha256:([0-9a-f]{64})/g)) {
+  for (const m of text.matchAll(/`((?:skills|rules-templates|agents)\/[^`]+)`\s*sha256:([0-9a-f]{64})/g)) {
     try {
       const h = crypto.createHash('sha256').update(fs.readFileSync(path.join(PLUGIN_ROOT, m[1]))).digest('hex');
       if (h !== m[2]) bad.push(m[1]);
     } catch { bad.push(m[1]); }
   }
-  return bad;
+  return [...new Set(bad)];
 }
 
 function sweep(proj, config) {

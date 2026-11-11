@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no implementation was written on top of the contradiction)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply points out that complete erasure within 24 hours conflicts with keeping all data for 7 years with no deletion",
+      "passed": true,
+      "evidence": "The agent wrote that 'the two rules in SPEC.md contradict each other,' with Rule 1 requiring erasure within 24 hours and Rule 2 requiring all data be kept for 7 years, and said 'A deletion endpoint can't satisfy both.'"
+    },
+    {
+      "text": "The reply stops or asks the user to resolve the conflict, offering a recommended resolution, instead of silently picking one requirement",
+      "passed": true,
+      "evidence": "The agent wrote no code ('I haven't written any code yet'), proposed a fix under 'A common way to reconcile them' citing Article 17(3)(b), and asked 'should I go with the approach above?'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

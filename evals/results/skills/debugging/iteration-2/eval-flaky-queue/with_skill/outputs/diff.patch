@@ -1,0 +1,27 @@
+diff --git a/test/queue.test.js b/test/queue.test.js
+index ee2a039..fd12ea5 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -2,9 +2,20 @@ const test = require('node:test');
+ const assert = require('node:assert/strict');
+ const { Queue } = require('../src/queue');
+ 
++// Poll until condition() is truthy, instead of guessing how long async work takes.
++async function waitFor(condition, description, timeoutMs = 2000) {
++  const start = Date.now();
++  while (!condition()) {
++    if (Date.now() - start > timeoutMs) {
++      throw new Error(`Timeout waiting for ${description} after ${timeoutMs}ms`);
++    }
++    await new Promise((r) => setTimeout(r, 5));
++  }
++}
++
+ test('processes all jobs', async () => {
+   const q = new Queue();
+   q.push('a'); q.push('b'); q.push('c');
+-  await new Promise((r) => setTimeout(r, 25));
+-  assert.equal(q.done.length, 3);
++  await waitFor(() => q.done.length === 3, '3 jobs to finish');
++  assert.deepEqual([...q.done].sort(), ['a', 'b', 'c']);
+ });

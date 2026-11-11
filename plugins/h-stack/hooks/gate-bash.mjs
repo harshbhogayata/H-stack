@@ -98,7 +98,7 @@ export async function decide(input, proj) {
     const rel = relToProject(proj, t);
     if (rel.startsWith('..')) continue;
     const kind = protectedKind(rel, config);
-    if (kind === 'state') denies.push(refusal('protected-state', `${rel} is H-Stack state written only by hooks and hs`, `use ${path.join('${CLAUDE_PLUGIN_ROOT}', 'bin', 'hs')} instead`));
+    if (kind === 'state') denies.push(refusal('protected-state', `${rel} is H-Stack state written only by hooks and hs`, `use the hs command instead`));
     else if (kind === 'checker') asks.push(refusal('protected-checker', `the command writes to ${rel}, a CI, agent or test-runner config`, 'the user approves edits to checkers'));
     else if (isTestPath(rel, proj, config) && !testPhaseActive(dir, input.prompt_id || route.prompt_id, proj, config)) asks.push(refusal('read-only-tests', `the command writes to the test file ${rel} outside a declared test-writing step`, 'declare the step with hs phase test before editing tests, or the user approves'));
   }
