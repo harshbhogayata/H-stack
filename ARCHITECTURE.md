@@ -726,9 +726,11 @@ P1 and P2 items follow in backlog order once v1.0 is measured.
 
 ---
 
-## 12. Open decisions (need the user)
+## 12. Decisions
 
-| # | Decision | Options | Recommendation |
+**Decided 2026-11-11:** the user accepted every recommendation below (OD-1 to OD-10). They are now the plan of record.
+
+| # | Decision | Options | Decision (recommendation accepted) |
 |---|---|---|---|
 | OD-1 | **Classifier** | (a) rules only, (b) rules + small-model fallback | **(a) at P0**; add (b) at P1 only if the trigger evals show fuzzy prompts missed and the per-prompt cost is acceptable. Each fallback call is a Haiku-class request on the user's plan |
 | OD-2 | **Visibility** | (a) spinner + announcement line, (b) + side pane | **(a)** first (zero tokens, works in terminal, Desktop and VS Code); the pane after there is playbook state worth showing |
