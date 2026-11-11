@@ -1,0 +1,108 @@
+diff --git a/lib/dates.js b/lib/dates.js
+index d5ffd0a..bb4d767 100644
+--- a/lib/dates.js
++++ b/lib/dates.js
+@@ -1,15 +1,33 @@
++// Invoice dates are calendar dates ("YYYY-MM-DD"), not instants in time.
++// All arithmetic is done in UTC so the result never depends on the server's
++// (or customer's) timezone or on DST transitions. Never use local-time
++// getters/setters (getDate, setDate, getMonth, ...) in this module.
++
++const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
++
+ function pad(n) {
+   return String(n).padStart(2, '0');
+ }
+ 
++function parseDate(isoDate) {
++  const m = ISO_DATE.exec(isoDate);
++  if (!m) throw new Error(`invalid date (expected YYYY-MM-DD): ${isoDate}`);
++  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
++  const d = new Date(Date.UTC(year, month - 1, day));
++  if (d.getUTCFullYear() !== year || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) {
++    throw new Error(`invalid date: ${isoDate}`);
++  }
++  return d;
++}
++
+ function formatDate(d) {
+-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
++  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+ }
+ 
+ function addDays(isoDate, days) {
+-  const d = new Date(isoDate);
+-  d.setDate(d.getDate() + days);
++  const d = parseDate(isoDate);
++  d.setUTCDate(d.getUTCDate() + days);
+   return formatDate(d);
+ }
+ 
+-module.exports = { formatDate, addDays };
++module.exports = { parseDate, formatDate, addDays };
+diff --git a/test/invoice.test.js b/test/invoice.test.js
+index 4d0ef3a..02078b6 100644
+--- a/test/invoice.test.js
++++ b/test/invoice.test.js
+@@ -17,3 +17,21 @@ test('due on receipt is the issue date', () => {
+ test('unknown terms are rejected', () => {
+   assert.throws(() => dueDate({ issued: '2026-05-12', terms: 'net45' }), /unknown payment terms/);
+ });
++
++test('crosses DST start (US spring forward)', () => {
++  assert.equal(dueDate({ issued: '2026-03-01', terms: 'net15' }), '2026-03-16');
++});
++
++test('crosses DST end (US fall back)', () => {
++  assert.equal(dueDate({ issued: '2026-10-20', terms: 'net15' }), '2026-11-04');
++});
++
++test('crosses a year boundary and leap day', () => {
++  assert.equal(dueDate({ issued: '2026-12-20', terms: 'net15' }), '2027-01-04');
++  assert.equal(dueDate({ issued: '2028-02-15', terms: 'net15' }), '2028-03-01');
++});
++
++test('malformed issue dates are rejected', () => {
++  assert.throws(() => dueDate({ issued: '2026-02-30', terms: 'net30' }), /invalid date/);
++  assert.throws(() => dueDate({ issued: '2026-03-01T00:00:00Z', terms: 'net30' }), /invalid date/);
++});
+diff --git a/test/timezones.test.js b/test/timezones.test.js
+new file mode 100644
+index 0000000..43f3e6f
+--- /dev/null
++++ b/test/timezones.test.js
+@@ -0,0 +1,34 @@
++// Regression guard: due dates were once off by one day for customers west of
++// UTC because the code mixed UTC parsing with local-time arithmetic, and the
++// suite only ever ran in UTC. Re-run the date-sensitive tests under timezones
++// on both sides of UTC so this fails on any machine if it regresses.
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { spawnSync } = require('node:child_process');
++const path = require('node:path');
++
++const ZONES = [
++  'UTC',
++  'America/Los_Angeles',
++  'America/New_York',
++  'Pacific/Honolulu',
++  'Pacific/Kiritimati', // UTC+14
++  'Asia/Kolkata', // half-hour offset
++  'Europe/London',
++];
++
++const suite = path.join(__dirname, 'invoice.test.js');
++
++// node --test marks its children with NODE_TEST_CONTEXT; if inherited, the
++// nested run reports to the parent and exits 0 even when tests fail.
++const { NODE_TEST_CONTEXT, ...baseEnv } = process.env;
++
++for (const tz of ZONES) {
++  test(`invoice tests pass with TZ=${tz}`, () => {
++    const r = spawnSync(process.execPath, ['--test', suite], {
++      env: { ...baseEnv, TZ: tz },
++      encoding: 'utf8',
++    });
++    assert.equal(r.status, 0, `failed under TZ=${tz}:\n${r.stdout}${r.stderr}`);
++  });
++}

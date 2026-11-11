@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (SettingsPage.jsx created)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+      "passed": true,
+      "evidence": "SettingsPage.jsx imports `{ Button } from \"./Button.jsx\"` and renders `<Button type=\"submit\">Save</Button>`, and every colour and font in settings.css comes from theme variables (e.g. `background: var(--color-surface)`, `border: 1px solid var(--color-accent)`, `font-family: var(--font-ui)`), with no"
+    },
+    {
+      "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+      "passed": true,
+      "evidence": "Both inputs are wrapped in `<label>` elements (`<label className=\"settings__field\">…Display name…<input …/>` and `<label className=\"settings__toggle\"><input type=\"checkbox\" …/><span>Email notifications</span>`), and the toggle is a native checkbox input, which the keyboard can reach and operate by d"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

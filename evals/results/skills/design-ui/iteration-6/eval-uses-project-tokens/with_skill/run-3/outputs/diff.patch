@@ -1,0 +1,166 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..215fced
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,115 @@
++import { useId, useRef, useState } from "react";
++import { Button } from "./Button";
++import "./settings.css";
++
++const NAME_MAX = 50;
++
++/**
++ * Settings form for display name and email notifications.
++ * `onSave(values)` may return a promise; a rejection is shown next to the Save button.
++ */
++export function SettingsPage({
++  initialValues = { displayName: "", emailNotifications: true },
++  onSave,
++}) {
++  const id = useId();
++  const nameRef = useRef(null);
++  const [displayName, setDisplayName] = useState(initialValues.displayName);
++  const [emailNotifications, setEmailNotifications] = useState(initialValues.emailNotifications);
++  const [nameError, setNameError] = useState("");
++  const [status, setStatus] = useState("idle"); // idle | saving | saved | error
++  const [saveError, setSaveError] = useState("");
++
++  async function handleSubmit(event) {
++    event.preventDefault();
++    const trimmed = displayName.trim();
++    if (!trimmed) {
++      setNameError("Enter a display name so others know who you are.");
++      nameRef.current?.focus();
++      return;
++    }
++    setNameError("");
++    setSaveError("");
++    setStatus("saving");
++    try {
++      await onSave?.({ displayName: trimmed, emailNotifications });
++      setDisplayName(trimmed);
++      setStatus("saved");
++    } catch (err) {
++      setSaveError(err?.message || "Couldn't save your settings. Check your connection and try again.");
++      setStatus("error");
++    }
++  }
++
++  function markDirty() {
++    if (status === "saved") setStatus("idle");
++  }
++
++  const saving = status === "saving";
++
++  return (
++    <form className="settings" onSubmit={handleSubmit} noValidate aria-labelledby={`${id}-title`}>
++      <h1 id={`${id}-title`}>Settings</h1>
++
++      <div className="settings-field">
++        <label htmlFor={`${id}-name`}>Display name</label>
++        <p id={`${id}-name-hint`} className="settings-hint">
++          Shown to other people. Up to {NAME_MAX} characters.
++        </p>
++        <input
++          id={`${id}-name`}
++          ref={nameRef}
++          className="settings-input"
++          type="text"
++          name="displayName"
++          autoComplete="nickname"
++          maxLength={NAME_MAX}
++          required
++          value={displayName}
++          onChange={(e) => {
++            setDisplayName(e.target.value);
++            if (nameError) setNameError("");
++            markDirty();
++          }}
++          aria-invalid={nameError ? "true" : undefined}
++          aria-describedby={`${id}-name-hint${nameError ? ` ${id}-name-error` : ""}`}
++        />
++        {nameError && (
++          <p id={`${id}-name-error`} className="settings-error">{nameError}</p>
++        )}
++      </div>
++
++      <div className="settings-field settings-toggle">
++        <div>
++          <label htmlFor={`${id}-email`}>Email notifications</label>
++          <p id={`${id}-email-hint`} className="settings-hint">
++            Get an email when there's activity on your account.
++          </p>
++        </div>
++        <input
++          id={`${id}-email`}
++          className="settings-switch"
++          type="checkbox"
++          role="switch"
++          name="emailNotifications"
++          checked={emailNotifications}
++          onChange={(e) => {
++            setEmailNotifications(e.target.checked);
++            markDirty();
++          }}
++          aria-describedby={`${id}-email-hint`}
++        />
++      </div>
++
++      <div className="settings-actions">
++        <Button type="submit" disabled={saving} aria-describedby={saveError ? `${id}-save-error` : undefined}>
++          {saving ? "Saving…" : "Save changes"}
++        </Button>
++        <div aria-live="polite">
++          {status === "saved" && <p className="settings-status">Changes saved.</p>}
++          {saveError && <p id={`${id}-save-error`} className="settings-error">{saveError}</p>}
++        </div>
++      </div>
++    </form>
++  );
++}
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..bdc35af
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,30 @@
++.settings { max-width: 40rem; padding: var(--space-6); background: var(--color-surface); color: var(--color-text); border-radius: var(--radius); font-family: var(--font-ui); }
++.settings h1 { margin: 0 0 var(--space-6); font-size: 1.25rem; font-weight: 600; }
++
++.settings-field { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-6); }
++.settings-field label { font-weight: 500; }
++.settings-hint { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
++.settings-error { margin: 0; color: var(--color-danger); font-size: 0.875rem; }
++
++.settings-input { padding: var(--space-2) var(--space-3); background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius); font: inherit; }
++.settings-input[aria-invalid="true"] { border-color: var(--color-danger); }
++
++.settings-toggle { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-4); }
++
++/* Native checkbox with role="switch": keeps keyboard + screen-reader behaviour */
++.settings-switch { appearance: none; flex: none; position: relative; width: 40px; height: 22px; margin: 0; background: var(--color-border); border-radius: 999px; cursor: pointer; }
++.settings-switch::before { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: var(--color-text); border-radius: 50%; transition: transform 150ms ease-out; }
++.settings-switch:checked { background: var(--color-accent); }
++.settings-switch:checked::before { transform: translateX(18px); background: var(--color-bg); }
++
++.settings-input:focus-visible,
++.settings-switch:focus-visible,
++.settings .btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
++
++.settings-actions { display: flex; align-items: center; gap: var(--space-3); }
++.settings .btn:disabled { opacity: 0.6; cursor: progress; }
++.settings-status { margin: 0; font-size: 0.875rem; color: var(--color-text-muted); }
++
++@media (prefers-reduced-motion: reduce) {
++  .settings-switch::before { transition: none; }
++}
+diff --git a/theme.css b/theme.css
+index a9660f5..e71f1ae 100644
+--- a/theme.css
++++ b/theme.css
+@@ -1 +1,3 @@
+-:root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif; }
++:root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif;
++  --color-text-muted: #94a3b8; --color-border: #334155; --color-danger: #f87171;
++  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; }

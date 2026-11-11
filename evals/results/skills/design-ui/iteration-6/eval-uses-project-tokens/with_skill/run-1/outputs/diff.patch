@@ -1,0 +1,208 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..344f5b1
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,130 @@
++import { useId, useState } from "react";
++import { Button } from "./Button";
++import "./theme.css";
++import "./button.css";
++import "./settings.css";
++
++const NAME_MAX = 50;
++
++/**
++ * Settings form for display name and email notifications.
++ *
++ * Props:
++ *   initialValues: { displayName?: string, emailNotifications?: boolean }
++ *   onSave: (values) => void | Promise<void>  — throw/reject to show an error
++ */
++export function SettingsPage({ initialValues = {}, onSave }) {
++  const id = useId();
++  const [displayName, setDisplayName] = useState(initialValues.displayName ?? "");
++  const [emailNotifications, setEmailNotifications] = useState(
++    initialValues.emailNotifications ?? true
++  );
++  const [nameError, setNameError] = useState("");
++  const [saveError, setSaveError] = useState("");
++  const [status, setStatus] = useState("idle"); // idle | saving | saved
++
++  const nameId = `${id}-name`;
++  const nameHintId = `${id}-name-hint`;
++  const nameErrorId = `${id}-name-error`;
++  const notifyId = `${id}-notify`;
++  const notifyHintId = `${id}-notify-hint`;
++
++  function markDirty() {
++    if (status === "saved") setStatus("idle");
++    setSaveError("");
++  }
++
++  async function handleSubmit(event) {
++    event.preventDefault();
++    const trimmed = displayName.trim();
++
++    if (!trimmed) {
++      setNameError("Enter a display name so others know who you are.");
++      return;
++    }
++    if (trimmed.length > NAME_MAX) {
++      setNameError(`Shorten your display name to ${NAME_MAX} characters or fewer.`);
++      return;
++    }
++
++    setNameError("");
++    setSaveError("");
++    setStatus("saving");
++    try {
++      await onSave?.({ displayName: trimmed, emailNotifications });
++      setStatus("saved");
++    } catch {
++      setStatus("idle");
++      setSaveError("Couldn't save your changes. Check your connection and try again.");
++    }
++  }
++
++  return (
++    <form className="settings" onSubmit={handleSubmit} noValidate>
++      <h1>Settings</h1>
++
++      <div className="settings-field">
++        <label htmlFor={nameId}>Display name</label>
++        <p id={nameHintId} className="settings-hint">
++          Shown to others on your profile and comments.
++        </p>
++        <input
++          id={nameId}
++          className="settings-input"
++          type="text"
++          autoComplete="nickname"
++          value={displayName}
++          aria-invalid={nameError ? "true" : undefined}
++          aria-describedby={nameError ? `${nameHintId} ${nameErrorId}` : nameHintId}
++          onChange={(e) => {
++            setDisplayName(e.target.value);
++            if (nameError) setNameError("");
++            markDirty();
++          }}
++        />
++        {nameError && (
++          <p id={nameErrorId} className="settings-error" role="alert">
++            {nameError}
++          </p>
++        )}
++      </div>
++
++      <div className="settings-field settings-toggle">
++        <div>
++          <label htmlFor={notifyId}>Email notifications</label>
++          <p id={notifyHintId} className="settings-hint">
++            Get an email when there's activity on your account.
++          </p>
++        </div>
++        <input
++          id={notifyId}
++          className="settings-switch"
++          type="checkbox"
++          role="switch"
++          checked={emailNotifications}
++          aria-describedby={notifyHintId}
++          onChange={(e) => {
++            setEmailNotifications(e.target.checked);
++            markDirty();
++          }}
++        />
++      </div>
++
++      <div className="settings-actions">
++        <Button type="submit" disabled={status === "saving"}>
++          {status === "saving" ? "Saving…" : "Save changes"}
++        </Button>
++        <p className="settings-status" role="status" aria-live="polite">
++          {status === "saved" ? "Changes saved." : ""}
++        </p>
++        {saveError && (
++          <p className="settings-error" role="alert">
++            {saveError}
++          </p>
++        )}
++      </div>
++    </form>
++  );
++}
++
++export default SettingsPage;
+diff --git a/button.css b/button.css
+index d1689a7..aa2a5eb 100644
+--- a/button.css
++++ b/button.css
+@@ -1 +1,3 @@
+ .btn { background: var(--color-accent); color: var(--color-bg); border-radius: var(--radius); font-family: var(--font-ui); padding: 6px 12px; }
++.btn:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
++.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..80dc795
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,34 @@
++.settings {
++  max-width: 32rem;
++  padding: var(--space-4);
++  background: var(--color-surface);
++  color: var(--color-text);
++  border-radius: var(--radius);
++  font-family: var(--font-ui);
++}
++.settings h1 { margin: 0 0 var(--space-4); font-size: 1.25rem; }
++
++.settings-field { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4); }
++.settings-field label { font-weight: 500; }
++.settings-hint { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
++
++.settings-input {
++  padding: var(--space-2);
++  background: var(--color-bg);
++  color: var(--color-text);
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius);
++  font: inherit;
++}
++.settings-input[aria-invalid="true"] { border-color: var(--color-danger); }
++
++.settings-toggle { flex-direction: row; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
++.settings-toggle > div { display: flex; flex-direction: column; gap: var(--space-1); }
++.settings-switch { width: 1.25rem; height: 1.25rem; margin: 0; flex-shrink: 0; accent-color: var(--color-accent); }
++
++.settings-input:focus-visible,
++.settings-switch:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
++
++.settings-error { margin: 0; color: var(--color-danger); font-size: 0.875rem; }
++.settings-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
++.settings-status { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
+diff --git a/theme.css b/theme.css
+index a9660f5..fba0a86 100644
+--- a/theme.css
++++ b/theme.css
+@@ -1 +1,18 @@
+-:root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif; }
++:root {
++  --color-bg: #0f172a;
++  --color-surface: #1e293b;
++  --color-text: #e2e8f0;
++  --color-accent: #38bdf8;
++  --radius: 6px;
++  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
++
++  /* Added for form screens (SettingsPage): field borders, helper text, errors, focus, spacing */
++  --color-text-muted: #94a3b8;
++  --color-border: #334155;
++  --color-danger: #f87171;
++  --focus-ring: 2px solid var(--color-accent);
++  --space-1: 4px;
++  --space-2: 8px;
++  --space-3: 16px;
++  --space-4: 24px;
++}

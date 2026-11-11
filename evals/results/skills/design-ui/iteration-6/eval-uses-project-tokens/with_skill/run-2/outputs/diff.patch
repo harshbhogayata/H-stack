@@ -1,0 +1,177 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..2834919
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,119 @@
++import { useId, useState } from "react";
++import { Button } from "./Button.jsx";
++import "./settings.css";
++
++const MAX_NAME_LENGTH = 50;
++
++/**
++ * Account settings: display name + email notifications.
++ *
++ * Props:
++ *  - initialValues: { displayName?: string, emailNotifications?: boolean }
++ *  - onSave: async ({ displayName, emailNotifications }) => void — throw to show an error.
++ */
++export function SettingsPage({ initialValues = {}, onSave }) {
++  const [displayName, setDisplayName] = useState(initialValues.displayName ?? "");
++  const [emailNotifications, setEmailNotifications] = useState(initialValues.emailNotifications ?? true);
++  const [saved, setSaved] = useState({
++    displayName: initialValues.displayName ?? "",
++    emailNotifications: initialValues.emailNotifications ?? true,
++  });
++  const [status, setStatus] = useState("idle"); // idle | saving | saved | error
++  const [saveError, setSaveError] = useState("");
++  const [touched, setTouched] = useState(false);
++
++  const nameId = useId();
++  const nameHintId = useId();
++  const nameErrorId = useId();
++  const notifyId = useId();
++  const notifyHintId = useId();
++
++  const trimmedName = displayName.trim();
++  const nameError = !trimmedName
++    ? "Enter a display name."
++    : trimmedName.length > MAX_NAME_LENGTH
++      ? `Use ${MAX_NAME_LENGTH} characters or fewer.`
++      : "";
++  const showNameError = touched && nameError;
++  const isDirty = trimmedName !== saved.displayName || emailNotifications !== saved.emailNotifications;
++
++  function markEdited() {
++    if (status === "saved" || status === "error") setStatus("idle");
++  }
++
++  async function handleSubmit(event) {
++    event.preventDefault();
++    setTouched(true);
++    if (nameError || status === "saving") return;
++
++    const values = { displayName: trimmedName, emailNotifications };
++    setStatus("saving");
++    setSaveError("");
++    try {
++      await onSave?.(values);
++      setSaved(values);
++      setDisplayName(trimmedName);
++      setStatus("saved");
++    } catch (err) {
++      setSaveError(err?.message || "Your changes weren't saved. Check your connection and try again.");
++      setStatus("error");
++    }
++  }
++
++  return (
++    <main className="settings">
++      <h1 className="settings__title">Settings</h1>
++
++      <form className="settings__card" onSubmit={handleSubmit} noValidate>
++        <div className="settings__field">
++          <label className="settings__label" htmlFor={nameId}>Display name</label>
++          <p className="settings__hint" id={nameHintId}>Shown to other people on your profile and comments.</p>
++          <input
++            id={nameId}
++            className="settings__input"
++            type="text"
++            name="displayName"
++            autoComplete="nickname"
++            value={displayName}
++            onChange={(e) => { setDisplayName(e.target.value); markEdited(); }}
++            onBlur={() => setTouched(true)}
++            aria-invalid={showNameError ? "true" : undefined}
++            aria-describedby={showNameError ? `${nameHintId} ${nameErrorId}` : nameHintId}
++          />
++          {showNameError && (
++            <p className="settings__error" id={nameErrorId}>{nameError}</p>
++          )}
++        </div>
++
++        <div className="settings__field settings__field--row">
++          <div>
++            <label className="settings__label" htmlFor={notifyId}>Email notifications</label>
++            <p className="settings__hint" id={notifyHintId}>Get an email when someone mentions or replies to you.</p>
++          </div>
++          <input
++            id={notifyId}
++            className="settings__switch"
++            type="checkbox"
++            role="switch"
++            name="emailNotifications"
++            checked={emailNotifications}
++            onChange={(e) => { setEmailNotifications(e.target.checked); markEdited(); }}
++            aria-describedby={notifyHintId}
++          />
++        </div>
++
++        <div className="settings__actions">
++          <p className="settings__status" role="status" aria-live="polite">
++            {status === "saved" && <span className="settings__status--success">Changes saved.</span>}
++            {status === "error" && <span className="settings__status--error">{saveError}</span>}
++          </p>
++          <Button type="submit" disabled={status === "saving" || !isDirty}>
++            {status === "saving" ? "Saving…" : "Save changes"}
++          </Button>
++        </div>
++      </form>
++    </main>
++  );
++}
++
++export default SettingsPage;
+diff --git a/button.css b/button.css
+index d1689a7..16eff2d 100644
+--- a/button.css
++++ b/button.css
+@@ -1 +1,3 @@
+ .btn { background: var(--color-accent); color: var(--color-bg); border-radius: var(--radius); font-family: var(--font-ui); padding: 6px 12px; }
++.btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
++.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..81cf6e9
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,29 @@
++.settings { min-height: 100dvh; background: var(--color-bg); color: var(--color-text); font-family: var(--font-ui); padding: var(--space-6) var(--space-4); padding-bottom: max(var(--space-6), env(safe-area-inset-bottom)); }
++.settings__title { max-width: 560px; margin: 0 auto var(--space-4); font-size: 1.5rem; font-weight: 600; }
++.settings__card { max-width: 560px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-6); }
++
++.settings__field { display: flex; flex-direction: column; gap: var(--space-1); }
++.settings__field--row { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-4); }
++.settings__label { font-weight: 500; }
++.settings__hint { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
++
++.settings__input { margin-top: var(--space-1); font: inherit; color: var(--color-text); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius); padding: var(--space-2) var(--space-3); }
++.settings__input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
++.settings__input[aria-invalid="true"] { border-color: var(--color-danger); }
++.settings__error { margin: 0; color: var(--color-danger); font-size: 0.875rem; }
++
++/* Native checkbox styled as a switch: keeps keyboard (Space) and screen-reader behaviour. */
++.settings__switch { appearance: none; flex-shrink: 0; position: relative; width: 40px; height: 24px; margin: 0; border-radius: 999px; background: var(--color-border); cursor: pointer; transition: background-color 150ms ease; }
++.settings__switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--color-text); transition: transform 150ms ease; }
++.settings__switch:checked { background: var(--color-accent); }
++.settings__switch:checked::after { transform: translateX(16px); background: var(--color-bg); }
++.settings__switch:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
++
++.settings__actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
++.settings__status { margin: 0 auto 0 0; font-size: 0.875rem; }
++.settings__status--success { color: var(--color-success); }
++.settings__status--error { color: var(--color-danger); }
++
++@media (prefers-reduced-motion: reduce) {
++  .settings__switch, .settings__switch::after { transition: none; }
++}
+diff --git a/theme.css b/theme.css
+index a9660f5..5f77ea6 100644
+--- a/theme.css
++++ b/theme.css
+@@ -1 +1,4 @@
+ :root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif; }
++
++/* Added for forms (SettingsPage): secondary text, field borders, errors/success, spacing. */
++:root { --color-text-muted: #94a3b8; --color-border: #334155; --color-danger: #f87171; --color-success: #4ade80; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; }
