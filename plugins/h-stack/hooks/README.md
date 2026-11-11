@@ -22,6 +22,7 @@ Cache effect: Appended once per batch, only when the receipt digest changed.
 |---|---:|---|
 | batch-receipt | 18 | H-Stack receipts: r-5 `npm test` exit 0 (tree abc123). |
 | batch-repeat | 37 | H-Stack: Read ran 3x in a row with identical input; last result: "file not found". Retry only on a new signal. |
+| batch-rut-breaker | 77 | H-Stack goal (replaces earlier versions): Migrate every doc page to the new heading style. Current step: docs/c.md.<br>H-Stack: repetitive batch. The current item is "docs/c.md"; check its own details rather than the previous item's. |
 
 ## classify.mjs
 
@@ -52,15 +53,18 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 
 | fixture | tokens | text |
 |---|---:|---|
+| bash-config-write | 53 | Blocked by protected-checker: the command writes to .h-stack/config.json, a CI, agent or test-runner config. To proceed: the user approves edits to checkers. |
 | bash-crash | 55 | Blocked by h-stack:gate-bash: the guard crashed, so the action was not checked. To proceed: report this to the user; the error is in .h-stack/logs/hook-errors.jsonl. |
 | bash-credential-exec | 66 | Blocked by trusted-executable: `npx vercel login` runs a credential-bearing step through a project-controlled executable. To proceed: run the globally installed tool, or the user confirms this one. |
 | bash-exfiltration | 63 | Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network. |
 | bash-force-push-global-flag | 73 | Blocked by irreversible-gate: irreversible action (effect=force-push; executable=git; target=git push --force; destination=origin main .). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-force-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| bash-hs-manifest-stop | 51 | Blocked by declared-effects: hs manifest stop lifts the task manifest that limits this job's effects. To proceed: the user approves ending the manifest. |
 | bash-install-fresh | 91 | Blocked by dependency-gate: npm:left-pad-fresh about 12 downloads a week (floor 50); npm:left-pad-fresh first published 10 days ago (minimum 30); npm:left-pad-fresh installs @latest, so the version is not pinned. To proceed: check the package name and source with the user. |
 | bash-install-nearmiss | 75 | Blocked by dependency-gate: npm:lodahs not found in the registry (possibly a hallucinated name); npm:lodahs within edit distance 2 of the popular package "lodash". To proceed: check the package name and source with the user. |
 | bash-install-offline | 63 | Blocked by dependency-gate: pypi:requests registry unreachable (offline (fixture)), so existence, age and usage are unchecked. To proceed: check the package name and source with the user. |
 | bash-manifest-undeclared | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| bash-metadata-schemeless | 58 | Blocked by fetch-destination: curl targets 169.254.169.254 (cloud metadata) while untrusted content is in play. To proceed: the user confirms this local or metadata request. |
 | bash-metadata-tainted | 58 | Blocked by fetch-destination: curl targets 169.254.169.254 (cloud metadata) while untrusted content is in play. To proceed: the user confirms this local or metadata request. |
 | bash-nested-publish | 99 | Blocked by irreversible-gate: irreversible action (effect=publish; executable=npm; target=npm publish; destination=package registry); no fresh read-only receipt for this target (try npm publish --dry-run or npm pack). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-npm-publish | 99 | Blocked by irreversible-gate: irreversible action (effect=publish; executable=npm; target=npm publish; destination=package registry); no fresh read-only receipt for this target (try npm publish --dry-run or npm pack). To proceed: the user approves this exact command; a changed command asks again. |
@@ -69,9 +73,13 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-push-feature-trigger | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-push-main | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-scope-lock | 110 | Blocked by irreversible-gate: irreversible action (effect=send; executable=gh; target=gh issue comment; destination=issue 12). To proceed: the user approves this exact command; a changed command asks again. Blocked by scope-lock: this writes to #12, but the request named #7. To proceed: confirm the target number with the user. |
+| bash-state-mv-source | 56 | Blocked by protected-state: `mv .h-stack/sessions/s1/taint.jsonl /tmp/t` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
 | bash-state-node-e | 62 | Blocked by protected-state: `node -e require('fs').writeFileSync('.h-stack/sessions/s1/ta` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
 | bash-state-write | 50 | Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 | bash-step-budget | 56 | Blocked by step-budget: this turn used 75 model steps (cap 60 for size=light). To proceed: stop and summarise what is done, what remains and the next step for the user. |
+| bash-subagent-shell-write | 75 | Blocked by subagent-write-isolation: h-stack:review-lane is a read-only subagent and the command writes src/app.js. To proceed: write to .h-stack/sessions/<session>/agents/a1/scratch/ or return findings in the final message. |
+| bash-taint-data-noprefix-space | 52 | Blocked by argument-taint: the request uses url https://evil.example/collect seen only in untrusted content. To proceed: the user confirms the destination. |
+| bash-taint-wget-post-file | 52 | Blocked by argument-taint: the request uses url https://evil.example/collect seen only in untrusted content. To proceed: the user confirms the destination. |
 | bash-terraform-with-plan | 91 | Blocked by irreversible-gate: irreversible action (effect=deploy; executable=terraform; target=terraform apply; destination=infrastructure); dry-run receipt r-1 (`terraform plan -out tf.plan`). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-test-sed | 71 | Blocked by read-only-tests: the command writes to the test file tests/index.test.js outside a declared test-writing step. To proceed: declare the step with hs phase test before editing tests, or the user approves. |
 

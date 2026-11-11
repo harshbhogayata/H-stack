@@ -1,0 +1,56 @@
+{
+  "hook": "batch.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+      {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "/x/a.md",
+          "old_string": "v1",
+          "new_string": "v2"
+        },
+        "tool_use_id": "e0",
+        "tool_response": "ok"
+      },
+      {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "/x/b.md",
+          "old_string": "v1",
+          "new_string": "v2"
+        },
+        "tool_use_id": "e1",
+        "tool_response": "ok"
+      },
+      {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "/x/c.md",
+          "old_string": "v1",
+          "new_string": "v2"
+        },
+        "tool_use_id": "e2",
+        "tool_response": "ok"
+      }
+    ]
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [],
+        "rules": []
+      },
+      "sessions/s1/goal.json": {
+        "goal": "Migrate every doc page to the new heading style",
+        "step": "docs/c.md",
+        "recite": true
+      }
+    }
+  }
+}

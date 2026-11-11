@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by subagent-write-isolation: h-stack:review-lane is a read-only subagent and the command writes src/app.js. To proceed: write to .h-stack/sessions/<session>/agents/a1/scratch/ or return findings in the final message."}}

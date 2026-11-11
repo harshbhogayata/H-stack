@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+      "passed": true,
+      "evidence": "check exit 0: \nok 6 - subtotal multiplies price by quantity\n  ---\n  duration_ms: 1.002633\n  type: 'test'\n  ...\n1..6\n# tests 6\n# suites 0\n# pass 6\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 84.157032\n"
+    },
+    {
+      "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+      "passed": true,
+      "evidence": "test/discount.test.js uses `import { discount } from '../src/pricing.js'` and asserts fixed numbers, e.g. `assert.equal(discount(1000, 'SAVE10'), 900)` and `assert.equal(discount(1005, 'SAVE10'), 905)`."
+    },
+    {
+      "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+      "passed": true,
+      "evidence": "The final message says each slice 'started with a test that I watched fail', for example 'It failed first because `discount` didn't exist yet' and 'It failed first because it returned 899.1, which led to `Math.round`'. The check command later shows '# pass 6 # fail 0'. The failing runs are supported"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

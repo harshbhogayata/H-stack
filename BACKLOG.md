@@ -436,7 +436,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-018 · Per-prompt rules classifier: size gate, sticky mode, overrides
 **Activation · Build · P0 · M · Reliability · Depends on: HS-015, HS-045 · Sources: E1, E2, E3**
-- **Status.** done — hooks/classify.mjs + lib/pure/classify-rules.mjs: overrides, sticky playbook, direct/light/full size gate, <=2 skills, native routes (code-review, security-review, skill-creator), one factual line, nothing for direct prompts; trigger sets in CI. Measured: on 4 real fixture tasks the suggested skill was loaded 2/4 times (tdd, planning yes; debugging no), on 4 brief questions 0/4
+- **Status.** needs-user (judgement call not covered by ARCHITECTURE or BACKLOG: the classifier is built (hooks/classify.mjs + lib/pure/classify-rules.mjs: overrides, sticky playbook, direct/light/full size gate, <=2 skills, native routes (code-review, security-review, skill-creator), one factual line, nothing for direct prompts; trigger sets in CI. Measured: on 4 real fixture tasks the suggested skill was loaded 2/4 times (tdd, planning yes; debugging no), on 4 brief questions 0/4). M4's measured exit criterion is only partly met: claude plugin eval, 3 runs per arm, after the self-audit fixes: planning 0.67 vs 0.33, debugging 1.00 vs 1.00, tdd 1.00 vs 1.00 with the skill loaded 0/3 times. The model often answers without loading the named skill. Raising the load rate means either imperative hook wording (CLAUDE.md forbids it), injecting a skill excerpt with the line (context cost), or the OD-1 model fallback (picks, does not load). Options are in MORNING-REPORT Needs you)
 - **Problem.** The right skill must be in front of Claude with no slash commands, and trivial requests must skip process.
 - **Mechanism.** A `UserPromptSubmit` command hook works in this order:
   1. Plain-language overrides ("just do it", "go deep", "why that?").
@@ -918,7 +918,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-055 · Recitation hook and few-shot rut breaker
 **State & memory · Build · P2 · S · Autonomy · Depends on: HS-011, HS-001 · Sources: N7, N117**
-- **Status.** done — recitation built in hooks/batch.mjs (goal/step digest-gated), opt-in with hs goal set --recite; off by default until a measured gain (K16), which needs the smoke-test tasks. Rut-breaker variant not built for the same reason
+- **Status.** done — recitation and the few-shot rut breaker built in hooks/batch.mjs: goal/step line when its digest changes, and on a batch of 3+ calls to one tool with different inputs a restatement of the current item with rotating wording (snapshots batch-rut-breaker, batch-rut-breaker-off). Opt-in with hs goal set --recite; off by default until a measured gain (K16), which needs the smoke-test tasks
 - **Problem.** On long runs the goal drifts out of focus, and batch work imitates itself.
 - **Mechanism.** On long runs only, PostToolBatch appends the goal and step when their digest changes, and restates the current item with varied wording on repetitive batches. Ships only with a measured gain (K16).
 - **Evidence.** Manus: recite the plan; "Don't get few-shotted" ([00b](research/00b-research-backed-ideas.md)).
@@ -928,7 +928,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-056 · Status mod: spinner and announcement line
 **Visibility · Build · P1 · S · Judgment · Depends on: HS-018 · Sources: E12, E14**
-- **Status.** done — Spinner suffix (size, skill, step) and once-per-change announcement line at turn.complete in hooks/register.js; mod tests
+- **Status.** needs-user (visual check inside the user's desktop app: the Spinner suffix and announcement line are built in hooks/register.js and pass the mod tests (claude plugin test, 5/5); how they look in the app has not been checked)
 - **Problem.** Users can't see what H-Stack picked, so wrong picks go uncorrected.
 - **Mechanism.**
   - **Spinner.** The mod's Spinner render site shows `H-Stack · <size> · <skill> · step n/m`.
@@ -940,7 +940,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-057 · Side pane
 **Visibility · Build · P2 · M · Judgment · Depends on: HS-056 · Sources: E13**
-- **Status.** done — Pane (route, receipts, assumptions, decisions, wishlist) in hooks/register.js; opt-in via config pane; visual check in the desktop app not done here
+- **Status.** needs-user (visual check inside the user's desktop app: the Pane is built in hooks/register.js (opt-in via config pane) and passes the mod tests; its rendering in the app has not been checked)
 - **Problem.** Long runs are opaque.
 - **Mechanism.** A mod Pane gives a read-only view of the playbook step, skills used, receipts, assumptions, decisions and the wishlist (OD-2).
 - **Evidence.** [00 E13](research/00-activation-and-experience.md); mods Pane site.
@@ -1251,7 +1251,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-085 · Release gate
 **Distribution · Thin · P1 · S · Reliability · Depends on: HS-001, HS-010, HS-011, HS-013, HS-083 · Sources: none of its own (CLAUDE.md "Validate", "Report honestly")**
-- **Status.** done — evals/release-gate.mjs: CI (validate, budget, snapshots, lint, THIRD_PARTY, egress, tests) + a smoke run on real tasks newer than the last plugin change with regressions listed. Currently fails on the smoke check (no real tasks yet, HS-001)
+- **Status.** needs-user (smoke-test results: evals/release-gate.mjs is built (CI + a smoke run on real tasks newer than the last plugin change, with regressions listed) and its CI part passes; the gate itself cannot pass until the user's real smoke-test tasks exist and have been run (HS-001))
 - **Problem.** A release ships without numbers, or hides its regressions.
 - **Mechanism.** Bump the version only when these pass:
   - `claude plugin validate .`;

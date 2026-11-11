@@ -55,6 +55,8 @@ When moving data, config or code from one shape to another, every source item ma
 
 ## Before you finish
 
+- Every rule the spec states has a test, including its exceptions and boundary values; slices are small, but the work isn't done until the spec is covered.
+- If tests can't be run here, write them anyway and list them under Not verified instead of stopping early.
 - Each new test was seen failing, then passing (cite both runs, or the receipt of the passing run after the last edit).
 - The whole suite passes after the last edit.
 - No existing assertion was weakened, skipped or special-cased to pass.

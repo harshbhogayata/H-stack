@@ -2,7 +2,7 @@
 
 Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **107 done, 4 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. No import is worse than no skill. Review was worse on its first run and was fixed. Five skills tie at the ceiling. The whole-stack smoke test has not run because it needs your real tasks.
+**Short version.** All 85 HS items and 26 IM rows have a status: **103 done, 8 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Every needs-user item has one of the allowed reasons: smoke-test tasks, accounts, desktop visual checks, or a judgement call. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. No import is worse than no skill. Review was worse on its first run and was fixed. Five skills tie at the ceiling. M4's activation target is only partly met: the model often doesn't load the skill H-Stack names (item 2 below). The whole-stack smoke test has not run because it needs your real tasks.
 
 ## Needs you
 
@@ -16,8 +16,19 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
    - `node evals/run-smoke.mjs --runs 3` for the M1 baseline and v1.0 numbers (OD-6: 3 runs per arm, your daily model);
    - `node evals/release-gate.mjs` before bumping the version.
 
-   The release gate currently fails on exactly this check.
-2. **Retire or harden the five ceiling ties (judgement call).** debugging, design-ui, research, review and security-audit score 1.00 with and without the skill. They conflict with two rules:
+   The release gate (HS-085) is built and its CI part passes. The gate itself fails until these tasks exist and have been run, so HS-085 is needs-user.
+2. **Activation: the model often doesn't load the named skill (HS-018, judgement call).** The classifier names the right skill, but the model frequently answers without calling the Skill tool. Latest `claude plugin eval`, 3 runs per arm:
+   - planning 0.67 vs 0.33;
+   - debugging 1.00 vs 1.00;
+   - tdd 1.00 vs 1.00, with the skill loaded 0 of 3 times.
+
+   M4 asks for activation cases that pass and differ from no-plugin, which holds only for planning. Raising the load rate needs one of:
+   - **(a)** imperative hook wording, which CLAUDE.md forbids ("never YOU MUST");
+   - **(b)** injecting a short excerpt of the skill's contract with the classifier line, which costs about 50–100 tokens per routed prompt;
+   - **(c)** the OD-1 model fallback, which picks better but doesn't make the model load the skill.
+
+   I recommend (b), measured on the smoke test.
+3. **Retire or harden the five ceiling ties (judgement call).** debugging, design-ui, research, review and security-audit score 1.00 with and without the skill. They conflict with two rules:
    - HS-006 says a skill the base model passes without is retired.
    - The goal's import rule says to drop only what is worse than no skill.
 
@@ -26,16 +37,16 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
    - **(b)** retire them now.
 
    `node evals/retire-check.mjs` lists them.
-3. **Routines (HS-076 nightly prep, HS-077 CI watcher).** These must be created in your claude.ai account; the GitHub-event trigger also needs the GitHub app on the repo. What each Routine does and its `task.yaml` pattern are in `skills/long-run` (SKILL.md, references/task-yaml.md).
-4. **Second scaffold check (HS-009).** Needs a Codex or dsh install and its own model account.
-5. **Visual checks in the desktop app.** I could not look at:
+4. **Routines (HS-076 nightly prep, HS-077 CI watcher).** These must be created in your claude.ai account; the GitHub-event trigger also needs the GitHub app on the repo. What each Routine does and its `task.yaml` pattern are in `skills/long-run` (SKILL.md, references/task-yaml.md).
+5. **Second scaffold check (HS-009).** Needs a Codex or dsh install and its own model account.
+6. **Visual checks in the desktop app.** I could not look at:
    - the Spinner suffix and announcement line (HS-056);
    - the side pane (HS-057, opt-in via `"pane": true` in `.h-stack/config.json`).
 
-   Mod unit tests pass (5/5).
-6. **Off-by-default switches to decide after the smoke test.** Each one costs model calls or context and has no measured gain yet. They are listed in Deviations (item 6).
-7. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
-8. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
+   Both are built and pass the mod tests (5/5); HS-056 and HS-057 are needs-user only for this check.
+7. **Off-by-default switches to decide after the smoke test.** Each one costs model calls or context and has no measured gain yet. They are listed in Deviations (item 6).
+8. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
+9. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
    - edits to `CLAUDE.md`, `.claude/rules/**` and `.h-stack/config.json`;
    - MCP tools whose names carry no recognisable verb.
 
@@ -46,9 +57,9 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 | Milestone | Items | What exists now |
 |---|---|---|
 | M1 baseline | HS-001, 003, 005, 082 | Skipped per the goal, apart from what it needs:<br>• smoke runner `evals/run-smoke.mjs` (skill-creator layout; false-done, tampering, questions, unaided, cost per solved task, sameness), self-tested in both arms;<br>• task format and validator;<br>• judge hygiene;<br>• native map (ARCHITECTURE §2).<br>HS-001 is needs-user. |
-| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 906/1,500 tokens, listing 650/900), 82 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
+| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 906/1,500 tokens, listing 650/900), 94 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
 | M3 core imports | IM-01, 04, 05, 06, 07, 11, 15; HS-002 | core-rules (verification-before-completion and the Karpathy rules, plus 4 opt-in path-scoped rule templates), planning, tdd, debugging (with `verify-fix.mjs`), clarify. Each has evals and a benchmark. |
-| M4 activation | HS-017, 018, 020, 022 | • SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
+| M4 activation | HS-017, 018, 020, 022 | **Exit criterion partly met** (see Needs you, item 2).<br>• SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
 | M5 guards I | HS-027, 028, 029 | • Receipts ledger and a Stop gate (blocks once on unbacked "done").<br>• Read-only tests outside `hs phase test`.<br>• Tamper scan (8 patterns).<br>• Protected checkers and paths, plus opt-in permission rules (`setup.mjs`, OD-4). |
 | M6 guards II | HS-030, 031, 033 | • Irreversible-action gate: shell unwrapping, effect classes, dry-run receipts, approval binding; exfiltration always denied.<br>• Dependency gate: exists, age, downloads, near-miss; offline ⇒ ask.<br>• MCP tool-description firewall (mods `tool.describe`). |
 | M7 state and memory | HS-046, 048, 049 | • Assumption ledger (blocks Stop while open).<br>• Committed path-scoped lessons with evidence and provenance, and a validator.<br>• At most 2 trigger-matched lessons per prompt.<br>• Native auto memory configured by setup. |
@@ -59,9 +70,9 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 
 | Priority | done | needs-user | dropped |
 |---|---:|---:|---:|
-| P0 (26) | 25 | 1 (HS-001) | 0 |
-| P1 (36) | 36 | 0 | 0 |
-| P2 (23) | 20 | 3 (HS-009, 076, 077) | 0 |
+| P0 (26) | 24 | 2 (HS-001 smoke tasks; HS-018 judgement call) | 0 |
+| P1 (36) | 34 | 2 (HS-056 visual check; HS-085 smoke results) | 0 |
+| P2 (23) | 19 | 4 (HS-009, 076, 077 accounts; HS-057 visual check) | 0 |
 | IM rows (26) | 26 | 0 | 0 (resolving-merge-conflicts dropped inside the IM-13 row: upstream archived) |
 
 **P1 highlights**
@@ -79,7 +90,7 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 - Reviewer calibration from overrides; skill feedback drafts with exact-text approval.
 - Git-based retro signals (reverts, rework, request-to-commit time); user-edit candidates for lessons.
 - Several-attempts guidance for high-risk work.
-- Effort measurement; opt-in recitation; side pane.
+- Effort measurement; opt-in recitation and few-shot rut breaker (HS-055); side pane.
 
 ## Benchmark numbers per import
 
@@ -101,7 +112,7 @@ With one run per arm, a delta under about 0.15 is within noise. Full data: `eval
 | clarify (grilling) | 2 | 1.00 | 0.89 | +0.11 | +17k | kept |
 | writing (writing-for-agents, unslop) | 1 | 1.00 | 0.89 | +0.11 | +10k | kept |
 | core-rules (verification, Karpathy) | 2 | 0.89 | 0.78 | +0.11 | +105k | kept |
-| tdd | 2 | 0.89 | 0.78 | +0.11 | +175k | kept |
+| tdd | 4 | 0.89 | 0.78 | +0.11 | +359k | kept (iteration 4 re-checks the spec-coverage change; iteration 2 was the same 0.89 vs 0.78) |
 | review (receiving-code-review) | 2 | 1.00 | 1.00 | 0.00 | +36k | kept (tie). **Iteration 1 was worse: 0.89 vs 1.00** (explained below the table) |
 | debugging (systematic-debugging) | 2 | 1.00 | 1.00 | 0.00 | +177k | kept (tie at ceiling) |
 | design-ui (baseline-ui, frontend-design) | 1 | 1.00 | 1.00 | 0.00 | +34k | kept (tie at ceiling) |
@@ -123,21 +134,30 @@ With one run per arm, a delta under about 0.15 is within noise. Full data: `eval
 
 I did not set frontmatter `effort: low`. The field overrides your session effort for the whole turn, and 3 small fixtures are too little evidence for that.
 
-**Activation through hooks** (`claude plugin eval`, 1 run per arm, measured during M4):
+**Activation through hooks** (`claude plugin eval`).
 
-| Case | With | Without |
-|---|---:|---:|
-| debugging | 1.00 | 1.00 |
-| planning | 1.00 | 1.00 |
-| tdd | 0.50 | 1.00 (**regression** on the date-rule grader) |
-| clarify-vague | 0 | 0 |
-| direct prompt | 1.00 | 1.00 |
+| Case | M4 run (1 per arm): with / without | Re-run (3 per arm): with / without |
+|---|---|---|
+| debugging | 1.00 / 1.00 | 1.00 / 1.00 |
+| planning | 1.00 / 1.00 | **0.67 / 0.33** |
+| tdd | **0.50 / 1.00 (regression)** | 1.00 / 1.00, skill loaded 0 of 3 |
+| clarify-vague | 0 / 0 | not re-run |
+| direct prompt | 1.00 / 1.00 | not re-run |
 
-How often the model actually loaded the named skill:
-- fixture tasks: 2 of 4 (tdd and planning yes, debugging no);
-- brief questions: 0 of 4.
+**What caused the tdd regression.** In the M4 run the skill loaded, and its one-test-per-cycle rule ended the run before the spec's exception cases (century years) had tests. Tests couldn't be run in that eval, which made it worse.
 
-The classifier names the right skill, but the model often answers without loading it. This is the biggest open activation problem. The smoke test will show whether it matters for outcomes.
+I added two "Before you finish" checks to the skill:
+- every rule the spec states, exceptions included, has a test;
+- if tests can't run, write them anyway and list them as Not verified.
+
+The per-skill benchmark with the change stays at 0.89 vs 0.78. The activation re-run no longer regresses, but there the skill never loaded, so it doesn't test the change.
+
+**How often the model loaded the named skill:**
+- M4: 2 of 4 fixture tasks;
+- M4: 0 of 4 brief questions;
+- re-run: 0 of 3 tdd runs.
+
+This activation gap is the biggest open problem (Needs you, item 2).
 
 ## CI summary
 
@@ -149,12 +169,12 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 | index | current (15 skills) |
 | Model Experience note | current |
 | context budget | always-on 906/1,500 tokens; listing 650/900; 0 rows over |
-| snapshots | 85/85 |
+| snapshots | 94/94 |
 | hook contract | 19 hook scripts; 5 closed hooks deny on crash |
 | lint | 15 skills, 4 agents, 0 problems |
 | THIRD_PARTY | 19 import rows, 0 problems |
 | egress inventory | 9 points, 0 outside the inventory |
-| unit and validator tests | 36 pass, 0 fail |
+| unit and validator tests | 37 pass, 0 fail |
 | mod tests (`claude plugin test`) | 5 pass |
 | smoke-test task file | valid; 0 real tasks |
 
@@ -166,7 +186,9 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 
 **Findings: 12 confirmed (7 medium, 5 low), 2 plausible, 4 refuted.** Both upstream validators pass on `docs/self-audit/findings.json` (18 records) and `coverage-ledger.json` (15 units). Full report: `docs/self-audit/REPORT.md`.
 
-**All 12 confirmed findings are fixed.** Each has a regression check (`tests/unit/self-audit.test.mjs` and 3 new snapshot cases), and every reproduction in `docs/self-audit/agents/parent/artifacts/repro.sh` now asks or denies.
+**All 12 confirmed findings are fixed.** Every reproduction in `docs/self-audit/agents/parent/artifacts/repro.sh` now asks or denies, and each finding has at least one automated check:
+- unit tests in `tests/unit/self-audit.test.mjs` for F1, F2, F3, F6, F8, F9, F10 and F12;
+- snapshot cases in `tests/snapshots/` for F1, F3, F4, F5, F6, F7, F9 and F11 (`bash-force-push-global-flag`, `bash-config-write`, `bash-state-node-e`, `bash-state-mv-source`, `bash-hs-manifest-stop`, `bash-metadata-schemeless`, `bash-taint-data-noprefix-space`, `bash-taint-wget-post-file`, `mcp-camelcase-write`, `bash-subagent-shell-write`).
 
 | Finding | What could happen | Fix |
 |---|---|---|
@@ -204,14 +226,15 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
    - concern check at Stop (HS-040);
    - overseer (HS-042);
    - side pane (HS-057, consistent with OD-2);
-   - recitation (HS-055, K16: only with a measured gain).
+   - recitation and rut breaker (HS-055, K16: only with a measured gain).
 7. **Repeat-call reminders run on PostToolBatch, not PostToolUse** (HS-037): one line per batch instead of one per call.
 8. **Upstream tests for the Cloudflare security-audit validators were not executed**: auto mode blocked running downloaded code.
    - A review subagent safety-read the 11 companion files in full.
    - I read the core files, schema and validators in full; I reviewed the test files for side effects but did not read every line.
 9. **resolving-merge-conflicts not imported**: the upstream skill is archived. git-ship covers conflicts in its own words.
-10. **HS-006 retire rule not applied** to the five ceiling ties (see Needs you, item 2).
+10. **HS-006 retire rule not applied** to the five ceiling ties (see Needs you, item 3).
 11. **Solo-boundary pass signal (HS-025)** is "the next prompt is not a correction". That is a proxy until smoke-test data exists; cold start is `medium` as specified.
+12. **M4 activation exit criterion only partly met** (HS-018). The classifier is built, but the named skill often isn't loaded; see Needs you, item 2.
 
 ## Next steps
 
@@ -219,8 +242,6 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 2. Run the M1 baseline, then the full stack, with `node evals/run-smoke.mjs --runs 3`.
 3. Drop any piece that makes results worse (CLAUDE.md), then commit the results.
 4. Decide on the five ceiling ties. If you keep them, harder evals first, starting with debugging.
-5. Use the smoke test to measure the activation gap (skill named but not loaded). Options if it costs outcomes:
-   - stronger classifier wording;
-   - or the OD-1 model fallback.
+5. Choose an option for the activation gap (Needs you, item 2) and measure it on the smoke test.
 6. Decide the off-by-default switches from measured numbers.
 7. Once `node evals/release-gate.mjs` passes, bump `plugins/h-stack/.claude-plugin/plugin.json` from 0.0.1 and put the smoke numbers, regressions included, in the README.

@@ -44,3 +44,17 @@ test('F12 claim kinds from the executable, not the text', () => {
   assert.deepEqual(claimKinds('npm test', DEFAULT_CONFIG), ['test']);
   assert.deepEqual(claimKinds('cd x && go test ./...', DEFAULT_CONFIG), ['test']);
 });
+
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { loadLessons } from '../../lib/memory.mjs';
+test('F10 lessons that fail validation are never loaded', () => {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-lessons-'));
+  const L = path.join(d, '.claude', 'rules', 'lessons');
+  fs.mkdirSync(L, { recursive: true });
+  const fx = new URL('../fixtures/lessons/', import.meta.url).pathname;
+  for (const f of ['good-payments.md', 'bad-provenance.md']) fs.copyFileSync(path.join(fx, f), path.join(L, f));
+  assert.deepEqual(loadLessons(d).map((l) => l.file), ['.claude/rules/lessons/good-payments.md']);
+  fs.rmSync(d, { recursive: true, force: true });
+});
