@@ -1,8 +1,8 @@
 # H-Stack
 
-A Claude Code skill stack, built from scratch, one category at a time.
+A lean, native-first Claude Code skill stack: the best existing skills, adopted and adapted, plus custom pieces only where nothing exists.
 
-**North star:** get as much real capability out of the model as a harness can, measured on our own eval suite: reliability, autonomy horizon, learning over time, judgment, cost. Nothing ships unless it moves those numbers. Details in [`CLAUDE.md`](CLAUDE.md#north-star).
+**North star:** get as much real capability out of the model as a harness can, measured on our own eval suite: reliability, autonomy horizon, learning over time, judgment, cost. Checked with a small smoke test of real tasks. Details in [`CLAUDE.md`](CLAUDE.md#north-star).
 
 ## Install
 
@@ -42,4 +42,4 @@ To update after new commits: `/plugin` → Marketplaces → `h-stack` → update
 Each category's top 10 and the ideas worth taking are in [`research/`](research/README.md).
 
 ## How we build
-Research → decide → build our own skill → validate (`claude plugin validate .`) → commit. Rules for working on this repo are in [`CLAUDE.md`](CLAUDE.md).
+Pick the top-ranked skill → import and adapt it → smoke-test → validate (`claude plugin validate .`) → commit. Rules for working on this repo are in [`CLAUDE.md`](CLAUDE.md).
