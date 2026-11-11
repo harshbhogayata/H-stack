@@ -78,6 +78,7 @@ const tasks = spec.tasks.filter((t) => !ONLY.length || ONLY.includes(t.skill));
 const jobs = [];
 for (const t of tasks) for (const arm of ['with_skill', 'without_skill']) for (let n = 1; n <= RUNS; n++) for (const ctx of spec.contexts) jobs.push(async () => {
   const out = await agent(t, ctx, arm);
+  if (/hit your [\w -]*limit/i.test(out.final)) { process.stderr.write(`usage limit reached (${t.skill} ${arm} ${ctx}); stopping\n`); process.exit(3); }
   const fit = await gradeFit(ctx, t, out);
   process.stderr.write(`${t.skill} ${arm}#${n} ${ctx}: fit ${fit.passed}/${fit.total}\n`);
   return { skill: t.skill, arm, run: n, ctx, fit, text: out.text, final: out.final.slice(0, 4000), diff: out.diff.slice(0, 8000) };

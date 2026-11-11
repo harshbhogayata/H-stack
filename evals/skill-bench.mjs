@@ -28,7 +28,8 @@ const ITER = Number(opt('iteration', 1));
 const MAX_TURNS = Number(opt('max-turns', 30));
 const ONLY_EVAL = opt('eval', null);
 const EFFORT = opt('effort', null);
-const RUNS = Number(opt('runs', 1)); // runs per arm per eval // HS-007: compare a skill at two effort levels
+const RUNS = Number(opt('runs', 1)); // runs per arm per eval
+const LIMIT = /hit your [\w -]*limit/i; // HS-007: compare a skill at two effort levels
 const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(npm run:*)', 'Bash(npx vitest:*)', 'Bash(npx jest:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(grep:*)', 'Bash(rg:*)', 'Bash(find:*)', 'Bash(mkdir:*)', 'Bash(git stash:*)'];
 
 function run(cmd, argv, { cwd, input, timeout = 900000, env } = {}) {
@@ -40,6 +41,7 @@ function run(cmd, argv, { cwd, input, timeout = 900000, env } = {}) {
     p.stderr.on('data', (d) => { err += d; });
     const timer = setTimeout(() => p.kill('SIGKILL'), timeout);
     p.on('close', (code) => { clearTimeout(timer); resolve({ code, out, err, ms: Date.now() - t0 }); });
+    p.stdin.on('error', () => { /* child exited before reading stdin (EPIPE) */ });
     p.stdin.end(input || '');
   });
 }
@@ -135,7 +137,15 @@ async function benchSkill(skill) {
   for (const ev of evs) for (const arm of ['with_skill', 'without_skill']) for (let n = 1; n <= RUNS; n++) tasks.push(async () => {
     const dir = RUNS > 1 ? path.join(base, `eval-${ev.eval_name}`, arm, `run-${n}`) : path.join(base, `eval-${ev.eval_name}`, arm);
     fs.mkdirSync(path.join(dir, 'outputs'), { recursive: true });
+    // Resume: reuse a finished run whose output is not a usage-limit message.
+    const prevG = path.join(dir, 'grading.json'); const prevF = path.join(dir, 'outputs', 'final.md'); const prevT = path.join(dir, 'timing.json');
+    if (fs.existsSync(prevG) && fs.existsSync(prevT) && !LIMIT.test(fs.readFileSync(prevF, 'utf8'))) {
+      const g0 = JSON.parse(fs.readFileSync(prevG, 'utf8')); const t0 = JSON.parse(fs.readFileSync(prevT, 'utf8'));
+      return { eval_id: ev.id, eval_name: ev.eval_name, configuration: arm, run_number: n, result: { ...g0.summary, time_seconds: t0.total_duration_seconds, tokens: t0.total_tokens, errors: t0.error ? 1 : 0 }, expectations: g0.expectations, resumed: true };
+    }
     const res = await agentRun(skill, ev, arm);
+    // A usage-limit reply is not a result: stop the whole run so no garbage is scored.
+    if (LIMIT.test(res.final)) { process.stderr.write(`usage limit reached during ${skill} ${ev.eval_name} ${arm}#${n}; stopping (re-run resumes)\n`); process.exit(3); }
     const g = await grade(ev, res);
     fs.writeFileSync(path.join(dir, 'outputs', 'final.md'), res.final);
     fs.writeFileSync(path.join(dir, 'outputs', 'diff.patch'), res.diff);
