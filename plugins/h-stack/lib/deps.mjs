@@ -4,7 +4,7 @@
 // file) replaces the network in tests.
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseCommands, exe } from './shell.mjs';
+import { parseCommands, exe, normaliseArgv } from './shell.mjs';
 import { stateDir, readJson, writeJsonAtomic } from './core.mjs';
 import { PY_STDLIB, NODE_BUILTINS, TOP } from './deps-data.mjs';
 
@@ -35,8 +35,8 @@ const isLocalSpec = (s) => /^(\.|\/|~|file:|git\+|https?:|link:|workspace:|-)/.t
 export function installTargets(command) {
   const out = [];
   for (const c of parseCommands(command)) {
-    const a = c.argv; const e = exe(c);
-    const VALUE_FLAGS = new Set(['--features', '-F', '--registry', '--tag', '--target', '--git', '--branch', '--rev', '--path', '--vers', '--version', '--source', '--group', '-G', '--index', '--filter', '--workspace', '-w', '--save-prefix', '--python', '-p', '--package']);
+    const a = normaliseArgv(c.argv); const e = exe(c);
+    const VALUE_FLAGS = new Set(['--prefix', '-C', '--dir', '--cwd', '--directory', '--project', '--manifest-path', '--config', '--userconfig', '--cache', '--workspace-dir', '--features', '-F', '--registry', '--tag', '--target', '--git', '--branch', '--rev', '--path', '--vers', '--version', '--source', '--group', '-G', '--index', '--filter', '--workspace', '-w', '--save-prefix', '--python', '-p', '--package']);
     const args = (from) => { const r = []; const xs = a.slice(from); for (let k = 0; k < xs.length; k++) { if (VALUE_FLAGS.has(xs[k])) { k++; continue; } if (!xs[k].startsWith('-')) r.push(xs[k]); } return r; };
     let eco = null; let names = [];
     if (['npm', 'pnpm', 'yarn', 'bun', 'cnpm'].includes(e) && ['i', 'install', 'add'].includes(a[1])) { eco = 'npm'; names = args(2); }

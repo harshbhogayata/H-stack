@@ -55,6 +55,7 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-crash | 55 | Blocked by h-stack:gate-bash: the guard crashed, so the action was not checked. To proceed: report this to the user; the error is in .h-stack/logs/hook-errors.jsonl. |
 | bash-credential-exec | 66 | Blocked by trusted-executable: `npx vercel login` runs a credential-bearing step through a project-controlled executable. To proceed: run the globally installed tool, or the user confirms this one. |
 | bash-exfiltration | 63 | Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network. |
+| bash-force-push-global-flag | 73 | Blocked by irreversible-gate: irreversible action (effect=force-push; executable=git; target=git push --force; destination=origin main .). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-force-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-install-fresh | 91 | Blocked by dependency-gate: npm:left-pad-fresh about 12 downloads a week (floor 50); npm:left-pad-fresh first published 10 days ago (minimum 30); npm:left-pad-fresh installs @latest, so the version is not pinned. To proceed: check the package name and source with the user. |
 | bash-install-nearmiss | 75 | Blocked by dependency-gate: npm:lodahs not found in the registry (possibly a hallucinated name); npm:lodahs within edit distance 2 of the popular package "lodash". To proceed: check the package name and source with the user. |
@@ -68,6 +69,7 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-push-feature-trigger | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-push-main | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | bash-scope-lock | 110 | Blocked by irreversible-gate: irreversible action (effect=send; executable=gh; target=gh issue comment; destination=issue 12). To proceed: the user approves this exact command; a changed command asks again. Blocked by scope-lock: this writes to #12, but the request named #7. To proceed: confirm the target number with the user. |
+| bash-state-node-e | 62 | Blocked by protected-state: `node -e require('fs').writeFileSync('.h-stack/sessions/s1/ta` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
 | bash-state-write | 50 | Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 | bash-step-budget | 56 | Blocked by step-budget: this turn used 75 model steps (cap 60 for size=light). To proceed: stop and summarise what is done, what remains and the next step for the user. |
 | bash-terraform-with-plan | 91 | Blocked by irreversible-gate: irreversible action (effect=deploy; executable=terraform; target=terraform apply; destination=infrastructure); dry-run receipt r-1 (`terraform plan -out tf.plan`). To proceed: the user approves this exact command; a changed command asks again. |
@@ -102,6 +104,7 @@ Cache effect: Decision text only.
 
 | fixture | tokens | text |
 |---|---:|---|
+| mcp-camelcase-write | 60 | Blocked by irreversible-gate: effect=send/write; tool=mcp__slack__sendMessage; arguments={"text":"hi"}. To proceed: the user approves this exact call; changed arguments ask again. |
 | mcp-scope-lock | 110 | Blocked by irreversible-gate: effect=send/write; tool=mcp__github__add_issue_comment; arguments={"issue_number":99,"body":"done"}. To proceed: the user approves this exact call; changed arguments ask again. Blocked by scope-lock: this writes to #99, but the request named #42. To proceed: confirm the target number with the user. |
 | mcp-send | 67 | Blocked by irreversible-gate: effect=send/write; tool=mcp__slack__send_message; arguments={"channel":"C1","text":"deployed"}. To proceed: the user approves this exact call; changed arguments ask again. |
 

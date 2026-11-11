@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { readJson, matchesAny } from './core.mjs';
 import { splitFrontmatter } from './yaml.mjs';
+import { validateLessonText } from './lessons.mjs';
 
 export function autoMemoryDir(proj) {
   for (const f of [path.join(proj, '.claude', 'settings.local.json'), path.join(proj, '.claude', 'settings.json'), path.join(os.homedir(), '.claude', 'settings.json')]) {
@@ -22,6 +23,9 @@ export function loadLessons(proj) {
   try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).sort(); } catch { return out; }
   for (const f of files) {
     const text = fs.readFileSync(path.join(dir, f), 'utf8');
+    // Self-audit F10: a file that fails the lesson validator (untrusted provenance, no evidence,
+    // always-on) is never injected, even if it was written past the gates.
+    if (!validateLessonText(text).ok) continue;
     const { data, body } = splitFrontmatter(text);
     const entries = body.split(/^### /m).slice(1).map((chunk) => {
       const [title, ...rest] = chunk.split('\n');

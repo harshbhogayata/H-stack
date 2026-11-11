@@ -34,14 +34,19 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 
    Mod unit tests pass (5/5).
 6. **Off-by-default switches to decide after the smoke test.** Each one costs model calls or context and has no measured gain yet. They are listed in Deviations (item 6).
-7. **Self-audit findings.** See the Self-audit section; any finding marked "open" needs your call on the fix.
+7. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
+8. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
+   - edits to `CLAUDE.md`, `.claude/rules/**` and `.h-stack/config.json`;
+   - MCP tools whose names carry no recognisable verb.
+
+   If the asks are too frequent, add the tool to `irreversible.allowlist` in `.h-stack/config.json` (that edit itself asks once).
 
 ## What was built, per milestone
 
 | Milestone | Items | What exists now |
 |---|---|---|
 | M1 baseline | HS-001, 003, 005, 082 | Skipped per the goal, apart from what it needs:<br>• smoke runner `evals/run-smoke.mjs` (skill-creator layout; false-done, tampering, questions, unaided, cost per solved task, sameness), self-tested in both arms;<br>• task format and validator;<br>• judge hygiene;<br>• native map (ARCHITECTURE §2).<br>HS-001 is needs-user. |
-| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 956/1,500 tokens, listing 650/900), 82 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
+| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 906/1,500 tokens, listing 650/900), 82 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
 | M3 core imports | IM-01, 04, 05, 06, 07, 11, 15; HS-002 | core-rules (verification-before-completion and the Karpathy rules, plus 4 opt-in path-scoped rule templates), planning, tdd, debugging (with `verify-fix.mjs`), clarify. Each has evals and a benchmark. |
 | M4 activation | HS-017, 018, 020, 022 | • SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
 | M5 guards I | HS-027, 028, 029 | • Receipts ledger and a Stop gate (blocks once on unbacked "done").<br>• Read-only tests outside `hs phase test`.<br>• Tamper scan (8 patterns).<br>• Protected checkers and paths, plus opt-in permission rules (`setup.mjs`, OD-4). |
@@ -143,13 +148,13 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 | plugin validate | passed |
 | index | current (15 skills) |
 | Model Experience note | current |
-| context budget | always-on 956/1,500 tokens; listing 650/900; 0 rows over |
-| snapshots | 82/82 |
+| context budget | always-on 906/1,500 tokens; listing 650/900; 0 rows over |
+| snapshots | 85/85 |
 | hook contract | 19 hook scripts; 5 closed hooks deny on crash |
 | lint | 15 skills, 4 agents, 0 problems |
 | THIRD_PARTY | 19 import rows, 0 problems |
 | egress inventory | 9 points, 0 outside the inventory |
-| unit and validator tests | 29 pass, 0 fail |
+| unit and validator tests | 36 pass, 0 fail |
 | mod tests (`claude plugin test`) | 5 pass |
 | smoke-test task file | valid; 0 real tasks |
 
@@ -157,7 +162,31 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 
 ## Self-audit (HS-014)
 
-In progress: the imported security-audit skill is running on H-Stack itself; interim files are in `docs/self-audit/`. This section is updated when it finishes.
+A review subagent ran the imported security-audit skill on H-Stack's own hooks, mods, lib, `hs` and setup.
+
+**Findings: 12 confirmed (7 medium, 5 low), 2 plausible, 4 refuted.** Both upstream validators pass on `docs/self-audit/findings.json` (18 records) and `coverage-ledger.json` (15 units). Full report: `docs/self-audit/REPORT.md`.
+
+**All 12 confirmed findings are fixed.** Each has a regression check (`tests/unit/self-audit.test.mjs` and 3 new snapshot cases), and every reproduction in `docs/self-audit/agents/parent/artifacts/repro.sh` now asks or denies.
+
+| Finding | What could happen | Fix |
+|---|---|---|
+| F1, F2 | Global flags such as `git -C . push --force`, `gh -R`, `kubectl --context` and `npm --prefix` bypassed the irreversible and dependency gates | A shared normaliser moves global options after the subcommand |
+| F3 | The agent could rewrite `.h-stack/config.json` to allowlist everything | Edits to config.json now ask |
+| F4 | `mv`, `node -e` and `find -delete` on `.h-stack/` state got through | Any non-reading command naming state is denied, except `hs` |
+| F5 | `hs manifest stop` lifted the declared-effects manifest without asking | It now asks, and the refusal no longer suggests it |
+| F8 | `.e""nv` and `$(gh auth token)` got past the exfiltration guard | De-quoted tokens are checked, credential printers count as secret sources, and the parser now extracts substitutions inside double quotes |
+| F9 | Hyphenated, camelCase and `*_write` MCP tools weren't treated as writes | Names are split on `-`, `.` and camelCase; a tool with no recognisable verb asks |
+| F10 | A lesson with untrusted provenance was injected into prompts | Lessons are validated before injection, and `.claude/rules/**` and `CLAUDE.md` edits ask |
+| F6, F7 | Scheme-less and IPv4-mapped metadata URLs, and `-d@x` / `--post-file=`, slipped through | Fixed |
+| F11 | Read-only subagents could still write through Bash | The scratch-only rule now applies to Bash |
+| F12 | `echo tests` satisfied a "tests pass" claim | Claim kinds come from the parsed executable |
+
+**Still open:**
+- **Plausible finding 1:** the MCP firewall may scan only the `description` field.
+- **Plausible finding 2:** a resubmit loop in the off-by-default concern check.
+- Both need the live runtime to check.
+- **Structural limit:** these gates parse text and are a second layer behind Claude Code's native permissions, not a sandbox. In-process tool use (`python -c "subprocess…"`) gets past any text-based gate.
+- **Audit method:** one agent did the whole audit (no separate verifier) and coverage is partial. REPORT.md §7 lists what wasn't covered.
 
 ## Deviations from ARCHITECTURE.md
 

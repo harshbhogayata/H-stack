@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by irreversible-gate: irreversible action (effect=force-push; executable=git; target=git push --force; destination=origin main .). To proceed: the user approves this exact command; a changed command asks again."}}

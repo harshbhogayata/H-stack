@@ -29,7 +29,10 @@ export function taintedIn(proj, sid, text, trusted = []) {
 
 export function privateDestination(url) {
   let host;
-  try { host = new URL(url).hostname.replace(/^\[|\]$/g, ''); } catch { return null; }
+  try { host = new URL(url).hostname.replace(/^\[|\]$/g, '').toLowerCase(); } catch { return null; }
+  // Self-audit F6: IPv4-mapped (::ffff:a9fe:a9fe) and NAT64 (64:ff9b::) IPv6 forms of IPv4 hosts.
+  const mapped = host.match(/^(?:::ffff:|64:ff9b::)(?:(\d+\.\d+\.\d+\.\d+)|([0-9a-f]{1,4}):([0-9a-f]{1,4}))$/);
+  if (mapped) host = mapped[1] || [parseInt(mapped[2], 16) >> 8, parseInt(mapped[2], 16) & 255, parseInt(mapped[3], 16) >> 8, parseInt(mapped[3], 16) & 255].join('.');
   if (/^(localhost|.*\.localhost|.*\.local|.*\.internal|metadata\.google\.internal|metadata)$/i.test(host)) return `${host} (local or metadata host)`;
   if (/^127\.|^0\.0\.0\.0$|^::1$|^::$/.test(host)) return `${host} (loopback)`;
   if (/^10\.|^192\.168\.|^172\.(1[6-9]|2\d|3[01])\.|^fc|^fd|^fe80:/i.test(host)) return `${host} (private network)`;

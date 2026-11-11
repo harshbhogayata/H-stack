@@ -84,7 +84,7 @@ export async function decide(input, proj) {
       if (!declared(manifestObj, { kind, target })) undeclared.push(f.target);
     }
     for (const t of writeTargets(cmds)) { const rel = relToProject(proj, t); if (!declared(manifestObj, { kind: 'edit', target: rel })) undeclared.push(`write ${rel}`); }
-    if (undeclared.length) denies.push(refusal('declared-effects', `${undeclared.slice(0, 3).join(', ')} is not declared in ${manifestObj.source || 'the active task manifest'}`, 'add it to the manifest\'s effects with the user, or run hs manifest stop'));
+    if (undeclared.length) denies.push(refusal('declared-effects', `${undeclared.slice(0, 3).join(', ')} is not declared in ${manifestObj.source || 'the active task manifest'}`, 'add it to the manifest\'s effects with the user'));
   }
 
   // HS-035 scope lock.
@@ -108,6 +108,33 @@ export async function decide(input, proj) {
     }
   }
 
+  // Self-audit F4/F5: H-Stack state is written only by hooks and hs. Any other command that names a
+  // .h-stack/ path (mv source, node -e, find -delete, ...) is denied unless it only reads.
+  const READERS = new Set(['cat', 'head', 'tail', 'less', 'more', 'ls', 'grep', 'rg', 'jq', 'wc', 'stat', 'diff', 'file', 'du', 'tree', 'bat']);
+  for (const c of cmds) {
+    const e = exe(c);
+    if (e === 'hs') {
+      if (c.argv[1] === 'manifest' && c.argv[2] === 'stop') asks.push(refusal('declared-effects', 'hs manifest stop lifts the task manifest that limits this job\'s effects', 'the user approves ending the manifest'));
+      continue;
+    }
+    // Redirect targets are checked by the protected-paths block below; this covers arguments.
+    const names = c.argv.slice(1).filter((x) => /(^|[\s'"=:(/])\.h-stack(\/|\b)/.test(String(x)));
+    if (!names.length) continue;
+    const readOnly = READERS.has(e) || (e === 'find' && !c.argv.some((x) => /^-(delete|exec|execdir|ok|fprint)/.test(x)));
+    if (readOnly) continue;
+    if (names.every((x) => /\.h-stack\/config\.json/.test(x))) asks.push(refusal('protected-checker', `\`${c.argv.join(' ').slice(0, 60)}\` changes .h-stack/config.json, H-Stack's policy file`, 'the user approves policy changes'));
+    else denies.push(refusal('protected-state', `\`${c.argv.join(' ').slice(0, 60)}\` touches H-Stack state, which only hooks and hs write`, 'use the hs command instead'));
+  }
+
+  // HS-023 / self-audit F11: read-only subagents write only to their scratch directory, Bash included.
+  if (input.agent_id && /(review|audit|rubric|intent|lane|grader|judge|explore)/i.test(input.agent_type || '')) {
+    for (const t of writeTargets(cmds)) {
+      const rel = relToProject(proj, t);
+      if (t === '/dev/null' || rel.includes(`/agents/${input.agent_id}/scratch/`) || /^\/tmp\//.test(t)) continue;
+      denies.push(refusal('subagent-write-isolation', `${input.agent_type} is a read-only subagent and the command writes ${rel}`, `write to .h-stack/sessions/<session>/agents/${input.agent_id}/scratch/ or return findings in the final message`));
+    }
+  }
+
   // HS-029 protected paths and HS-028a test files via shell writes.
   for (const t of writeTargets(cmds)) {
     const rel = relToProject(proj, t);
@@ -122,11 +149,14 @@ export async function decide(input, proj) {
   for (const c of cmds) {
     const e = exe(c);
     if (!['curl', 'wget', 'http', 'xh', 'httpie'].includes(e)) continue;
-    const url = c.argv.find((x) => /^https?:\/\//.test(x)) || '';
-    const priv = privateDestination(url);
+    // Self-audit F6: curl also takes scheme-less URLs (`curl 169.254.169.254/...`).
+    const VALUE = /^(-d|--data.*|-F|--form|-H|--header|-o|--output|-u|--user|-A|--user-agent|-e|--referer|-x|--proxy|-b|--cookie|-c|--cookie-jar|-T|--upload-file|-X|--request|-w|--write-out|-m|--max-time|--connect-timeout|-O|--output-document|--post-data|--post-file|--header)$/;
+    const bare = c.argv.slice(1).filter((x, i, a) => !x.startsWith('-') && !(i > 0 && VALUE.test(a[i - 1])));
+    const urls = bare.map((x) => (/^https?:\/\//i.test(x) ? x : /^(\[[0-9a-f:.]+\]|[\w.-]+)(:\d+)?(\/|$)/i.test(x) && /[.:\[]|^localhost/i.test(x) ? `http://${x}` : null)).filter(Boolean);
+    const priv = urls.map(privateDestination).find(Boolean) || null;
     const tainted = taintedIn(proj, sid, c.argv.join(' '), route.trusted_values || []);
     if (priv && tainted.any) asks.push(refusal('fetch-destination', `${e} targets ${priv} while untrusted content is in play`, 'the user confirms this local or metadata request'));
-    const isWrite = c.argv.some((x, i) => ((x === '-X' || x === '--request') && !/^GET$/i.test(c.argv[i + 1] || '')) || /^(-d|--data.*|-F|--form|-T|--upload-file)$/.test(x));
+    const isWrite = c.argv.some((x, i) => ((x === '-X' || x === '--request') && !/^GET$/i.test(c.argv[i + 1] || '')) || /^(-d|--data|-F|--form|-T|--upload-file|--post-(file|data))/.test(x));
     if (isWrite && tainted.hits.length) asks.push(refusal('argument-taint', `the request uses ${tainted.hits.slice(0, 2).join(', ')} seen only in untrusted content`, 'the user confirms the destination'));
   }
 

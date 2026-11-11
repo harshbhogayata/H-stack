@@ -369,7 +369,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-014 · Self-audit and egress audit
 **Self-checks/CI · Thin · P1 · M · Reliability · Depends on: HS-062, HS-063 · Sources: N55, D20, Cloudflare §E self-audit seed**
-- **Status.** done — scripts/egress.mjs in CI (inventory: dependency-gate registries, gh at SessionStart, off-by-default model calls; fails on any new egress point); self-audit with the imported security-audit skill in docs/self-audit/
+- **Status.** done — scripts/egress.mjs in CI (dependency-gate registries, gh at SessionStart, off-by-default model calls; fails on any new egress point). Self-audit with the imported security-audit skill: 12 confirmed findings (7 medium, 5 low), all fixed with regression tests; 2 plausible need the live runtime (docs/self-audit/REPORT.md)
 - **Problem.** H-Stack's own hooks, mods, memory and imports are an attack surface.
 - **Mechanism.** Before each public release, run the imported security-audit skill (IM-09) on H-Stack itself.
   - **Units.** Seeded from Cloudflare's AI/LLM and supply-chain classes: memory poisoning, provenance confusion, approval binding, unbounded loops, subagent/MCP trust inheritance, mutable install inputs, hooks on install.

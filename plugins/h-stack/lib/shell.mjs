@@ -121,11 +121,23 @@ function unwrap(tokens, depth) {
   return [{ argv: t, env, redirects }];
 }
 
+function quotedSubs(arg) {
+  const out = [];
+  for (let i = arg.indexOf('$('); i >= 0; i = arg.indexOf('$(', i + 2)) {
+    let d = 0;
+    for (let j = i + 1; j < arg.length; j++) { if (arg[j] === '(') d++; else if (arg[j] === ')' && --d === 0) { out.push(arg.slice(i + 2, j)); break; } }
+  }
+  for (const m of arg.matchAll(/`([^`]+)`/g)) out.push(m[1]);
+  return out;
+}
+
 function parseCommandsInner(src, depth) {
   const { parts, subs } = splitCommands(String(src || ''));
   const out = [];
   for (const p of parts) out.push(...unwrap(tokenize(p), depth));
   for (const s of subs) out.push(...parseCommandsInner(s, depth + 1));
+  // Substitutions that survived inside double quotes ("$(gh auth token)") are commands too.
+  if (depth < 6) for (const c of [...out]) for (const a of c.argv) for (const inner of quotedSubs(a)) out.push(...parseCommandsInner(inner, depth + 1));
   return out.filter((c) => c.argv.length || c.redirects.length);
 }
 
@@ -135,4 +147,34 @@ export function parseCommands(src) {
 
 export function exe(cmd) {
   return (cmd.argv[0] || '').split('/').pop();
+}
+
+// Global options that take a separate value, per tool (self-audit F1/F2). `git -C . push` must
+// classify the same as `git push`, so the options before the subcommand move after it.
+const GLOBAL_VALUE_FLAGS = {
+  git: ['-C', '-c', '--git-dir', '--work-tree', '--namespace', '--exec-path', '--super-prefix', '--config-env'],
+  gh: ['-R', '--repo', '--hostname'],
+  kubectl: ['--context', '-n', '--namespace', '--kubeconfig', '-s', '--server', '--cluster', '--user', '--token', '--as', '-l'],
+  helm: ['-n', '--namespace', '--kube-context', '--kubeconfig', '--registry-config', '--repository-config'],
+  terraform: [], tofu: [], pulumi: ['-C', '--cwd', '-s', '--stack'],
+  npm: ['--prefix', '-C', '--workspace', '-w', '--registry', '--userconfig', '--cache'], pnpm: ['-C', '--dir', '--filter', '-F', '--workspace-dir'],
+  yarn: ['--cwd'], bun: ['--cwd', '-c', '--config'], uv: ['--directory', '--project', '--python', '-p', '--config-file', '--cache-dir'],
+  poetry: ['-C', '--directory', '-P', '--project'], cargo: ['-C', '--config', '--manifest-path', '-Z'], docker: ['-H', '--host', '-c', '--context', '--config', '-l', '--log-level'],
+  aws: ['--profile', '--region', '--endpoint-url', '--output'], gcloud: ['--project', '--account', '--configuration'], az: ['--subscription'],
+  wrangler: ['-c', '--config', '-e', '--env'], vercel: ['--scope', '--token', '-t', '--cwd'], fly: ['-a', '--app', '-c', '--config'], flyctl: ['-a', '--app', '-c', '--config'],
+  gem: [], pip: [], pip3: [], go: [], twine: [], heroku: ['-a', '--app'], firebase: ['--project', '-P'],
+};
+export function normaliseArgv(argv) {
+  const name = (argv[0] || '').split('/').pop();
+  const vf = GLOBAL_VALUE_FLAGS[name];
+  if (!vf) return argv;
+  const globals = [];
+  let i = 1;
+  while (i < argv.length && argv[i].startsWith('-') && argv[i] !== '--') {
+    const f = argv[i];
+    globals.push(f);
+    if (vf.includes(f) && !f.includes('=')) { if (i + 1 < argv.length) globals.push(argv[i + 1]); i += 2; } else i += 1;
+  }
+  if (!globals.length) return argv;
+  return [argv[0], ...argv.slice(i), ...globals];
 }

@@ -6,13 +6,16 @@ import { TEST_CONFIG_GLOBS } from './tests.mjs';
 export const PROTECTED_GLOBS = [
   '.github/workflows/**', '.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS', '.gitlab-ci.yml', '.circleci/**', 'azure-pipelines.yml', 'Jenkinsfile', 'buildkite/**', '.buildkite/**',
   '.claude/settings.json', '.claude/settings.local.json', '.claude/hooks/**', '.mcp.json', '.claude/agents/**',
+  '.claude/rules/**', 'CLAUDE.md', '.claude/CLAUDE.md', 'CLAUDE.local.md', '.h-stack/config.json',
   '.husky/**', '.pre-commit-config.yaml', 'lefthook.yml',
   ...TEST_CONFIG_GLOBS,
 ];
 export const STATE_GLOB = '.h-stack/**';
 
 export function protectedKind(rel, config) {
-  if (matchesAny(rel, [STATE_GLOB]) && !/^\.h-stack\/config\.json$/.test(rel)) return 'state';
+  // config.json is policy: the agent may propose a change, the user approves it (self-audit F3).
+  if (/^\.h-stack\/config\.json$/.test(rel)) return 'checker';
+  if (matchesAny(rel, [STATE_GLOB])) return 'state';
   if (matchesAny(rel, [...PROTECTED_GLOBS, ...((config && config.protected && config.protected.extra) || [])])) return 'checker';
   return null;
 }
@@ -23,7 +26,8 @@ export function proposedPermissionRules() {
     ask: [
       'Edit(.github/workflows/**)', 'Write(.github/workflows/**)', 'Edit(**/CODEOWNERS)', 'Write(**/CODEOWNERS)',
       'Edit(.claude/settings*.json)', 'Write(.claude/settings*.json)', 'Edit(.claude/hooks/**)', 'Write(.claude/hooks/**)',
-      'Edit(.mcp.json)', 'Write(.mcp.json)',
+      'Edit(.mcp.json)', 'Write(.mcp.json)', 'Edit(.h-stack/config.json)', 'Write(.h-stack/config.json)',
+      'Edit(.claude/rules/**)', 'Write(.claude/rules/**)', 'Edit(CLAUDE.md)', 'Write(CLAUDE.md)',
       'Edit(**/jest.config.*)', 'Edit(**/vitest.config.*)', 'Edit(**/pytest.ini)', 'Edit(**/.coveragerc)', 'Edit(**/codecov.yml)',
       'Bash(npm publish:*)', 'Bash(gh pr merge:*)', 'Bash(git push --force:*)',
     ],

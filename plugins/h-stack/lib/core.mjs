@@ -67,7 +67,8 @@ export function stateDir(proj) {
   return dir;
 }
 export function sessionDir(proj, sid) {
-  const safe = String(sid || 'no-session').replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80);
+  let safe = String(sid || 'no-session').replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, 80);
+  if (/^\.+$/.test(safe)) safe = 'no-session'; // '.' and '..' must not leave sessions/ (self-audit hardening)
   const dir = path.join(stateDir(proj), 'sessions', safe);
   fs.mkdirSync(dir, { recursive: true });
   return dir;

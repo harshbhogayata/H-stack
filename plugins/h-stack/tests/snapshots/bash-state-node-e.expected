@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by protected-state: `node -e require('fs').writeFileSync('.h-stack/sessions/s1/ta` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead."}}

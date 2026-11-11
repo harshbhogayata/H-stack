@@ -1,6 +1,6 @@
 // HS-030 irreversible-action classifier, HS-034 credential exec, HS-035 scope lock helpers.
 // Effect classes: medium (ask with manifest; some need a dry-run receipt) and high (deny).
-import { parseCommands, exe } from './shell.mjs';
+import { parseCommands, exe, normaliseArgv } from './shell.mjs';
 
 const has = (argv, ...words) => words.every((w) => argv.includes(w));
 const sub = (argv, i) => argv[i] || '';
@@ -78,15 +78,22 @@ const RULES = [
 const NET = new Set(['curl', 'wget', 'nc', 'ncat', 'netcat', 'http', 'httpie', 'xh', 'scp', 'rsync', 'ssh', 'sftp', 'ftp', 'telnet', 'socat']);
 const SECRET_SRC = /(\$\{?(AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|GITHUB_TOKEN|GH_TOKEN|ANTHROPIC_API_KEY|OPENAI_API_KEY|NPM_TOKEN|[A-Z_]*(SECRET|PASSWORD|PRIVATE_KEY|API_KEY)[A-Z_]*)\}?|~\/\.ssh\/id_|\.ssh\/id_[a-z0-9]+|\.aws\/credentials|\.netrc|\.npmrc|\.pypirc|\.docker\/config\.json|\bprintenv\b|\benv\s*\||\/proc\/self\/environ|\.env\b)/;
 
+const CRED_PRINTERS = [/^gh auth token\b/, /^gh auth status .*--show-token/, /^aws (configure get|configure export-credentials|sts get-session-token|ecr get-login-password)\b/, /^gcloud auth (print-access-token|print-identity-token|application-default print-access-token)\b/, /^az account get-access-token\b/, /^(security) find-(generic|internet)-password\b/, /^op (read|item get)\b/, /^vault (read|kv get)\b/, /^(cat|head|tail|less|base64|xxd) .*(\.config\/gh\/hosts\.yml|\.git-credentials|\.kube\/config)\b/, /^git credential fill\b/, /^npm token\b/];
+
 export function classifyBash(command, ctx = {}) {
   const cmds = parseCommands(command);
   const findings = [];
   const text = String(command);
   const usesNet = cmds.some((c) => NET.has(exe(c)));
-  if (usesNet && SECRET_SRC.test(text)) {
+  // Match the de-quoted parsed tokens as well as the raw text (self-audit F8: `.e""nv`), and treat
+  // commands that print a credential as secret sources (`$(gh auth token)`).
+  const tokens = cmds.map((c) => c.argv.join(' ')).join(' ; ');
+  const printsCred = cmds.some((c) => CRED_PRINTERS.some((re) => re.test(`${exe(c)} ${c.argv.slice(1).join(' ')}`)));
+  if (usesNet && (SECRET_SRC.test(text) || SECRET_SRC.test(tokens) || printsCred)) {
     findings.push({ cls: 'exfiltration', high: true, target: 'secret to network', destination: (text.match(/https?:\/\/[^\s'"]+/) || ['remote'])[0] });
   }
-  for (const c of cmds) {
+  for (const raw of cmds) {
+    const c = { ...raw, argv: normaliseArgv(raw.argv) };
     for (const r of RULES) {
       const hit = r(c, ctx);
       if (hit) { findings.push({ ...hit, argv: c.argv }); break; }
