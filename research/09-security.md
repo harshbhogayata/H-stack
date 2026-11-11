@@ -35,7 +35,7 @@ Read on 2026-11-11: `skills/security-audit/SKILL.md`, file list of the attack-cl
 
 ### How the skill works
 - **Two modes.** *Guidance* by default (answer the security question, use only relevant parts, create no files). *Full audit* only when the user explicitly asks to audit / pen-test / produce reports. If unclear, ask one question first.
-- **Six phases.** Recon (architecture, trust boundaries, inputs, `coverage-ledger.json`) → coverage-led hunting by isolated hunters → every candidate given to a fresh verifier that tries to disprove it → `findings.json` validated against a JSON schema by a zero-dependency script → fresh agents re-verify final records → reports derived only from verified records.
+- **Six phases** (Cloudflare's internal original had seven; the published skill has six). Recon (architecture, trust boundaries, inputs, `coverage-ledger.json`) → coverage-led hunting by isolated hunters → every candidate given to a fresh verifier that tries to disprove it → `findings.json` validated against a JSON schema by a zero-dependency script → fresh agents re-verify final records → reports derived only from verified records.
 - **Three verdicts.** `confirmed` (full source trace + observed result, gets a severity), `needs_validation` (names the exact unresolved fact, no severity), `rejected` (disproved).
 - **Boundary-first findings.** Every candidate must name the lower-trust actor, the input, the intended control, the boundary crossed, what's affected, and the observed result. Missing best practice is not a vulnerability; a defence-in-depth gap is a hardening note.
 - **Severity anchors.** Concrete definitions for critical/high/medium/low/informational; "if you cannot state the concrete damage, the severity is lower than it feels."
@@ -55,10 +55,10 @@ Read on 2026-11-11: `skills/security-audit/SKILL.md`, file list of the attack-cl
 - Semgrep was wired in but agents called it zero times in a month: watch what agents actually use before adding tools.
 - API errors can arrive as text in a 200 response; treat them as failures, not empty successes.
 - Better recon cut validation rejections from 40% to 11%.
-- Results: 20,799 raw candidates → 7,245 actionable across 145 repos; ~30k LOC repo ≈ 80 distinct bugs in ~3 h.
+- Results: the discovery harness ran on 128 repos and produced 20,799 raw candidates; the validation pool spans 145 repos and yielded 7,245 actionable findings; ~30k LOC repo ≈ 80 distinct bugs in ~3 h.
 
 ### Other Cloudflare work worth knowing
-- **Code Mode** (Agents SDK): agents get an API as a typed code interface instead of many tool definitions; Cloudflare reports its whole API in ~1,000 tokens vs ~1.17M as plain MCP tools (via search summaries; check the primary post).
+- **Code Mode** (Agents SDK): agents get an API as a typed code interface instead of many tool definitions; Cloudflare reports its whole API in ~1,000 tokens vs ~1.17M as plain MCP tools, a 99.9% cut (verified from the primary Code Mode MCP post; see [cloudflare/other-repos-and-posts.md](cloudflare/other-repos-and-posts.md)).
 - **Sandboxes / Dynamic Workers:** isolated runtimes for agent-generated code ("you can't just eval() AI-generated code in your app").
 - **[cloudflare/skills](https://github.com/cloudflare/skills):** platform skills (Workers, Agents SDK, Durable Objects, Sandbox, wrangler, web-perf…). Only useful if a project runs on Cloudflare. Pattern worth copying: a top-level `cloudflare` skill that routes to the right product skill and to upstream docs instead of duplicating them.
 - **MCP governance** (Agents Week 2026): MCP server portals, shadow-MCP detection in Gateway. Enterprise-side; noted for completeness.

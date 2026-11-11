@@ -341,7 +341,7 @@ File: [08-testing-qa.md](08-testing-qa.md). 25 candidates (24 ranked). Adoption 
 ### Changes vs previous list
 - **agent-browser #4 → #1** (1.5M installs, 3 KB CLI skill). **webapp-testing #1 → #2.**
 - **Added:** playwright-cli (Microsoft), dev-browser, browser-use.
-- **Dropped:** lackeyjb playwright-skill (#23), superpowers condition-based-waiting (no longer exists as a skill), qaskills "playwright-e2e-testing" (source never found; replaced by currents-dev playwright-best-practices, which scored #20 on adoption).
+- **Dropped:** lackeyjb playwright-skill (#23), superpowers condition-based-waiting (no longer a standalone skill; moved into systematic-debugging as a reference file), qaskills "playwright-e2e-testing" (source never found; replaced by currents-dev playwright-best-practices, which scored #20 on adoption).
 
 ### Score sheet
 | Rank | Candidate | Repo | ★ | Installs | Licence | Last commit | S×3 | E×2 | A | M | F | C | Total |

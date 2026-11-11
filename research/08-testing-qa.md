@@ -29,7 +29,7 @@ Proving the thing works on the real surface: browser, API, CLI. Separate from un
 - **Report-only mode** (`/qa-only`) vs fix mode, so QA can run safely on things you don't want changed.
 - **Test the tests:** property-based and mutation testing show whether the suite has teeth (Trail of Bits; ideas only, CC BY-SA).
 - **Screenshots as evidence** attached to the report.
-- Note: superpowers no longer ships `condition-based-waiting` as a separate skill.
+- Note: superpowers no longer ships `condition-based-waiting` as a separate skill; it now lives as a reference file inside `systematic-debugging` (`skills/systematic-debugging/condition-based-waiting.md`).
 
 ## H-Stack decision
 _Not decided yet._
