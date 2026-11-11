@@ -17,6 +17,7 @@ Rules that follow from it:
 - **Evals before skills.** The eval suite (real tasks, each with a pass/fail check) is built first. A skill, hook or rule ships only if it beats the no-change baseline on it; it is retired when the model passes without it.
 - **Evidence over opinion.** Design choices cite a primary source or a measurement from our own evals.
 - **Report honestly.** Results are reported with numbers, including regressions and failures.
+- **Context over templates.** H-Stack must be the most flexible stack: output is derived from the project's own context (its code, brand, users, constraints), never from a house style. Skills teach how to *decide*, not what to produce; no fixed palettes, layouts, boilerplate or one-size checklists baked in. Evals include a sameness check: the same kind of task in different contexts must produce appropriately different results.
 
 ## Before doing anything
 - Read first. Check this file, `README.md`, and the relevant `research/NN-*.md` before acting.
