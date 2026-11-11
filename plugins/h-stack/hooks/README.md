@@ -88,6 +88,7 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 
 | fixture | tokens | text |
 |---|---:|---|
+| edit-claude-md-not-named | 42 | Blocked by protected-checker: CLAUDE.md is a CI, agent or test-runner config. To proceed: the user approves edits to checkers. |
 | edit-crash | 55 | Blocked by h-stack:gate-edit: the guard crashed, so the action was not checked. To proceed: report this to the user; the error is in .h-stack/logs/hook-errors.jsonl. |
 | edit-import-undeclared | 69 | Blocked by dependency-gate: npm:left-pad-fresh about 12 downloads a week (floor 50); npm:left-pad-fresh first published 10 days ago (minimum 30). To proceed: check the package with the user before adding it. |
 | edit-manifest-nearmiss | 75 | Blocked by dependency-gate: npm:reactt not found in the registry (possibly a hallucinated name); npm:reactt within edit distance 2 of the popular package "react". To proceed: check the package with the user before adding it. |
