@@ -17,29 +17,47 @@ No slash commands: H-Stack picks the right skill itself and shows what it picked
 
 To update after new commits: `/plugin` → Marketplaces → `h-stack` → update (or enable auto-update).
 
-## Categories
+## What ships
 
-| # | Category | Status |
-|---|---|---|
-| 00 | Activation & experience | Researched, design proposed |
-| 01 | Core rules & principles | Researched |
-| 02 | Workflow orchestration | Researched |
-| 03 | Ideation & product thinking | Researched |
-| 04 | Specs & planning | Researched |
-| 05 | Build & TDD | Researched |
-| 06 | Debugging & performance | Researched |
-| 07 | Code review & quality | Researched |
-| 08 | Testing & QA | Researched |
-| 09 | Security | Researched |
-| 10 | Design & UI | Researched |
-| 11 | Memory & context | Researched |
-| 12 | Docs & writing | Researched |
-| 13 | Git, PR & shipping | Researched |
-| 14 | Autonomous loops & multi-agent | Researched |
-| 15 | Skill authoring & meta | Researched |
-| 16 | Business, growth & research | Researched |
+One plugin, `h-stack`, with 15 skills (one per category, playbooks in `references/`), 4 agents, 19 command hooks and one mods module. Every skill sets `user-invocable: false`; H-Stack routes to them itself.
 
-Each category's top 10 and the ideas worth taking are in [`research/`](research/README.md).
+| Layer | What it does |
+|---|---|
+| Activation | SessionStart skill map, per-prompt classifier (`size=direct/light/full` + one relevant skill), event triggers, act/ask/stop check; "why that?" shows the matched rule |
+| Guards | Evidence receipts and a Stop gate against false "done"; read-only tests outside the declared test-writing step; tamper scan; irreversible-action gate with dry-run receipts; dependency gate; MCP tool-description firewall; taint and fetch-destination checks; scope lock; step and spawn budgets |
+| State and memory | Assumption and decision ledgers, wishlist, compaction checkpoints, committed path-scoped lessons with evidence, auto-memory shadow log, `hs retro` (local telemetry, 90-day retention) |
+| Visibility | Spinner suffix and a one-line announcement of the skill used; optional side pane |
+| Skills | core-rules, clarify, planning, tdd, debugging, review, qa, security-audit, design-ui, memory, writing, git-ship, long-run (only when asked), skill-authoring, research |
+
+Imported skills keep their upstream licence; sources, commits and sha256 digests are in [`plugins/h-stack/THIRD_PARTY.md`](plugins/h-stack/THIRD_PARTY.md). Every backlog item's status is in [`BACKLOG.md`](BACKLOG.md).
+
+Optional project setup (shown before anything is written): `node plugins/h-stack/scripts/setup.mjs`. The `hs` command (assume, decide, wish, failed, stop, retro, status) is on Claude's PATH inside sessions.
+
+## Results so far
+
+Per-skill benchmark, skill-creator layout, 3 eval prompts per skill, **1 run per arm** (a delta under about 0.15 is within noise). Full table: [`evals/results/skills/SUMMARY.md`](evals/results/skills/SUMMARY.md).
+
+| Skill | With | Without | Skill | With | Without |
+|---|---:|---:|---|---:|---:|
+| qa | 1.00 | 0.56 | clarify | 1.00 | 0.89 |
+| memory | 0.78 | 0.44 | writing | 1.00 | 0.89 |
+| git-ship | 1.00 | 0.72 | core-rules | 0.89 | 0.78 |
+| long-run | 1.00 | 0.72 | tdd | 0.89 | 0.78 |
+| skill-authoring | 1.00 | 0.72 | debugging, design-ui, research, review, security-audit | 1.00 | 1.00 (tie) |
+| planning | 1.00 | 0.87 | | | |
+
+The review import was worse than no skill on its first run (0.89 vs 1.00) and was fixed before keeping it. The five ties sit at the ceiling: their evals are too easy to show a gain (see the morning report).
+
+**Not yet measured:** the whole-stack smoke test on ~10 of the user's real tasks (HS-001, M1 and M9). The runner and release gate are ready (`evals/run-smoke.mjs`, `evals/release-gate.mjs`); the tasks have to come from real work.
+
+## Checks
+
+```bash
+node plugins/h-stack/scripts/ci.mjs   # validate, index, budget, snapshots, hook contract, lint, THIRD_PARTY, egress, tests
+claude plugin validate .
+node evals/release-gate.mjs           # CI + a fresh smoke run on real tasks; required before a version bump
+```
 
 ## How we build
+
 Pick the top-ranked skill → import and adapt it → smoke-test → validate (`claude plugin validate .`) → commit. Rules for working on this repo are in [`CLAUDE.md`](CLAUDE.md).
