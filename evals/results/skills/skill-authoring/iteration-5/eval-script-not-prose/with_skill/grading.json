@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (a script or package script was added)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The result is an executable script (or package script) that runs the steps in order and stops when the bundle-size check fails, rather than only a prose checklist or skill text",
+      "passed": true,
+      "evidence": "scripts/release.mjs runs build, `node scripts/check-bundle-size.js --max-kb`, `git tag`, then changelog in that order, and calls `process.exit(1)` on any non-zero step. It is wired up as `\"release\":\"node scripts/release.mjs\"`, and the test \"size check failure stops the release: no tag, no changelog\""
+    },
+    {
+      "text": "The script keeps the defaults that worked (--max-kb 250, tag from package.json version)",
+      "passed": true,
+      "evidence": "The script sets `const maxKb = maxIdx >= 0 ? args[maxIdx + 1] : \"250\"` and builds the tag with `const { version } = JSON.parse(readFileSync(\"package.json\", \"utf8\")); const tag = `v${version}``. The happy-path test asserts `--max-kb 250` and tag `v1.2.3`."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

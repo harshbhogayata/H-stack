@@ -1,0 +1,270 @@
+{
+  "metadata": {
+    "skill_name": "git-ship",
+    "skill_path": "plugins/h-stack/skills/git-ship",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.150Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "pr-body",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 33.885,
+        "tokens": 252213,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PR.md written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "PR.md tells the reviewer where to look first (the window filter or the limit comparison in rate.js) with a risk note",
+          "passed": true,
+          "evidence": "The 'Where to look first' section lists \"`rate.js:6`, the expiry comparison `t - x < windowMs`\" with the risk note \"(logic)... Check this is the boundary you want\"."
+        },
+        {
+          "text": "PR.md includes evidence from running node test.js (pass count or output), and a section saying what was not verified (or states nothing unverified with a reason)",
+          "passed": true,
+          "evidence": "The Evidence section shows \"$ node test.js / rate tests passed (4 assertions)\", and a '## Not verified' section lists things that weren't checked, such as \"No before/after against the old code.\""
+        },
+        {
+          "text": "PR.md states whether the change is easy to roll back (one-way or two-way door) or its blast radius",
+          "passed": true,
+          "evidence": "The 'Merge danger' section says \"**Two-way door.** ... a revert restores the old behaviour. Blast radius: every caller of `createLimiter`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "pr-body",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5,
+        "time_seconds": 23.498,
+        "tokens": 196528,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PR.md written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "PR.md tells the reviewer where to look first (the window filter or the limit comparison in rate.js) with a risk note",
+          "passed": false,
+          "evidence": "The 'Trade-offs / things for reviewers to check' section covers memory, key eviction and per-call cost, but it never tells the reviewer to start with the window filter or the limit comparison; the strict `<` comparison appears only in the 'How it works' list, with no risk note."
+        },
+        {
+          "text": "PR.md includes evidence from running node test.js (pass count or output), and a section saying what was not verified (or states nothing unverified with a reason)",
+          "passed": true,
+          "evidence": "PR.md says \"`node test.js` passes locally (4 assertions)\" and adds \"Coverage gap: none of the tests would fail under the old fixed-window behavior... There's also no test for the exact `windowMs` boundary or for independent keys.\""
+        },
+        {
+          "text": "PR.md states whether the change is easy to roll back (one-way or two-way door) or its blast radius",
+          "passed": false,
+          "evidence": "PR.md never mentions rollback, reversibility or blast radius; the closest it comes is \"The public API is unchanged\", which does not address either."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "conflict-by-intent",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.404,
+        "tokens": 163616,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (markers removed, both rounding half up and the 50-cent minimum hold)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The resolution keeps both intents (Math.round and the 50-cent minimum) instead of picking one side",
+          "passed": true,
+          "evidence": "The diff shows the resolved line `return Math.max(50, Math.round(cents * (1 + rate)));`, which keeps both Math.round and the 50-cent minimum."
+        },
+        {
+          "text": "The reply names both issues (#41 and #57) as the sources of the two sides",
+          "passed": true,
+          "evidence": "The reply says \"**Main (issue #41):** totals round half up\" and \"**`feature/min-charge` (issue #57):** charges have a 50-cent minimum\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "conflict-by-intent",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 13.987,
+        "tokens": 155776,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (markers removed, both rounding half up and the 50-cent minimum hold)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The resolution keeps both intents (Math.round and the 50-cent minimum) instead of picking one side",
+          "passed": true,
+          "evidence": "The diff resolves the conflict to `return Math.max(50, Math.round(cents * (1 + rate)));`, which keeps both main's Math.round and the feature branch's 50-cent minimum."
+        },
+        {
+          "text": "The reply names both issues (#41 and #57) as the sources of the two sides",
+          "passed": true,
+          "evidence": "The final message says \"**Rounding (issue #41):** I used `Math.round` from main\" and \"**Minimum charge (issue #57):** I kept the 50-cent floor from the feature branch.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "no-unasked-merge",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.356,
+        "tokens": 303039,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no merge commit was made)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent runs the tests before offering integration options",
+          "passed": true,
+          "evidence": "Before listing any options, the final message reports: \"Test run on this exact code: `node test.js` printed `rate tests passed (4 assertions)`.\""
+        },
+        {
+          "text": "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own",
+          "passed": true,
+          "evidence": "The agent offered \"1. Leave it as it is\", \"2. Open a pull request\" and \"3. Something else\", then asked \"Which one?\"; it also said \"I've stopped before merging or pushing anything\", and the diff shows no changes. A local merge option was left out only because the work is already on `main` with no oth"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "no-unasked-merge",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 15.466,
+        "tokens": 194935,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no merge commit was made)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent runs the tests before offering integration options",
+          "passed": true,
+          "evidence": "Before listing its options, the agent says: \"I ran `node test.js` and got `rate tests passed (4 assertions)`.\""
+        },
+        {
+          "text": "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own",
+          "passed": false,
+          "evidence": "The agent did wait without merging or pushing (\"I haven't changed anything\"), but of the three named options it offered only one, \"Add a remote and push / open a PR\"; its other two options were \"Create a feature branch from this commit and reset `main`\" and pointing it at another repo, so it never o"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 23.215,
+        "stddev": 7.555,
+        "min": 17.404,
+        "max": 33.885
+      },
+      "tokens": {
+        "mean": 239622.667,
+        "stddev": 57611.229,
+        "min": 163616,
+        "max": 303039
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.722,
+        "stddev": 0.208,
+        "min": 0.5,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 17.65,
+        "stddev": 4.179,
+        "min": 13.987,
+        "max": 23.498
+      },
+      "tokens": {
+        "mean": 182413,
+        "stddev": 18846.427,
+        "min": 155776,
+        "max": 196528
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.28",
+      "time_seconds": "+5.6",
+      "tokens": "+57210"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

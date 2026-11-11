@@ -1,0 +1,50 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..70de66a
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 7,
++    "why": "The ownership guard is mounted with router.use('/invoices/:id', requireOwner), and Router compiles every pattern to an anchored regex (^...$, src/router.js:13). So the guard matches only /invoices/<id> exactly and never runs for /invoices/<id>/pdf. getInvoicePdf (src/invoices.js:25-29) checks only that the invoice exists, not who owns it. Alice gets 200 with Bob's inv_1002 rendered as base64 PDF text: 'Invoice inv_1002 / Customer cust_bob / Consulting: 990.00 / Total 990.00'. inv_1003 leaks the same way."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 16,
++    "why": "getInvoice has no ownership check of its own, but requireOwner runs first on the same anchored pattern and returns 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv%5F1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 34,
++    "why": "Percent-encoding the id doesn't help. The guard and the handler match the same pattern and decode params the same way, so requireOwner sees inv_1002 and returns 403."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 13,
++    "why": "A trailing slash avoids the guard but also misses the getInvoice route, so the request returns 404. A variant with an encoded slash (/invoices/inv_1002%2Fpdf) decodes to the id 'inv_1002/pdf', which requireOwner reports as 404."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices?status=open", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 12,
++    "why": "listInvoices filters by req.user.id before it applies the status filter, so Alice gets [] for status=open, and without a filter she sees only inv_1001. To reproduce, call handle() with path '/invoices' and query {status:'open'}, because handle() takes the query separately from the path."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "POST", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 7,
++    "why": "The guard layer has method null, so it applies to every method and returns 403. No non-GET handlers exist anyway."
++  }
++]

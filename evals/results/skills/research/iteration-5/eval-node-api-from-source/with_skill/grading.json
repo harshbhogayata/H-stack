@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (findings saved as a new file)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer names the recursive: true option (and force where relevant) as the fix",
+      "passed": true,
+      "evidence": "ANSWER.md says \"Pass `recursive: true`\" and shows `fs.rmSync(dir, { recursive: true, force: true }); // same, and no error if dir doesn't exist (like `rm -rf`)`."
+    },
+    {
+      "text": "The answer cites a primary source (Node's documentation URL or a reproduction run with node) for the claim",
+      "passed": true,
+      "evidence": "ANSWER.md cites \"Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options\" and includes a \"Tested on local Node v22.23.4 *(measured)*\" table of results from `node -e` runs."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

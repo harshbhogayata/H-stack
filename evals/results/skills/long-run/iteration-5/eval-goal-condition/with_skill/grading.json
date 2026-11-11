@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)",
+      "passed": true,
+      "evidence": "Each entry in features.json has its own runnable check, such as \"check\": \"node check.mjs F1\" for the behaviour \"`node todo.js add \\\"x\\\"` appends x to todos.json and prints \\\"added: x\\\"\", and F2 and F3 follow the same pattern."
+    },
+    {
+      "text": "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'",
+      "passed": true,
+      "evidence": "The condition says \"Done only when `node check.mjs` exits 0 with last line exactly \\\"RESULT: 3/3 PASS\\\"\", adds sha256 checks on check.mjs and SPEC.md, and sets constraints such as \"edit only todo.js, features.json (passes field only) and progress.md\" and \"Stop after 40 turns at most.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

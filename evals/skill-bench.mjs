@@ -101,13 +101,17 @@ async function grade(ev, res) {
     const prompt = `You are grading one run of a coding agent. Judge each expectation strictly from the evidence below. Answer "passed": true only if the evidence clearly shows it; if the evidence is missing or ambiguous, answer false and say so.\n\nTASK GIVEN TO THE AGENT:\n${ev.prompt}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${res.check ? `exit ${res.check.code}\n${res.check.out}` : '(no check)'}\n\nFINAL MESSAGE FROM THE AGENT:\n${blind(res.final).slice(0, 6000)}\n\nDIFF OF THE AGENT'S CHANGES:\n${blind(res.diff).slice(0, 12000) || '(no changes)'}\n\nEXPECTATIONS:\n${judged.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"text":"...","passed":true|false,"evidence":"one sentence quoting the evidence"}]} in the same order.`;
     const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', '1'];
     if (JUDGE) argv.push('--model', JUDGE);
-    const r = await run('claude', argv, { cwd: os.tmpdir(), timeout: 300000 });
-    let verdicts = [];
-    try {
-      const j = JSON.parse(r.out.trim().split('\n').pop());
-      const m = String(j.result).match(/\{[\s\S]*\}/);
-      verdicts = JSON.parse(m[0]).expectations || [];
-    } catch { verdicts = judged.map((t) => ({ text: t, passed: false, evidence: 'judge output unparseable' })); }
+    // One retry when the grader's reply doesn't parse (measured: a qa run lost 2 expectations to this).
+    let verdicts = null;
+    for (let attempt = 0; attempt < 2 && !verdicts; attempt++) {
+      const r = await run('claude', argv, { cwd: os.tmpdir(), timeout: 300000 });
+      try {
+        const j = JSON.parse(r.out.trim().split('\n').pop());
+        const m = String(j.result).match(/\{[\s\S]*\}/);
+        verdicts = JSON.parse(m[0]).expectations || null;
+      } catch { verdicts = null; }
+    }
+    if (!verdicts) verdicts = judged.map((t) => ({ text: t, passed: false, evidence: 'judge output unparseable (2 attempts)' }));
     let k = 0;
     for (let i = 0; i < out.length; i++) if (out[i] === null) { const v = verdicts[k] || {}; out[i] = { text: judged[k], passed: Boolean(v.passed), evidence: String(v.evidence || '').slice(0, 300) }; k++; }
   }

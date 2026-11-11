@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+      "passed": true,
+      "evidence": "The reply opens with \"No confirmed vulnerabilities in `hash.js`.\" and puts the unsalted-hash and Unicode-surrogate points under \"Observations, not findings\", saying they matter only in certain cases (low-entropy secrets, or tokens that contain such characters)."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md answers no to both questions; vendor/, src/ and package.json unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer rests on the installed source (vendor/tinyretry 3.1.0: defaults.js retryOn without 429, index.js parseRetryAfter using Number()) with file paths and the version",
+      "passed": true,
+      "evidence": "answer.md says the installed version is \"**3.1.0** (`vendor/tinyretry/package.json`)\", that \"`vendor/tinyretry/defaults.js:5` sets `retryOn: [408, 502, 503, 504]`\", and that \"`index.js:3-7` `parseRetryAfter` does `Number(value)`\"."
+    },
+    {
+      "text": "The answer points out that the vendored README, the team wiki note (2025-10-14) and the 2.4.0 changelog entry describe behaviour the installed 3.1.0 code does not have",
+      "passed": true,
+      "evidence": "answer.md says the wiki \"was last edited 2025-10-14\" and \"is not true for the installed 3.1.0\", says \"`vendor/tinyretry/README.md` makes the same claims and is stale in the same way\", and says \"`CHANGELOG.md` 2.4.0 (2025-09-10) added HTTP-date support. The 3.0.0 rewrite ... seems to have dropped it\""
+    },
+    {
+      "text": "The answer marks which conclusions were measured (e.g. ran the wrapper against a stub fetch) versus read, and states the consequence for src/client.js (opt in with retryOn including 429 and handle HTTP-date Retry-After itself)",
+      "passed": true,
+      "evidence": "answer.md tags each bullet with *(read)*, *(measured)* or *(inferred)*, for example \"fetch was called **once** and the result was a 429. *(measured)*\", and says that for client.js, adding only `retryOn: [...defaults, 429]` is not enough, so \"The client needs its own handling: parse an HTTP-date `Ret"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

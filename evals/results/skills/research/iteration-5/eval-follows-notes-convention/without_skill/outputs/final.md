@@ -1,0 +1,8 @@
+**No, by default Node 22's global `fetch()` ignores `HTTPS_PROXY`.** I saved the findings to `docs/research/2026-11-11-node22-fetch-https-proxy.md`, following the naming of the existing research note.
+
+- **Turning it on:** from v22.21.0, Node reads `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` only if you set `NODE_USE_ENV_PROXY=1` or start it with `node --use-env-proxy`. Node's v22 CLI docs and HTTP docs ("Built-in Proxy Support") both say this and mark the feature as still in active development. Lowercase names (`https_proxy` etc.) win over uppercase ones.
+- **Older Node 22 releases:** before v22.21.0 there's no built-in switch. You have to set a proxy dispatcher yourself, e.g. `setGlobalDispatcher(new EnvHttpProxyAgent())` from the `undici` package.
+- **Local test (Node v22.23.4):** with the proxy variables set and no flag, `fetch()` tried to look up the host directly and failed (`ENOTFOUND`), so the proxy wasn't used.
+- **The flagged run didn't finish:** with `--use-env-proxy`, Node printed an "`EnvHttpProxyAgent` is experimental" warning, which shows the flag reaches `fetch()`. But my test proxy couldn't answer because of how I'd set it up, so I never saw a request go through it end to end. The fixed test script needed approval that I didn't get.
+
+I didn't read Node's source code, because fetching from GitHub wasn't permitted. So the claim that the flag covers `fetch()` rests on the docs, `node --help` and that warning. I also didn't check the docs page for `fetch` itself for a proxy note. The note lists both gaps. I haven't committed the note.

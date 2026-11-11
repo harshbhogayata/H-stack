@@ -1,0 +1,49 @@
+diff --git a/features.json b/features.json
+new file mode 100644
+index 0000000..5d5a9d9
+--- /dev/null
++++ b/features.json
+@@ -0,0 +1,43 @@
++{
++  "spec": "SPEC.md",
++  "target": "todo.js",
++  "how_to_check": "Each `check` is a bash command run from the repo root; exit code 0 = pass. Every check runs in a fresh temp dir with a copy of todo.js and todos.json reset to [], so the repo's todos.json is never touched. Run all: node -e \"const f=require('./features.json').features,{execSync:x}=require('child_process');let bad=0;for(const t of f){try{x(t.check,{shell:'/bin/bash',stdio:'ignore'});console.log('PASS',t.id)}catch{bad++;console.log('FAIL',t.id)}}process.exit(bad?1:0)\"",
++  "features": [
++    {
++      "id": "add-prints",
++      "spec_item": 1,
++      "description": "`node todo.js add \"x\"` prints exactly \"added: x\"",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && [ \"$(node todo.js add 'buy milk')\" = 'added: buy milk' ]"
++    },
++    {
++      "id": "add-persists",
++      "spec_item": 1,
++      "description": "add writes the item to todos.json (valid JSON array; item stored as a string or as an object with a text field)",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && node todo.js add 'buy milk' >/dev/null && node -e \"const a=JSON.parse(require('fs').readFileSync('todos.json','utf8'));const t=i=>typeof i==='string'?i:i&&i.text;process.exit(Array.isArray(a)&&a.length===1&&t(a[0])==='buy milk'?0:1)\""
++    },
++    {
++      "id": "add-appends",
++      "spec_item": 1,
++      "description": "repeated adds append in order without dropping earlier items",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && node todo.js add a >/dev/null && node todo.js add b >/dev/null && node todo.js add c >/dev/null && node -e \"const a=JSON.parse(require('fs').readFileSync('todos.json','utf8'));const t=i=>typeof i==='string'?i:i&&i.text;process.exit(a.map(t).join(',')==='a,b,c'?0:1)\""
++    },
++    {
++      "id": "list-numbered-from-1",
++      "spec_item": 2,
++      "description": "`node todo.js list` prints one line per todo, numbered from 1 in insertion order (e.g. \"1. a\"; \"1) a\", \"1: a\", \"1 a\" also accepted)",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && node todo.js add 'first one' >/dev/null && node todo.js add second >/dev/null && out=$(node todo.js list) && [ \"$(printf '%s\\n' \"$out\" | grep -cE '^[0-9]')\" = 2 ] && printf '%s\\n' \"$out\" | grep -qE '^1[.):]?[[:space:]]+first one$' && printf '%s\\n' \"$out\" | grep -qE '^2[.):]?[[:space:]]+second$'"
++    },
++    {
++      "id": "done-prints",
++      "spec_item": 3,
++      "description": "`node todo.js done 1` prints exactly \"done: <text of item 1>\"",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && node todo.js add a >/dev/null && node todo.js add b >/dev/null && [ \"$(node todo.js done 1)\" = 'done: a' ]"
++    },
++    {
++      "id": "done-removes",
++      "spec_item": 3,
++      "description": "done N removes item N from todos.json and later list renumbers from 1",
++      "check": "d=$(mktemp -d) && cp todo.js \"$d\"/ && cd \"$d\" && echo '[]' > todos.json && node todo.js add a >/dev/null && node todo.js add b >/dev/null && node todo.js add c >/dev/null && node todo.js done 2 >/dev/null && node -e \"const a=JSON.parse(require('fs').readFileSync('todos.json','utf8'));const t=i=>typeof i==='string'?i:i&&i.text;process.exit(a.map(t).join(',')==='a,c'?0:1)\" && out=$(node todo.js list) && printf '%s\\n' \"$out\" | grep -qE '^1[.):]?[[:space:]]+a$' && printf '%s\\n' \"$out\" | grep -qE '^2[.):]?[[:space:]]+c$' && ! printf '%s\\n' \"$out\" | grep -qE '(^|[[:space:]])b$'"
++    }
++  ]
++}

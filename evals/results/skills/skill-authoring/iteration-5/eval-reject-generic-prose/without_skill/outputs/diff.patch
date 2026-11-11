@@ -1,0 +1,70 @@
+diff --git a/SKILL.md b/SKILL.md
+new file mode 100644
+index 0000000..b54934c
+--- /dev/null
++++ b/SKILL.md
+@@ -0,0 +1,64 @@
++---
++name: careful-coding
++description: Working checklist for writing or changing code so it is correct, handles edge cases, and is verified by tests before being called done. Use when implementing a feature, fixing a bug, refactoring, or otherwise editing source code, especially when the change touches input handling, data transformations, error paths, or behavior other code depends on. Skip it for questions about code that involve no changes.
++---
++
++# Careful coding
++
++The teammate's request was: write good code, be careful with edge cases, test things. "Good" and "careful" don't tell you what to do, so this skill turns each into concrete steps. Follow the three parts in order. Each one ends with something you can check.
++
++## 1. Write code that fits the codebase
++
++Before writing, read the code around the change and at least one caller of anything you modify. Most "bad code" isn't wrong in isolation. It's code that doesn't match how the project already does things.
++
++- **Match local conventions** for naming, error handling, logging, and file layout, even when you'd choose differently. Consistency is more valuable here than your preference.
++- **Reuse what exists.** Search for an existing helper before writing a new one. Two functions that almost do the same thing are a future bug.
++- **Keep the change scoped to the task.** Don't reformat unrelated lines, rename things in passing, or add abstractions the task doesn't need. A small diff is easier to review and to revert.
++- **Make failure loud.** Don't swallow exceptions, return a silent default, or `catch` and continue unless the surrounding code clearly intends that. A crash with a clear message is easier to fix than wrong data.
++- **Name things for what they mean** (`retry_deadline`, not `t2`). Comment *why* when the reason isn't obvious from the code. Don't comment *what*.
++
++**Check:** re-read your diff as a reviewer would. Every changed line should be explainable by the task.
++
++## 2. Handle edge cases on purpose
++
++Before you consider the logic finished, go through this list for each input and state the code touches. Decide what should happen in each case. Don't just hope it works.
++
++| Category | Ask |
++|---|---|
++| Empty / missing | Empty string, empty list, `null`/`None`/`undefined`, a missing key, a file that doesn't exist? |
++| Boundaries | Zero, one, the maximum, off-by-one at both ends of a range or loop? |
++| Size | A very large input, or one deep enough to recurse too far? |
++| Type and format | Wrong type, unexpected encoding or Unicode, whitespace, mixed case, a negative or non-integer number? |
++| Duplicates and order | Repeated items, unsorted input, does iteration order matter? |
++| Time | Time zones, DST, leap days, clocks moving backwards, timeouts? |
++| Failure | The network, disk, or a dependency fails partway through. Is state left consistent? Is a retry safe? |
++| Concurrency | Two callers at once, a shared mutable state, a check that goes stale before it's used (TOCTOU)? |
++| Trust | Can the input come from a user or an external system? If so, validate it at the boundary and never put it into a query, a shell command, or a path unescaped. |
++
++Not every row applies. Skip the ones that don't, but decide that for a reason. When the right behavior is unclear and it affects users (reject the input, or accept it and clean it up?), ask instead of guessing.
++
++**Check:** you can say what the code does for each case that applies, and the important ones have a test (see part 3).
++
++## 3. Test it, and actually run the tests
++
++A change isn't done because it looks right. It's done when you've watched it work.
++
++1. **Find the project's test setup.** Look at the README, `package.json` scripts, `Makefile`, `pyproject.toml`, the CI config, or existing test files. Use the framework and style already in use.
++2. **For a bug fix, write the failing test first.** Reproduce the bug in a test, see it fail, then fix the bug and see the test pass. That proves the test checks the right thing.
++3. **Cover behavior, not lines.** At minimum, write a test for:
++   - the normal case,
++   - each edge case from part 2 that could realistically happen,
++   - each error path you added or changed.
++4. **Run the relevant tests, then the wider suite** (or the closest thing to it that's practical), plus any linter or type checker the project uses.
++5. **Report the results honestly.** Give the command you ran and the outcome. If tests fail, show the failure. Don't describe it as passing. If you couldn't run tests (no setup, missing dependency, no access), say so plainly and explain what you checked instead.
++
++If the code has no tests and adding a framework is out of scope, at least run the code path by hand (a script, a REPL, the CLI) and report what you saw.
++
++**Check:** the tests you ran passed after your final edit, not an earlier version of it.
++
++## Before calling it done
++
++- [ ] The diff only contains changes the task needs, and it follows local conventions.
++- [ ] You decided what happens for each edge case that applies.
++- [ ] Tests cover the normal case, the important edge cases, and the error paths.
++- [ ] You ran the tests and linters after your last edit and reported the actual results.

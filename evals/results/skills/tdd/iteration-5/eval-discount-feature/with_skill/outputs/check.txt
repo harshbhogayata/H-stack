@@ -1,0 +1,35 @@
+exit 0
+TAP version 13
+# Subtest: unknown code leaves the total unchanged
+ok 1 - unknown code leaves the total unchanged
+  ---
+  duration_ms: 0.945979
+  type: 'test'
+  ...
+# Subtest: SAVE10 takes 10% off the total
+ok 2 - SAVE10 takes 10% off the total
+  ---
+  duration_ms: 0.281512
+  type: 'test'
+  ...
+# Subtest: SAVE10 rounds to the nearest cent
+ok 3 - SAVE10 rounds to the nearest cent
+  ---
+  duration_ms: 0.161645
+  type: 'test'
+  ...
+# Subtest: subtotal multiplies price by quantity
+ok 4 - subtotal multiplies price by quantity
+  ---
+  duration_ms: 0.945887
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 97.868841

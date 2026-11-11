@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app and config unchanged; at least one confirmed entry, and every confirmed request, replayed with subprocess mocked, either puts shell metacharacters into a shell=True command or returns config/deploy.env)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies command injection in branch_log: BRANCH_RE.match anchors only the start, so a branch such as \"main;id\" passes validation and reaches subprocess.run with shell=True",
+      "passed": true,
+      "evidence": "The reply says \"the branch-name check (`BRANCH_RE`) only looks at the start of the value... so `\"main; id\"` gets through\" and that the value goes into a git log command run with `shell=True`. findings.json confirms this at app/tasks.py:22 with subprocess.run(shell=True)."
+    },
+    {
+      "text": "show_commit (fullmatch on a hex sha), read_report (realpath plus commonpath) and the literal_eval deploy filter are recorded as checked and rejected, not reported as vulnerabilities",
+      "passed": true,
+      "evidence": "findings.json has three \"rejected\" entries. /api/commit cites \"SHA_RE.fullmatch\". /api/report cites \"os.path.realpath ... and requires commonpath\". /api/deploys cites \"ast.literal_eval\"."
+    },
+    {
+      "text": "The reply names the boundary (any signed-in employee runs commands as the service account) and the smallest effective fix (fullmatch, or an argument list without shell=True)",
+      "passed": true,
+      "evidence": "The reply states \"Any signed-in employee can run any shell command as the service account\". The fix it gives is to \"check the whole value against a strict branch-name pattern\" and \"pass git its arguments as a list instead of through the shell\". findings.json says \"validate with fullmatch\" and \"argv "
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

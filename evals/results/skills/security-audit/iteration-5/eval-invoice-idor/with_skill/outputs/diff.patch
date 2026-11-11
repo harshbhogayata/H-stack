@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..7dedbfc
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a"},
++    "file": "src/app.js",
++    "line": 6,
++    "why": "router.use('/invoices/:id', requireOwner) compiles to the fully anchored regex ^/invoices/([^/]+)$ (src/router.js:13), so the ownership middleware never runs for /invoices/:id/pdf. getInvoicePdf (src/invoices.js:25-28) checks only existence, not ownership, and returns Bob's invoice inv_1002 to Alice as base64 PDF content: 'Invoice inv_1002 / Customer cust_bob / Consulting: 990.00 / Total 990.00'. Fix: check invoice.customer === req.user.id in getInvoicePdf (or have the middleware match by prefix)."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a"},
++    "file": "src/invoices.js",
++    "line": 16,
++    "why": "getInvoice has no ownership check of its own, but requireOwner (registered first, method-agnostic) matches this exact path and returns 403 for Bob's invoice before getInvoice runs. Verified: 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"method": "GET", "path": "/invoices/inv%5f1002", "token": "tok_alice_7f3a"},
++    "file": "src/router.js",
++    "line": 34,
++    "why": "Percent-encoding can't be used to skip the check: both the middleware and the handler see the same decodeURIComponent output, so requireOwner looks up inv_1002 and returns 403. A trailing slash (/invoices/inv_1002/) matches no route and returns 404, and a lowercase method ('get') still hits the method-agnostic middleware and gets 403."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"method": "GET", "path": "/invoices", "token": "tok_alice_7f3a"},
++    "file": "src/invoices.js",
++    "line": 12,
++    "why": "listInvoices filters by inv.customer === req.user.id before applying the optional status filter, so query parameters can only narrow the caller's own invoices. Verified: Alice sees only inv_1001, and with status=open she gets an empty list."
++  }
++]

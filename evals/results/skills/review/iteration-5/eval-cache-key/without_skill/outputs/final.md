@@ -1,0 +1,9 @@
+I've written the review to `REVIEW.md` and left the code unchanged. I'd hold the merge: the module can charge the wrong currency's price, and the 3 existing tests pass without catching it. I ran every example input in the review and it gave the result shown.
+
+1. **Critical: the wrong currency's price is returned** (`src/pricing.js:6`, caused by `src/memoize.js:4`). The price cache is keyed on the product code only and ignores currency. So whichever currency is quoted first for a product sticks for the whole process. For example, quoting `MUG-02` in USD and then in GBP gives a GBP subtotal of 1200 instead of 950, so customers can be overcharged or undercharged depending on request order.
+2. **High: fake currency names get past the currency check** (`src/pricing.js:9`). The check also accepts built-in object names like `'toString'`, which produces `NaN` totals. Because of the cache bug above, one such request also makes every later quote for that product return `NaN` in any currency until the process restarts.
+3. **High: quantity isn't validated** (`src/pricing.js:12-13`). `qty: -3` gives a negative total, `0.5` charges for half an item, and `'abc'` gives `NaN`. A negative line can also be used to cancel out the cost of other items in the cart.
+4. **Low:** the cache never empties or refreshes, so it would keep serving old prices if prices ever change.
+5. **Nits:** `var` should be `let`, an empty or missing `cart` gives an unclear error, and the review lists the tests that are missing.
+
+The simplest fix for 1 and 4 is to remove the cache, since looking up a price is already instant. For 2, check currencies with `Object.hasOwn`. For 3, require a whole-number quantity of at least 1.

@@ -1,0 +1,52 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..49337e6
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,46 @@
++# fs.rmSync on non-empty folders: Node 22 options
++
++**Question:** `fs.rmSync(dir)` throws on non-empty folders. What options does Node 22 document for `fs.rmSync`, and which one fixes the error?
++
++## Answer
++
++Pass `recursive: true`:
++
++```js
++fs.rmSync(dir, { recursive: true });              // removes the folder and everything in it
++fs.rmSync(dir, { recursive: true, force: true }); // same, and no error if dir doesn't exist (like `rm -rf`)
++```
++
++`force` does **not** fix the non-empty folder error on its own. It only suppresses the error when the path doesn't exist.
++
++## Documented options (Node v22.x)
++
++Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options. That page showed **v22.23.4** when read on 2026-11-11. *(read)*
++
++Signature: `fs.rmSync(path[, options])`. `path` is a `<string> | <Buffer> | <URL>`. It returns `undefined` and is "modeled on the standard POSIX `rm` utility".
++
++| Option | Type | Default | Documented behaviour |
++|---|---|---|---|
++| `force` | boolean | `false` | "When `true`, exceptions will be ignored if `path` does not exist." |
++| `maxRetries` | integer | `0` | Number of retries on `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY`, or `EPERM`, with a linear backoff that waits `retryDelay` ms longer on each try. **Ignored unless `recursive` is `true`.** |
++| `recursive` | boolean | `false` | "If `true`, perform a recursive directory removal. In recursive mode operations are retried on failure." |
++| `retryDelay` | integer | `100` | Milliseconds to wait between retries. **Ignored unless `recursive` is `true`.** |
++
++History from the same page: added in v14.14.0. Since v17.3.0 and v16.14.0, `path` can also be a `file:` WHATWG `URL`. *(read)*
++
++## Tested on local Node v22.23.4 *(measured)*
++
++I ran each call with `node -e` against a scratch folder `x/` that contained `y/f`:
++
++| Call | Result |
++|---|---|
++| `fs.rmSync(dir)` on a non-empty dir | throws `ERR_FS_EISDIR`: "Path is a directory: rm returned EISDIR (is a directory)" |
++| `fs.rmSync(dir, { recursive: true })` | succeeds; afterwards `fs.existsSync(dir)` is `false` |
++| `fs.rmSync(missing)` | throws `ENOENT` |
++| `fs.rmSync(missing, { force: true })` | succeeds silently |
++
++Note: without `recursive`, `rmSync` rejects **any** directory, empty or not, with `ERR_FS_EISDIR`. I only tested the non-empty case. The empty-directory behaviour is *inferred* from the error message, which complains that the path is a directory rather than that it is not empty. For an empty folder there is also `fs.rmdirSync`.
++
++## Open questions
++
++- None that block the fix. I didn't check whether a different Node major version runs this repo in CI. The Node 22 history table lists no changes to these options since `rmSync` was added in v14.14.0, but I didn't read the docs for other versions.

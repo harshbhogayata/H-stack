@@ -1,0 +1,139 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..365d342
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,38 @@
++import fs from 'node:fs';
++import { fileURLToPath } from 'node:url';
++
++export function migrateUsers(users) {
++  const migrated = [];
++  const skipped = [];
++  for (const u of users) {
++    if (typeof u.mail !== 'string' || u.mail.trim() === '') {
++      skipped.push({ id: u.uid, reason: 'missing email' });
++      continue;
++    }
++    migrated.push({ id: u.uid, email: u.mail, name: `${u.first} ${u.last}`.trim() });
++  }
++  return { migrated, skipped };
++}
++
++function main(inputPath = 'users.json', outputPath = 'users-v2.json') {
++  const source = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
++  const { migrated, skipped } = migrateUsers(source);
++
++  // Every source item must be either migrated or skipped with a reason.
++  if (migrated.length + skipped.length !== source.length) {
++    throw new Error(`count mismatch: source ${source.length}, migrated ${migrated.length}, skipped ${skipped.length}`);
++  }
++
++  fs.writeFileSync(outputPath, JSON.stringify(migrated, null, 2) + '\n');
++  const written = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
++  if (written.length !== migrated.length) {
++    throw new Error(`write mismatch: expected ${migrated.length}, file has ${written.length}`);
++  }
++
++  console.log(`source: ${source.length}, migrated: ${migrated.length}, skipped: ${skipped.length}`);
++  for (const s of skipped) console.log(`not migrated: ${s.id} (${s.reason})`);
++}
++
++if (process.argv[1] === fileURLToPath(import.meta.url)) {
++  main(process.argv[2], process.argv[3]);
++}
+diff --git a/migrate.test.js b/migrate.test.js
+new file mode 100644
+index 0000000..1b70ba3
+--- /dev/null
++++ b/migrate.test.js
+@@ -0,0 +1,61 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { execFileSync } from 'node:child_process';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { migrateUsers } from './migrate.js';
++
++const SCRIPT = fileURLToPath(new URL('./migrate.js', import.meta.url));
++
++test('CLI writes users-v2.json and reports skipped users', () => {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'migrate-'));
++  const input = path.join(dir, 'users.json');
++  const output = path.join(dir, 'users-v2.json');
++  fs.writeFileSync(input, JSON.stringify([
++    { uid: 1, mail: 'ana@example.com', first: 'Ana', last: 'Silva' },
++    { uid: 3, first: 'Cy', last: 'Ode' },
++  ]));
++  const stdout = execFileSync('node', [SCRIPT, input, output], { encoding: 'utf8' });
++  assert.deepEqual(JSON.parse(fs.readFileSync(output, 'utf8')), [
++    { id: 1, email: 'ana@example.com', name: 'Ana Silva' },
++  ]);
++  assert.match(stdout, /source: 2, migrated: 1, skipped: 1/);
++  assert.match(stdout, /not migrated: 3 \(missing email\)/);
++});
++
++test('a user with email is migrated to {id, email, name}', () => {
++  const { migrated, skipped } = migrateUsers([
++    { uid: 1, mail: 'ana@example.com', first: 'Ana', last: 'Silva' },
++  ]);
++  assert.deepEqual(migrated, [{ id: 1, email: 'ana@example.com', name: 'Ana Silva' }]);
++  assert.deepEqual(skipped, []);
++});
++
++test('name is trimmed when a name part is empty', () => {
++  const { migrated } = migrateUsers([
++    { uid: 5, mail: 'ed@example.com', first: 'Ed', last: '' },
++  ]);
++  assert.deepEqual(migrated, [{ id: 5, email: 'ed@example.com', name: 'Ed' }]);
++});
++
++test('a user without email is not migrated and is reported with a reason', () => {
++  const { migrated, skipped } = migrateUsers([{ uid: 3, first: 'Cy', last: 'Ode' }]);
++  assert.deepEqual(migrated, []);
++  assert.deepEqual(skipped, [{ id: 3, reason: 'missing email' }]);
++});
++
++test('blank or null email counts as missing', () => {
++  const { migrated, skipped } = migrateUsers([
++    { uid: 6, mail: '', first: 'A', last: 'B' },
++    { uid: 7, mail: '   ', first: 'C', last: 'D' },
++    { uid: 8, mail: null, first: 'E', last: 'F' },
++  ]);
++  assert.deepEqual(migrated, []);
++  assert.deepEqual(skipped, [
++    { id: 6, reason: 'missing email' },
++    { id: 7, reason: 'missing email' },
++    { id: 8, reason: 'missing email' },
++  ]);
++});
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

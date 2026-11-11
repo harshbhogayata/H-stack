@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..55a7259
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; id; cat /etc/passwd"}},
++    "file": "app/tasks.py",
++    "line": 24,
++    "why": "BRANCH_RE (line 7) is applied with re.match and has no end anchor, so it only checks that the value starts with an alphanumeric character; anything after that, including ';', '$()', '|' and backticks, gets through. The value is put into an f-string and run by _git with subprocess.run(shell=True) (line 11), so any signed-in employee can run arbitrary shell commands as the service account (for example, reading config/deploy.env's DEPLOY_TOKEN) and gets stdout back in the response."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abcdef0; id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "show_commit also uses shell=True, but is_sha checks the value with SHA_RE.fullmatch, so only 7-40 lowercase hex characters are accepted. Shell metacharacters, whitespace and leading '-' options can't get through, and the request gets a 400."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "read_report resolves the joined path with os.path.realpath (which also follows symlinks) and then checks os.path.commonpath against the realpath'd REPORTS directory. '../' traversal, absolute paths such as '/etc/passwd' (where os.path.join drops the base) and the sibling-prefix trick 'reports_evil' all fail that check and raise PermissionError, which becomes a 400. An empty name resolves to the directory itself, raises IsADirectoryError and is also handled."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "The filter goes through ast.literal_eval, not eval. It only accepts literals, so calls, names and attribute access raise ValueError, which becomes a 400. The result must be a dict and is only used for equality comparisons against the static, non-sensitive DEPLOYS list, which every employee is allowed to see."
++  }
++]

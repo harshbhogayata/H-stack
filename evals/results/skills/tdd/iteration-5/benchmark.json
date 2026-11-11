@@ -1,0 +1,260 @@
+{
+  "metadata": {
+    "skill_name": "tdd",
+    "skill_path": "plugins/h-stack/skills/tdd",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.152Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "discount-feature",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 37.051,
+        "tokens": 418150,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+          "passed": true,
+          "evidence": "check exit 0: \nok 4 - subtotal multiplies price by quantity\n  ---\n  duration_ms: 0.945887\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 97.868841\n"
+        },
+        {
+          "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+          "passed": true,
+          "evidence": "test/discount.test.js imports `{ discount } from '../src/pricing.js'` and asserts literal values such as `assert.equal(discount(1000, 'SAVE10'), 900)` and `assert.equal(discount(1234, 'SAVE10'), 1111)`."
+        },
+        {
+          "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+          "passed": true,
+          "evidence": "The final message names a specific failure for each test before its code was written (\"It first failed because `discount` didn't exist yet\", \"It first failed with 1000 against an expected 900\", \"It first failed with `1110.6000000000001`\") and says \"the full suite passes\". The check command confirms "
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "discount-feature",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 24.753,
+        "tokens": 238901,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+          "passed": true,
+          "evidence": "check exit 0: h an unknown code returns the total unchanged\n  ---\n  duration_ms: 0.104677\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 77.959271\n"
+        },
+        {
+          "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+          "passed": true,
+          "evidence": "The test file imports `{ subtotal, discount } from '../src/pricing.js'` and asserts literal values such as `assert.equal(discount(1000, 'SAVE10'), 900)`, `discount(999, 'SAVE10'), 899` and `discount(1000, 'BOGUS'), 1000`, with no formula recomputed in the tests."
+        },
+        {
+          "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+          "passed": true,
+          "evidence": "The final message says the tests were \"run first and confirmed failing\" and that \"All 4 tests pass\", and the check command confirms the pass with \"# pass 4 # fail 0\"; however, the failing run appears only as the agent's own claim, with no failing output shown."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "migration-accounting",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 89.564,
+        "tokens": 775533,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (4 users migrated with trimmed names)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The final message accounts for all 5 source users: 4 migrated and user 3 not migrated because it has no email",
+          "passed": true,
+          "evidence": "The final message says \"source: 5, migrated: 4, skipped: 1\" and \"Not migrated: user 3 (Cy Ode) has no email,\" and it names users 1, 2, 4 and 5 as migrated."
+        },
+        {
+          "text": "The script or its output compares source and target counts (or lists skipped items with a reason) rather than silently dropping the record",
+          "passed": true,
+          "evidence": "migrate.js throws an error when `migrated.length + skipped.length !== source.length`, and it prints `not migrated: ${s.id} (${s.reason})` for each skipped user."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "migration-accounting",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.697,
+        "tokens": 196426,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (4 users migrated with trimmed names)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The final message accounts for all 5 source users: 4 migrated and user 3 not migrated because it has no email",
+          "passed": true,
+          "evidence": "The final message says \"It converted 4 of the 5 users\" and \"uid 3 (Cy Ode) has no email, and the README says a user without an email can't be migrated.\""
+        },
+        {
+          "text": "The script or its output compares source and target counts (or lists skipped items with a reason) rather than silently dropping the record",
+          "passed": true,
+          "evidence": "The script logs `Migrated ${migrated.length} of ${users.length} users` and warns `Skipped uid ${u.uid} (...): no email` for each skipped user."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "bugfix-regression-test",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.611,
+        "tokens": 371792,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (bug fixed and a regression test for 1h30m added)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The existing tests in tests/test_duration.py were not weakened or removed",
+          "passed": true,
+          "evidence": "The diff to tests/test_duration.py only adds `test_hours_and_minutes_combine`; `test_minutes` and `test_hours` (`assert parse_duration(\"2h\") == 120`) remain unchanged."
+        },
+        {
+          "text": "The final message reports a test run after the fix with its result",
+          "passed": true,
+          "evidence": "The final message says \"I called all three test functions directly with `python3` after the fix... All three passed\", though it also says pytest itself did not run."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "bugfix-regression-test",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 7.043,
+        "tokens": 115812,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (bug fixed and a regression test for 1h30m added)",
+          "passed": false,
+          "evidence": "check exit 1: "
+        },
+        {
+          "text": "The existing tests in tests/test_duration.py were not weakened or removed",
+          "passed": true,
+          "evidence": "The diff changes only duration.py (`diff --git a/duration.py b/duration.py`) and does not touch tests/test_duration.py."
+        },
+        {
+          "text": "The final message reports a test run after the fix with its result",
+          "passed": false,
+          "evidence": "The final message reports only an informal check (\"A quick check now gives the right answers: '1h30m' → 90...\"), not a test-suite run, and the check command afterwards gave `exit 1`, which the message never mentions."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 49.409,
+        "stddev": 29.085,
+        "min": 21.611,
+        "max": 89.564
+      },
+      "tokens": {
+        "mean": 521825,
+        "stddev": 180394.157,
+        "min": 371792,
+        "max": 775533
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.778,
+        "stddev": 0.314,
+        "min": 0.3333333333333333,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 15.498,
+        "stddev": 7.252,
+        "min": 7.043,
+        "max": 24.753
+      },
+      "tokens": {
+        "mean": 183713,
+        "stddev": 51048.609,
+        "min": 115812,
+        "max": 238901
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.22",
+      "time_seconds": "+33.9",
+      "tokens": "+338112"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

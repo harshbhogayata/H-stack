@@ -1,0 +1,410 @@
+{
+  "metadata": {
+    "skill_name": "debugging",
+    "skill_path": "plugins/h-stack/skills/debugging",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.149Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 23.894,
+        "tokens": 291252,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff changes the read to `fs.readFileSync(require('path').join(__dirname, 'config.json'), 'utf8')`, which resolves the path from the module's own folder. Only src/config.js changed: no file was copied, no error was caught, and the test script was not touched."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says `src/config.js` opened 'src/config.json' \"with a path relative to whatever folder Node was started from. The `npm test` script runs `cd test` first, so Node looked for `test/src/config.json`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 13.592,
+        "tokens": 156642,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff replaces `fs.readFileSync('src/config.json', 'utf8')` with `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')`, changes only src/config.js, and does not copy the file, catch the error or change the test's working directory."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says the agent's code opened 'src/config.json', \"a path Node looks up from the folder the process is running in,\" and that because the test script runs `cd test && node run.js`, \"Node looked for `test/src/config.json`, which doesn't exist.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 76.459,
+        "tokens": 434157,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff removes the fixed `setTimeout(r, 25)` sleep and adds `await waitFor(() => q.done.length === 3, '3 jobs to finish')`, which checks `done.length` every 5 ms and gives up after 2 s."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The final message says \"each job finishes after a random 5–44 ms. The test slept a fixed 25 ms and then checked that all 3 jobs were done.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 39.468,
+        "tokens": 277534,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff swaps `await new Promise((r) => setTimeout(r, 25));` for `await q.drain();`, and `drain()` loops on `await Promise.all(this.pending)` until every job's promise has resolved."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says \"each job finishes after a random delay of 5–44 ms. The test waited a fixed 25 ms... It failed whenever any of the three jobs took longer than 25 ms.\" That matches the code's actual maximum of 5 + 39 = 44 ms."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 53.456,
+        "tokens": 390914,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"`node bench.js`, 3 runs each: 1279 / 1121 / 1100 ms before, 15 / 9 / 21 ms after.\""
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"`JSON.stringify` wasn't the cause\" and timed it at \"~1 ms\". It names \"Totalling each customer (`orders.filter(...).reduce` per customer)\" and \"`customers.includes` per order\" as the slow steps, which is \"scanning the whole orders list once for every customer\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 15.717,
+        "tokens": 156362,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The final message says \"`buildReport` now takes **8.9 ms instead of 1,500 ms** on the benchmark\"."
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The final message says \"`JSON.stringify` wasn't the slow part\" and names \"`customers.includes(...)` searched the customer list for every order\" and \"`orders.filter(...)` went through all orders again for every customer\" as the real cost."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 38.08,
+        "tokens": 387536,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes lib/settings.js so `getDefaults()` returns `structuredClone(DEFAULTS)` from a frozen, once-loaded config, so `Object.assign(getDefaults(), prefs)` in createCustomer can no longer change the shared defaults; refunds, currency passing and test order are untouched."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": true,
+          "evidence": "The message reports that \"`node --test --test-name-pattern=refund` (refund test alone): passed\", that under `npm test` it \"failed with `'-7.50 USD'`\", and that \"`getDefaults().currency` went from `EUR` to `USD` after one `createCustomer` call\"."
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message states \"With the fix stashed, 3 tests failed (the refund test and both new ones). With it restored, all 6 passed.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 28.565,
+        "tokens": 202496,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes `Object.assign(getDefaults(), prefs)` to `{ ...getDefaults(), ...prefs }`, and getDefaults now returns `structuredClone(DEFAULTS)` of a deep-frozen object; refund code and test order are unchanged."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": false,
+          "evidence": "The message explains the mechanism and says \"The refund test failed only because the customer test runs before it,\" but it never describes a diagnostic step, such as running the refund test alone or in a different order, so how the cause was found is not shown."
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "\"I put back the old `lib/` code and ran them: 3 tests failed, including both new ones. With the fix, all 6 pass.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 80.325,
+        "tokens": 685645,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message reports running `TZ=America/Los_Angeles npm test` before the fix, with '3 of the 4 existing tests failed, each one day early (for example, expected `2026-03-31`, got `2026-03-30`)'. This comes from the agent's own report; no transcript was provided."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The message says '`new Date('2026-03-01')` reads a plain date as midnight UTC. `addDays` then read and changed it in local time... so every due date came out a day early. This would hit any timezone west of UTC.' It does not say outright that formatting also used local time, but it does say formatDa"
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `Date.UTC(...)`, does the arithmetic with `setUTCDate(d.getUTCDate() + days)`, and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no conditional offsets or zone-specific cases."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 49.574,
+        "tokens": 410979,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": false,
+          "evidence": "The final message only says \"under `TZ=America/Los_Angeles` the original suite fails 3 of 4\"; it shows no command output and doesn't make clear the run happened before the fix rather than afterwards (the agent also says it later put the old dates.js back temporarily), so the evidence is ambiguous."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The message says \"`new Date('2026-03-01')` reads a date-only string as midnight UTC, but `formatDate` printed it using the server's local time. In California that moment is 4–5pm the day before... The same thing happens in any timezone west of UTC.\""
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `Date.UTC(y, mo - 1, d)`, adds `days * MS_PER_DAY` to the UTC milliseconds and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no zone-specific or conditional adjustment."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 54.443,
+        "stddev": 21.71,
+        "min": 23.894,
+        "max": 80.325
+      },
+      "tokens": {
+        "mean": 437900.8,
+        "stddev": 132394.447,
+        "min": 291252,
+        "max": 685645
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.9,
+        "stddev": 0.122,
+        "min": 0.75,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 29.383,
+        "stddev": 13.756,
+        "min": 13.592,
+        "max": 49.574
+      },
+      "tokens": {
+        "mean": 240802.6,
+        "stddev": 95906.016,
+        "min": 156362,
+        "max": 410979
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.10",
+      "time_seconds": "+25.1",
+      "tokens": "+197098"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

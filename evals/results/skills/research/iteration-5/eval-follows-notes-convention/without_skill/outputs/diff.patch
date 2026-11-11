@@ -1,0 +1,66 @@
+diff --git a/docs/research/2026-11-11-node22-fetch-https-proxy.md b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+new file mode 100644
+index 0000000..76ce025
+--- /dev/null
++++ b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+@@ -0,0 +1,60 @@
++# 2026-11-11 Does Node 22 global fetch() honour HTTPS_PROXY by default?
++
++## Answer
++
++**No.** In Node 22, global `fetch()` ignores `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` by default.
++
++Since **v22.21.0**, Node can read those variables, but only if you turn it on in one of two ways:
++
++- set `NODE_USE_ENV_PROXY=1`, or
++- start Node with `node --use-env-proxy`.
++
++The feature is marked Stability 1.1 (Active Development). On Node 22 releases before v22.21.0 there is no built-in way to make `fetch()` use these variables. You have to set an undici dispatcher yourself, for example `setGlobalDispatcher(new EnvHttpProxyAgent())` from the `undici` package.
++
++## Evidence
++
++### Node 22 docs: CLI (https://nodejs.org/docs/latest-v22.x/api/cli.html)
++
++`--use-env-proxy`, Added in: v22.21.0, Stability: 1.1 – Active Development:
++
++> When enabled, Node.js parses the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables during startup, and tunnels requests over the specified proxy.
++>
++> This is equivalent to setting the `NODE_USE_ENV_PROXY=1` environment variable. When both are set, `--use-env-proxy` takes precedence.
++
++The `NODE_USE_ENV_PROXY=1` entry has the same wording and the same "Added in: v22.21.0".
++
++The wording "When enabled" means the feature is off unless you turn it on.
++
++### Node 22 docs: HTTP, "Built-in Proxy Support" (https://nodejs.org/docs/latest-v22.x/api/http.html#built-in-proxy-support)
++
++Added in: v22.21.0.
++
++> When Node.js creates the global agent, if the `NODE_USE_ENV_PROXY` environment variable is set to `1` or `--use-env-proxy` is enabled, the global agent will be constructed with `proxyEnv: process.env`, enabling proxy support based on the environment variables.
++
++The `http.Agent` `proxyEnv` option also has **Default: `undefined`**, which means no proxy. Other details from this section:
++
++- Lowercase `http_proxy`, `https_proxy` and `no_proxy` win over the uppercase names.
++- Requests to Unix domain sockets ignore the proxy settings.
++
++### `node --help` (local v22.23.4)
++
++```
++--use-env-proxy   parse proxy settings from HTTP_PROXY/HTTPS_PROXY/NO_PROXY environment
++                  variables and apply the setting in global HTTP/HTTPS clients
++```
++
++### Local experiment (Node v22.23.4)
++
++`HTTP_PROXY`, `HTTPS_PROXY` and their lowercase forms were all set to a local proxy, and `NODE_USE_ENV_PROXY` was unset. Then `fetch('http://example.invalid/')` was called.
++
++- **Default run:** the request failed with `ENOTFOUND`. Node tried to resolve DNS directly, so the proxy was not used.
++- **Run with `--use-env-proxy`:** Node printed `[UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental`. This means the flag makes Node install undici's `EnvHttpProxyAgent`, which is the dispatcher `fetch()` uses. The proxy could not answer in this run, because the test harness blocked the event loop that served it, so the run did not show a full proxied response.
++
++## Caveats / not verified
++
++- I did not read the Node source (`lib/internal/process/pre_execution.js`) because fetching from GitHub was not permitted in this session. The claim that `--use-env-proxy` covers `fetch()` rests on:
++  - the CLI docs, which say "tunnels requests";
++  - `--help`, which says "global HTTP/HTTPS clients";
++  - the `EnvHttpProxyAgent` warning seen in the experiment.
++- The Node 22 docs page for `fetch` was not checked for its own proxy note.
++- Before relying on this, check the exact Node version: `node --version` must be ≥ 22.21.0.

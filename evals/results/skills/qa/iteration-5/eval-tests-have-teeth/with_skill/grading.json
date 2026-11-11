@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: 2 passed\n"
+    },
+    {
+      "text": "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes",
+      "passed": true,
+      "evidence": "The agent states \"**Nothing tests the upper bound.** You could delete the `x > hi` branch entirely and both tests would still pass\" and lists the mutants \"Upper-bound check removed (`clamp(15,0,10)` returns 15)\" and \"Upper branch returns `lo`\" as \"not caught\"."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

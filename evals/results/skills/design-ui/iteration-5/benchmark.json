@@ -1,0 +1,420 @@
+{
+  "metadata": {
+    "skill_name": "design-ui",
+    "skill_path": "plugins/h-stack/skills/design-ui",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.150Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 47.841,
+        "tokens": 306863,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": false,
+          "evidence": "The page imports `{ Button } from \"./Button.jsx\"` and uses var(--color-accent), var(--color-surface) and var(--font-ui), but settings.css also hard-codes a new colour, `#f87171`, three times (for example `.settings__input[aria-invalid=\"true\"] { border-color: #f87171; }`), and the agent admits it 'ad"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs have `<label ... htmlFor={nameId}>` / `htmlFor={notifId}` matching their ids, and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so it stays keyboard-operable."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.542,
+        "tokens": 156966,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\";` and renders `<Button type=\"submit\">Save</Button>`; every colour and font in settings.css is a variable, such as `background: var(--color-surface)`, `font-family: var(--font-ui)` and `accent-color: var(--color-accent)`, and no hex or rgb value"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs sit inside `<label>` elements with the text \"Display name\" and \"Email notifications\", and the toggle is a native `<input type=\"checkbox\" role=\"switch\" ...>`, which can be focused and switched from the keyboard by default."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 40.931,
+        "tokens": 164643,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The proposal targets \"6–8-year-olds who are still learning to read\" and makes the screen \"a side view of a garden, not a dashboard\" with \"no card grid and no stats panel\"; the main button is \"at least 88px tall\". It never mentions reading aloud, but the audience, metaphor and touch-target parts are "
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex colours such as Sunflower `#FFC83D` (\"Soil-coloured text on it is about 6.7:1 contrast\") and picks Andika because \"It was designed for literacy: it has the single-storey 'a' and 'g' that children learn to write\", with \"at least 24px for any text a child reads\" and a fallback for reduced"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 32.328,
+        "tokens": 79043,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The proposal says it is based on \"children aged 6–8, reading aloud, a garden as the reward... big touch targets\". Its concept is \"The garden is the home screen\", and it specifies \"Every tap target is at least 64pt... Small fingers aren't precise.\""
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex colours such as \"Garden green `#2F7D3E`\" and names \"Andika. It was designed for early readers. Its 'a' and 'g' are the simple shapes children learn to write.\" It also covers accessibility: \"Both combinations should pass WCAG AA\" and \"Never rely on colour alone... which helps colour-blin"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 17.462,
+        "tokens": 120979,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Item 3 says 'the search control is a `<div onClick>`, not a button. Keyboard users can't tab to it...', item 4 says it has no accessible name, and item 5 says 'the delete button is icon-only with no accessible name.'"
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Item 6 says 'delete runs immediately, with no confirmation', and item 7 says 'the filter input blocks paste... remove the `onPaste` handler.'"
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Item 1 flags that the toolbar 'is fixed but ignores the phone's safe area' and item 2 says '`vh` is the wrong unit on mobile... use `height: '100dvh'`.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 19.166,
+        "tokens": 116590,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "The review says the search is 'a clickable `<div>`, not a button' that 'A keyboard can't reach' and whose 'icon has no accessible name', and that for the delete button 'Screen readers announce it only as \"button\", with no label.'"
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Line 6 is flagged because 'onPaste={(e) => e.preventDefault()} stops users from pasting', and line 5 is flagged as 'Delete runs with no confirmation or undo'."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Line 3 is flagged with \"`position: 'fixed', bottom: 0, height: '100vh'` makes a toolbar as tall as the screen\"; the review never mentions dvh or safe-area insets, but the 'and/or' wording means flagging the fixed 100vh toolbar is enough."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 39.109,
+        "tokens": 212061,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` from './IconButton' and `CloseIcon` from './icons'. Toast.css takes its colour, spacing, shadow, z-index and motion values from tokens: `var(--hb-color-surface)`, `var(--hb-space-6)`, `var(--hb-shadow-raised)`, `var(--hb-z-toast)` and `var(--hb-motion-base) var(--hb-ea"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code sets `const paused = hovered || focused;` and the timer effect returns early `if (paused)`. The reply says \"The 5-second timer stops while the pointer is over the toast or keyboard focus is inside it.\""
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply lists \"Accessibility checks, done by reading the code\" (label, focus-visible, reduced motion, safe areas, AA contrast, wrapping, pointer-events). It also says \"I haven't run or seen it\" and \"Not verified: rendering, the animation, and timer behaviour in a browser.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 38.939,
+        "tokens": 203352,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "The JSX imports `IconButton` from './IconButton' and `CloseIcon` from './icons', and the CSS uses var(--hb-color-surface), var(--hb-space-*), var(--hb-shadow-raised), var(--hb-z-toast) and var(--hb-motion-base)/var(--hb-ease-out); only a few layout sizes are hard-coded (360px width, 480px breakpoint"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code sets paused on onMouseEnter/onFocus and the effect returns early `if (!message || paused)`; the reply says 'The 5-second timer pauses while the mouse is over the toast or the keyboard focus is inside it', and a `duration` prop lets the time be changed."
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply says 'I haven't run it: the repo has no build setup, app entry point or tests. Nothing calls it yet either', which clearly states that no rendering or runtime check was done; it lists no UI checks because none were made."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 33.947,
+        "tokens": 170341,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "ui-review.json entry at SignupForm.jsx:30 says \"The email input has id=\\\"email\\\" but its label uses htmlFor=\\\"signup-email\\\", so the label is not associated: screen readers announce an unnamed field\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "ui-review.json entry at SignupForm.css:10 says \"Focused inputs remove the outline and set border-color to the same var(--color-border) as the resting state, so keyboard users see no focus indicator at all\"."
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "The entry at line 34 says \"the error text is never rendered; the only signal is a red border... on the password field... and the field gets no aria-invalid\", with a fix that adds aria-describedby. The entry at line 40 says the <div onClick> \"cannot be reached or toggled by keyboard, has no checkbox "
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 35.491,
+        "tokens": 163920,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "The SignupForm.jsx line 30 entry says: \"The Email label points to htmlFor=\\\"signup-email\\\", but the input's id is \\\"email\\\"... so the input has no accessible name\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "The SignupForm.css line 10 entry says: \"The input focus style sets outline: none and keeps border-color as var(--color-border), the same as the unfocused state. Focused inputs look no different\"."
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "Line 18 says the code \"stores `error` in state but never renders it... The only sign of an error is a red border on the password field\". Line 34 says \"there is no aria-invalid\", and its fix adds aria-describedby. Line 40 says the checkbox is \"a <div> with an onClick handler. It can't be focused or t"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.933,
+        "stddev": 0.133,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 35.858,
+        "stddev": 10.217,
+        "min": 17.462,
+        "max": 47.841
+      },
+      "tokens": {
+        "mean": 194977.4,
+        "stddev": 62949.389,
+        "min": 120979,
+        "max": 306863
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 28.693,
+        "stddev": 8.712,
+        "min": 17.542,
+        "max": 38.939
+      },
+      "tokens": {
+        "mean": 143974.2,
+        "stddev": 42563.6,
+        "min": 79043,
+        "max": 203352
+      }
+    },
+    "delta": {
+      "pass_rate": "-0.07",
+      "time_seconds": "+7.2",
+      "tokens": "+51003"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

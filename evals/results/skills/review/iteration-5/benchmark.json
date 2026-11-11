@@ -1,0 +1,430 @@
+{
+  "metadata": {
+    "skill_name": "review",
+    "skill_path": "plugins/h-stack/skills/review",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.151Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 32.122,
+        "tokens": 206205,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 cites \"`accounts.js:6`: `accounts.set(from, accounts.get(from) - amount);`\" and says \"Nothing checks that `from` has enough money. `transfer('b', 'a', 100)` left `b = -50`.\""
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 says \"`accounts.get(...)` returns `undefined` for an ID that doesn't exist, so the sum becomes `NaN` and `set` quietly adds that ID as a new account.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each finding gives an input and a wrong result, e.g. \"`transfer('a', 'zz', 10)` left `a = 90` and `zz = NaN`\" and \"Sending 0.1 and then 0.2 left `b = 50.300000000000004`\"; finding 5 is labelled as only plausible, and there are no style comments."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 18.984,
+        "tokens": 156112,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 says \"Overdrafts are allowed (`accounts.js:6`). Nothing checks that `from` has enough money. `transfer('a','b',1000)` left `a` at `-915`\", and finding 2's `accounts.js:6-7` range implies line 6 is the `from` subtraction, though the file itself isn't shown."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 states \"`accounts.get(to)` returns `undefined`, so `undefined + 5` becomes `NaN`. `transfer('a','zzz',5)` took 5 from `a` and created account `zzz` holding `NaN`.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each main finding gives an input and a wrong result, e.g. \"`50 + '10'` gives the string `'5010'`\" and \"`transfer('a','b',1000)` left `a` at `-915`\"; only the minor items at the end are opinions."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.479,
+        "tokens": 248091,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The final message says \"Switch to `URL.parse(req.url)`: declined\" and explains \"`URL.parse` only exists from Node 22.1, so on Node 18–22.0 the handler would crash\"; the diff keeps `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The diff adds `a.strictEqual(call('/nope'), 404);` to test.js, and the check command exited 0 and printed \"ok\"."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message begins \"I made two of the three changes and declined the `URL.parse` one\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.727,
+        "tokens": 197286,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"Did not switch to `URL.parse`... `URL.parse` was added in Node 22.1, but `package.json` says the app supports Node 18 and up\", and the diff keeps `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The test.js diff adds `a.strictEqual(call('/does-not-exist'), 404);`, and the check command printed 'ok' with exit code 0."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message opens with \"I made two of the three changes and skipped the URL one\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.058,
+        "tokens": 120971,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent states \"None at bug severity\" and has a \"Checked and ruled out\" section that covers the empty string, \"`null`, `undefined` and numbers\", and accented and non-BMP Unicode first characters."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The three edge cases are introduced as \"all minor and optional to fix\", and each one is labelled \"Severity: minor.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 12.916,
+        "tokens": 115566,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent says \"I found no real bugs in `strings.js`\". It also names what it checked: \"handles empty strings and non-string input correctly\", and it looks at a Unicode first character in examples such as `capitalize('𐐨abc')` and `'ßeta'`."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The agent first says there are \"no real bugs\" and then lists the remaining points as \"three edge cases with non-English text, ordered from most to least likely to matter\". It adds caveats such as \"Whether that matters depends on what you use the function for\" and \"That looks deliberate\". It does not"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 102.123,
+        "tokens": 698588,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "Finding 1 cites `src/memoize.js:4`: `const key = args[0];` and says \"`memoize` builds its cache key from the first argument only, the SKU\". Its example is `quote([{ sku: 'CAP-03' }], 'USD')` followed by `quote([{ sku: 'CAP-03' }], 'EUR')`, which returns \"subtotal: 1500 ... total: 1800  wrong: should"
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is headed \"**Critical, confirmed**\" and the review says \"do not merge until finding 1 is fixed\". `var` is never mentioned. Math.round appears only under \"Checked and rejected\" (\"`Math.round` on whole cents is fine\"). The `item.qty == null` line is cited only as the place where qty goes unv"
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": true,
+          "evidence": "REVIEW.md has \"Checked and rejected\", \"Cleared\" and \"Not reviewed\" sections. They include \"Tax rounding\", \"Unsupported currency (e.g. `'JPY'`). Throws as intended\", \"A missing `qty` defaults to 1\", \"an unknown SKU throws\" and \"Who calls `quote`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 46.038,
+        "tokens": 247157,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "REVIEW.md finding 1 says \"`memoize` builds its cache key from `args[0]` only (the SKU)\" and gives the example \"quote([{ sku: 'MUG-02' }], 'GBP'); // { subtotal: 1200, ... } expected { subtotal: 950 ...}\" after a USD quote."
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is headed \"**Critical**\" with \"Verdict: do not merge yet\", and the only style point, \"`var subtotal` should be `let`\", appears under \"## 5. Minor / style. **Nit**\"; Math.round and qty == null are not raised as bugs."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": false,
+          "evidence": "Apart from \"`npm test` passes (3/3)\" and a passing remark that \"Unknown SKUs throw before anything is cached\", REVIEW.md has no list of areas checked and found correct, and it doesn't say what was left unreviewed."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 43.967,
+        "tokens": 212828,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"JavaScript regex alternation takes the first option that matches, not the longest. In \"500ms\", m matches before ms gets a chance\" and that \"parseDuration(\"500ms\") throws TypeError when the spec says 500.\""
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": true,
+          "evidence": "The reply lists \"Uppercase units are rejected\", \"\".5s\"\", \"\"1 h\"\" and \"\"1s1s\" gives 2000\" under \"Checked and fine\", and says the rounding note \"isn't a spec violation.\""
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply rates the bug \"high severity\", says the function \"reads timeouts from config files, where values like \"250ms\" are likely\", proposes \"put ms before m in the regex, i.e. (ms|h|m|s)\", and the diff only adds cases.json, with no change to duration.js."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 44.222,
+        "tokens": 208010,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply quotes `(h|m|s|ms)` and says \"in `\"500ms\"` it reads `500` as minutes and leaves the `s` with no number in front of it... and throws\", and its table shows \"1h 250ms\" giving TypeError."
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": true,
+          "evidence": "Under \"The rest of the spec checks out\", the reply lists uppercase units (\"1H\") and \"1 h\" as correctly rejected and says \"repeated units and any unit order all give the right sums\"; it labels the Infinity point \"not a bug against the spec\"."
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply says \"Don't merge yet... a config value like `timeout: \\\"500ms\\\"` would fail\" and \"The fix is to put `ms` before `m` in the regex, e.g. `(ms|h|m|s)`\"; the diff touches only cases.json."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 43.15,
+        "stddev": 30.967,
+        "min": 17.058,
+        "max": 102.123
+      },
+      "tokens": {
+        "mean": 297336.6,
+        "stddev": 204928.92,
+        "min": 120971,
+        "max": 698588
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.95,
+        "stddev": 0.1,
+        "min": 0.75,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 28.577,
+        "stddev": 13.774,
+        "min": 12.916,
+        "max": 46.038
+      },
+      "tokens": {
+        "mean": 184826.2,
+        "stddev": 45164.908,
+        "min": 115566,
+        "max": 247157
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.05",
+      "time_seconds": "+14.6",
+      "tokens": "+112510"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

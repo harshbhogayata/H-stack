@@ -1,0 +1,43 @@
+diff --git a/notes/json-schema-validator-ajv-vs-zod.md b/notes/json-schema-validator-ajv-vs-zod.md
+new file mode 100644
+index 0000000..d7ee73e
+--- /dev/null
++++ b/notes/json-schema-validator-ajv-vs-zod.md
+@@ -0,0 +1,37 @@
++# Ajv vs Zod: validating draft 2020-12 JSON Schema in Node
++
++Question: see `QUESTION.md`. Date: 2026-11-11.
++
++**Evidence status: none of this has been verified in this run.** The repo has no
++`node_modules` (checked: the only tracked file is `QUESTION.md`), and permission to fetch
++web pages was not granted. Every claim below is **inferred from prior knowledge** of the
++official docs, not read during this session. Check the cited pages before relying on it.
++
++## Answer
++
++**Use Ajv.** Ajv is a JSON Schema validator and supports draft 2020-12 through a separate
++class. Zod is not a JSON Schema validator. It defines schemas in TypeScript and can *export*
++them as JSON Schema, but it does not take an arbitrary 2020-12 schema document and validate
++data against it to spec.
++
++## Findings
++
++| Claim | Source (not fetched) | Status |
++|---|---|---|
++| Ajv supports drafts 04, 06, 07, 2019-09 and 2020-12 | https://ajv.js.org/json-schema.html (Ajv v8) | inferred |
++| You enable 2020-12 with `Ajv2020` from `ajv/dist/2020` (`import Ajv2020 from "ajv/dist/2020"`). The default `Ajv` export targets draft-07 | https://ajv.js.org/json-schema.html#draft-2020-12, https://ajv.js.org/guide/schema-language.html | inferred |
++| Draft 2020-12 and draft-07 schemas cannot be mixed in one Ajv instance | https://ajv.js.org/json-schema.html | inferred |
++| Zod defines schemas in TypeScript with a builder API (`z.object(...)`) and parses data against them. It does not take JSON Schema documents as input | https://zod.dev | inferred |
++| Zod 4's `z.toJSONSchema()` *outputs* JSON Schema, with draft-2020-12 as the default target (`target` option also allows draft-7) | https://zod.dev/json-schema | inferred |
++
++## Open questions
++
++1. Does Ajv's 2020-12 support have gaps? In particular, check `$dynamicRef`/`$dynamicAnchor`
++   and `unevaluated*` against https://ajv.js.org/json-schema.html and the Ajv test-suite results.
++2. Which Ajv version first shipped `Ajv2020`? I believe it was v8, but check the
++   changelog at https://github.com/ajv-validator/ajv/releases.
++3. Does the current Zod have a `fromJSONSchema`-style import, and is it complete? Even if it
++   does, it would convert schemas rather than act as a conformant 2020-12 validator.
++   Check https://zod.dev/json-schema.
++4. To close these: approve fetching those URLs, or run `npm i ajv zod` and read
++   `node_modules/ajv/dist/2020.d.ts` and `node_modules/zod/package.json` / source.

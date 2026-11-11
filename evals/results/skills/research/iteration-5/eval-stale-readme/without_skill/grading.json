@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md answers no to both questions; vendor/, src/ and package.json unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer rests on the installed source (vendor/tinyretry 3.1.0: defaults.js retryOn without 429, index.js parseRetryAfter using Number()) with file paths and the version",
+      "passed": true,
+      "evidence": "answer.md names version 3.1.0 from `vendor/tinyretry/package.json`, quotes `retryOn: [408, 502, 503, 504]` from `vendor/tinyretry/defaults.js`, and quotes `parseRetryAfter` from `index.js`, which uses `const seconds = Number(value);`."
+    },
+    {
+      "text": "The answer points out that the vendored README, the team wiki note (2025-10-14) and the 2.4.0 changelog entry describe behaviour the installed 3.1.0 code does not have",
+      "passed": false,
+      "evidence": "The answer covers the README ('The README is out of date') and the 2.4.0 CHANGELOG entry ('describes support that the 3.0.0 rewrite dropped'), but never mentions the team wiki note dated 2025-10-14."
+    },
+    {
+      "text": "The answer marks which conclusions were measured (e.g. ran the wrapper against a stub fetch) versus read, and states the consequence for src/client.js (opt in with retryOn including 429 and handle HTTP-date Retry-After itself)",
+      "passed": true,
+      "evidence": "Measured results are set apart from the code readings as separate 'Check:' lines (e.g. 'a fake fetch that always returns 429 ... was called **1** time'), and the answer ends with 'Pass `retryOn: [408, 429, 500, 502, 503, 504]`' and 'Handle HTTP-date `Retry-After` yourself'."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

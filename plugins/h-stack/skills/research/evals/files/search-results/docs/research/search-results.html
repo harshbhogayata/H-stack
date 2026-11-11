@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>node cpSync preserve mtime path.join absolute - Search</title></head>
+<body>
+<!-- saved 2026-11-03 -->
+<ol class="results">
+  <li class="result featured">
+    <h3><a href="https://devanswers.example/q/88213">fs.cpSync keeps timestamps? And path.join with absolute paths</a></h3>
+    <p class="meta">Accepted answer · 1,204 votes · 2021-08-19</p>
+    <p class="snippet">Yes. <code>fs.cp</code>/<code>fs.cpSync</code> behave like <code>cp -a</code>: mode and timestamps are preserved, so incremental tools keep working. Also note that <code>path.join</code> treats an absolute segment like <code>cd</code> does: <code>path.join('dist', '/assets')</code> returns <code>'/assets'</code>, so strip the leading slash first.</p>
+  </li>
+  <li class="result">
+    <h3><a href="https://blog.example/node-16-7-cp">Node 16.7 adds fs.cp (experimental)</a></h3>
+    <p class="meta">2021-08-18</p>
+    <p class="snippet">The new experimental copy API copies directories recursively. Options include <code>force</code>, <code>errorOnExist</code>, <code>preserveTimestamps</code> and <code>recursive</code>...</p>
+  </li>
+  <li class="result">
+    <h3><a href="https://nodejs.org/api/fs.html">File system | Node.js v22 Documentation</a></h3>
+    <p class="meta">nodejs.org</p>
+    <p class="snippet">fs.cpSync(src, dest[, options]) ... Synchronously copies the entire directory structure from src to dest, including subdirectories and files...</p>
+  </li>
+  <li class="result">
+    <h3><a href="https://forum.example/t/path-join-vs-resolve">path.join vs path.resolve</a></h3>
+    <p class="meta">2019-03-02</p>
+    <p class="snippet">One of these treats absolute segments as a new root, the other just concatenates. I always forget which...</p>
+  </li>
+</ol>
+</body>
+</html>

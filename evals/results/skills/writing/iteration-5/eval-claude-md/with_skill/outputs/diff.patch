@@ -1,0 +1,17 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..71bc708
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,11 @@
++# CLAUDE.md
++
++Team rules live in CONTRIBUTING.md and apply to agents too:
++
++@CONTRIBUTING.md
++
++## Gotchas
++
++- `Cents` in `src/money.ts` is a plain alias for `number`, so the compiler accepts `19.99` as `Cents`. Convert at the edge (`Math.round(dollars * 100)`) and keep every stored or computed amount an integer.
++- Before you push, run both `npm test` and `npm run lint`. CI runs lint too, and `npm test` alone does not.
++- `npm run dev` starts `src/index.ts`, which does not exist yet. Create it before relying on the dev server.

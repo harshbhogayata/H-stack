@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+      "passed": true,
+      "evidence": "Finding 1 cites `src/memoize.js:4`: `const key = args[0];` and says \"`memoize` builds its cache key from the first argument only, the SKU\". Its example is `quote([{ sku: 'CAP-03' }], 'USD')` followed by `quote([{ sku: 'CAP-03' }], 'EUR')`, which returns \"subtotal: 1500 ... total: 1800  wrong: should"
+    },
+    {
+      "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+      "passed": true,
+      "evidence": "Finding 1 is headed \"**Critical, confirmed**\" and the review says \"do not merge until finding 1 is fixed\". `var` is never mentioned. Math.round appears only under \"Checked and rejected\" (\"`Math.round` on whole cents is fine\"). The `item.qty == null` line is cited only as the place where qty goes unv"
+    },
+    {
+      "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+      "passed": true,
+      "evidence": "REVIEW.md has \"Checked and rejected\", \"Cleared\" and \"Not reviewed\" sections. They include \"Tax rounding\", \"Unsupported currency (e.g. `'JPY'`). Throws as intended\", \"A missing `qty` defaults to 1\", \"an unknown SKU throws\" and \"Who calls `quote`\"."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (src unchanged; at least one confirmed entry, and every confirmed request, replayed through handle(), returns another customer's invoice)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply traces the path end to end: requireOwner is registered with router.use('/invoices/:id'), but use() compiles the same exact-match ^...$ pattern as get(), so /invoices/:id/pdf never runs the ownership check and getInvoicePdf has none of its own",
+      "passed": true,
+      "evidence": "The findings say 'The ownership guard is mounted with router.use('/invoices/:id', requireOwner), and Router compiles every pattern to an anchored regex (^...$, src/router.js:13). So the guard matches only /invoices/<id> exactly... getInvoicePdf (src/invoices.js:25-29) checks only that the invoice ex"
+    },
+    {
+      "text": "GET /invoices/:id without a suffix is recorded as checked and not exploitable because requireOwner runs for it, rather than reported as an IDOR",
+      "passed": true,
+      "evidence": "findings.json has a rejected entry for GET /invoices/inv_1002 with the reason 'requireOwner runs first on the same anchored pattern and returns 403 forbidden.'"
+    },
+    {
+      "text": "The reply names the boundary (any signed-in customer can download any invoice PDF) and the smallest effective fix (prefix matching in use(), or an ownership check in getInvoicePdf or a shared loader)",
+      "passed": true,
+      "evidence": "The final message says 'Any signed-in customer can read another customer's invoice through the PDF endpoint' and 'To fix it, put an ownership check inside getInvoicePdf, or attach requireOwner to the /pdf route too.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

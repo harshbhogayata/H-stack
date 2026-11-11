@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no source or test files were changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+      "passed": true,
+      "evidence": "The plan says \"**Test command:** `make test` (runs `python3 -m pytest -q tests`)\" and names files such as `app/csv_export.py`, `tests/test_csv_export.py`, `app/web.py` and `tests/test_web.py`. It mentions no JavaScript or npm."
+    },
+    {
+      "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+      "passed": true,
+      "evidence": "The interfaces section defines `def invoices_to_csv(invoices: list[dict]) -> str` and `def format_amount(cents: int) -> str`, and says \"Invoice dicts use the keys from `app/invoices.py`: `id`, `amount_cents`, `issued_at`, `customer`.\""
+    },
+    {
+      "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+      "passed": true,
+      "evidence": "Task 1 lists `csv_field(\"Acme, Inc.\") == '\"Acme, Inc.\"'`, `csv_field('Say \"hi\"') == '\"Say \"\"hi\"\"\"'` and `csv_field('Say \"hi\", Inc') == '\"Say \"\"hi\"\", Inc\"'`."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,28 @@
+diff --git a/docs/research/2026-11-11-quickcache-ttl-unit.md b/docs/research/2026-11-11-quickcache-ttl-unit.md
+new file mode 100644
+index 0000000..ba956d7
+--- /dev/null
++++ b/docs/research/2026-11-11-quickcache-ttl-unit.md
+@@ -0,0 +1,22 @@
++Answer: ttl is in seconds
++
++# 2026-11-11 quickcache ttl unit
++
++**Question.** src/cache.js creates `new QuickCache({ ttl: 5000, max: 500 })` so that product entries expire after 5 seconds. Does that work with the quickcache version installed in this repo?
++
++**Answer.** No. The installed quickcache is 2.0.1, and in that version `ttl` is in **seconds**. `ttl: 5000` makes entries live for 5000 s (about 83 minutes), not 5 s. For a 5-second expiry, use `ttl: 5`.
++
++The saved docs in docs/vendor/ say `ttl` is in milliseconds, but they describe version 1.4.2, not the installed 2.0.1. Do not rely on them for this version.
++
++**Findings.**
++- Installed version is 2.0.1 (read): vendor/quickcache/package.json `"version":"2.0.1"`. package.json pins `quickcache` to `file:vendor/quickcache`.
++- 2.0.1 treats `ttl` as seconds (read): vendor/quickcache/index.js, constructor: `this.ttlMs = ttl * 1000;`. `set()` then uses `expires: Date.now() + this.ttlMs`.
++- The 2.0.1 README gives no unit (read): vendor/quickcache/README.md says only "`ttl` (time to live; `0` disables expiry)".
++- The saved docs cover 1.4.2 and say milliseconds (read): docs/vendor/quickcache-docs.html, header "Version 1.4.2 · Last updated April 2024", saved 2024-05-02. This is out of date for the installed version.
++- Behaviour confirmed by test (measured, Node v22.23.4, 2026-11-11): `new QuickCache({ ttl: 5000 })` gives `ttlMs = 5000000`. A set entry expires 5000 s later. With the clock moved forward 6 s, `get` still returns the value. Moved forward 5001 s, it returns `undefined`.
++
++**Recommendation.** In src/cache.js, change `ttl: 5000` to `ttl: 5` (inferred from the findings above). Also replace or label the saved 1.4 docs so nobody else follows the old unit.
++
++**Open questions.**
++- No 2.x changelog is vendored, so it is unknown whether the switch to seconds was an intentional breaking change in 2.0.0. The upstream docs at https://quickcache.example/docs were not checked.
++- `max: 500` is unaffected: LRU eviction in 2.0.1 works as the old docs describe (index.js `set()`).

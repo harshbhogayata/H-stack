@@ -1,0 +1,10 @@
+.invoice-summary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.invoice-summary__amount { font-variant-numeric: tabular-nums; font-size: 1.5rem; }
+.invoice-summary__due { color: var(--text-muted); }

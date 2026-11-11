@@ -1,0 +1,400 @@
+{
+  "metadata": {
+    "skill_name": "security-audit",
+    "skill_path": "plugins/h-stack/skills/security-audit",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.152Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "sqli-focused",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 22.699,
+        "tokens": 134958,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+          "passed": true,
+          "evidence": "The reply cites `users.js:5` with the concatenated query `\"...WHERE name LIKE '%\" + name + \"%'\"` and says \"`req.query.name` comes straight from the query string. Nothing checks, escapes or binds it before it is pasted into the SQL.\""
+        },
+        {
+          "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+          "passed": true,
+          "evidence": "The reply notes that \"`db.query(sql, params)` already supports\" bound parameters (`db.js:1`), and its fix calls `db.query(\"SELECT ... WHERE name LIKE ? ESCAPE '\\\\'\", [`%${escaped}%`])`; it also adds type validation and LIKE-wildcard escaping, so it goes beyond the minimal fix but still contains it."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "sqli-focused",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 15.163,
+        "tokens": 154267,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+          "passed": true,
+          "evidence": "The reply says \"`users.js:5` builds the query by pasting `req.query.name` straight into the SQL string\" and quotes the concatenated `LIKE '%\" + name + \"%'` query."
+        },
+        {
+          "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+          "passed": false,
+          "evidence": "The reply does use db.query's params argument (`db.query(\"... LIKE ? ESCAPE '\\\\' LIMIT 50\", [`%${escaped}%`])`), but it also adds a type check, wildcard escaping and a new `LIMIT 50`, so it is not the smallest fix."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "path-traversal",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.732,
+        "tokens": 87320,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+          "passed": true,
+          "evidence": "The reply says \"`?file=../../../etc/passwd` becomes `/srv/app/uploads/../../../etc/passwd`, which resolves to `/etc/passwd`\" and \"if `name` is absolute, `os.path.join` throws away `UPLOADS` entirely.\""
+        },
+        {
+          "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+          "passed": true,
+          "evidence": "The reply says \"anyone can read any file the app process has permission to read\" and \"anyone (or any logged-in user) can download every other user's uploads\". That covers both files outside uploads and other users' files, with an attacker group that includes any logged-in user."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "path-traversal",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.815,
+        "tokens": 116248,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+          "passed": true,
+          "evidence": "The reply says `/download?file=../../../etc/passwd` resolves to `/etc/passwd` and that `os.path.join` throws away the earlier parts when a later part is absolute, so `/download?file=/etc/passwd` gives `/etc/passwd`."
+        },
+        {
+          "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+          "passed": true,
+          "evidence": "The reply says anyone can 'read any file on the server that the app's process can read' and that 'any user who can guess or list a filename can download other users' uploads'. It frames the attacker as an anonymous visitor rather than a logged-in user, which is a broader version of the same boundary"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-no-manufactured",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 18.684,
+        "tokens": 134429,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+          "passed": true,
+          "evidence": "The reply opens with \"No confirmed vulnerabilities in `hash.js`.\" and puts the unsalted-hash and Unicode-surrogate points under \"Observations, not findings\", saying they matter only in certain cases (low-entropy secrets, or tokens that contain such characters)."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-no-manufactured",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 18.937,
+        "tokens": 116045,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+          "passed": true,
+          "evidence": "The agent states \"I found no exploitable vulnerabilities in `hash.js`\" and puts its other points under \"Minor points (hardening, not exploitable)\", so they aren't presented as vulnerabilities."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "invoice-idor",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 42.577,
+        "tokens": 290103,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (src unchanged; at least one confirmed entry, and every confirmed request, replayed through handle(), returns another customer's invoice)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply traces the path end to end: requireOwner is registered with router.use('/invoices/:id'), but use() compiles the same exact-match ^...$ pattern as get(), so /invoices/:id/pdf never runs the ownership check and getInvoicePdf has none of its own",
+          "passed": true,
+          "evidence": "The reply cites `src/app.js:6` for the requireOwner registration on '/invoices/:id' and says the router turns 'every pattern into a regex that must match the whole path (`^...$`, `src/router.js:13`)', so the check 'never [runs] for `/invoices/inv_1002/pdf`'; it adds that getInvoicePdf 'only checks t"
+        },
+        {
+          "text": "GET /invoices/:id without a suffix is recorded as checked and not exploitable because requireOwner runs for it, rather than reported as an IDOR",
+          "passed": true,
+          "evidence": "findings.json records GET /invoices/inv_1002 as 'rejected', explaining that 'requireOwner ... matches this exact path and returns 403 for Bob's invoice before getInvoice runs. Verified: 403 forbidden.'"
+        },
+        {
+          "text": "The reply names the boundary (any signed-in customer can download any invoice PDF) and the smallest effective fix (prefix matching in use(), or an ownership check in getInvoicePdf or a shared loader)",
+          "passed": true,
+          "evidence": "The reply answers 'Yes' to whether a signed-in customer can read another customer's invoices and shows the check is skipped for every /pdf path; it then gives the fix: 'add an `invoice.customer === req.user.id` check in `getInvoicePdf`, or make the ownership check apply to every path under `/invoice"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "invoice-idor",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 33.088,
+        "tokens": 244369,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (src unchanged; at least one confirmed entry, and every confirmed request, replayed through handle(), returns another customer's invoice)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply traces the path end to end: requireOwner is registered with router.use('/invoices/:id'), but use() compiles the same exact-match ^...$ pattern as get(), so /invoices/:id/pdf never runs the ownership check and getInvoicePdf has none of its own",
+          "passed": true,
+          "evidence": "The findings say 'The ownership guard is mounted with router.use('/invoices/:id', requireOwner), and Router compiles every pattern to an anchored regex (^...$, src/router.js:13). So the guard matches only /invoices/<id> exactly... getInvoicePdf (src/invoices.js:25-29) checks only that the invoice ex"
+        },
+        {
+          "text": "GET /invoices/:id without a suffix is recorded as checked and not exploitable because requireOwner runs for it, rather than reported as an IDOR",
+          "passed": true,
+          "evidence": "findings.json has a rejected entry for GET /invoices/inv_1002 with the reason 'requireOwner runs first on the same anchored pattern and returns 403 forbidden.'"
+        },
+        {
+          "text": "The reply names the boundary (any signed-in customer can download any invoice PDF) and the smallest effective fix (prefix matching in use(), or an ownership check in getInvoicePdf or a shared loader)",
+          "passed": true,
+          "evidence": "The final message says 'Any signed-in customer can read another customer's invoice through the PDF endpoint' and 'To fix it, put an ownership check inside getInvoicePdf, or attach requireOwner to the /pdf route too.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "shell-validation",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 31.267,
+        "tokens": 284621,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (app and config unchanged; at least one confirmed entry, and every confirmed request, replayed with subprocess mocked, either puts shell metacharacters into a shell=True command or returns config/deploy.env)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies command injection in branch_log: BRANCH_RE.match anchors only the start, so a branch such as \"main;id\" passes validation and reaches subprocess.run with shell=True",
+          "passed": true,
+          "evidence": "The reply says \"the branch-name check (`BRANCH_RE`) only looks at the start of the value... so `\"main; id\"` gets through\" and that the value goes into a git log command run with `shell=True`. findings.json confirms this at app/tasks.py:22 with subprocess.run(shell=True)."
+        },
+        {
+          "text": "show_commit (fullmatch on a hex sha), read_report (realpath plus commonpath) and the literal_eval deploy filter are recorded as checked and rejected, not reported as vulnerabilities",
+          "passed": true,
+          "evidence": "findings.json has three \"rejected\" entries. /api/commit cites \"SHA_RE.fullmatch\". /api/report cites \"os.path.realpath ... and requires commonpath\". /api/deploys cites \"ast.literal_eval\"."
+        },
+        {
+          "text": "The reply names the boundary (any signed-in employee runs commands as the service account) and the smallest effective fix (fullmatch, or an argument list without shell=True)",
+          "passed": true,
+          "evidence": "The reply states \"Any signed-in employee can run any shell command as the service account\". The fix it gives is to \"check the whole value against a strict branch-name pattern\" and \"pass git its arguments as a list instead of through the shell\". findings.json says \"validate with fullmatch\" and \"argv "
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "shell-validation",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 36.447,
+        "tokens": 322485,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (app and config unchanged; at least one confirmed entry, and every confirmed request, replayed with subprocess mocked, either puts shell metacharacters into a shell=True command or returns config/deploy.env)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies command injection in branch_log: BRANCH_RE.match anchors only the start, so a branch such as \"main;id\" passes validation and reaches subprocess.run with shell=True",
+          "passed": true,
+          "evidence": "findings.json marks /api/log as confirmed with branch \"main; id; cat /etc/passwd\" and explains that \"BRANCH_RE (line 7) is applied with re.match and has no end anchor\" and that the value \"is run by _git with subprocess.run(shell=True) (line 11)\"."
+        },
+        {
+          "text": "show_commit (fullmatch on a hex sha), read_report (realpath plus commonpath) and the literal_eval deploy filter are recorded as checked and rejected, not reported as vulnerabilities",
+          "passed": true,
+          "evidence": "findings.json has three \"rejected\" entries: show_commit (\"is_sha checks the value with SHA_RE.fullmatch\"), read_report (\"os.path.realpath ... os.path.commonpath\"), and /api/deploys (\"The filter goes through ast.literal_eval, not eval\")."
+        },
+        {
+          "text": "The reply names the boundary (any signed-in employee runs commands as the service account) and the smallest effective fix (fullmatch, or an argument list without shell=True)",
+          "passed": true,
+          "evidence": "The final message says \"any employee can run commands as the service account\" and gives the fix: \"either check the whole value (use `fullmatch`, or end the pattern with `$`) or stop using the shell: `subprocess.run([\"git\", \"log\", ...])`\"."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 27.392,
+        "stddev": 8.666,
+        "min": 18.684,
+        "max": 42.577
+      },
+      "tokens": {
+        "mean": 186286.2,
+        "stddev": 84339.46,
+        "min": 87320,
+        "max": 290103
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.933,
+        "stddev": 0.133,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 24.29,
+        "stddev": 8.707,
+        "min": 15.163,
+        "max": 36.447
+      },
+      "tokens": {
+        "mean": 190682.8,
+        "stddev": 80859.729,
+        "min": 116045,
+        "max": 322485
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.07",
+      "time_seconds": "+3.1",
+      "tokens": "-4397"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

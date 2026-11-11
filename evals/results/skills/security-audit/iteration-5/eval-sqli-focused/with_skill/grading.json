@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+      "passed": true,
+      "evidence": "The reply cites `users.js:5` with the concatenated query `\"...WHERE name LIKE '%\" + name + \"%'\"` and says \"`req.query.name` comes straight from the query string. Nothing checks, escapes or binds it before it is pasted into the SQL.\""
+    },
+    {
+      "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+      "passed": true,
+      "evidence": "The reply notes that \"`db.query(sql, params)` already supports\" bound parameters (`db.js:1`), and its fix calls `db.query(\"SELECT ... WHERE name LIKE ? ESCAPE '\\\\'\", [`%${escaped}%`])`; it also adds type validation and LIKE-wildcard escaping, so it goes beyond the minimal fix but still contains it."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

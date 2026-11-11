@@ -1,0 +1,18 @@
+diff --git a/ISSUE.md b/ISSUE.md
+new file mode 100644
+index 0000000..e660448
+--- /dev/null
++++ b/ISSUE.md
+@@ -0,0 +1,12 @@
++# [tdd] Asks to agree seams even after the user said "just build it"
++
++**Skill:** tdd
++**File / section:** SKILL.md, the guidance on agreeing seams with the user (exact heading not confirmed)
++
++**Expected:** When the user has already said "just build it", the skill should go ahead, pick reasonable seams itself and write down the assumptions it made.
++
++**Actual:** The skill told the agent to agree seams with the user first, so the agent asked three clarifying questions even though the user had already said to just build it.
++
++**Suggested fix:** Before the seam-agreement step, check whether the user has already said to go ahead (for example "just build it" or "don't ask, just do it"). If they have, skip the questions and list the seams and assumptions in the output so the user can review them afterwards.
++
++_Drafted by H-Stack; the user approved this exact text before posting._

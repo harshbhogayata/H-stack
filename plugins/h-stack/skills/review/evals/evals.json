@@ -64,6 +64,19 @@
         "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
         "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file"
       ]
+    },
+    {
+      "id": 6,
+      "eval_name": "shipping-spec",
+      "prompt": "Review checkout.js against SPEC.md before we merge. Write REVIEW.md with each finding's file:line, severity, and a concrete input with expected and actual results. Don't change the code.",
+      "files": ["evals/files/shipping-spec/"],
+      "check": "test -z \"$(git status --porcelain -- checkout.js test.js SPEC.md package.json)\" && test -s REVIEW.md && grep -Eq 'checkout\\.js[^0-9]{0,12}(1[6-8])([^0-9]|$)' REVIEW.md",
+      "expectations": [
+        "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+        "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+        "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+        "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check"
+      ]
     }
   ]
 }

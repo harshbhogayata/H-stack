@@ -1,0 +1,86 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..7bf1a4c
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,80 @@
++# Review: `src/pricing.js`
++
++Scope: `src/pricing.js` and what it uses (`src/memoize.js`, `src/catalogue.js`), plus `test/pricing.test.js`. No code was changed.
++Method: I read every line and ran each finding below with `node`. Pricing is money code, so two separate reviewers also went over it without seeing my notes: one on correctness, one on input validation. Their results are folded in below.
++Test suite: `npm test` passes, 3 of 3. It does not catch finding 1 (see the note there).
++
++**Recommendation: do not merge until finding 1 is fixed.** Finding 2 should be fixed too, or you should confirm that the currency value is always checked before it reaches `quote`.
++
++---
++
++## 1. The price cache ignores currency, so customers are charged another currency's price. **Critical, confirmed**
++
++- `src/memoize.js:4`: `const key = args[0];`
++- `src/pricing.js:6`: `const priceFor = memoize(basePrice);`, used at `src/pricing.js:13`: `subtotal += priceFor(item.sku, currency) * qty;`
++
++`memoize` builds its cache key from the first argument only, the SKU. `priceFor(sku, currency)` stores the first price it looks up for a SKU and then returns that same number for every currency. The cache lasts for the whole process, so one request decides the price later requests get.
++
++Example (fresh process):
++```js
++quote([{ sku: 'CAP-03' }], 'USD') // { subtotal: 1500, tax: 0,   total: 1500 }  correct
++quote([{ sku: 'CAP-03' }], 'EUR') // { subtotal: 1500, tax: 300, total: 1800 }  wrong: should be 1400 / 280 / 1680
++```
++In the other order, EUR first and then USD, USD customers are charged 1400 instead of 1500. Also, after EUR has been quoted, a GBP quote for TSHIRT-01 returns 1850 instead of 1600. Every SKU sold in more than one currency is affected. Which price is wrong depends on which request comes first after a deploy.
++
++Why the tests miss it: each test uses a different SKU (TSHIRT/MUG for USD, CAP for EUR), so no SKU is ever priced in two currencies in one run. A test that quotes the same SKU in USD and then EUR fails right away.
++
++## 2. Names inherited from `Object` pass the currency check and make that SKU's quotes NaN for the rest of the process. **Major, confirmed**
++
++- `src/pricing.js:9`: ``if (!(currency in TAX_RATE)) throw new Error(`unsupported currency: ${currency}`);``
++- also `src/catalogue.js:10`: ``if (!(currency in prices)) throw new Error(`no ${currency} price for ${sku}`);``
++
++The `in` operator also looks at properties every object inherits, so `'toString'`, `'constructor'`, `'__proto__'` and `'hasOwnProperty'` all pass both checks. `basePrice` then returns a function instead of a number, and the quote comes back as `NaN` instead of an error. Because of finding 1, that `NaN` is stored in the cache for the SKU, so every later quote for that SKU in any currency is also `NaN`:
++
++```js
++quote([{ sku: 'MUG-02' }], 'toString') // { subtotal: NaN, tax: NaN, total: NaN }  should throw "unsupported currency"
++quote([{ sku: 'MUG-02' }], 'USD')      // { subtotal: NaN, tax: NaN, total: NaN }  later requests are affected too
++quote([{ sku: 'MUG-02' }], 'GBP')      // NaN
++```
++How serious this is depends on where `currency` comes from. If it comes from a request parameter, any client can break pricing for any SKU until the process restarts, which makes this critical. If it only ever comes from a fixed internal list, it is minor. Checking with `Object.hasOwn(TAX_RATE, currency)` and `Object.hasOwn(prices, currency)` closes it.
++
++## 3. `qty` is never checked: negative amounts, non-numbers and fractions are priced anyway. **Major if `qty` comes from the client, minor otherwise. Confirmed.**
++
++- `src/pricing.js:12`: `const qty = item.qty == null ? 1 : item.qty;`
++
++Any value is multiplied straight into the subtotal.
++
++```js
++quote([{ sku: 'TSHIRT-01', qty: 3 }, { sku: 'MUG-02', qty: -5 }]) // total: 0         a negative line cancels a 6000 order
++quote([{ sku: 'MUG-02', qty: '' }])                             // total: 0         an empty form field makes the item free
++quote([{ sku: 'MUG-02', qty: 'abc' }])                          // total: NaN
++quote([{ sku: 'CAP-03', qty: Infinity }])                       // subtotal: Infinity, total: NaN
++quote([{ sku: 'TSHIRT-01', qty: 0.333 }], 'EUR')                // subtotal 616.0500000000001, total 739.05...: tax is rounded but subtotal and total are not
++```
++(`qty: '2'` happens to work because JavaScript converts the string to a number.) If the cart comes from the browser, a negative quantity lets a customer lower their total, down to zero or below. An empty `qty` makes an item free. Requiring a positive safe integer (`Number.isSafeInteger(qty) && qty > 0`) fixes all of these.
++
++## 4. A malformed cart throws a raw `TypeError` instead of a validation error. **Minor, confirmed**
++
++- `src/pricing.js:11`: `for (const item of cart) {`
++
++`quote([null])` throws `TypeError: Cannot read properties of null (reading 'qty')`. `quote({})` throws "cart is not iterable". `quote([{}])` throws `unknown sku: undefined`. No wrong amount is produced, but the errors are unclear, and they could leak through as 500 errors if the caller doesn't handle them.
++
++---
++
++## Checked and rejected
++- **Thrown errors stored in the cache.** No: when `basePrice` throws, `cache.set` is never called. An unknown SKU throws on every call and is never cached.
++- **Tax rounding.** `Math.round` on whole cents is fine for positive subtotals. It only behaves oddly with negative subtotals, which come from finding 3.
++- **Unsupported currency (e.g. `'JPY'`).** Throws as intended (and is covered by a test). `null` and lowercase `'usd'` are rejected as well.
++- **`'__proto__'` or `'constructor'` used as a SKU.** The catalogue lookup finds an inherited object, but the currency check then throws `no USD price`, so nothing is mispriced.
++
++## Cleared
++- `TAX_RATE` values (USD 0, EUR/GBP 0.2) and how they are applied (`subtotal * rate`, rounded once over the whole order).
++- `catalogue.basePrice`: an unknown SKU throws, and a missing currency throws, apart from the inherited names in finding 2.
++- A missing `qty` defaults to 1; `qty: 0` gives 0.
++- An empty cart gives `{ subtotal: 0, tax: 0, total: 0 }`.
++- `total = subtotal + tax` is computed correctly from its inputs.
++
++## Not reviewed
++- Who calls `quote`, and whether `currency` and `qty` are checked before they reach it. Nothing in this repo calls `quote`, and this decides how serious findings 2 and 3 are.
++- Memory and performance: the memoize cache never evicts entries. With a fixed catalogue this is minor; once finding 1 is fixed, the key will include currency.
++- Whether 20% is the right VAT for EUR in every market. This is a business decision, and no spec was provided.

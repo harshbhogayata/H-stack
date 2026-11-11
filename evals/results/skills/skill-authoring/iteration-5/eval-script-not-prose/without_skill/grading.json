@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (a script or package script was added)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The result is an executable script (or package script) that runs the steps in order and stops when the bundle-size check fails, rather than only a prose checklist or skill text",
+      "passed": true,
+      "evidence": "The diff adds `\"release\": \"bash scripts/release.sh\"` to package.json, and the new script uses `set -euo pipefail` to run build, then `node scripts/check-bundle-size.js --max-kb \"${MAX_KB}\"`, then `git tag`, then changelog, so a failed size check exits before tagging; the failure path was not tested "
+    },
+    {
+      "text": "The script keeps the defaults that worked (--max-kb 250, tag from package.json version)",
+      "passed": true,
+      "evidence": "The script sets `MAX_KB=\"${MAX_KB:-250}\"`, `VERSION=\"$(node -p 'require(\"./package.json\").version')\"` and `TAG=\"v${VERSION}\"`, so it keeps the 250 KB default and the package.json version tag."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

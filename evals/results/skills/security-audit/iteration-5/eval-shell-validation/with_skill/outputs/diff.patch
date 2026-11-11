@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..f01cd79
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; id"}},
++    "file": "app/tasks.py",
++    "line": 22,
++    "why": "BRANCH_RE is only start-anchored and checked with re.match, so any value beginning with an alphanumeric passes (verified: BRANCH_RE.match('main; id') is truthy). The value is interpolated into an f-string run by subprocess.run(shell=True) at app/tasks.py:11/24, so any signed-in employee can run arbitrary shell commands as the API service account in /srv/ops/repo (e.g. reading config/deploy.env's DEPLOY_TOKEN). Fix: validate with fullmatch against a strict ref pattern, reject leading '-', and call git with an argv list (shell=False) plus '--' separator."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abc1234; id"}},
++    "file": "app/validate.py",
++    "line": 7,
++    "why": "Same shell=True sink, but is_sha uses SHA_RE.fullmatch, so only 7-40 lowercase hex characters are accepted; metacharacters and trailing newlines are rejected (verified is_sha('abc1234; id') and is_sha('abc1234\\n') are False). No injection."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "read_report resolves the path with os.path.realpath (following symlinks) and requires commonpath with the reports directory; '../' traversal, absolute paths like '/etc/passwd', and '..' all raise PermissionError (verified locally). Only files under app/reports are readable, which is the intended feature."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "The filter is parsed with ast.literal_eval, which only accepts Python literals and does not evaluate calls or names (verified: raises ValueError). Results come from a static in-memory DEPLOYS list that every employee may already view, so no code execution or data exposure."
++  }
++]

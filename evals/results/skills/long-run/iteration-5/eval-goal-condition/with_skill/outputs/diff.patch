@@ -1,0 +1,151 @@
+diff --git a/check.mjs b/check.mjs
+new file mode 100644
+index 0000000..e1817d8
+--- /dev/null
++++ b/check.mjs
+@@ -0,0 +1,83 @@
++#!/usr/bin/env node
++// Acceptance checks for SPEC.md. Do NOT edit during the /goal run.
++// Usage: node check.mjs            -> run all features
++//        node check.mjs F2         -> run one feature
++// Each feature runs in a fresh temp dir holding a copy of todo.js and todos.json = [].
++// Last line is "RESULT: <passed>/<total> PASS"; exit 0 only if all selected features pass.
++import { execFileSync } from 'node:child_process';
++import { mkdtempSync, copyFileSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join, dirname } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++const ROOT = dirname(fileURLToPath(import.meta.url));
++const SRC = join(ROOT, 'todo.js');
++
++function sandbox() {
++  if (!existsSync(SRC)) throw new Error('todo.js does not exist');
++  const dir = mkdtempSync(join(tmpdir(), 'todo-check-'));
++  copyFileSync(SRC, join(dir, 'todo.js'));
++  writeFileSync(join(dir, 'todos.json'), '[]\n');
++  const run = (...args) =>
++    execFileSync('node', ['todo.js', ...args], { cwd: dir, encoding: 'utf8', timeout: 5000 }).trim();
++  const store = () => JSON.parse(readFileSync(join(dir, 'todos.json'), 'utf8'));
++  const text = (t) => (typeof t === 'string' ? t : t && t.text);
++  const lines = (s) => s.split('\n').map((l) => l.trim()).filter(Boolean);
++  return { dir, run, store, text, lines, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
++}
++
++function expect(cond, msg) { if (!cond) throw new Error(msg); }
++
++const FEATURES = {
++  F1: ['add appends to todos.json and prints "added: x"', (s) => {
++    const out1 = s.run('add', 'buy milk');
++    expect(out1 === 'added: buy milk', `add stdout was ${JSON.stringify(out1)}, want "added: buy milk"`);
++    const out2 = s.run('add', 'walk dog');
++    expect(out2 === 'added: walk dog', `second add stdout was ${JSON.stringify(out2)}`);
++    const st = s.store();
++    expect(Array.isArray(st), 'todos.json is not a JSON array');
++    expect(st.length === 2, `todos.json has ${st.length} items, want 2`);
++    expect(s.text(st[0]) === 'buy milk' && s.text(st[1]) === 'walk dog',
++      `todos.json order/content wrong: ${JSON.stringify(st)}`);
++  }],
++  F2: ['list prints todos numbered from 1', (s) => {
++    s.run('list'); // empty list must not crash
++    s.run('add', 'alpha');
++    s.run('add', 'beta');
++    const ls = s.lines(s.run('list'));
++    expect(ls.length === 2, `list printed ${ls.length} lines, want 2: ${JSON.stringify(ls)}`);
++    expect(/^1\D.*alpha$/.test(ls[0]), `line 1 was ${JSON.stringify(ls[0])}, want number 1 then "alpha"`);
++    expect(/^2\D.*beta$/.test(ls[1]), `line 2 was ${JSON.stringify(ls[1])}, want number 2 then "beta"`);
++  }],
++  F3: ['done N removes item N and prints "done: <text>"', (s) => {
++    s.run('add', 'alpha');
++    s.run('add', 'beta');
++    const out = s.run('done', '1');
++    expect(out === 'done: alpha', `done stdout was ${JSON.stringify(out)}, want "done: alpha"`);
++    const st = s.store();
++    expect(st.length === 1 && s.text(st[0]) === 'beta', `todos.json after done: ${JSON.stringify(st)}`);
++    const ls = s.lines(s.run('list'));
++    expect(ls.length === 1 && /^1\D.*beta$/.test(ls[0]), `list after done: ${JSON.stringify(ls)}`);
++  }],
++};
++
++const only = process.argv[2];
++const ids = only ? [only] : Object.keys(FEATURES);
++let passed = 0;
++for (const id of ids) {
++  const f = FEATURES[id];
++  if (!f) { console.log(`${id} FAIL unknown feature`); continue; }
++  let s;
++  try {
++    s = sandbox();
++    f[1](s);
++    passed++;
++    console.log(`${id} PASS ${f[0]}`);
++  } catch (e) {
++    console.log(`${id} FAIL ${f[0]} :: ${String(e.message).split('\n')[0]}`);
++  } finally {
++    s?.cleanup();
++  }
++}
++console.log(`RESULT: ${passed}/${ids.length} PASS`);
++process.exit(passed === ids.length ? 0 : 1);
+diff --git a/features.json b/features.json
+new file mode 100644
+index 0000000..429af7a
+--- /dev/null
++++ b/features.json
+@@ -0,0 +1,34 @@
++{
++  "spec": "SPEC.md",
++  "target": "todo.js",
++  "check_all": "node check.mjs",
++  "done_when": "node check.mjs exits 0 and its last line is \"RESULT: 3/3 PASS\"",
++  "rules": [
++    "Flip passes to true only after `node check.mjs <id>` passes on a run made after the last edit to todo.js.",
++    "Do not edit check.mjs, SPEC.md, or the id/behaviour/check fields below.",
++    "Leave todos.json in the repo as [] (checks run in temp copies)."
++  ],
++  "features": [
++    {
++      "id": "F1",
++      "spec_item": 1,
++      "behaviour": "`node todo.js add \"x\"` appends x to todos.json and prints \"added: x\"",
++      "check": "node check.mjs F1",
++      "passes": false
++    },
++    {
++      "id": "F2",
++      "spec_item": 2,
++      "behaviour": "`node todo.js list` prints todos numbered from 1 (one per line, number then text; empty list exits 0)",
++      "check": "node check.mjs F2",
++      "passes": false
++    },
++    {
++      "id": "F3",
++      "spec_item": 3,
++      "behaviour": "`node todo.js done 1` removes item 1 from todos.json and prints \"done: <text>\"; remaining items renumber from 1",
++      "check": "node check.mjs F3",
++      "passes": false
++    }
++  ]
++}
+diff --git a/progress.md b/progress.md
+new file mode 100644
+index 0000000..d97ddf6
+--- /dev/null
++++ b/progress.md
+@@ -0,0 +1,16 @@
++# Progress — Todo CLI (SPEC.md → todo.js)
++
++Goal: implement SPEC.md in todo.js until `node check.mjs` prints `RESULT: 3/3 PASS` and exits 0.
++
++## State
++- F1 add: not started
++- F2 list: not started
++- F3 done: not started
++
++## Notes / decisions
++- todo.js does not exist yet; all checks fail with "todo.js does not exist" (verified at setup).
++- Spec does not fix the `list` line format; check accepts number, then any non-digit separator, then the text (e.g. `1. alpha`).
++- todos.json items may be strings or objects with a `text` field.
++
++## Blocked (only after the same failure persists 3 rounds)
++- none

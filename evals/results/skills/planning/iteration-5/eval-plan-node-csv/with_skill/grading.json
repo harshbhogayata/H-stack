@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no source or test files were changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The plan names files that exist in this repo (src/server.js, src/invoices.js, test/) and uses the project's own test command (npm test or node --test), not an invented runner such as jest or pytest",
+      "passed": true,
+      "evidence": "The plan says to \"modify `src/server.js` (add the import at line 2 and the route branch between lines 8 and 10...)\", cites \"`src/invoices.js:1-4`\", adds tests under `test/`, and runs \"Run `npm test`\" with `node:test`, so no invented runner is used."
+    },
+    {
+      "text": "The plan has an interfaces section or equivalent giving an exact function signature for the CSV conversion (name, parameters, return type)",
+      "passed": true,
+      "evidence": "Its \"Interfaces\" section lists `export function invoicesToCsv(invoices: Array<{id, amountCents, issuedAt, customer}>): string`, alongside `formatAmount(cents: number): string` and `csvField(value: string): string`."
+    },
+    {
+      "text": "The plan includes a failing-test-first step that uses the spec's exact values (the header row id,amount,issued_at,customer and 1250 -> 12.50 or the quoting of 'Acme, Inc.')",
+      "passed": true,
+      "evidence": "Task 1 step 1 says \"Write the failing tests\" with `1250→\"12.50\"`, `\"Acme, Inc.\"→\"\\\"Acme, Inc.\\\"\"`, and expected output `'id,amount,issued_at,customer\\ninv-1,12.50,2026-01-31,\"Acme, Inc.\"\\n...'`, and step 2 expects `npm test` to fail with `ERR_MODULE_NOT_FOUND`."
+    },
+    {
+      "text": "The final message asks the user to review or confirm the plan before implementation",
+      "passed": false,
+      "evidence": "The message only says \"Nothing has been changed in the repo\" and \"I'll go with the default for each unless you say otherwise\" about the open questions, then cuts off at \"Line endings: I'm planning `\\n`\", and it never clearly asks the user to review or approve the whole plan before implementing."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  }
+}

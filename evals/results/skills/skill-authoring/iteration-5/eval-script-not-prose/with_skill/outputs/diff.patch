@@ -1,0 +1,151 @@
+diff --git a/NOTES.md b/NOTES.md
+index bc0dfbe..9e22641 100644
+--- a/NOTES.md
++++ b/NOTES.md
+@@ -4,3 +4,6 @@ We did this release dance three times this month, each time the same:
+ 3. git tag v$(node -p "require(\"./package.json\").version")
+ 4. npm run changelog -- --since-last-tag
+ It failed once when step 2 was skipped and a 400 KB bundle shipped.
++
++Now automated: `npm run release` (add `-- --dry-run` to preview, `-- --max-kb N` to change the limit).
++The size check always runs and a failure stops the release before tagging. Tests: `npm run test:release`.
+diff --git a/package.json b/package.json
+index de3dfa5..369e642 100644
+--- a/package.json
++++ b/package.json
+@@ -1 +1 @@
+-{"name":"app","version":"3.2.0","scripts":{"build":"echo build","changelog":"echo changelog"}}
++{"name":"app","version":"3.2.0","scripts":{"build":"echo build","changelog":"echo changelog","release":"node scripts/release.mjs","test:release":"node --test scripts/release.test.mjs"}}
+diff --git a/scripts/release.mjs b/scripts/release.mjs
+new file mode 100644
+index 0000000..c034092
+--- /dev/null
++++ b/scripts/release.mjs
+@@ -0,0 +1,48 @@
++#!/usr/bin/env node
++// Release: build -> bundle-size gate -> tag -> changelog.
++// Replaces the manual steps in NOTES.md. The size check is not skippable:
++// a skipped check once shipped a 400 KB bundle.
++//
++// Usage: node scripts/release.mjs [--max-kb 250] [--dry-run]
++import { spawnSync } from "node:child_process";
++import { readFileSync } from "node:fs";
++
++const args = process.argv.slice(2);
++const dryRun = args.includes("--dry-run");
++const maxIdx = args.indexOf("--max-kb");
++const maxKb = maxIdx >= 0 ? args[maxIdx + 1] : "250";
++if (!/^\d+$/.test(maxKb ?? "")) {
++  console.error(`release: --max-kb needs a whole number, got "${maxKb}"`);
++  process.exit(2);
++}
++
++const { version } = JSON.parse(readFileSync("package.json", "utf8"));
++const tag = `v${version}`;
++
++function run(cmd, cmdArgs, { capture = false } = {}) {
++  console.log(`release: $ ${[cmd, ...cmdArgs].join(" ")}`);
++  if (dryRun) return "";
++  const r = spawnSync(cmd, cmdArgs, { stdio: capture ? "pipe" : "inherit", encoding: "utf8" });
++  if (r.status !== 0) {
++    console.error(`release: step failed (exit ${r.status ?? r.signal}); stopping before anything later runs.`);
++    process.exit(1);
++  }
++  return r.stdout ?? "";
++}
++
++// Refuse up front if the tag already exists, so nothing is rebuilt for nothing.
++const existing = spawnSync("git", ["tag", "--list", tag], { encoding: "utf8" });
++if (existing.status !== 0) {
++  console.error("release: not a git repository?");
++  process.exit(1);
++}
++if (existing.stdout.trim() === tag) {
++  console.error(`release: tag ${tag} already exists; bump the version in package.json first.`);
++  process.exit(1);
++}
++
++run("npm", ["run", "build"]);
++run("node", ["scripts/check-bundle-size.js", "--max-kb", maxKb]);
++run("git", ["tag", tag]);
++run("npm", ["run", "changelog", "--", "--since-last-tag"]);
++console.log(`release: ${dryRun ? "dry run of" : "done,"} ${tag}`);
+diff --git a/scripts/release.test.mjs b/scripts/release.test.mjs
+new file mode 100644
+index 0000000..ce89257
+--- /dev/null
++++ b/scripts/release.test.mjs
+@@ -0,0 +1,73 @@
++// Run: node --test scripts/
++// Each case runs release.mjs inside a throwaway git repo copy, never this one.
++import { test } from "node:test";
++import assert from "node:assert/strict";
++import { spawnSync } from "node:child_process";
++import { mkdtempSync, writeFileSync, mkdirSync, copyFileSync, readFileSync } from "node:fs";
++import { tmpdir } from "node:os";
++import { join, dirname } from "node:path";
++import { fileURLToPath } from "node:url";
++
++const here = dirname(fileURLToPath(import.meta.url));
++
++function fixture({ sizeCheckExit = 0 } = {}) {
++  const dir = mkdtempSync(join(tmpdir(), "release-test-"));
++  mkdirSync(join(dir, "scripts"));
++  copyFileSync(join(here, "release.mjs"), join(dir, "scripts", "release.mjs"));
++  writeFileSync(join(dir, "package.json"), JSON.stringify({
++    name: "t", version: "1.2.3",
++    scripts: { build: "echo built > built.txt", changelog: "echo changelog > changelog.txt" },
++  }));
++  writeFileSync(join(dir, "scripts", "check-bundle-size.js"),
++    `require("fs").writeFileSync("size-args.txt", process.argv.slice(2).join(" ")); process.exit(${sizeCheckExit});`);
++  const git = (...a) => spawnSync("git", a, { cwd: dir, encoding: "utf8" });
++  git("init", "-q");
++  git("-c", "user.email=t@t", "-c", "user.name=t", "add", ".");
++  git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init");
++  const release = (...a) => spawnSync("node", ["scripts/release.mjs", ...a], { cwd: dir, encoding: "utf8" });
++  const tags = () => git("tag", "--list").stdout.trim();
++  const read = (f) => { try { return readFileSync(join(dir, f), "utf8").trim(); } catch { return null; } };
++  return { dir, release, tags, read };
++}
++
++test("happy path: builds, checks size at 250 KB, tags, writes changelog", () => {
++  const f = fixture();
++  const r = f.release();
++  assert.equal(r.status, 0, r.stderr);
++  assert.equal(f.read("built.txt"), "built");
++  assert.equal(f.read("size-args.txt"), "--max-kb 250");
++  assert.equal(f.tags(), "v1.2.3");
++  assert.equal(f.read("changelog.txt"), "changelog --since-last-tag");
++});
++
++test("size check failure stops the release: no tag, no changelog", () => {
++  const f = fixture({ sizeCheckExit: 1 });
++  const r = f.release();
++  assert.equal(r.status, 1);
++  assert.equal(f.tags(), "");
++  assert.equal(f.read("changelog.txt"), null);
++});
++
++test("--max-kb is passed through", () => {
++  const f = fixture();
++  assert.equal(f.release("--max-kb", "300").status, 0);
++  assert.equal(f.read("size-args.txt"), "--max-kb 300");
++});
++
++test("refuses when the tag already exists, before building", () => {
++  const f = fixture();
++  spawnSync("git", ["tag", "v1.2.3"], { cwd: f.dir });
++  const r = f.release();
++  assert.equal(r.status, 1);
++  assert.match(r.stderr, /already exists/);
++  assert.equal(f.read("built.txt"), null);
++});
++
++test("--dry-run prints steps and changes nothing", () => {
++  const f = fixture();
++  const r = f.release("--dry-run");
++  assert.equal(r.status, 0, r.stderr);
++  assert.match(r.stdout, /check-bundle-size\.js --max-kb 250/);
++  assert.equal(f.tags(), "");
++  assert.equal(f.read("built.txt"), null);
++});

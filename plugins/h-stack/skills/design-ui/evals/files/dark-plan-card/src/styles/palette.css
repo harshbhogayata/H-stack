@@ -1,0 +1,13 @@
+:root {
+  --palette-gray-0: #ffffff;
+  --palette-gray-50: #f6f7f9;
+  --palette-gray-200: #d9dde3;
+  --palette-gray-600: #5b6472;
+  --palette-gray-800: #262b33;
+  --palette-gray-900: #15181d;
+  --palette-gray-950: #0c0e11;
+  --palette-green-300: #6fd3a0;
+  --palette-green-700: #12704a;
+  --palette-amber-300: #f5c25b;
+  --palette-amber-700: #8a5a00;
+}

@@ -1,0 +1,22 @@
+:root {
+  --ld-bg: #f4f5f7;
+  --ld-surface: #ffffff;
+  --ld-border: #c8ccd2;
+  --ld-text: #1d2127;
+  --ld-text-subtle: #5a6270;
+  --ld-focus: #1f4fbf;
+  --ld-status-ok: #1b6e3a;
+  --ld-status-warn: #8a5a00;
+  --ld-status-error: #a3201c;
+
+  --ld-font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --ld-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --ld-text-sm: 13px;
+  --ld-text-md: 14px;
+
+  --ld-space-1: 4px;
+  --ld-space-2: 8px;
+  --ld-space-3: 12px;
+  --ld-row-height: 32px;
+  --ld-radius: 2px;
+}

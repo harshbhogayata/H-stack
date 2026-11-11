@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "skill_name": "clarify",
+    "skill_path": "plugins/h-stack/skills/clarify",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.147Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "vague-export",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 20.128,
+        "tokens": 161204,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (nothing was built before the ambiguity was resolved)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply asks at most three questions, and each offers a recommended answer",
+          "passed": true,
+          "evidence": "The reply is headed 'Questions (3):', and each of the three questions has a '**Recommended:**' option (a minimal Node API endpoint, JSON plus Markdown, and own notes only on any plan)."
+        },
+        {
+          "text": "The questions are about outcome-changing decisions (format, scope such as which notes/whose notes, delivery) rather than facts that could be read from the repo such as the note fields",
+          "passed": true,
+          "evidence": "The questions cover where export lives and how it is delivered ('endpoint... or a standalone CLI script'), the format ('JSON... plus Markdown'), and whose notes can be exported, including plan gating ('filtered by `ownerId`'). The note fields were read from the repo and stated, not asked about."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "vague-export",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 11.466,
+        "tokens": 115705,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (nothing was built before the ambiguity was resolved)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply asks at most three questions, and each offers a recommended answer",
+          "passed": false,
+          "evidence": "The reply says \"To build it I need four answers\" and lists four numbered questions, so it exceeds the three-question limit; also, only the defaults list afterwards gives recommendations for the other questions, rather than each question offering one inline."
+        },
+        {
+          "text": "The questions are about outcome-changing decisions (format, scope such as which notes/whose notes, delivery) rather than facts that could be read from the repo such as the note fields",
+          "passed": true,
+          "evidence": "The questions cover where the code lives or which language to build in, the export format (\"JSON, CSV, Markdown...\"), scope (\"each user exports only their own notes (by `ownerId`), or all notes?\") and plan gating; none ask about facts the repo already shows, such as note fields."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "clear-fix-no-questions",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 8.886,
+        "tokens": 159840,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (fixed)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The agent made the fix without asking the user any clarifying question",
+          "passed": true,
+          "evidence": "The final message says \"The request was small and clear, so I made the change without asking anything first,\" and the diff shows '!!' changed to '!' in greet.js."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "clear-fix-no-questions",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 6.711,
+        "tokens": 115450,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (fixed)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The agent made the fix without asking the user any clarifying question",
+          "passed": true,
+          "evidence": "The diff changes `'!!'` to `'!'` in greet.js. The final message (\"`greet()` now adds one exclamation mark instead of two... `node test.js` passes\") reports the finished fix and asks no question; only the final message was provided, but nothing in it shows a clarifying question."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "contradictory-spec",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.551,
+        "tokens": 79613,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no implementation was written on top of the contradiction)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply points out that complete erasure within 24 hours conflicts with keeping all data for 7 years with no deletion",
+          "passed": true,
+          "evidence": "The reply quotes both requirements, \"Deleted accounts must be erased completely within 24 hours\" and \"All account data must be kept for 7 years, with no deletion allowed\", and says \"An account deletion endpoint can't meet both rules.\""
+        },
+        {
+          "text": "The reply stops or asks the user to resolve the conflict, offering a recommended resolution, instead of silently picking one requirement",
+          "passed": true,
+          "evidence": "The reply says \"Outcome: Stop. I haven't written any code\", the diff shows no changes, and it gives a \"(Recommended)\" option: erase or anonymise personal data within 24 hours and keep a minimal pseudonymised audit record for 7 years."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "contradictory-spec",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 10.999,
+        "tokens": 77258,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no implementation was written on top of the contradiction)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply points out that complete erasure within 24 hours conflicts with keeping all data for 7 years with no deletion",
+          "passed": true,
+          "evidence": "The agent quotes both rules, 'Deleted accounts must be erased completely within 24 hours' and 'All account data must be kept for 7 years for audit, with no deletion allowed,' and says they 'can't both hold.'"
+        },
+        {
+          "text": "The reply stops or asks the user to resolve the conflict, offering a recommended resolution, instead of silently picking one requirement",
+          "passed": true,
+          "evidence": "The agent wrote no code ('I haven't written any code yet'), proposed a GDPR Art. 17(3)(b) fix that anonymises personal data within 24 hours and keeps a minimal audit record, and asked 'Which rule wins, or is the fix above acceptable?'"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 14.522,
+        "stddev": 4.59,
+        "min": 8.886,
+        "max": 20.128
+      },
+      "tokens": {
+        "mean": 133552.333,
+        "stddev": 38144.933,
+        "min": 79613,
+        "max": 161204
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 9.725,
+        "stddev": 2.14,
+        "min": 6.711,
+        "max": 11.466
+      },
+      "tokens": {
+        "mean": 102804.333,
+        "stddev": 18064.286,
+        "min": 77258,
+        "max": 115705
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.11",
+      "time_seconds": "+4.8",
+      "tokens": "+30748"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

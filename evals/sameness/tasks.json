@@ -1,0 +1,31 @@
+{
+  "contexts": ["kids-reading", "bank-admin", "dev-cli"],
+  "tasks": [
+    {"skill": "design-ui", "prompt": "Add a settings page where users can change their display name and notification preferences."},
+    {"skill": "writing", "prompt": "Write the intro section for this project's README (replace the current first paragraph)."},
+    {"skill": "planning", "prompt": "Write a short plan (no code) for adding export of the user's data."}
+  ],
+  "fit_criteria": {
+    "kids-reading": [
+      "Uses the project's own vocabulary from AUDIENCE.md (readers, grown-ups, garden, seeds, sprouts, story shelf) and avoids the banned words 'user', 'account', 'points' and 'level up' in anything a reader or grown-up would see",
+      "Words aimed at readers talk to them as 'you' in short, warm sentences (12 words or fewer, praise for effort); words aimed at grown-ups are plain and calm, as AUDIENCE.md describes",
+      "Settings, export or anything that leaves the app is placed behind the existing ParentGate (PARENTS.md); for the README intro, the grown-up/child split or the privacy promise is reflected rather than ignored",
+      "Builds on existing project pieces by name where the output involves UI or a plan: --sprout-* tokens (e.g. --sprout-text-body, --sprout-radius-pill, --sprout-tap), RoundButton, ParentGate, src/copy/en.json for strings, src/data/progress.js for data",
+      "Respects the privacy rules in PARENTS.md: progress stays on the device, no third-party analytics or uploads, display name is a first name or nickname only, no email asked of readers"
+    ],
+    "bank-admin": [
+      "Copy is formal, neutral and precise in sentence case with no exclamation marks, humour, 'we' or emoji, and names the object and action (e.g. 'Save changes'), as CONTRIBUTING.md requires",
+      "Uses the @ledgerdesk/ui components (Button, Field, DataTable, ConfirmDialog) and --ld-* tokens with compact density, rather than raw elements, new colours or decorative styling",
+      "Gates screens and actions with requirePermission and the PERMISSIONS identifiers (e.g. PROFILE_EDIT_SELF for a staff member's own settings, DATA_EXPORT for exports), proposing any new identifier in permissions.ts for Security review",
+      "Records state-changing actions and exports with audit.record (actor, action, target, reason); an export plan includes a reason code, the 7-day expiry and the staff-ID watermark from CONTRIBUTING.md",
+      "Treats the audience as internal Operations, Support and Compliance staff of Northbridge Retail Banking (not customers), and notes Compliance sign-off (CMP- ticket) where customer data is involved"
+    ],
+    "dev-cli": [
+      "Fits a Node CLI with no UI framework: the 'settings page' request becomes a command such as 'logq config get/set/ls' (or equivalent) backed by src/config.js, and the export plan is a command (e.g. 'logq export') rather than a screen",
+      "Follows docs/conventions.md: data on stdout and diagnostics on stderr, a --json mode, 'logq: <what failed>: <why>' errors with the documented exit codes, no prompting when stdin is not a TTY, NO_COLOR respected",
+      "Uses the project's config and data locations ($XDG_CONFIG_HOME/logq/config.json via src/config.js, saved queries and history under $XDG_DATA_HOME/logq/) and the flag > env (LOGQ_*) > config precedence",
+      "Prose is terse and technical: leads with the command, no marketing words such as 'powerful', 'blazing' or 'simply', as docs/conventions.md describes; the README intro says what logq does in one or two plain sentences",
+      "Follows CONTRIBUTING.md for new work: one command per file in src/commands/, registered in bin/logq.js, no runtime dependencies, docs/commands.md updated and a node:test test added"
+    ]
+  }
+}

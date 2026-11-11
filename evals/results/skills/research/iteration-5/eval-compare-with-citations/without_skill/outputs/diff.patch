@@ -1,0 +1,33 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..69563eb
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,27 @@
++# ajv vs zod: draft 2020-12 JSON Schema validation
++
++**Short answer: use ajv.** Ajv validates data against draft 2020-12 JSON Schema documents. Zod is a different kind of library: you write schemas in TypeScript, and its JSON Schema support converts in the other direction (Zod to JSON Schema).
++
++> **Not verified against sources.** This repo has no `node_modules`, and in this session I didn't have permission to download either package or fetch their docs. Everything below comes from my own knowledge of ajv v8 and zod v4, so treat it as unconfirmed. Before relying on it, check the links listed at the end.
++
++## ajv: yes
++- Ajv v8 supports draft 2020-12, but you have to use a separate class. The default export targets draft-07.
++  ```js
++  const Ajv2020 = require("ajv/dist/2020");   // ESM: import Ajv2020 from "ajv/dist/2020"
++  const ajv = new Ajv2020();
++  const validate = ajv.compile(schema);       // schema with "$schema": "https://json-schema.org/draft/2020-12/schema"
++  validate(data) || console.log(validate.errors);
++  ```
++- It supports the 2020-12 keywords, such as `prefixItems`, `$dynamicRef`/`$dynamicAnchor` and `unevaluatedProperties`/`unevaluatedItems`.
++- You can't mix draft-07 and 2020-12 schemas in one Ajv instance.
++- `format` validation needs the separate `ajv-formats` package.
++- To check: https://ajv.js.org/json-schema.html (section "draft-2020-12") and `node_modules/ajv/dist/2020.js` once installed.
++
++## zod: no, not as a JSON Schema validator
++- Zod validates data against schemas built with its own TypeScript API (`z.object(...)`). It does not take JSON Schema documents as input.
++- Zod v4's JSON Schema feature, `z.toJSONSchema(zodSchema)`, *outputs* JSON Schema, with draft 2020-12 as the default target. That's useful for publishing schemas, but it doesn't help you validate against existing ones.
++- Recent v4 releases may have an experimental `z.fromJSONSchema()` (JSON Schema to Zod). I haven't been able to confirm it exists. If it does, it is unlikely to cover the full 2020-12 spec (for example `$dynamicRef` or `unevaluated*`), so don't count on it for spec compliance.
++- To check: https://zod.dev/json-schema and `node_modules/zod/v4/core/to-json-schema.*` once installed.
++
++## Recommendation
++If the input is JSON Schema 2020-12 documents, use **ajv** (`ajv/dist/2020`, plus `ajv-formats`). Zod only makes sense if you're happy to author schemas in TypeScript and drop the existing JSON Schema files.

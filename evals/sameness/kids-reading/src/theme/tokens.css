@@ -1,0 +1,25 @@
+:root {
+  --sprout-leaf: #3fae5a;
+  --sprout-leaf-deep: #23743a;
+  --sprout-sun: #ffc93c;
+  --sprout-sky: #7cc6fe;
+  --sprout-soil: #6b4f3a;
+  --sprout-petal: #ff8fab;
+  --sprout-cream: #fff8e7;
+  --sprout-ink: #2d2a32;
+
+  --sprout-font: "Andika", "Comic Neue", system-ui, sans-serif;
+  --sprout-text-body: 22px;
+  --sprout-text-title: 34px;
+  --sprout-line: 1.5;
+
+  --sprout-radius-pill: 999px;
+  --sprout-radius-blob: 32px;
+  --sprout-tap: 64px;
+  --sprout-gap: 20px;
+  --sprout-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sprout-bounce: linear; }
+}

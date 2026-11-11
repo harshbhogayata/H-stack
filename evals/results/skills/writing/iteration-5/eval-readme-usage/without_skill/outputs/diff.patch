@@ -1,0 +1,94 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..124ce14
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,88 @@
++# tidyjson
++
++A small command-line tool that reformats a JSON file in place.
++
++> **Status:** `cli.js` currently contains only the usage header, with no implementation. This README describes the interface that header specifies. Running the command right now does nothing.
++
++## What it does
++
++`tidyjson` reads a JSON file, re-serializes it with consistent indentation (and, if you ask, with keys sorted), and writes the result back to the same file.
++
++If the file is not valid JSON, `tidyjson` leaves it **untouched** and exits with status `2`.
++
++## Installation
++
++Requires [Node.js](https://nodejs.org/).
++
++```sh
++# from a clone of this repository
++npm install -g .
++
++# or run without installing
++node cli.js <file> [options]
++```
++
++## Usage
++
++```sh
++tidyjson <file> [--indent N] [--sort-keys]
++```
++
++| Argument / option | Description |
++| --- | --- |
++| `<file>` | Path to the JSON file to rewrite. The file is modified in place. |
++| `--indent N` | Indent with `N` spaces. |
++| `--sort-keys` | Sort object keys alphabetically. |
++
++### Examples
++
++```sh
++# Reformat a file
++tidyjson config.json
++
++# Use 4-space indentation
++tidyjson config.json --indent 4
++
++# Sort keys and use 2-space indentation
++tidyjson package-lock.json --indent 2 --sort-keys
++```
++
++Given `data.json`:
++
++```json
++{"name":"demo","version":1,"tags":["a","b"]}
++```
++
++`tidyjson data.json --indent 2 --sort-keys` rewrites it as:
++
++```json
++{
++  "name": "demo",
++  "tags": [
++    "a",
++    "b"
++  ],
++  "version": 1
++}
++```
++
++## Exit codes
++
++| Code | Meaning |
++| --- | --- |
++| `0` | The file was reformatted successfully. |
++| `2` | The file contains invalid JSON. It was not modified. |
++
++Because invalid input never changes the file, you can safely run `tidyjson` in scripts or pre-commit hooks and check the exit code:
++
++```sh
++tidyjson settings.json || echo "settings.json is not valid JSON"
++```
++
++## Development
++
++Run the tests with Node's built-in test runner:
++
++```sh
++npm test
++```

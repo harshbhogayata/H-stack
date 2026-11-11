@@ -1,0 +1,12 @@
+{
+  "garden": {
+    "title": "Hi {name}! This is your garden.",
+    "empty": "Read a story to plant your first seed.",
+    "growing": "Look how your sprouts have grown!",
+    "toShelf": "Pick a story",
+    "grownUps": "Grown-ups"
+  },
+  "storyCard": { "seeds": "{n} seeds to earn" },
+  "finish": { "title": "You did it!", "body": "You kept going. A new seed is ready to plant." },
+  "grownUps": { "goalTitle": "Daily reading goal", "goalHelp": "Sprout reminds your child gently when today's goal is met. It never nags." }
+}

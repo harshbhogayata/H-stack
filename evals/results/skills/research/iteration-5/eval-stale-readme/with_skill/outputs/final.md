@@ -1,0 +1,9 @@
+The answer to both questions is no. The installed tinyretry (3.1.0) doesn't retry a 429 by default, and when a 429 is retried it ignores a `Retry-After` given as a date. I saved this in `answer.md`. I confirmed both by running the vendored code with a fake fetch.
+
+1. **No retry on 429 by default.** In `vendor/tinyretry/defaults.js:5` the default list of status codes to retry is `[408, 502, 503, 504]`, and 429 isn't in it. `src/client.js` only sets `retries: 4`, so it uses that list. With an always-429 fetch, fetch was called once and the 429 came straight back, so `pushOrders` throws.
+
+2. **Date values in `Retry-After` are ignored.** The header parser (`index.js:3-7`) only accepts a number of seconds. A date such as `Wed, 11 Nov 2026 10:00:00 GMT` doesn't parse, so it falls back to a short random wait (up to 200 ms on the first retry). In my test I added 429 to the retry list and set the date 60 seconds ahead; the retry came after about 12 ms. A `Retry-After` given in seconds is also capped at 10 seconds by default.
+
+The team wiki (`docs/wiki/http-clients.md`, last edited 2025-10-14) and tinyretry's own README say the opposite, but both are out of date. The changelog shows date support arrived in 2.4.0. The 3.0.0 rewrite changed the default retry list, and it seems to have dropped date parsing, which the changelog doesn't mention. So the wiki's advice "don't add your own 429 handling" no longer holds: right now the partner's 429s fail on the first attempt.
+
+To fix it, `client.js` needs to add 429 to the retry list and handle date-form `Retry-After` itself. If the partner can ask for waits over 10 seconds, the cap needs raising too. I only examined the vendored copy, not whether a newer tinyretry release fixes this.

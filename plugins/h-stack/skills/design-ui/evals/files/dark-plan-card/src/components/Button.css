@@ -1,0 +1,10 @@
+.button {
+  font: inherit;
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.button--primary { background: var(--accent); color: var(--on-accent); }
+.button--secondary { background: transparent; color: var(--text); border-color: var(--border); }

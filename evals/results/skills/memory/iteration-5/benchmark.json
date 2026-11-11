@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "skill_name": "memory",
+    "skill_path": "plugins/h-stack/skills/memory",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T16:22:28.150Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "handoff",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 40.852,
+        "tokens": 301805,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (handoff saved outside the repo, mentions tomli and the env var override)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The handoff records the failed approach (tomllib on Python 3.10) and why it failed",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        },
+        {
+          "text": "The handoff quotes or preserves the user's correction about keeping the env var override and lists the open items (docs/setup.md, removing the config.ini fallback after 2.4)",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "handoff",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 26.363,
+        "tokens": 239047,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (handoff saved outside the repo, mentions tomli and the env var override)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The handoff records the failed approach (tomllib on Python 3.10) and why it failed",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        },
+        {
+          "text": "The handoff quotes or preserves the user's correction about keeping the env var override and lists the open items (docs/setup.md, removing the config.ini fallback after 2.4)",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "lesson-draft",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.217,
+        "tokens": 204939,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (draft exists, path-scoped to src/billing)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The lesson states when it applies and when it doesn't (applicability bounds), not just a general rule",
+          "passed": true,
+          "evidence": "The diff includes '**Applies when:** prices or amounts are summed, compared, rounded or stored' and '**Doesn't apply when:** formatting cents into a display string for output (divide by 100 only there)'."
+        },
+        {
+          "text": "The lesson includes the concrete evidence (10.299999 / 10.29 vs 10.30, or the npm run invoices run) and marks its provenance as coming from the user",
+          "passed": true,
+          "evidence": "The Evidence block quotes 'round() on floats gave 10.299999 in the March invoice run (npm run invoices showed 10.29 instead of 10.30)', and the lesson sets '**Provenance:** user'."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "lesson-draft",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "pass_rate": 0,
+        "time_seconds": 22.586,
+        "tokens": 234714,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (draft exists, path-scoped to src/billing)",
+          "passed": false,
+          "evidence": "check exit 1: "
+        },
+        {
+          "text": "The lesson states when it applies and when it doesn't (applicability bounds), not just a general rule",
+          "passed": false,
+          "evidence": "The lesson limits its scope to \"In `src/billing`, money is stored and computed as **integer cents**\" but never says when the rule does not apply, such as exceptions or out-of-scope cases."
+        },
+        {
+          "text": "The lesson includes the concrete evidence (10.299999 / 10.29 vs 10.30, or the npm run invoices run) and marks its provenance as coming from the user",
+          "passed": false,
+          "evidence": "The lesson includes the evidence (\"a total that should have been **10.30** came out as **10.29**. The float total was 10.299999…\") but never says it came from the user's correction or CONTEXT.md, and the agent deliberately left out the npm run invoices command."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "who-calls",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 7.933,
+        "tokens": 119906,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply lists both call sites, src/cart.js and src/refund.js, with line references, and does not list src/other.js",
+          "passed": true,
+          "evidence": "The final message lists \"`src/cart.js:2`: `export const a = () => charge(100);`\" and \"`src/refund.js:2`: `return charge(-c);`\" and never mentions src/other.js."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "who-calls",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 5.923,
+        "tokens": 115155,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply lists both call sites, src/cart.js and src/refund.js, with line references, and does not list src/other.js",
+          "passed": true,
+          "evidence": "The final message lists \"`src/cart.js:2`: `export const a = () => charge(100);`\" and \"`src/refund.js:2`: `export function refund(c) { return charge(-c); }`\", and src/other.js appears nowhere in it."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.778,
+        "stddev": 0.314,
+        "min": 0.3333333333333333,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 22.334,
+        "stddev": 13.751,
+        "min": 7.933,
+        "max": 40.852
+      },
+      "tokens": {
+        "mean": 208883.333,
+        "stddev": 74312.313,
+        "min": 119906,
+        "max": 301805
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.444,
+        "stddev": 0.416,
+        "min": 0,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 18.291,
+        "stddev": 8.88,
+        "min": 5.923,
+        "max": 26.363
+      },
+      "tokens": {
+        "mean": 196305.333,
+        "stddev": 57409.21,
+        "min": 115155,
+        "max": 239047
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.33",
+      "time_seconds": "+4.0",
+      "tokens": "+12578"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

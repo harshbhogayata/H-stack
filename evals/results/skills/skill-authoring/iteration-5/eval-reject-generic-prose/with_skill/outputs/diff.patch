@@ -1,0 +1,39 @@
+diff --git a/SKILL.md b/SKILL.md
+new file mode 100644
+index 0000000..05f249d
+--- /dev/null
++++ b/SKILL.md
+@@ -0,0 +1,33 @@
++---
++name: code-quality-checks
++description: Before calling a code change done, check edge cases against the actual change and run the project's tests. Use when finishing any code change in this repo.
++---
++
++<!--
++DRAFT. Not benchmarked and not reviewed yet. Do not ship it until both happen.
++Requested wording: "Always write good code. Be careful with edge cases. Test things."
++Prose like that is advice the model already follows, and generic model-written prose
++skills have scored below having no skill at all (SkillsBench, −8 to −11.5 points).
++So this draft turns each line into a check you can confirm. Keep it only if
++skill-creator's with/without benchmark, run on this repo's real prompts plus one
++held-out case, comes out at least as good. Once the repo has a test command, replace
++the placeholder below with that command or a script under scripts/.
++-->
++
++# Code quality checks
++
++## Gate
++
++Use this when you've changed code and are about to say the work is done.
++
++## Contract
++
++1. **Edge cases, from the diff.** For each function or branch you changed, list the inputs it actually receives that could break it: empty or missing values, zero or negative numbers, boundary indices, duplicates, unicode, large inputs, concurrent calls, and error paths from I/O or the network. Handle each one, or say why it can't happen. Skip any category that doesn't apply.
++2. **A test for each behaviour change.** Add or update a test that fails without the change and passes with it. Include at least one edge case from step 1.
++3. **Run the tests.** Use the project's test command: `TODO: e.g. npm test, pytest, make test`. This repo has no test command yet. If you can't find one, say so instead of claiming the code is tested.
++
++## Before you finish
++
++- The test command ran, and you've reported its output (pass/fail counts, or the exact failure).
++- Each edge case from step 1 has been handled, tested, or ruled out with a stated reason.
++- You haven't said "tested" or "works" without a run to back it up.
