@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: h-stack:review-lane output failed validation (findings[0].line 40 is past the end of src/index.js (2 lines)). Discard it and re-run a fresh h-stack:review-lane; do not repair the output."}}

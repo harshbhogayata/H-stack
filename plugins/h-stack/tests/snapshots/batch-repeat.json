@@ -1,0 +1,45 @@
+{
+  "hook": "batch.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+      {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "/x/a.txt"
+        },
+        "tool_use_id": "r1",
+        "tool_response": "file not found"
+      },
+      {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "/x/a.txt"
+        },
+        "tool_use_id": "r2",
+        "tool_response": "file not found"
+      },
+      {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "/x/a.txt"
+        },
+        "tool_use_id": "r3",
+        "tool_response": "file not found"
+      }
+    ]
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [],
+        "rules": []
+      }
+    }
+  }
+}

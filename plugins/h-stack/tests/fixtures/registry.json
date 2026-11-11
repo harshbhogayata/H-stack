@@ -1,0 +1,26 @@
+{
+  "npm:lodash": {
+    "created": "2012-04-23T00:00:00Z",
+    "weekly": 50000000
+  },
+  "npm:react": {
+    "created": "2011-10-26T00:00:00Z",
+    "weekly": 30000000
+  },
+  "npm:left-pad-fresh": {
+    "created_days_ago": 10,
+    "weekly": 12
+  },
+  "npm:zod": {
+    "created": "2020-03-07T00:00:00Z",
+    "weekly": 20000000
+  },
+  "pypi:requests": {
+    "created": "2011-02-14T00:00:00Z",
+    "weekly": 100000000
+  },
+  "crates:serde": {
+    "created": "2014-12-05T00:00:00Z",
+    "weekly": 5000000
+  }
+}

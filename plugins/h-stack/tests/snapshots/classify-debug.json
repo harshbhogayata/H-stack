@@ -1,0 +1,11 @@
+{
+  "hook": "classify.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "The tests fail with a traceback in parser.py after my last change. Why does it break?"
+  },
+  "setup": {}
+}

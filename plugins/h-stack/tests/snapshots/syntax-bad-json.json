@@ -1,0 +1,19 @@
+{
+  "hook": "syntax.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "$PROJ/config.json",
+      "content": "{\"a\": 1,}"
+    }
+  },
+  "setup": {
+    "files": {
+      "config.json": "{\"a\": 1,}"
+    }
+  }
+}

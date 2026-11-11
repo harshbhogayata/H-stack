@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by fetch-destination: WebFetch targets 169.254.169.254 (cloud metadata) while untrusted content is in play. To proceed: the user confirms this request."}}

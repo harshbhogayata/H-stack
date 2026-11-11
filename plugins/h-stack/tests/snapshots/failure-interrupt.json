@@ -1,0 +1,16 @@
+{
+  "hook": "failure.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "npm run migrate"
+    },
+    "error": "interrupted",
+    "is_interrupt": true
+  },
+  "setup": {}
+}

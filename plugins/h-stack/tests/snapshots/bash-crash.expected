@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by h-stack:gate-bash: the guard crashed, so the action was not checked. To proceed: report this to the user; the error is in .h-stack/logs/hook-errors.jsonl."}}

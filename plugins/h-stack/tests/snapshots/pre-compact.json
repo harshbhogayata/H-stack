@@ -1,0 +1,11 @@
+{
+  "hook": "pre-compact.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreCompact",
+    "trigger": "auto"
+  },
+  "setup": {}
+}

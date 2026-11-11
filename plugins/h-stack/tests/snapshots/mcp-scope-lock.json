@@ -1,0 +1,27 @@
+{
+  "hook": "gate-mcp.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "mcp__github__add_issue_comment",
+    "tool_input": {
+      "issue_number": 99,
+      "body": "done"
+    }
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [],
+        "rules": [],
+        "scope_numbers": [
+          "42"
+        ]
+      }
+    }
+  }
+}

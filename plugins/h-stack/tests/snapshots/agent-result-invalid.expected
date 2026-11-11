@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: h-stack:review-lane output failed validation (no JSON object found). Discard it and re-run a fresh h-stack:review-lane; do not repair the output."}}

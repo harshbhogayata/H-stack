@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack: h-stack:review-lane returned no findings and only 1 cleared unit(s), which is thin coverage. Re-run a fresh h-stack:review-lane from a different angle before treating it as clear."}}

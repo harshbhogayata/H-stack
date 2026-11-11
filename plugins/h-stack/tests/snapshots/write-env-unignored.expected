@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by env-not-ignored: .env is not git-ignored, so secrets written to it could be committed. To proceed: add it to .gitignore first."}}

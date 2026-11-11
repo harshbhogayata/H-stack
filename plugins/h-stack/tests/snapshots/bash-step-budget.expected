@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by step-budget: this turn used 75 model steps (cap 60 for size=light). To proceed: stop and summarise what is done, what remains and the next step for the user."}}

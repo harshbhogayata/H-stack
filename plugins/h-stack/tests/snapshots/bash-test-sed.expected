@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by read-only-tests: the command writes to the test file tests/index.test.js outside a declared test-writing step. To proceed: declare the step with hs phase test before editing tests, or the user approves."}}

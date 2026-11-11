@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by protected-checker: .claude/settings.json is a CI, agent or test-runner config. To proceed: the user approves edits to checkers."}}

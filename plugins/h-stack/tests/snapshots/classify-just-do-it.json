@@ -1,0 +1,11 @@
+{
+  "hook": "classify.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Add a retry to the upload function in src/upload.ts. Just do it, no questions."
+  },
+  "setup": {}
+}

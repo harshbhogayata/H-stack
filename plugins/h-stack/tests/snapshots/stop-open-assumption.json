@@ -1,0 +1,43 @@
+{
+  "hook": "stop.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "Stop",
+    "stop_hook_active": false,
+    "last_assistant_message": "Done.\n\nNot verified: none",
+    "background_tasks": []
+  },
+  "setup": {
+    "files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"lodash\": \"^4\"\n  }\n}",
+      "src/index.js": "import _ from 'lodash';\n",
+      "tests/index.test.js": "test('adds', () => { expect(1 + 1).toBe(2); });\n"
+    },
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [],
+        "rules": []
+      },
+      "sessions/s1/ledger.jsonl": [
+        {
+          "id": "e-1",
+          "kind": "edit",
+          "path": "src/index.js",
+          "ts": 1,
+          "turn": "p1"
+        }
+      ],
+      "sessions/s1/assumptions.jsonl": [
+        {
+          "id": "A1",
+          "text": "UTC dates",
+          "status": "open"
+        }
+      ]
+    }
+  }
+}

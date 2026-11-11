@@ -1,0 +1,21 @@
+{
+  "hook": "agent-result.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Agent",
+    "tool_input": {
+      "subagent_type": "h-stack:review-lane"
+    },
+    "tool_response": "{\"findings\":[{\"id\":\"F1\",\"title\":\"x\",\"severity\":\"high\",\"verdict\":\"confirmed\",\"file\":\"src/index.js\",\"line\":40,\"evidence\":\"y\"}],\"cleared\":[\"a\",\"b\",\"c\"]}"
+  },
+  "setup": {
+    "files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"lodash\": \"^4\"\n  }\n}",
+      "src/index.js": "import _ from 'lodash';\n",
+      "tests/index.test.js": "test('adds', () => { expect(1 + 1).toBe(2); });\n"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network."}}

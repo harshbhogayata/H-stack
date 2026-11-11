@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by dependency-gate: npm:lodahs not found in the registry (possibly a hallucinated name); npm:lodahs within edit distance 2 of the popular package \"lodash\". To proceed: check the package name and source with the user."}}

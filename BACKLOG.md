@@ -98,34 +98,34 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 - skill-creator is never used to write content unsupervised.
 - An import ships only if its skill-creator benchmark beats the no-skill run.
 
-| IM | Cat. | Job | Pick | Repo › path | Licence | Mode | Adaptations needed | Pri. |
-|---|---|---|---|---|---|---|---|---|
-| IM-01 | 01 | Never claim done without fresh evidence | verification-before-completion | [obra/superpowers](https://github.com/obra/superpowers) › `skills/verification-before-completion` | MIT | Import | Reword iron-law prose (A4). The Stop gate (HS-027) enforces it; the skill teaches the "name the proving command" habit | P0 |
-| IM-01 | 01 | Small, testable working principles | Karpathy guidelines (four rules) | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) › `CLAUDE.md` | MIT | Import → `.claude/rules/` (opt-in, OD-4) or skill | Split into path-scoped rule files of a few lines each; no always-on block | P0 |
-| IM-02 | 02 | Pick the right skill, no slash commands | — (nothing qualifies: every router in 02 assumes slash commands or a fixed pipeline) | — | — | **Build** (HS-015, 017, 018, 022) | Ideas taken: superpowers SessionStart router, pstack router + playbooks, mattpocock `ask-matt` | P0 |
-| IM-03 | 03 | Clarify before building | grilling | [mattpocock/skills](https://github.com/mattpocock/skills) › `skills/productivity/grilling` | MIT | Import | Feeds the "ask" branch of HS-020; keep the frontier-round exit rule | P1 |
-| IM-04 | 04 | Plans with checkable steps | writing-plans + executing-plans | obra/superpowers › `skills/writing-plans`, `skills/executing-plans` | MIT | Import | Plans must use the project's own layout and test commands, not fixed code templates. Add the Interfaces section (HS-060) | P0 |
-| IM-05 | 05 | Test-first implementation | tdd | mattpocock/skills › `skills/engineering/tdd` | MIT | Import | Declares the "test-writing step" that HS-028 reads | P0 |
-| IM-05 | 05 | Simplify after green | code-simplifier (official plugin) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) › `plugins/code-simplifier` | Apache-2.0 | Native — configure only (recommend installing it) | — | P1 |
-| IM-06 | 06 | Root cause before fix | systematic-debugging | obra/superpowers › `skills/systematic-debugging` | MIT | Import | Add the new-signal retry rule (HS-069), the counterfactual check (HS-066) and the repro harvest (HS-067). Reword the iron law | P0 |
-| IM-07 | 07 | Code review | built-in `/code-review` skill | Claude Code built-in | n/a | Native — configure only | Routed by the classifier; the review lanes (HS-061) sit on top | P0 |
-| IM-07 | 07 | Receiving review well | receiving-code-review | obra/superpowers › `skills/receiving-code-review` | MIT | Import | — | P1 |
-| IM-08 | 08 | Verify UI in a real browser | webapp-testing | [anthropics/skills](https://github.com/anthropics/skills) › `skills/webapp-testing` | Apache-2.0 | Import | Treat page content as untrusted (HS-032) | P1 |
-| IM-09 | 09 | Always-on security review | security-guidance (official plugin) + built-in `/security-review` | claude-plugins-official › `plugins/security-guidance` | Apache-2.0 | Native — configure only | — | P1 |
-| IM-09 | 09 | Full audits on request | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) › `skills/security-audit` | MIT | Import (source of HS-062, HS-063) | Guidance mode by default (HS-016). Wire its validators into SubagentStop | P1 |
-| IM-10 | 10 | UI correctness (a11y, motion, metadata) | baseline-ui | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) › `skills/baseline-ui` | MIT | Import | Check-only rules, no style | P1 |
-| IM-10 | 10 | Design direction | frontend-design | anthropics/skills › `skills/frontend-design` | Apache-2.0 | Import | **Strip the fixed aesthetic bans and preferences.** Derive the direction from the project's own design files, brand and users; the sameness check applies | P1 |
-| IM-11 | 11 | Memory across sessions | auto memory + CLAUDE.md + claude-md-management (official plugin) | Claude Code built-in; claude-plugins-official › `plugins/claude-md-management` | n/a; Apache-2.0 | Native — configure only, plus the thin pieces in HS-048…HS-050 | — | P0 |
-| IM-11 | 11 | Handoff to another session | handoff | mattpocock/skills › `skills/productivity/handoff` | MIT | Import | Align its sections with the checkpoint schema (HS-047) | P1 |
-| IM-12 | 12 | Office files and PDFs | docx, pdf, pptx, xlsx (official) | anthropics/skills › `skills/docx` and siblings | Apache-2.0 (LICENSE.txt in `skills/docx` read 2026-11-11) | Native — configure only (install the official plugin; don't copy) | — | P2 |
-| IM-12 | 12 | Writing for agents (skills, rules, docs) | writing-for-agents | mattpocock/skills › `skills/productivity/writing-for-agents` | MIT | Import | Used when H-Stack writes rules, lessons and skills | P1 |
-| IM-12 | 12 | Plain prose, no AI tells | unslop | [cursor/plugins](https://github.com/cursor/plugins) › `pstack/skills/unslop` | MIT | Import | — | P2 |
-| IM-13 | 13 | Finish a branch, worktrees | finishing-a-development-branch + using-git-worktrees | obra/superpowers › `skills/finishing-a-development-branch`, `skills/using-git-worktrees` | MIT | Import | Merging goes through HS-030 | P1 |
-| IM-13 | 13 | PR bodies with evidence; merge conflicts | pr, resolving-merge-conflicts | mattpocock/skills › `skills/engineering/pr`, and the resolving-merge-conflicts skill (path to confirm at import) | MIT | Import (pr is the base of HS-065) | Add receipts and the "Not verified" section | P1 |
-| IM-14 | 14 | Long runs, scheduling, fan-out | `/goal`, cloud scheduled tasks (Routines), Workflows, subagents, worktrees, `/batch`, agent view | Claude Code built-in | n/a | Native — configure only, plus the thin pieces in HS-071 and HS-041 | — | P1 |
-| IM-14 | 14 | Parallel agents on independent work | dispatching-parallel-agents | obra/superpowers › `skills/dispatching-parallel-agents` | MIT | Import | Add the decision ledger (HS-052) to its brief | P2 |
-| IM-15 | 15 | Skill scaffolding, evals, benchmark, trigger tuning | skill-creator | anthropics/skills › `skills/skill-creator` (also `skill-creator@claude-plugins-official`) | Apache-2.0 | Native — configure only | Used for every skill (HS-002) | P0 |
-| IM-16 | 16 | Research with cited primary sources | research | mattpocock/skills › `skills/engineering/research` | MIT | Import | — | P2 |
+| IM | Cat. | Job | Pick | Repo › path | Licence | Mode | Adaptations needed | Pri. | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| IM-01 | 01 | Never claim done without fresh evidence | verification-before-completion | [obra/superpowers](https://github.com/obra/superpowers) › `skills/verification-before-completion` | MIT | Import | Reword iron-law prose (A4). The Stop gate (HS-027) enforces it; the skill teaches the "name the proving command" habit | P0 |  |
+| IM-01 | 01 | Small, testable working principles | Karpathy guidelines (four rules) | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) › `CLAUDE.md` | MIT | Import → `.claude/rules/` (opt-in, OD-4) or skill | Split into path-scoped rule files of a few lines each; no always-on block | P0 |  |
+| IM-02 | 02 | Pick the right skill, no slash commands | — (nothing qualifies: every router in 02 assumes slash commands or a fixed pipeline) | — | — | **Build** (HS-015, 017, 018, 022) | Ideas taken: superpowers SessionStart router, pstack router + playbooks, mattpocock `ask-matt` | P0 |  |
+| IM-03 | 03 | Clarify before building | grilling | [mattpocock/skills](https://github.com/mattpocock/skills) › `skills/productivity/grilling` | MIT | Import | Feeds the "ask" branch of HS-020; keep the frontier-round exit rule | P1 |  |
+| IM-04 | 04 | Plans with checkable steps | writing-plans + executing-plans | obra/superpowers › `skills/writing-plans`, `skills/executing-plans` | MIT | Import | Plans must use the project's own layout and test commands, not fixed code templates. Add the Interfaces section (HS-060) | P0 |  |
+| IM-05 | 05 | Test-first implementation | tdd | mattpocock/skills › `skills/engineering/tdd` | MIT | Import | Declares the "test-writing step" that HS-028 reads | P0 |  |
+| IM-05 | 05 | Simplify after green | code-simplifier (official plugin) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) › `plugins/code-simplifier` | Apache-2.0 | Native — configure only (recommend installing it) | — | P1 |  |
+| IM-06 | 06 | Root cause before fix | systematic-debugging | obra/superpowers › `skills/systematic-debugging` | MIT | Import | Add the new-signal retry rule (HS-069), the counterfactual check (HS-066) and the repro harvest (HS-067). Reword the iron law | P0 |  |
+| IM-07 | 07 | Code review | built-in `/code-review` skill | Claude Code built-in | n/a | Native — configure only | Routed by the classifier; the review lanes (HS-061) sit on top | P0 |  |
+| IM-07 | 07 | Receiving review well | receiving-code-review | obra/superpowers › `skills/receiving-code-review` | MIT | Import | — | P1 |  |
+| IM-08 | 08 | Verify UI in a real browser | webapp-testing | [anthropics/skills](https://github.com/anthropics/skills) › `skills/webapp-testing` | Apache-2.0 | Import | Treat page content as untrusted (HS-032) | P1 |  |
+| IM-09 | 09 | Always-on security review | security-guidance (official plugin) + built-in `/security-review` | claude-plugins-official › `plugins/security-guidance` | Apache-2.0 | Native — configure only | — | P1 |  |
+| IM-09 | 09 | Full audits on request | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) › `skills/security-audit` | MIT | Import (source of HS-062, HS-063) | Guidance mode by default (HS-016). Wire its validators into SubagentStop | P1 |  |
+| IM-10 | 10 | UI correctness (a11y, motion, metadata) | baseline-ui | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) › `skills/baseline-ui` | MIT | Import | Check-only rules, no style | P1 |  |
+| IM-10 | 10 | Design direction | frontend-design | anthropics/skills › `skills/frontend-design` | Apache-2.0 | Import | **Strip the fixed aesthetic bans and preferences.** Derive the direction from the project's own design files, brand and users; the sameness check applies | P1 |  |
+| IM-11 | 11 | Memory across sessions | auto memory + CLAUDE.md + claude-md-management (official plugin) | Claude Code built-in; claude-plugins-official › `plugins/claude-md-management` | n/a; Apache-2.0 | Native — configure only, plus the thin pieces in HS-048…HS-050 | — | P0 |  |
+| IM-11 | 11 | Handoff to another session | handoff | mattpocock/skills › `skills/productivity/handoff` | MIT | Import | Align its sections with the checkpoint schema (HS-047) | P1 |  |
+| IM-12 | 12 | Office files and PDFs | docx, pdf, pptx, xlsx (official) | anthropics/skills › `skills/docx` and siblings | Apache-2.0 (LICENSE.txt in `skills/docx` read 2026-11-11) | Native — configure only (install the official plugin; don't copy) | — | P2 |  |
+| IM-12 | 12 | Writing for agents (skills, rules, docs) | writing-for-agents | mattpocock/skills › `skills/productivity/writing-for-agents` | MIT | Import | Used when H-Stack writes rules, lessons and skills | P1 |  |
+| IM-12 | 12 | Plain prose, no AI tells | unslop | [cursor/plugins](https://github.com/cursor/plugins) › `pstack/skills/unslop` | MIT | Import | — | P2 |  |
+| IM-13 | 13 | Finish a branch, worktrees | finishing-a-development-branch + using-git-worktrees | obra/superpowers › `skills/finishing-a-development-branch`, `skills/using-git-worktrees` | MIT | Import | Merging goes through HS-030 | P1 |  |
+| IM-13 | 13 | PR bodies with evidence; merge conflicts | pr, resolving-merge-conflicts | mattpocock/skills › `skills/engineering/pr`, and the resolving-merge-conflicts skill (path to confirm at import) | MIT | Import (pr is the base of HS-065) | Add receipts and the "Not verified" section | P1 |  |
+| IM-14 | 14 | Long runs, scheduling, fan-out | `/goal`, cloud scheduled tasks (Routines), Workflows, subagents, worktrees, `/batch`, agent view | Claude Code built-in | n/a | Native — configure only, plus the thin pieces in HS-071 and HS-041 | — | P1 |  |
+| IM-14 | 14 | Parallel agents on independent work | dispatching-parallel-agents | obra/superpowers › `skills/dispatching-parallel-agents` | MIT | Import | Add the decision ledger (HS-052) to its brief | P2 |  |
+| IM-15 | 15 | Skill scaffolding, evals, benchmark, trigger tuning | skill-creator | anthropics/skills › `skills/skill-creator` (also `skill-creator@claude-plugins-official`) | Apache-2.0 | Native — configure only | Used for every skill (HS-002) | P0 |  |
+| IM-16 | 16 | Research with cited primary sources | research | mattpocock/skills › `skills/engineering/research` | MIT | Import | — | P2 |  |
 
 **Not imported** (ideas only):
 
@@ -288,6 +288,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-010 · Always-on context budget and a Model Experience note
 **Self-checks/CI · Thin · P0 · S · Cost · Depends on: — · Sources: N6, N116, D1, D11**
+- **Status.** done — plugins/h-stack/scripts/budget.mjs renders every injection (listing, SessionStart, classifier, SubagentStart, event notes) with ceil(bytes/3) and fails CI over budget; Model Experience notes in hooks/README.md
 - **Problem.** Every always-on line costs attention and money on every turn, and stacks only grow.
 - **Mechanism.**
   - **Native measurement.** `/skill-doctor` shows each skill's context cost and use count.
@@ -310,6 +311,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-011 · Cache-safe injection and snapshot tests
 **Self-checks/CI · Build · P0 · S · Cost · Depends on: HS-012 · Sources: N8, N115, D2, D7**
+- **Status.** done — lib/core.mjs stable serialisation; digest-gated notes; scripts/snapshot.mjs pipes 78 canned payloads through every hook twice and diffs against *.expected
 - **Problem.** One timestamp or reordered key in injected text breaks the prompt cache.
 - **Mechanism.**
   - All injected text is appended `additionalContext`, serialised deterministically (sorted keys, no timestamps or random IDs).
@@ -324,6 +326,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-012 · Hook and script contract
 **Self-checks/CI · Build · P0 · S · Cost · Depends on: — · Sources: N113, C10, C12, C31, D14**
+- **Status.** done — lib/core.mjs runHook/refusal/clip/logFull; scripts/contract.mjs checks FAILURE_MODE vs onFailure, explicit timeouts, closed hooks deny on crash; snapshot.mjs checks <=10 lines, refusal format, no allow
 - **Problem.** Noisy hook output fills context. Crashed guards fail open silently. Vague refusals make the agent loop.
 - **Mechanism.** Every H-Stack hook and script:
   - prints ≤10 stdout lines and logs the rest to a file whose path it prints;
@@ -747,6 +750,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-045 · `.h-stack/` folder for data with no native home
 **State & memory · Thin · P0 · S · Reliability · Depends on: HS-012 · Sources: none of its own (infrastructure serving HS-027, HS-046, HS-047, HS-052, HS-053)**
+- **Status.** done — lib/core.mjs stateDir/sessionDir/appendLine (single O_APPEND write <=4 KB), redaction, retention sweep in session-start.mjs; bin/hs is the agent's only writer
 - **Problem.** Receipts, assumptions, decisions, failures, the wishlist and telemetry have no home in Claude Code. Memory and rules do.
 - **Mechanism.**
   - **Location.** A gitignored `.h-stack/` per project, used *only* for those items (justified one by one in [ARCHITECTURE §4](ARCHITECTURE.md#4-state-native-homes-first-then-h-stack)).
@@ -1113,6 +1117,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-081 · Adopt-and-adapt procedure and skill standard
 **Docs · Build · P0 · S · Reliability · Depends on: — · Sources: C29, N56, C32, N44, N28**
+- **Status.** done — docs/adopt-and-adapt.md; checked by scripts/lint.mjs
 - **Problem.** Imports bring house styles, size and licence obligations. Generic or model-written skills lower pass rates.
 - **Mechanism.** One short doc used for every import (checked by HS-013):
   1. Pick the top-ranked permissive skill.
@@ -1135,6 +1140,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-082 · Native-first map
 **Docs · Build · P0 · S · Cost · Depends on: — · Sources: N34**
+- **Status.** done — ARCHITECTURE.md §2 table; every built item names its native feature and thin addition
 - **Problem.** Stacks reinvent loops, memory, schedulers and guards that Claude Code now ships.
 - **Mechanism.** The "Need → native feature → H-Stack's thin addition → evidence" table in [ARCHITECTURE §2](ARCHITECTURE.md#2-need--native-feature--h-stacks-thin-addition). Any item that duplicates a native feature is cut or turned into configuration.
 - **Evidence.** The 00b Claude Code features row; dsh "not worth copying"; the memory, skills, hooks and mods docs (2026-11-11).

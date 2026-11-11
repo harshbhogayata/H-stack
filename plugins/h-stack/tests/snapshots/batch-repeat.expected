@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolBatch","additionalContext":"H-Stack: Read ran 3x in a row with identical input; last result: \"file not found\". Retry only on a new signal."}}

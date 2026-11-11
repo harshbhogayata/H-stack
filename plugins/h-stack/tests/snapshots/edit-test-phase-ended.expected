@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by read-only-tests: editing the existing test file tests/index.test.js outside a declared test-writing step (- toBe(2) | + toBe(3)). To proceed: declare the step with hs phase test before implementation edits, or the user approves this diff."}}

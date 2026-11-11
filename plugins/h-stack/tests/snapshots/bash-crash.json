@@ -1,0 +1,24 @@
+{
+  "hook": "gate-bash.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "ls"
+    },
+    "tool_use_id": "tu1"
+  },
+  "setup": {
+    "files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"lodash\": \"^4\"\n  }\n}",
+      "src/index.js": "import _ from 'lodash';\n",
+      "tests/index.test.js": "test('adds', () => { expect(1 + 1).toBe(2); });\n"
+    }
+  },
+  "env": {
+    "HSTACK_TEST_CRASH": "gate-bash"
+  }
+}

@@ -1,0 +1,175 @@
+#!/usr/bin/env node
+// hs: the only way the agent writes H-Stack state (ARCHITECTURE §4.6). Output: one JSON {status, reason}.
+// Commands: assume, verify-assumption, decide, failed, wish, resolve-wish, stop, phase, rubric,
+//           goal, lesson, vote, status.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const core = await import(path.join(here, '..', 'lib', 'core.mjs'));
+const { appendFailure } = await import(path.join(here, '..', 'lib', 'append.mjs'));
+const { validateLessonText } = await import(path.join(here, '..', 'lib', 'lessons.mjs'));
+const { isTestPath } = await import(path.join(here, '..', 'lib', 'tests.mjs'));
+const { appendLine, readJsonl, latestById, sessionDir, stateDir, activeSession, readJson, writeJsonAtomic, loadConfig, redact } = core;
+
+const proj = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+const sid = process.env.HSTACK_SESSION || activeSession(proj) || 'no-session';
+const dir = sessionDir(proj, sid);
+const route = readJson(path.join(dir, 'route.json'), {});
+const turn = route.prompt_id || null;
+
+const out = (status, reason, extra = {}) => { process.stdout.write(JSON.stringify({ status, reason, ...extra }) + '\n'); process.exit(status === 'error' ? 1 : 0); };
+const [cmd, ...rest] = process.argv.slice(2);
+function flags(args) {
+  const pos = []; const f = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) { const k = args[i].slice(2); const v = args[i + 1] && !args[i + 1].startsWith('--') ? args[++i] : true; f[k] = v; } else pos.push(args[i]);
+  }
+  return { pos, f };
+}
+const nextId = (file, prefix) => `${prefix}${latestById(readJsonl(file)).length + 1}`;
+const { pos, f } = flags(rest);
+const F = (name) => path.join(dir, name);
+
+switch (cmd) {
+  case 'assume': {
+    if (!pos[0]) out('error', 'usage: hs assume "<assumption>" --check "<how to verify>"');
+    const id = nextId(F('assumptions.jsonl'), 'A');
+    appendLine(F('assumptions.jsonl'), { id, text: pos.join(' '), check: f.check || '', status: 'open', turn, ts: Date.now() }, proj);
+    out('ok', `${id} recorded; list it in the reply and resolve it before stopping (hs verify-assumption ${id} --status verified --receipt r-…)`);
+    break;
+  }
+  case 'verify-assumption': {
+    const rows = latestById(readJsonl(F('assumptions.jsonl')));
+    const a = rows.find((r) => r.id === pos[0]);
+    if (!a) out('error', `no assumption ${pos[0]}`);
+    const status = f.status || 'verified';
+    if (!['verified', 'refuted', 'handed_off'].includes(status)) out('error', 'status must be verified, refuted or handed_off');
+    if (status === 'verified') {
+      const receipts = readJsonl(F('ledger.jsonl')).filter((r) => r.kind === 'receipt');
+      if (!f.receipt || !receipts.some((r) => r.id === f.receipt && r.exit === 0)) out('error', `verified needs --receipt <id> of a passing command (known: ${receipts.slice(-3).map((r) => r.id).join(', ') || 'none'})`);
+    }
+    appendLine(F('assumptions.jsonl'), { id: a.id, status, receipt: f.receipt || null, note: f.note || null, ts: Date.now() }, proj);
+    out('ok', `${a.id} ${status}`);
+    break;
+  }
+  case 'decide': {
+    if (!pos[0]) out('error', 'usage: hs decide "<what>" --why "<why>" --scope "<scope>" --evidence measured|inferred|guessed');
+    const ev = f.evidence || 'inferred';
+    if (!['measured', 'inferred', 'guessed'].includes(ev)) out('error', 'evidence must be measured, inferred or guessed');
+    const id = nextId(F('decisions.jsonl'), 'D');
+    appendLine(F('decisions.jsonl'), { id, what: pos.join(' '), why: f.why || '', scope: f.scope || '', evidence: ev, agent: process.env.HSTACK_AGENT || 'main', ts: Date.now() }, proj);
+    const clash = latestById(readJsonl(F('decisions.jsonl'))).filter((d) => d.id !== id && d.scope && d.scope === f.scope && d.agent !== (process.env.HSTACK_AGENT || 'main'));
+    out('ok', `${id} recorded${clash.length ? `; same scope as ${clash.map((d) => d.id).join(', ')} by another agent: reconcile before merge` : ''}`);
+    break;
+  }
+  case 'failed': {
+    if (!pos[0]) out('error', 'usage: hs failed "<what was tried>" --because "<why it failed>"');
+    appendFailure(proj, dir, { tried: pos.join(' '), failed_because: f.because || '', source: 'agent' });
+    out('ok', 'failure recorded; it survives compaction');
+    break;
+  }
+  case 'wish': {
+    if (!pos[0]) out('error', 'usage: hs wish "<need>" --why "<why>" --resume "<task to resume>"');
+    const file = path.join(stateDir(proj), 'wishlist.jsonl');
+    const id = nextId(file, 'W');
+    appendLine(file, { id, need: pos.join(' '), why: f.why || '', resume_task: f.resume || '', status: 'open', ts: Date.now() }, proj);
+    out('ok', `${id} parked; it is listed at the next session start`);
+    break;
+  }
+  case 'resolve-wish': {
+    const file = path.join(stateDir(proj), 'wishlist.jsonl');
+    const w = latestById(readJsonl(file)).find((r) => r.id === pos[0]);
+    if (!w) out('error', `no wish ${pos[0]}`);
+    appendLine(file, { id: w.id, status: 'resolved', resolution: f.with || '', ts: Date.now() }, proj);
+    out('ok', `${w.id} resolved; resume: ${w.resume_task || '(no task recorded)'}`);
+    break;
+  }
+  case 'stop': {
+    if (!pos[0]) out('error', 'usage: hs stop "<reason, e.g. the tests contradict the spec>"');
+    appendLine(F('stops.jsonl'), { turn, reason: pos.join(' '), ts: Date.now() }, proj);
+    out('ok', 'honest stop recorded; explain the reason to the user and stop');
+    break;
+  }
+  case 'phase': {
+    const ph = pos[0];
+    if (!['test', 'implement'].includes(ph)) out('error', 'usage: hs phase test|implement');
+    if (ph === 'test') {
+      const config = loadConfig(proj);
+      const srcEdits = readJsonl(F('ledger.jsonl')).filter((r) => r.kind === 'edit' && r.turn === turn && r.path && !isTestPath(r.path, proj, config));
+      if (srcEdits.length) out('error', `the test-writing step must come before implementation edits; ${srcEdits.length} source edit(s) already made this turn (${srcEdits[0].path}). Ask the user before changing existing tests.`);
+    }
+    appendLine(F('phase.jsonl'), { phase: ph, turn, ts: Date.now() }, proj);
+    out('ok', ph === 'test' ? 'test-writing step open; it ends at the first non-test edit' : 'implementation step');
+    break;
+  }
+  case 'rubric': {
+    const sub = pos[0];
+    const file = F('rubric.json');
+    const cur = readJson(file, null);
+    if (sub === 'set') {
+      const src = pos[1];
+      if (!src) out('error', 'usage: hs rubric set <rubric.json|yaml> (items: [{id, level: must|important|nice, text}])');
+      const raw = fs.readFileSync(src, 'utf8');
+      let items;
+      try { items = JSON.parse(raw).items; } catch {
+        const { parseYaml } = await import(path.join(here, '..', 'lib', 'yaml.mjs'));
+        items = parseYaml(raw).items;
+      }
+      if (!Array.isArray(items) || !items.length) out('error', 'rubric needs a non-empty items list');
+      for (const it of items) if (!it.id || !['must', 'important', 'nice'].includes(it.level) || !it.text) out('error', `bad rubric item ${JSON.stringify(it).slice(0, 80)}`);
+      writeJsonAtomic(file, { items, graded: {} });
+      out('ok', `rubric with ${items.length} items set (${items.filter((i) => i.level === 'must').length} must); show it to the user to strike items`);
+    }
+    if (!cur) out('error', 'no rubric set');
+    if (sub === 'strike') { for (const id of pos.slice(1)) { const it = cur.items.find((i) => i.id === id); if (it) it.struck = true; } writeJsonAtomic(file, cur); out('ok', `struck ${pos.slice(1).join(', ')}`); }
+    if (sub === 'grade') {
+      const g = JSON.parse(fs.readFileSync(pos[1], 'utf8'));
+      for (const [id, v] of Object.entries(g.graded || g)) cur.graded[id] = { pass: Boolean(v.pass), evidence: String(v.evidence || '').slice(0, 300) };
+      writeJsonAtomic(file, cur);
+      const unmet = cur.items.filter((i) => i.level === 'must' && !i.struck && !cur.graded[i.id]?.pass);
+      out('ok', `graded; ${unmet.length} must item(s) unmet${unmet.length ? ': ' + unmet.map((i) => i.id).join(', ') : ''}`);
+    }
+    out('error', 'usage: hs rubric set|strike|grade');
+    break;
+  }
+  case 'goal': {
+    const file = F('goal.json');
+    const cur = readJson(file, {});
+    if (pos[0] === 'set') { writeJsonAtomic(file, { goal: pos.slice(1).join(' '), step: '', recite: Boolean(f.recite) }); out('ok', 'goal recorded'); }
+    if (pos[0] === 'step') { writeJsonAtomic(file, { ...cur, step: pos.slice(1).join(' ') }); out('ok', 'step recorded'); }
+    out('error', 'usage: hs goal set "<goal>" [--recite] | hs goal step "<current step>"');
+    break;
+  }
+  case 'lesson': {
+    if (pos[0] !== 'propose' && pos[0] !== 'check') out('error', 'usage: hs lesson propose <draft.md> | hs lesson check <file.md>');
+    const text = fs.readFileSync(pos[1], 'utf8');
+    const res = validateLessonText(text);
+    if (!res.ok) out('error', `lesson rejected: ${res.errors.slice(0, 4).join('; ')}`);
+    if (pos[0] === 'check') out('ok', 'lesson file valid');
+    const target = path.join(proj, '.claude', 'rules', 'lessons', path.basename(pos[1]));
+    out('ok', `valid. Offer the user a reviewed PR that adds ${path.relative(proj, target)}; never commit it unasked.`);
+    break;
+  }
+  case 'vote': {
+    const [lessonId, vote] = pos;
+    if (!lessonId || !['helpful', 'harmful'].includes(vote)) out('error', 'usage: hs vote <lesson-id> helpful|harmful --episode "<ref>"');
+    const file = path.join(stateDir(proj), 'lessons-votes.jsonl');
+    appendLine(file, { lesson_id: lessonId, vote, episode_ref: f.episode || '', ts: Date.now() }, proj);
+    const votes = readJsonl(file).filter((v) => v.lesson_id === lessonId);
+    const harm = votes.filter((v) => v.vote === 'harmful').length; const help = votes.length - harm;
+    out('ok', `vote recorded (${help} helpful, ${harm} harmful)${harm > help ? '; propose removing this lesson in a PR' : ''}`);
+    break;
+  }
+  case 'status': {
+    const a = latestById(readJsonl(F('assumptions.jsonl')));
+    const d = latestById(readJsonl(F('decisions.jsonl')));
+    const r = readJsonl(F('ledger.jsonl')).filter((x) => x.kind === 'receipt');
+    const w = latestById(readJsonl(path.join(proj, '.h-stack', 'wishlist.jsonl'))).filter((x) => x.status === 'open');
+    out('ok', redact(`session ${sid}: ${r.length} receipts (last ${r.slice(-1).map((x) => `${x.id} exit ${x.exit}`).join('') || 'none'}), ${a.filter((x) => x.status === 'open').length} open assumptions, ${d.length} decisions, ${w.length} open wishes`));
+    break;
+  }
+  default:
+    out('error', 'usage: hs assume|verify-assumption|decide|failed|wish|resolve-wish|stop|phase|rubric|goal|lesson|vote|status');
+}

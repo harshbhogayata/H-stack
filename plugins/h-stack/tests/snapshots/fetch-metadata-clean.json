@@ -1,0 +1,14 @@
+{
+  "hook": "gate-fetch.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "WebFetch",
+    "tool_input": {
+      "url": "http://169.254.169.254/latest/meta-data/iam"
+    }
+  },
+  "setup": {}
+}

@@ -1,0 +1,33 @@
+{
+  "hook": "session-start.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "SessionStart",
+    "source": "compact"
+  },
+  "setup": {
+    "files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"lodash\": \"^4\"\n  }\n}",
+      "src/index.js": "import _ from 'lodash';\n",
+      "tests/index.test.js": "test('adds', () => { expect(1 + 1).toBe(2); });\n"
+    },
+    "state": {
+      "wishlist.jsonl": [
+        {
+          "id": "W1",
+          "need": "staging DB password",
+          "status": "open"
+        }
+      ],
+      "sessions/s1/failures.jsonl": [
+        {
+          "tried": "bump node to 22",
+          "failed_because": "native addon fails to build"
+        }
+      ],
+      "sessions/s1/checkpoints/001.md": "# Checkpoint 001"
+    }
+  }
+}

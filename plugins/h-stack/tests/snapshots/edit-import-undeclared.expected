@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by dependency-gate: npm:left-pad-fresh about 12 downloads a week (floor 50); npm:left-pad-fresh first published 10 days ago (minimum 30). To proceed: check the package with the user before adding it."}}

@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by dependency-gate: pypi:requests registry unreachable (offline (fixture)), so existence, age and usage are unchecked. To proceed: check the package name and source with the user."}}

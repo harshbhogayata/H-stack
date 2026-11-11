@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Blocked by irreversible-gate: effect=send/write; tool=mcp__slack__send_message; arguments={\"channel\":\"C1\",\"text\":\"deployed\"}. To proceed: the user approves this exact call; changed arguments ask again."}}

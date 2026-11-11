@@ -1,0 +1,21 @@
+{
+  "hook": "memory-shadow.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "$PROJ/mem/MEMORY.md"
+    }
+  },
+  "setup": {
+    "files": {
+      ".claude/settings.json": "{\"autoMemoryDirectory\":\"$PROJ/mem\"}",
+      "mem/MEMORY.md": "- Deploy with `make deploy-staging` then run `scripts/smoke.sh --env staging`\n- Use pnpm 9.12\n"
+    },
+    "state": {}
+  },
+  "pre": "memory"
+}

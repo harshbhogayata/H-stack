@@ -1,0 +1,1 @@
+{"decision":"block","reason":"Blocked by stop-gate: 1 background task(s) still running (npm run build). To proceed: run the check and cite its receipt, add a \"Not verified:\" line saying what was not checked, or record an honest stop with hs stop \"<reason>\"."}

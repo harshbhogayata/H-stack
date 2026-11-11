@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUseFailure","additionalContext":"H-Stack: Bash was interrupted; its outcome is unknown. Retry only read-only or idempotent steps."}}

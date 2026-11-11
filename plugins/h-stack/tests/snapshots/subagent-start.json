@@ -1,0 +1,22 @@
+{
+  "hook": "subagent-start.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "SubagentStart",
+    "agent_id": "ag1",
+    "agent_type": "Explore"
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/decisions.jsonl": [
+        {
+          "id": "D1",
+          "what": "store money as integer cents",
+          "evidence": "measured"
+        }
+      ]
+    }
+  }
+}

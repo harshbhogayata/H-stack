@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"H-Stack syntax check: config.json: Expected double-quoted property name in JSON at position 8 (line 1 column 9)\n1| {\"a\": 1,}"}}
