@@ -1,6 +1,6 @@
 # H-Stack — working rules
 
-H-Stack is a **distilled, native-first** Claude Code skill stack: it adopts and adapts the best existing skills (ranked in `research/01–16`), uses Claude Code's built-in systems (CLAUDE.md, `.claude/rules/`, auto memory, skills, hooks, `/goal`, Routines, Workflows, mods, skill-creator) wherever they exist, and builds custom pieces only where nothing exists. Keep it lean.
+H-Stack is a **distilled, native-first** Claude Code skill stack: it adopts and adapts the best existing skills (ranked in `research/01–16`), uses Claude Code's built-in systems (CLAUDE.md, `.claude/rules/`, auto memory, skills, hooks, `/goal`, Routines, Workflows, mods, skill-creator) wherever they exist, and builds custom pieces only where nothing exists. The scope is the full stack (every category and every layer); lean applies to testing and to context cost, not to scope.
 
 ## North star
 Get as much real capability out of the model as a harness can, and prove it with numbers. A skill stack cannot exceed the model's ceiling; it decides how much of that ceiling is reached. Every change must move a metric below or it is cut.

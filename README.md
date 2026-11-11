@@ -1,6 +1,6 @@
 # H-Stack
 
-A lean, native-first Claude Code skill stack: the best existing skills, adopted and adapted, plus custom pieces only where nothing exists.
+A full, native-first Claude Code skill stack: the best existing skills adopted and adapted, every supporting layer built, and custom pieces wherever nothing good exists.
 
 **North star:** get as much real capability out of the model as a harness can (reliability, autonomy horizon, learning over time, judgment, cost), checked with a small smoke test of real tasks. Details in [`CLAUDE.md`](CLAUDE.md#north-star).
 
