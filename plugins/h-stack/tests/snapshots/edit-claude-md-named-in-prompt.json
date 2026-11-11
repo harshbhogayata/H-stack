@@ -1,0 +1,35 @@
+{
+  "hook": "gate-edit.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "$PROJ/CLAUDE.md",
+      "content": "# Notes\n"
+    },
+    "tool_use_id": "tu2"
+  },
+  "setup": {
+    "files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"lodash\": \"^4\"\n  }\n}",
+      "src/index.js": "import _ from 'lodash';\n",
+      "tests/index.test.js": "test('adds', () => { expect(1 + 1).toBe(2); });\n"
+    },
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [
+          "h-stack:writing"
+        ],
+        "rules": [],
+        "prompt_paths": [
+          "CLAUDE.md"
+        ]
+      }
+    }
+  }
+}

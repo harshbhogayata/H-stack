@@ -42,6 +42,7 @@ await runHook('classify', 'open', async (input) => {
     turn_seq: (prev.turn_seq || 0) + 1,
     turn_tree: treeHash(proj),
     trusted_values: trusted,
+    prompt_paths: secretKind ? [] : [...new Set([...prompt.matchAll(/(?:^|[\s`'"(])((?:[\w.-]+\/)*[\w.-]+\.(?:md|json|ya?ml|toml|js|ts|cjs|mjs|ini|cfg|txt))(?=$|[\s`'".,:;)!?])/gi)].map((m) => m[1]))].slice(0, 20),
     scope_numbers: route.override === 'why-that' ? prev.scope_numbers || [] : [...prompt.matchAll(/(?:#|\b(?:issue|pr|pull request)\s+#?)(\d{1,7})\b/gi)].map((m) => m[1]),
   };
   writeJsonAtomic(routeFile, next);

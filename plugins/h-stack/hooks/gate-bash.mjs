@@ -8,7 +8,7 @@ import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadC
 import { classifyBash, credentialExec, ghTargetNumbers, isDryRunLike, manifest } from '../lib/irreversible.mjs';
 import { installTargets, checkPackages } from '../lib/deps.mjs';
 import { parseCommands, exe } from '../lib/shell.mjs';
-import { protectedKind } from '../lib/protected.mjs';
+import { protectedKind, namedInPrompt } from '../lib/protected.mjs';
 import { isTestPath } from '../lib/tests.mjs';
 import { taintedIn, privateDestination } from '../lib/taint.mjs';
 import { logTool } from '../lib/telemetry.mjs';
@@ -141,7 +141,7 @@ export async function decide(input, proj) {
     if (rel.startsWith('..')) continue;
     const kind = protectedKind(rel, config);
     if (kind === 'state') denies.push(refusal('protected-state', `${rel} is H-Stack state written only by hooks and hs`, `use the hs command instead`));
-    else if (kind === 'checker') asks.push(refusal('protected-checker', `the command writes to ${rel}, a CI, agent or test-runner config`, 'the user approves edits to checkers'));
+    else if (kind === 'checker' && !namedInPrompt(rel, route)) asks.push(refusal('protected-checker', `the command writes to ${rel}, a CI, agent or test-runner config`, 'the user approves edits to checkers'));
     else if (isTestPath(rel, proj, config) && !testPhaseActive(dir, input.prompt_id || route.prompt_id, proj, config)) asks.push(refusal('read-only-tests', `the command writes to the test file ${rel} outside a declared test-writing step`, 'declare the step with hs phase test before editing tests, or the user approves'));
   }
 

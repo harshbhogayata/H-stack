@@ -20,6 +20,15 @@ export function protectedKind(rel, config) {
   return null;
 }
 
+// A checker the user named in this turn's own prompt is approved for this turn: the prompt is trusted
+// (T1), and asking again would block the very edit the user requested (measured: CLAUDE.md requests
+// failed 3/3 in headless runs). Matched by full relative path or by file name.
+export function namedInPrompt(rel, route) {
+  const named = (route && route.prompt_paths) || [];
+  const base = rel.split('/').pop().toLowerCase();
+  return named.some((p) => { const q = String(p).toLowerCase().replace(/^\.\//, ''); return q === rel.toLowerCase() || (!q.includes('/') && q === base); });
+}
+
 // Native permission rules proposed at setup (OD-4). Shown to the user before writing.
 export function proposedPermissionRules() {
   return {

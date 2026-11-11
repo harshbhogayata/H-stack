@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, relToProject, git } from '../lib/core.mjs';
 import { isTestPath } from '../lib/tests.mjs';
-import { protectedKind } from '../lib/protected.mjs';
+import { protectedKind, namedInPrompt } from '../lib/protected.mjs';
 import { manifestAdds, importAdds, checkPackages } from '../lib/deps.mjs';
 import { testPhaseActive } from '../lib/phase.mjs';
 import { logTool } from '../lib/telemetry.mjs';
@@ -50,7 +50,7 @@ export async function decide(input, proj) {
   if (!rel.startsWith('..')) {
     const kind = protectedKind(rel, config);
     if (kind === 'state' && !(input.agent_id && rel.includes(`/agents/${input.agent_id}/scratch/`))) denies.push(refusal('protected-state', `${rel} is H-Stack state written only by hooks and hs`, 'use the hs command instead'));
-    else if (kind === 'checker') asks.push(refusal('protected-checker', `${rel} is a CI, agent or test-runner config`, 'the user approves edits to checkers'));
+    else if (kind === 'checker' && !namedInPrompt(rel, route)) asks.push(refusal('protected-checker', `${rel} is a CI, agent or test-runner config`, 'the user approves edits to checkers'));
 
     const exists = fs.existsSync(abs);
     // Test files Claude created in this session are its own new tests, not existing ones: red-green
