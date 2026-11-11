@@ -11,7 +11,7 @@ In Claude Code (desktop app, CLI or web):
 /plugin install h-stack@h-stack
 ```
 
-Skills run as `/h-stack:<skill>`. The repo is private, so the machine needs GitHub access to it.
+No slash commands: H-Stack picks the right skill itself and shows what it picked. See [activation & experience](research/00-activation-and-experience.md). The repo is private, so the machine needs GitHub access to it.
 
 To update after new commits: `/plugin` → Marketplaces → `h-stack` → update (or enable auto-update).
 
@@ -19,6 +19,7 @@ To update after new commits: `/plugin` → Marketplaces → `h-stack` → update
 
 | # | Category | Status |
 |---|---|---|
+| 00 | Activation & experience | Researched, design proposed |
 | 01 | Core rules & principles | Researched |
 | 02 | Workflow orchestration | Researched |
 | 03 | Ideation & product thinking | Researched |

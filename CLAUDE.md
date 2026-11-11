@@ -14,6 +14,9 @@ H-Stack is a Claude Code skill stack built **from scratch**. Other stacks (super
 In cloud sessions `github.com` and `api.github.com` are blocked for repos not attached to the session; `raw.githubusercontent.com` works with `curl`.
 
 ## Building skills
+- **No slash commands.** Every skill sets `user-invocable: false`; activation comes from the router, classifier and event triggers in `research/00-activation-and-experience.md`.
+- Lead each `description` with the use case; trigger phrases go in `when_to_use`. Combined cap: 1,536 characters.
+- Hook and classifier text is factual ("Relevant skill: X because Y"), never "YOU MUST".
 - Write our own SKILL.md files. Take ideas and mechanisms, not text.
 - Never copy text from copyleft sources (GPL, AGPL, CC BY-SA). Short quotes from MIT/Apache sources need attribution in `research/`.
 - Credit inspirations in the category's research file under "H-Stack decision".
