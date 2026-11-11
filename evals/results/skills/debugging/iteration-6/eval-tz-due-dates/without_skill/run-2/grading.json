@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+      "passed": false,
+      "evidence": "The final message reports a Pacific-zone result against the old code (\"Running `TZ=America/Los_Angeles`, net30 from 2026-03-01 gave **2026-03-30** instead of 2026-03-31\"), but there is no transcript showing it was run before the fix rather than afterwards against the old code, so the ordering is amb"
+    },
+    {
+      "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+      "passed": true,
+      "evidence": "The message says \"`addDays` called `new Date('2026-03-01')`, which JavaScript reads as midnight UTC. It then read the result back with local-time getters (`getDate()`, `getMonth()`). On a machine west of UTC, midnight UTC is still the previous evening locally, so every due date came out one day earl"
+    },
+    {
+      "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+      "passed": true,
+      "evidence": "The diff parses with `new Date(Date.UTC(y, mo - 1, d))`, does the arithmetic with `d.setUTCDate(d.getUTCDate() + days)`, and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no zone-specific or conditional adjustment."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

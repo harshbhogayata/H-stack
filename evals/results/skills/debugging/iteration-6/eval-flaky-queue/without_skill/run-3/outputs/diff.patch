@@ -1,0 +1,45 @@
+diff --git a/src/queue.js b/src/queue.js
+index 1d07d0c..a4e6ab6 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -1,8 +1,26 @@
+ class Queue {
+-  constructor() { this.done = []; }
++  constructor() {
++    this.done = [];
++    this.pending = 0;
++    this._idleWaiters = [];
++  }
+   push(job) {
++    this.pending++;
+     // Jobs finish after a variable delay, like real I/O.
+-    setTimeout(() => { this.done.push(job); }, 5 + Math.floor(Math.random() * 40));
++    setTimeout(() => {
++      this.done.push(job);
++      this.pending--;
++      if (this.pending === 0) {
++        const waiters = this._idleWaiters;
++        this._idleWaiters = [];
++        waiters.forEach((resolve) => resolve());
++      }
++    }, 5 + Math.floor(Math.random() * 40));
++  }
++  // Resolves once every pushed job has finished.
++  onIdle() {
++    if (this.pending === 0) return Promise.resolve();
++    return new Promise((resolve) => this._idleWaiters.push(resolve));
+   }
+ }
+ module.exports = { Queue };
+diff --git a/test/queue.test.js b/test/queue.test.js
+index ee2a039..41e6e00 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -5,6 +5,6 @@ const { Queue } = require('../src/queue');
+ test('processes all jobs', async () => {
+   const q = new Queue();
+   q.push('a'); q.push('b'); q.push('c');
+-  await new Promise((r) => setTimeout(r, 25));
++  await q.onIdle();
+   assert.equal(q.done.length, 3);
+ });

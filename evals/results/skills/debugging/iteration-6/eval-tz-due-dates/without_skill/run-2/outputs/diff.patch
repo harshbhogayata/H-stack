@@ -1,0 +1,117 @@
+diff --git a/lib/dates.js b/lib/dates.js
+index d5ffd0a..818a7f4 100644
+--- a/lib/dates.js
++++ b/lib/dates.js
+@@ -1,15 +1,33 @@
++// Invoice dates are calendar dates ("YYYY-MM-DD"), not instants in time.
++// All arithmetic is done in UTC so the result never depends on the server's
++// local timezone. Do not use local getters (getDate, getMonth, ...) here:
++// `new Date('YYYY-MM-DD')` is parsed as UTC midnight, and reading it back with
++// local getters shifts it to the previous day anywhere west of UTC.
++
++const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
++
+ function pad(n) {
+   return String(n).padStart(2, '0');
+ }
+ 
++// Formats a Date's UTC calendar date as YYYY-MM-DD.
+ function formatDate(d) {
+-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
++  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
++}
++
++function parseDate(isoDate) {
++  const m = ISO_DATE.exec(isoDate);
++  if (!m) throw new Error(`invalid date (expected YYYY-MM-DD): ${isoDate}`);
++  const [, y, mo, d] = m.map(Number);
++  const date = new Date(Date.UTC(y, mo - 1, d));
++  if (formatDate(date) !== isoDate) throw new Error(`invalid date: ${isoDate}`);
++  return date;
+ }
+ 
+ function addDays(isoDate, days) {
+-  const d = new Date(isoDate);
+-  d.setDate(d.getDate() + days);
++  const d = parseDate(isoDate);
++  d.setUTCDate(d.getUTCDate() + days);
+   return formatDate(d);
+ }
+ 
+-module.exports = { formatDate, addDays };
++module.exports = { formatDate, parseDate, addDays };
+diff --git a/test/invoice.test.js b/test/invoice.test.js
+index 4d0ef3a..0622f8c 100644
+--- a/test/invoice.test.js
++++ b/test/invoice.test.js
+@@ -2,18 +2,62 @@ const test = require('node:test');
+ const assert = require('node:assert/strict');
+ const { dueDate } = require('../lib/invoice');
+ 
+-test('net30 adds thirty days', () => {
+-  assert.equal(dueDate({ issued: '2026-03-01', terms: 'net30' }), '2026-03-31');
+-});
++// Due dates must not depend on the server's timezone. CI runs in UTC, which
++// hid an off-by-one for customers west of UTC (e.g. California), so every
++// case below runs under a spread of timezones, including both sides of UTC
++// and the extremes.
++const TIMEZONES = [
++  'UTC',
++  'America/Los_Angeles', // UTC-8/-7, where the bug was reported
++  'Pacific/Honolulu',    // UTC-10
++  'Pacific/Pago_Pago',   // UTC-11
++  'Asia/Tokyo',          // UTC+9
++  'Pacific/Kiritimati',  // UTC+14
++];
+ 
+-test('net15 crosses a month boundary', () => {
+-  assert.equal(dueDate({ issued: '2026-01-20', terms: 'net15' }), '2026-02-04');
+-});
++const CASES = [
++  ['net30 adds thirty days', { issued: '2026-03-01', terms: 'net30' }, '2026-03-31'],
++  ['net15 crosses a month boundary', { issued: '2026-01-20', terms: 'net15' }, '2026-02-04'],
++  ['due on receipt is the issue date', { issued: '2026-05-12', terms: 'due_on_receipt' }, '2026-05-12'],
++  ['net30 crosses a year boundary', { issued: '2026-12-15', terms: 'net30' }, '2027-01-14'],
++  ['net15 across US DST start', { issued: '2026-03-01', terms: 'net15' }, '2026-03-16'],
++  ['net15 across US DST end', { issued: '2026-10-25', terms: 'net15' }, '2026-11-09'],
++  ['net30 through a leap day', { issued: '2028-02-15', terms: 'net30' }, '2028-03-16'],
++  ['first of the month stays put', { issued: '2026-06-01', terms: 'due_on_receipt' }, '2026-06-01'],
++];
++
++function withTimezone(tz, fn) {
++  const original = process.env.TZ;
++  process.env.TZ = tz;
++  try {
++    return fn();
++  } finally {
++    if (original === undefined) delete process.env.TZ;
++    else process.env.TZ = original;
++  }
++}
+ 
+-test('due on receipt is the issue date', () => {
+-  assert.equal(dueDate({ issued: '2026-05-12', terms: 'due_on_receipt' }), '2026-05-12');
++test('timezone switching takes effect (guards against this suite silently testing UTC only)', () => {
++  const offsets = TIMEZONES.map((tz) =>
++    withTimezone(tz, () => new Date('2026-01-15T00:00:00Z').getTimezoneOffset()),
++  );
++  assert.equal(new Set(offsets).size, TIMEZONES.length);
+ });
+ 
++for (const tz of TIMEZONES) {
++  for (const [name, invoice, expected] of CASES) {
++    test(`${name} [${tz}]`, () => {
++      withTimezone(tz, () => assert.equal(dueDate(invoice), expected));
++    });
++  }
++}
++
+ test('unknown terms are rejected', () => {
+   assert.throws(() => dueDate({ issued: '2026-05-12', terms: 'net45' }), /unknown payment terms/);
+ });
++
++test('malformed or impossible issue dates are rejected', () => {
++  for (const issued of ['2026-5-12', '05/12/2026', '2026-02-30', '2026-05-12T00:00:00Z', '']) {
++    assert.throws(() => dueDate({ issued, terms: 'net30' }), /invalid date/, issued);
++  }
++});

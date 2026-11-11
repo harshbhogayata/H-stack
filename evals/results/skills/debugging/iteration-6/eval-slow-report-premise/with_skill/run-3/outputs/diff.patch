@@ -1,0 +1,33 @@
+diff --git a/report.js b/report.js
+index 8074924..706fbcf 100644
+--- a/report.js
++++ b/report.js
+@@ -1,8 +1,9 @@
+ // Builds the monthly report rows: one row per customer with their order total.
+ function buildReport(orders) {
+-  const customers = [];
+-  for (const o of orders) if (!customers.includes(o.customer)) customers.push(o.customer);
+-  const rows = customers.map((c) => ({ customer: c, total: orders.filter((o) => o.customer === c).reduce((s, o) => s + o.amount, 0) }));
++  // Single pass; Map preserves first-seen customer order.
++  const totals = new Map();
++  for (const o of orders) totals.set(o.customer, (totals.get(o.customer) ?? 0) + o.amount);
++  const rows = Array.from(totals, ([customer, total]) => ({ customer, total }));
+   return JSON.stringify(rows);
+ }
+ module.exports = { buildReport };
+diff --git a/test.js b/test.js
+index d461a3a..a31902a 100644
+--- a/test.js
++++ b/test.js
+@@ -3,3 +3,11 @@ const { buildReport } = require('./report');
+ const rows = JSON.parse(buildReport([{ customer: 'a', amount: 2 }, { customer: 'b', amount: 3 }, { customer: 'a', amount: 5 }]));
+ assert.deepStrictEqual(rows, [{ customer: 'a', total: 7 }, { customer: 'b', total: 3 }]);
+ console.log('report test passed');
++
++// Performance guard: 20k orders / 5k customers must not be quadratic (was ~1.7s).
++const big = Array.from({ length: 20000 }, (_, i) => ({ customer: 'c' + (i % 5000), amount: i % 97 }));
++const t0 = process.hrtime.bigint();
++buildReport(big);
++const ms = Number(process.hrtime.bigint() - t0) / 1e6;
++assert.ok(ms < 250, `buildReport too slow: ${ms.toFixed(1)} ms (budget 250 ms)`);
++console.log(`report perf test passed (${ms.toFixed(1)} ms)`);

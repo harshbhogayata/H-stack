@@ -1,0 +1,51 @@
+diff --git a/lib/settings.js b/lib/settings.js
+index db4b0af..5eeecfc 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,7 +1,15 @@
+ const path = require('path');
+ 
++// require() caches the parsed JSON and hands every caller the same object.
++// Freeze it and give each caller its own copy, so a caller that mutates
++// the result (e.g. Object.assign(getDefaults(), prefs)) can't change the
++// defaults seen by everyone else.
++const DEFAULTS = Object.freeze(
++  require(path.join(__dirname, '..', 'config', 'defaults.json'))
++);
++
+ function getDefaults() {
+-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));
++  return { ...DEFAULTS };
+ }
+ 
+ module.exports = { getDefaults };
+diff --git a/test/billing.test.js b/test/billing.test.js
+index 091559a..335f0eb 100644
+--- a/test/billing.test.js
++++ b/test/billing.test.js
+@@ -2,6 +2,7 @@ const test = require('node:test');
+ const assert = require('node:assert/strict');
+ const { formatTotal, refundTotal } = require('../lib/money');
+ const { createCustomer } = require('../lib/customers');
++const { getDefaults } = require('../lib/settings');
+ 
+ test('formats an invoice total', () => {
+   assert.equal(formatTotal(1230), '12.30 EUR');
+@@ -20,3 +21,17 @@ test('creates a customer with their own preferences', () => {
+ test('formats a refund', () => {
+   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');
+ });
++
++// Regression: createCustomer used to Object.assign prefs onto the cached
++// defaults object, so one customer's currency leaked into every later total.
++test('customer preferences never leak into shared defaults', () => {
++  createCustomer({ id: 'c2', name: 'Bo', prefs: { currency: 'USD', precision: 0 } });
++  assert.deepEqual(getDefaults(), { currency: 'EUR', precision: 2, locale: 'de-DE' });
++  assert.equal(refundTotal([{ cents: 100 }]), '-1.00 EUR');
++});
++
++test('mutating returned defaults does not affect later callers', () => {
++  const d = getDefaults();
++  d.currency = 'JPY';
++  assert.equal(getDefaults().currency, 'EUR');
++});

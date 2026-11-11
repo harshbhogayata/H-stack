@@ -1,0 +1,55 @@
+diff --git a/lib/customers.js b/lib/customers.js
+index b3815fc..c41fbd3 100644
+--- a/lib/customers.js
++++ b/lib/customers.js
+@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');
+ 
+ function createCustomer({ id, name, prefs = {} }) {
+   if (!id) throw new Error('customer id is required');
+-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };
++  return { id, name, prefs: { ...getDefaults(), ...prefs } };
+ }
+ 
+ module.exports = { createCustomer };
+diff --git a/lib/settings.js b/lib/settings.js
+index db4b0af..c7182f2 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,7 +1,13 @@
+ const path = require('path');
+ 
++// Loaded once and frozen so no caller can mutate the shared defaults.
++const DEFAULTS = Object.freeze(
++  require(path.join(__dirname, '..', 'config', 'defaults.json'))
++);
++
++// Returns a fresh copy each call; callers may safely modify the result.
+ function getDefaults() {
+-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));
++  return { ...DEFAULTS };
+ }
+ 
+ module.exports = { getDefaults };
+diff --git a/test/billing.test.js b/test/billing.test.js
+index 091559a..d2d613d 100644
+--- a/test/billing.test.js
++++ b/test/billing.test.js
+@@ -17,6 +17,18 @@ test('creates a customer with their own preferences', () => {
+   assert.equal(c.prefs.precision, 2);
+ });
+ 
++test('customer preferences do not leak into global defaults', () => {
++  createCustomer({ id: 'c2', name: 'Bob', prefs: { currency: 'JPY', precision: 0 } });
++  assert.equal(formatTotal(1230), '12.30 EUR');
++});
++
++test('getDefaults returns an independent copy each call', () => {
++  const { getDefaults } = require('../lib/settings');
++  const d = getDefaults();
++  d.currency = 'XXX';
++  assert.equal(getDefaults().currency, 'EUR');
++});
++
+ test('formats a refund', () => {
+   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');
+ });

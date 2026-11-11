@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+      "passed": true,
+      "evidence": "The diff freezes the cached `require` result as DEFAULTS, and `getDefaults()` now returns `{ ...DEFAULTS }`, so `Object.assign(getDefaults(), prefs)` in createCustomer can no longer write to the shared object; the refund code and the test order are unchanged."
+    },
+    {
+      "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+      "passed": true,
+      "evidence": "The message says \"The customer test runs just before the refund test and sets `currency: 'USD'`... That's why the refund test passed when run alone and failed in the full suite.\""
+    },
+    {
+      "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+      "passed": true,
+      "evidence": "The message reports \"Before the fix: 3 pass, 3 fail (the refund test plus both new tests). After: 6 pass, 0 fail.\" It does not say how the unfixed code was restored, but it does state that the new tests failed before the fix and pass after it."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

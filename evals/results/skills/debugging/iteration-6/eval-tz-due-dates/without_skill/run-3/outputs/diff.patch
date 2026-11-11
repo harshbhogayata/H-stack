@@ -1,0 +1,106 @@
+diff --git a/lib/dates.js b/lib/dates.js
+index d5ffd0a..4b2bb5d 100644
+--- a/lib/dates.js
++++ b/lib/dates.js
+@@ -1,15 +1,34 @@
++// Invoice dates are calendar dates ("YYYY-MM-DD"), not instants in time.
++// All arithmetic is done in UTC so the result never depends on the timezone
++// of the machine running the code. Do not use local-time getters/setters
++// (getDate, setDate, getMonth, ...) here: `new Date('YYYY-MM-DD')` parses as
++// UTC midnight, which is the *previous day* in local time west of UTC.
++
++const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
++
+ function pad(n) {
+   return String(n).padStart(2, '0');
+ }
+ 
++function parseDate(isoDate) {
++  const m = ISO_DATE.exec(isoDate);
++  if (!m) throw new Error(`invalid date (expected YYYY-MM-DD): ${isoDate}`);
++  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
++  const date = new Date(Date.UTC(y, mo - 1, d));
++  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== mo - 1 || date.getUTCDate() !== d) {
++    throw new Error(`invalid date: ${isoDate}`);
++  }
++  return date;
++}
++
+ function formatDate(d) {
+-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
++  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+ }
+ 
+ function addDays(isoDate, days) {
+-  const d = new Date(isoDate);
+-  d.setDate(d.getDate() + days);
++  const d = parseDate(isoDate);
++  d.setUTCDate(d.getUTCDate() + days);
+   return formatDate(d);
+ }
+ 
+-module.exports = { formatDate, addDays };
++module.exports = { parseDate, formatDate, addDays };
+diff --git a/test/timezones.test.js b/test/timezones.test.js
+new file mode 100644
+index 0000000..7f3ba80
+--- /dev/null
++++ b/test/timezones.test.js
+@@ -0,0 +1,57 @@
++// Regression guard: due dates must not depend on the host timezone.
++// The original bug (dates one day early for California customers) passed CI
++// because CI runs in UTC. Each case here is evaluated in a child process with
++// TZ forced, so the suite catches the bug no matter where it runs.
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { execFileSync } = require('node:child_process');
++const path = require('node:path');
++
++const TIMEZONES = [
++  'UTC',
++  'America/Los_Angeles', // the reported bug
++  'America/New_York',
++  'Pacific/Pago_Pago',   // UTC-11
++  'Pacific/Kiritimati',  // UTC+14
++  'Asia/Kolkata',        // non-whole-hour offset
++  'Europe/London',
++];
++
++const CASES = [
++  [{ issued: '2026-03-01', terms: 'net30' }, '2026-03-31'],
++  [{ issued: '2026-01-20', terms: 'net15' }, '2026-02-04'],
++  [{ issued: '2026-05-12', terms: 'due_on_receipt' }, '2026-05-12'],
++  [{ issued: '2026-03-01', terms: 'net15' }, '2026-03-16'],  // spans US DST start (Mar 8)
++  [{ issued: '2026-10-20', terms: 'net15' }, '2026-11-04'],  // spans US DST end (Nov 1)
++  [{ issued: '2026-03-29', terms: 'net15' }, '2026-04-13'],  // spans EU DST start
++  [{ issued: '2026-12-20', terms: 'net30' }, '2027-01-19'],  // year boundary
++  [{ issued: '2028-02-15', terms: 'net15' }, '2028-03-01'],  // leap year
++  [{ issued: '2026-01-01', terms: 'due_on_receipt' }, '2026-01-01'],
++];
++
++const invoiceModule = path.join(__dirname, '..', 'lib', 'invoice.js');
++const script = `
++  const { dueDate } = require(${JSON.stringify(invoiceModule)});
++  const cases = JSON.parse(process.argv[1]);
++  process.stdout.write(JSON.stringify(cases.map((inv) => dueDate(inv))));
++`;
++
++for (const tz of TIMEZONES) {
++  test(`due dates are correct in TZ=${tz}`, () => {
++    const out = execFileSync(process.execPath, ['-e', script, JSON.stringify(CASES.map(([inv]) => inv))], {
++      env: { ...process.env, TZ: tz },
++      encoding: 'utf8',
++    });
++    const actual = JSON.parse(out);
++    CASES.forEach(([inv, expected], i) => {
++      assert.equal(actual[i], expected, `${JSON.stringify(inv)} in ${tz}`);
++    });
++  });
++}
++
++test('malformed issue dates are rejected rather than silently shifted', () => {
++  const { dueDate } = require('../lib/invoice');
++  for (const issued of ['2026-02-30', '2026-13-01', '03/01/2026', '2026-03-01T00:00:00Z', '']) {
++    assert.throws(() => dueDate({ issued, terms: 'net30' }), /invalid date/, issued);
++  }
++});

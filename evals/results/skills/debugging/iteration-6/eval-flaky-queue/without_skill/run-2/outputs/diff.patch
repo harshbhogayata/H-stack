@@ -1,0 +1,29 @@
+diff --git a/src/queue.js b/src/queue.js
+index 1d07d0c..7195ef3 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -2,7 +2,10 @@ class Queue {
+   constructor() { this.done = []; }
+   push(job) {
+     // Jobs finish after a variable delay, like real I/O.
+-    setTimeout(() => { this.done.push(job); }, 5 + Math.floor(Math.random() * 40));
++    // Returns a promise that resolves once this job has completed.
++    return new Promise((resolve) => {
++      setTimeout(() => { this.done.push(job); resolve(job); }, 5 + Math.floor(Math.random() * 40));
++    });
+   }
+ }
+ module.exports = { Queue };
+diff --git a/test/queue.test.js b/test/queue.test.js
+index ee2a039..e878727 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -4,7 +4,6 @@ const { Queue } = require('../src/queue');
+ 
+ test('processes all jobs', async () => {
+   const q = new Queue();
+-  q.push('a'); q.push('b'); q.push('c');
+-  await new Promise((r) => setTimeout(r, 25));
++  await Promise.all([q.push('a'), q.push('b'), q.push('c')]);
+   assert.equal(q.done.length, 3);
+ });

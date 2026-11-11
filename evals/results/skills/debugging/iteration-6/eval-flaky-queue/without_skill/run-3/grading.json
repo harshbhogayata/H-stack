@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (10 consecutive passing runs)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+      "passed": true,
+      "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await q.onIdle();`, and `onIdle()` returns a promise that resolves only when the `pending` count reaches 0 after every job's setTimeout callback has run."
+    },
+    {
+      "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+      "passed": true,
+      "evidence": "The message says each job 'finishes after a random delay between 5 and 44 ms' while 'The test waited a fixed 25 ms', so it 'failed whenever any of the three took longer than 25 ms'. The 44 ms figure is the code's exact maximum (5 + floor(rand*40)), which matches the expectation's 'up to 45 ms'."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

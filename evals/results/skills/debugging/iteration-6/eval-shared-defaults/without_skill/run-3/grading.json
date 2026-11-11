@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+      "passed": true,
+      "evidence": "The diff changes createCustomer from `Object.assign(getDefaults(), prefs)` to `{ ...getDefaults(), ...prefs }` and makes getDefaults return `structuredClone(DEFAULTS)` of a deep-frozen copy; it does not touch the refund code or the test order."
+    },
+    {
+      "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+      "passed": false,
+      "evidence": "The message explains the mechanism and says 'The refund test failed only because it runs after that test', but it never says how this was found, such as running the refund test alone or before the customer test, so it reports the conclusion without the diagnostic evidence."
+    },
+    {
+      "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+      "passed": true,
+      "evidence": "The message says 'I ran it against the old code and it fails there' and 'all 5 tests pass' with the fix."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

@@ -1,0 +1,13 @@
+diff --git a/lib/api.js b/lib/api.js
+index f43bc6c..ac041e7 100644
+--- a/lib/api.js
++++ b/lib/api.js
+@@ -5,7 +5,7 @@ function listItems(query) {
+   const page = Number(query.page || 1);
+   const size = Math.min(Number(query.size || 10), 100);
+   const items = allItems();
+-  return { page, size, total: items.length, items: paginate(items, page, size) };
++  return { page, size, total: items.length, items: paginate(items, page - 1, size) }; // paginate() is 0-based; API pages are 1-based
+ }
+ 
+ module.exports = { listItems };

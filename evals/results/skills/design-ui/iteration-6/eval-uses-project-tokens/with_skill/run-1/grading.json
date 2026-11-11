@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (SettingsPage.jsx created)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+      "passed": false,
+      "evidence": "judge output unparseable (2 attempts)"
+    },
+    {
+      "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+      "passed": false,
+      "evidence": "judge output unparseable (2 attempts)"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3,
+    "pass_rate": 0
+  }
+}

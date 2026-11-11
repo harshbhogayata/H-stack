@@ -1,0 +1,75 @@
+diff --git a/lib/dates.js b/lib/dates.js
+index d5ffd0a..56ae469 100644
+--- a/lib/dates.js
++++ b/lib/dates.js
+@@ -6,10 +6,15 @@ function formatDate(d) {
+   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+ }
+ 
++// Calendar-date arithmetic on 'YYYY-MM-DD' strings. Works entirely in UTC so the
++// result never depends on the server's time zone: `new Date('YYYY-MM-DD')` is
++// UTC midnight, and reading it back with local getters shifts the date by a
++// day west of UTC (the California off-by-one bug).
+ function addDays(isoDate, days) {
+-  const d = new Date(isoDate);
+-  d.setDate(d.getDate() + days);
+-  return formatDate(d);
++  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
++  if (!m) throw new Error(`expected a YYYY-MM-DD date, got: ${isoDate}`);
++  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + days));
++  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+ }
+ 
+ module.exports = { formatDate, addDays };
+diff --git a/test/timezones.test.js b/test/timezones.test.js
+new file mode 100644
+index 0000000..dd17417
+--- /dev/null
++++ b/test/timezones.test.js
+@@ -0,0 +1,46 @@
++// Due dates are calendar dates and must not depend on the server's time zone.
++// The rest of the suite only runs in whatever TZ the machine happens to have
++// (usually UTC on CI), which is how an off-by-one-day bug for California
++// customers slipped through. This test re-runs the date logic in child
++// processes pinned to zones on both sides of UTC, including DST transitions.
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { execFileSync } = require('node:child_process');
++const path = require('node:path');
++
++const ZONES = [
++  'UTC',
++  'America/Los_Angeles', // UTC-8/-7, the reported case
++  'Pacific/Pago_Pago',   // UTC-11
++  'Pacific/Kiritimati',  // UTC+14
++  'Asia/Kolkata',        // UTC+5:30
++  'Europe/London',       // DST, offset 0/+1
++];
++
++const CASES = [
++  [{ issued: '2026-03-01', terms: 'net30' }, '2026-03-31'],
++  [{ issued: '2026-01-20', terms: 'net15' }, '2026-02-04'],
++  [{ issued: '2026-05-12', terms: 'due_on_receipt' }, '2026-05-12'],
++  [{ issued: '2026-03-01', terms: 'net15' }, '2026-03-16'], // across US DST start (Mar 8)
++  [{ issued: '2026-03-20', terms: 'net15' }, '2026-04-04'], // across EU DST start (Mar 29)
++  [{ issued: '2026-10-20', terms: 'net15' }, '2026-11-04'], // across DST end
++  [{ issued: '2026-12-20', terms: 'net30' }, '2027-01-19'], // across year end
++  [{ issued: '2028-02-15', terms: 'net15' }, '2028-03-01'], // leap year
++];
++
++const invoiceModule = path.join(__dirname, '..', 'lib', 'invoice.js');
++const script = `
++  const { dueDate } = require(${JSON.stringify(invoiceModule)});
++  const cases = JSON.parse(process.argv[1]);
++  process.stdout.write(JSON.stringify(cases.map(([inv]) => dueDate(inv))));
++`;
++
++for (const tz of ZONES) {
++  test(`due dates are correct in ${tz}`, () => {
++    const out = execFileSync(process.execPath, ['-e', script, JSON.stringify(CASES)], {
++      env: { ...process.env, TZ: tz },
++      encoding: 'utf8',
++    });
++    assert.deepEqual(JSON.parse(out), CASES.map(([, expected]) => expected));
++  });
++}

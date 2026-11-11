@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+      "passed": true,
+      "evidence": "check exit 0: report test passed\n"
+    },
+    {
+      "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+      "passed": true,
+      "evidence": "The message states \"the benchmark dropped from **1315 ms to 8.7 ms**.\""
+    },
+    {
+      "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+      "passed": true,
+      "evidence": "The message says \"JSON.stringify wasn't the cause... stringify took under 1 ms\" and blames `customers.includes` and `orders.filter(...)`, which \"scanned all 20,000 orders once for each of the 5,000 customers.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

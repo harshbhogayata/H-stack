@@ -1,0 +1,17 @@
+diff --git a/report.js b/report.js
+index 8074924..a562b42 100644
+--- a/report.js
++++ b/report.js
+@@ -1,8 +1,9 @@
+ // Builds the monthly report rows: one row per customer with their order total.
+ function buildReport(orders) {
+-  const customers = [];
+-  for (const o of orders) if (!customers.includes(o.customer)) customers.push(o.customer);
+-  const rows = customers.map((c) => ({ customer: c, total: orders.filter((o) => o.customer === c).reduce((s, o) => s + o.amount, 0) }));
++  // Single pass; Map preserves first-appearance order of customers.
++  const totals = new Map();
++  for (const o of orders) totals.set(o.customer, (totals.get(o.customer) || 0) + o.amount);
++  const rows = Array.from(totals, ([customer, total]) => ({ customer, total }));
+   return JSON.stringify(rows);
+ }
+ module.exports = { buildReport };

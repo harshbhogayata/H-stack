@@ -1,0 +1,12 @@
+diff --git a/src/config.js b/src/config.js
+index 7912b80..abf0870 100644
+--- a/src/config.js
++++ b/src/config.js
+@@ -1,5 +1,6 @@
+ const fs = require('fs');
++const path = require('path');
+ function loadConfig() {
+-  return JSON.parse(fs.readFileSync('src/config.json', 'utf8'));
++  return JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
+ }
+ module.exports = { loadConfig };
