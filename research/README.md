@@ -3,11 +3,11 @@
 Top 10 existing skills/plugins for each H-Stack category. Reference only: H-Stack is written from scratch.
 
 ## Method
-- **Sources:** web search (built-in + Context.dev), each stack's own README read from `raw.githubusercontent.com`, and 2026 roundups (linked in each file).
-- **Stars:** read from each GitHub page via Context.dev on **2026-11-11**. For a skill inside a pack, the number is the whole repo's.
-- **Ranking:** substance first (what the skill makes the agent do), popularity second. A skill-level entry beats a whole pack when one skill is the standout.
-- **Not verified:** entries marked `?` (source repo or star count not confirmed).
-- **Licenses:** GPL / AGPL / CC BY-SA entries are marked in bold. Ideas only from those; no text.
+- **Full method, rubric, sources and score sheets:** [top10-method.md](top10-method.md) (rebuilt **2026-11-11**).
+- **Discovery:** Anthropic's official marketplace (317 plugins), claude.com/plugins install counts (305 plugins), skills.sh leaderboard, topic and per-repo pages, five awesome lists, 2026 roundups. 25–28 candidates per category, 385 in total.
+- **Signals:** ★, licence and last commit read from each GitHub page via Context.dev; installs from skills.sh (`s.sh`) or claude.com (`plugin`); security audits from skills.sh. For a skill inside a pack, ★ is the whole repo's.
+- **Ranking:** a published rubric, Substance×3 + Evidence×2 + Adoption + Maintenance + Fit/licence + Context cost (max 45), scored after reading each finalist's SKILL.md.
+- **Licences:** GPL / AGPL / CC BY-SA / NC / Commons Clause / ELv2 / no-licence entries are marked in bold. Ideas only from those; no text.
 
 ## Categories
 | # | Category | File |
@@ -31,13 +31,14 @@ Top 10 existing skills/plugins for each H-Stack category. Reference only: H-Stac
 | 14 | Autonomous loops & multi-agent | [14-autonomous-multiagent.md](14-autonomous-multiagent.md) |
 | 15 | Skill authoring & meta | [15-skill-authoring.md](15-skill-authoring.md) |
 | 16 | Business, growth & research | [16-business-research.md](16-business-research.md) |
+| — | Top-10 method, rubric and score sheets | [top10-method.md](top10-method.md) |
 
 ## Big packs at a glance (★ on 2026-11-11)
 | Pack | ★ | License | Shape |
 |---|---|---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) | 321k | MIT | Alignment-first: grill → spec → tickets → implement |
 | [obra/superpowers](https://github.com/obra/superpowers) | 316k | MIT | Auto-triggering methodology |
-| [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 301k | MIT | Full harness: 71 agents, 314 skills, memory, AgentShield |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC) (was everything-claude-code) | 301k | MIT | Full harness: 71 agents, 314 skills, memory, AgentShield |
 | [anthropics/skills](https://github.com/anthropics/skills) | 192k | Apache-2.0 | Official examples + document skills + skill-creator |
 | [garrytan/gstack](https://github.com/garrytan/gstack) | 141k | MIT | Team roles in sprint order |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 115k | MIT | Lifecycle: define → plan → build → verify → review → ship |
@@ -46,7 +47,7 @@ Top 10 existing skills/plugins for each H-Stack category. Reference only: H-Stac
 | [cursor/plugins › pstack](https://github.com/cursor/plugins/tree/main/pstack) | 16k (repo) | MIT | Router + 23 playbooks + 24 principles |
 
 ## Directories (for finding more)
-[awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) (58k) · [Composio awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) (79k) · [agentic-awesome-skills](https://github.com/sickn33/antigravity-awesome-skills) (50k) · [claude-code-templates](https://github.com/davila7/claude-code-templates) (33k) · [VoltAgent subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) (26k) · [BehiSecc awesome-claude-skills](https://github.com/BehiSecc/awesome-claude-skills) (10k)
+[awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) (58k) · [Composio awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) (79k) · [agentic-awesome-skills](https://github.com/sickn33/agentic-awesome-skills) (50k) · [claude-code-templates](https://github.com/davila7/claude-code-templates) (33k) · [VoltAgent subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) (26k) · [BehiSecc awesome-claude-skills](https://github.com/BehiSecc/awesome-claude-skills) (10k)
 
 ## Safety note
-Snyk's research found prompt injection in 36% of third-party skills it tested. Every file we take ideas from gets read in full first.
+Snyk's research found prompt injection in 36% of third-party skills it tested. Every file we take ideas from gets read in full first. Flags found in this round (remote-loaded instructions, session-cookie requests, default-on telemetry, inflated install counts) are listed in [top10-method.md](top10-method.md#safety-and-data-quality-flags).
