@@ -2,7 +2,7 @@
 
 Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **103 done, 8 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Every needs-user item has one of the allowed reasons: smoke-test tasks, credentials or accounts, or desktop visual checks. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The whole-stack smoke test has not run because it needs your real tasks.
+**Short version.** All 85 HS items and 26 IM rows have a status: **103 done, 8 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Seven needs-user items have an allowed reason: smoke-test tasks, credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision, which is outside that list: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The whole-stack smoke test has not run because it needs your real tasks.
 
 ## Needs you
 
@@ -24,12 +24,11 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
    - the side pane (HS-057), which opens by itself during a long run with a recorded goal (`"pane": "auto"`; `true` always, `false` never).
 
    Both are built and pass the mod tests (10/10); HS-056 and HS-057 are needs-user only for this check.
-5. **An API key for the bare-agent arm (HS-006, credentials).**
-   - The ablation arms are built and ran: classifier off and session-start map off. On the example task every arm passed, so the smoke tasks will be what tells them apart.
-   - The bare arm uses `claude --bare`, which authenticates only with `ANTHROPIC_API_KEY`, and this environment has none.
-   - I built an equivalent from ordinary flags (no hooks, Bash only, one-line system prompt), but auto mode refused it.
-   - Ablating the safety gates themselves (for example `ablate:stop`) was also refused.
-   - With a key set, `node evals/run-smoke.mjs --arms with,without,bare` runs it. `--dry-run` shows each arm's exact command.
+5. **HS-006: two things only you can give.**
+   - **Credentials.** The bare-agent arm uses `claude --bare`, which authenticates only with `ANTHROPIC_API_KEY`. This environment has none.
+   - **A permission decision (outside the goal's allowed reasons, stated plainly).** Claude Code's auto mode refused to start sessions with H-Stack's safety gates switched off (`ablate:stop`, `ablate:all`: "Create Unsafe Agents"). It also refused a bare agent built from ordinary flags ("Auto-Mode Bypass"). I did not work around either refusal, so the safety-gate ablation is unmeasured.
+   - **What did run:** the ablation of non-safety components (classifier off, session-start map off). Everything is built, and `--dry-run` shows each arm's exact command.
+   - **To finish:** set an API key, add a permission rule for `node evals/run-smoke.mjs`, then run `node evals/run-smoke.mjs --arms with,without,bare,ablate:stop` alongside the smoke test.
 6. **Run H-Stack's setup in each project** (`node plugins/h-stack/scripts/setup.mjs --apply`).
    - Its allow rule for `hs` is what lets an agent declare a test-writing step.
    - Without it, in a headless or unattended run, the read-only-tests gate blocks new regression tests in existing test files. Measured: the bugfix case stalled until `hs` was allowed.
@@ -64,7 +63,7 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 | Priority | done | needs-user | dropped |
 |---|---:|---:|---:|
 | P0 (26) | 25 | 1 (HS-001 smoke tasks) | 0 |
-| P1 (36) | 33 | 3 (HS-006 API key for the bare arm; HS-056 visual check; HS-085 smoke results) | 0 |
+| P1 (36) | 33 | 3 (HS-006 API key and a permission decision; HS-056 visual check; HS-085 smoke results) | 0 |
 | P2 (23) | 19 | 4 (HS-009, 076, 077 accounts; HS-057 visual check) | 0 |
 | IM rows (26) | 26 | 0 | 0 (resolving-merge-conflicts dropped inside the IM-13 row: upstream archived) |
 
@@ -346,7 +345,7 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 11. **Solo-boundary pass signal (HS-025)** is "the next prompt is not a correction". That is a proxy until smoke-test data exists; cold start is `medium` as specified.
 12. **Activation is measured in real `claude -p` sessions, not plugin eval** (HS-018). Plugin eval doesn't run UserPromptSubmit hooks (0 classifier events in its traces), so it can't measure H-Stack's classifier.
 
-13. **HS-006 arms.** Ablation of the classifier and the session-start map ran. The bare-agent arm needs an `ANTHROPIC_API_KEY` (credentials), and auto mode refused ablating the safety gates; see Needs you, item 5.
+13. **HS-006 is not complete.** The ablation of the classifier and the session-start map ran. The bare-agent arm needs an `ANTHROPIC_API_KEY`. The safety-gate ablation and the flag-built bare agent were refused by auto mode, which is a permission decision outside the goal's allowed reasons for leaving work undone. See Needs you, item 5.
 
 ## Next steps
 
