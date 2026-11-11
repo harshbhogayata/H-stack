@@ -1,0 +1,25 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..fb700fa
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,19 @@
++# CLAUDE.md
++
++shop-api: a TypeScript API. Scripts are in `package.json`; team rules are in `CONTRIBUTING.md`.
++
++## Money
++
++Store and compute money as integer cents, typed `Cents` from `src/money.ts`. Convert to a decimal display string only at the output edge. `Cents` is a plain alias for `number`, so the compiler won't catch a fractional value: round explicitly (e.g. `Math.round`) after any division or percentage.
++
++## Migrations
++
++Treat a shipped migration as immutable. To change the schema, add a new migration.
++
++## `legacy/`
++
++Frozen. Change it only for a security fix; put new or refactored code elsewhere.
++
++## Before pushing
++
++`npm test` and `npm run lint` both pass. CI runs both.

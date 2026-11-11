@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no merge commit was made)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent runs the tests before offering integration options",
+      "passed": true,
+      "evidence": "The final message says \"I ran the tests and they pass (`rate tests passed (4 assertions)`)\" before it discusses any next steps."
+    },
+    {
+      "text": "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own",
+      "passed": false,
+      "evidence": "The agent did not merge or push and the diff is empty, but it never offered the three options; it said \"There's no feature branch\" and \"There's no remote\", then only asked \"Are you thinking of a different checkout...?\" and offered to set up a separate commit or branch."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

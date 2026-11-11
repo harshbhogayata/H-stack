@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "skill_name": "security-audit",
+    "skill_path": "plugins/h-stack/skills/security-audit",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.404Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "sqli-focused",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 20.868,
+        "tokens": 134415,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+          "passed": true,
+          "evidence": "The reply says \"`users.js:5` builds the SQL by pasting the `name` query parameter straight into the string, so this is a SQL injection\" and quotes the concatenated `db.query(...)` line."
+        },
+        {
+          "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+          "passed": true,
+          "evidence": "The reply says \"`db.query` already takes a `params` argument. Use it\" and gives code that calls `db.query(\"... LIKE ? ESCAPE '\\\\'\", ['%' + escaped + '%'])`."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "sqli-focused",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.438,
+        "tokens": 154254,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+          "passed": true,
+          "evidence": "The reply says \"It has a SQL injection vulnerability. **The problem is at `users.js:5`.** The value of `req.query.name` goes straight into the SQL string\" and quotes the concatenated `db.query(\"SELECT ... LIKE '%\" + name + \"%'\")` line."
+        },
+        {
+          "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+          "passed": true,
+          "evidence": "The reply notes \"`db.query` already accepts a `params` argument (`db.js` exports `query(sql, params)`), so use a placeholder\" and shows `db.query(\"... WHERE name LIKE ? ESCAPE '\\\\'\", ['%' + escaped + '%'])`; the same code block also adds wildcard escaping and a typeof check, which go beyond the mini"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "path-traversal",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.385,
+        "tokens": 87185,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+          "passed": true,
+          "evidence": "The reply says \"`os.path.join` does nothing to stop `..` segments, and if the second argument is an absolute path it drops the base directory entirely\" and gives the examples `file=../../../etc/passwd` and `file=/etc/passwd`."
+        },
+        {
+          "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+          "passed": true,
+          "evidence": "The reply names the intended boundary as \"downloads are supposed to stay inside `/srv/app/uploads`\", says \"the caller can read any file the app process can open\", and adds that \"Users can read each other's files\". It speaks of 'the caller' and 'anyone' rather than 'logged-in user' specifically, but "
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "path-traversal",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.482,
+        "tokens": 115799,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+          "passed": true,
+          "evidence": "The reply says `/download?file=../../../etc/passwd` resolves to `/etc/passwd`, and that `os.path.join` throws away everything before an absolute component, so `UPLOADS` is ignored completely."
+        },
+        {
+          "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+          "passed": true,
+          "evidence": "The reply says an attacker 'can download any file the app's process can read' and that 'anyone who knows or guesses a filename can download another user's upload'; it frames the boundary as broader than logged-in users ('an anonymous visitor can call the endpoint'), which still covers both files out"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-no-manufactured",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 17.929,
+        "tokens": 86952,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+          "passed": true,
+          "evidence": "The reply opens with \"I found no confirmed vulnerabilities in `hash.js`\", marks each concern in the table as \"Not an issue\", \"Handled\", \"Fails closed\" or \"Not exploitable\", and frames the SHA-256 note as conditional (\"One thing depends on code outside this file... fine for long random API tokens\") i"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-no-manufactured",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 17.081,
+        "tokens": 115964,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files created or changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+          "passed": true,
+          "evidence": "The reply opens with \"I found no exploitable vulnerabilities in `hash.js`\" and lists its hardening points under \"Things to check outside this file (low severity)\", each depending on assumptions such as \"It's fine if tokens are long random values\", ending with \"No code changes are needed unless your "
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 20.061,
+        "stddev": 1.522,
+        "min": 17.929,
+        "max": 21.385
+      },
+      "tokens": {
+        "mean": 102850.667,
+        "stddev": 22319.557,
+        "min": 86952,
+        "max": 134415
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 16.334,
+        "stddev": 1.35,
+        "min": 14.438,
+        "max": 17.482
+      },
+      "tokens": {
+        "mean": 128672.333,
+        "stddev": 18089.095,
+        "min": 115799,
+        "max": 154254
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+3.7",
+      "tokens": "-25822"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

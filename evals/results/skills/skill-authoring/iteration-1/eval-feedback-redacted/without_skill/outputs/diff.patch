@@ -1,0 +1,38 @@
+diff --git a/ISSUE.md b/ISSUE.md
+new file mode 100644
+index 0000000..e2acc50
+--- /dev/null
++++ b/ISSUE.md
+@@ -0,0 +1,32 @@
++# `tdd` skill asks clarifying questions even after the user says "just build it"
++
++## Summary
++
++The `tdd` skill tells the agent to agree on seams (test boundaries / interfaces) with the user before writing tests. That instruction wins even when the user has already told the agent to go ahead without check-ins. The agent stops and asks questions when it should proceed and record its assumptions.
++
++## Steps to reproduce
++
++1. Start a session in any project with the `tdd` skill available.
++2. Ask for a feature and say explicitly that you don't want check-ins, e.g. "just build it".
++3. The `tdd` skill triggers.
++
++## Expected behavior
++
++The agent treats "just build it" as permission to proceed. It picks reasonable seams itself, continues with the TDD loop, and writes down the assumptions it made (for example in its final summary or a notes file) so the user can review them afterwards.
++
++## Actual behavior
++
++The agent stopped and asked the user three questions about seams before writing any tests, even though the user had already said not to ask.
++
++## Suggested fix
++
++Make the "agree seams with the user" step conditional. For example:
++
++> If the user has asked you to proceed without confirmation (e.g. "just build it", "don't ask, just do it"), choose the seams yourself, proceed, and list the assumptions you made about seams in your summary instead of asking.
++
++It may also help to state more generally that an explicit user instruction about how much to check in takes precedence over the skill's default collaboration steps.
++
++## Environment
++
++- Skill: `tdd`
++- Trigger phrase: "just build it"

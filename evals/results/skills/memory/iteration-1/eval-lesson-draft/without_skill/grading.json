@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (draft exists, path-scoped to src/billing)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The lesson states when it applies and when it doesn't (applicability bounds), not just a general rule",
+      "passed": false,
+      "evidence": "The draft gives a scope ('In `src/billing`, store and calculate all money as integer cents') and a 'Where this applies now' section, but it never says when the rule does not apply; the `Decimal` note covers how to handle fractions, not where the rule stops applying."
+    },
+    {
+      "text": "The lesson includes the concrete evidence (10.299999 / 10.29 vs 10.30, or the npm run invoices run) and marks its provenance as coming from the user",
+      "passed": false,
+      "evidence": "The draft includes the evidence ('a float total came out as `10.299999…`... `npm run invoices` showed **10.29** where the correct amount was **10.30**') but presents it as plain fact, with no note that the user reported it or that it was not independently checked."
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3,
+    "pass_rate": 0
+  }
+}

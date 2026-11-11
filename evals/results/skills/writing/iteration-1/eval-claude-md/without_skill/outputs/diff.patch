@@ -1,0 +1,30 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..58e813c
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,24 @@
++# CLAUDE.md
++
++This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
++
++## Project
++
++`shop-api` is a TypeScript service. The codebase is very small right now. `src/money.ts` is the only source file.
++
++## Commands
++
++- `npm run dev`: runs `src/index.ts` with `tsx watch`. Note that `src/index.ts` does not exist yet.
++- `npm test`: `vitest run`. To run a single file, use `npx vitest run path/to/file.test.ts`. To run a single test by name, use `npx vitest run -t "test name"`.
++- `npm run lint`: `eslint .`. CI runs lint, so make sure it passes before pushing.
++
++`package.json` doesn't list any dependencies yet, so `tsx`, `vitest`, and `eslint` aren't installed. You'll need to add them as devDependencies before these scripts will run.
++
++## Team rules (from CONTRIBUTING.md)
++
++- **Money is always integer cents.** Use the `Cents` type from `src/money.ts`. Never use floats for money amounts. `Cents` is a plain `number` alias, so the compiler won't enforce this. Keep values integral yourself, for example when computing percentages or splitting amounts.
++- **Migrations are append-only.** Never edit a migration that has shipped. Add a new one instead.
++- **`legacy/` is frozen.** Only security fixes are allowed there.
++- Run `npm test` before pushing.
++
++The `legacy/` and migrations directories don't exist in the repo yet. The rules apply once they are added.

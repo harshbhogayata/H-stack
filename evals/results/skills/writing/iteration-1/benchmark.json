@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "skill_name": "writing",
+    "skill_path": "plugins/h-stack/skills/writing",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.406Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "readme-usage",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 15.985,
+        "tokens": 207888,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (README documents both flags)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)",
+          "passed": true,
+          "evidence": "The README says \"tidyjson reformats a JSON file and writes the result back to the same file\" and \"If the file is not valid JSON, it exits with code 2 and leaves the file unchanged.\" The agent reports that both come from the usage comments in cli.js, which has no implementation yet."
+        },
+        {
+          "text": "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'",
+          "passed": true,
+          "evidence": "The full 31-line README in the diff uses only plain descriptive text such as \"This puts the `tidyjson` command on your PATH\" and contains none of the listed filler words."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "readme-usage",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 16.713,
+        "tokens": 155867,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (README documents both flags)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)",
+          "passed": true,
+          "evidence": "The README says it 'writes the result back to the same file' and 'If the file is not valid JSON, `tidyjson` exits with status `2` and leaves the file untouched', and the agent reports taking this from the usage comment in cli.js."
+        },
+        {
+          "text": "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'",
+          "passed": true,
+          "evidence": "The README describes itself only as 'A small command-line tool that reformats a JSON file in place' and none of the listed filler words appear anywhere in the diff."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "unslop",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.375,
+        "tokens": 164208,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (facts kept, AI vocabulary removed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The unsupported claim 'Experts believe' is removed or replaced with a sourced statement",
+          "passed": true,
+          "evidence": "The diff removes the line containing 'Experts believe this is a game-changer.', and the new draft.md has no 'Experts believe' wording."
+        },
+        {
+          "text": "The result states what the cache does in concrete terms (stores rendered pages on disk for 10 minutes, serves them while the database is down, 83% hit rate in staging)",
+          "passed": true,
+          "evidence": "The new file reads 'The cache stores rendered pages on disk for 10 minutes. While the database is down, it serves pages from the cache.' and 'In staging, the hit rate was 83%.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "unslop",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.995,
+        "tokens": 115937,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (facts kept, AI vocabulary removed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The unsupported claim 'Experts believe' is removed or replaced with a sourced statement",
+          "passed": true,
+          "evidence": "The diff deletes the line containing \"Experts believe this is a game-changer.\", and the new draft.md has no 'Experts' claim."
+        },
+        {
+          "text": "The result states what the cache does in concrete terms (stores rendered pages on disk for 10 minutes, serves them while the database is down, 83% hit rate in staging)",
+          "passed": true,
+          "evidence": "The new file contains \"- Rendered pages are stored on disk for 10 minutes.\", \"- Cached pages keep being served while the database is down.\", and \"- Hit rate in staging was 83%.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "claude-md",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 16.68,
+        "tokens": 168281,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (short, includes money-as-cents and migration rules)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "CLAUDE.md captures the unwritten conventions (integer cents, never edit shipped migrations, legacy/ frozen) rather than restating every package.json script or describing the directory tree",
+          "passed": true,
+          "evidence": "The diff has sections saying 'Store and compute money as integer cents', 'Treat a shipped migration as immutable', and '`legacy/` ... Frozen', and it points to package.json for scripts ('Scripts are in `package.json`') instead of listing them or describing the directory tree."
+        },
+        {
+          "text": "CLAUDE.md does not use all-caps imperatives such as NEVER or MUST",
+          "passed": true,
+          "evidence": "The full 19-line file in the diff has no all-caps imperatives; it uses sentence-case wording such as 'Treat a shipped migration as immutable' and 'Change it only for a security fix'."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "claude-md",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 18.329,
+        "tokens": 239060,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (short, includes money-as-cents and migration rules)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "CLAUDE.md captures the unwritten conventions (integer cents, never edit shipped migrations, legacy/ frozen) rather than restating every package.json script or describing the directory tree",
+          "passed": false,
+          "evidence": "The file captures all three conventions ('Money is always integer cents', 'Migrations are append-only', '`legacy/` is frozen') and skips the directory tree, but its Commands section still restates every package.json script ('npm run dev', 'npm test', 'npm run lint'). Because of that, the 'rather tha"
+        },
+        {
+          "text": "CLAUDE.md does not use all-caps imperatives such as NEVER or MUST",
+          "passed": true,
+          "evidence": "Its imperatives are in normal case, such as 'Never use floats for money amounts' and 'Never edit a migration that has shipped', and no all-caps NEVER or MUST appears anywhere in the diff."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 14.68,
+        "stddev": 2.354,
+        "min": 11.375,
+        "max": 16.68
+      },
+      "tokens": {
+        "mean": 180125.667,
+        "stddev": 19701.23,
+        "min": 164208,
+        "max": 207888
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 15.679,
+        "stddev": 2.687,
+        "min": 11.995,
+        "max": 18.329
+      },
+      "tokens": {
+        "mean": 170288,
+        "stddev": 51288.675,
+        "min": 115937,
+        "max": 239060
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.11",
+      "time_seconds": "-1.0",
+      "tokens": "+9838"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

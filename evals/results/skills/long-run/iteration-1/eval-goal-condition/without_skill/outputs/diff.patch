@@ -1,0 +1,62 @@
+diff --git a/features.json b/features.json
+new file mode 100644
+index 0000000..32be168
+--- /dev/null
++++ b/features.json
+@@ -0,0 +1,56 @@
++{
++  "spec": "SPEC.md",
++  "target": "todo.js",
++  "notes": "Each check is a bash command run from the repo root; exit 0 = pass. Checks copy todo.js into a fresh temp dir with an empty todos.json, so they never modify the repo's todos.json. Storage shape (strings vs objects) and list separator are not fixed by the spec, so checks accept any shape that contains the text and any 'N<non-digit>' prefix.",
++  "runner": "node -e 'const f=require(\"./features.json\");const{execSync}=require(\"child_process\");let ok=1;for(const x of f.features){try{execSync(x.check,{shell:\"/bin/bash\",stdio:\"pipe\",timeout:20000});console.log(\"PASS\",x.id)}catch(e){ok=0;console.log(\"FAIL\",x.id)}}console.log(ok?\"ALL PASS\":\"SOME FAILED\");process.exit(ok?0:1)'",
++  "features": [
++    {
++      "id": "add-prints",
++      "spec_item": 1,
++      "description": "`node todo.js add \"buy milk\"` prints exactly \"added: buy milk\" and exits 0",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; out=$(node todo.js add \"buy milk\"); [ \"$out\" = \"added: buy milk\" ]"
++    },
++    {
++      "id": "add-persists",
++      "spec_item": 1,
++      "description": "add writes the item to todos.json, which stays valid JSON",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add \"buy milk\" >/dev/null; node -e 'const t=JSON.parse(require(\"fs\").readFileSync(\"todos.json\",\"utf8\"));process.exit(JSON.stringify(t).includes(\"buy milk\")?0:1)'"
++    },
++    {
++      "id": "add-appends",
++      "spec_item": 1,
++      "description": "add appends: existing items are kept and new items go after them, in order",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add alpha >/dev/null; node todo.js add beta >/dev/null; node todo.js add gamma >/dev/null; node -e 'const s=JSON.stringify(JSON.parse(require(\"fs\").readFileSync(\"todos.json\",\"utf8\")));const a=s.indexOf(\"alpha\"),b=s.indexOf(\"beta\"),c=s.indexOf(\"gamma\");process.exit(a>=0&&a<b&&b<c?0:1)'"
++    },
++    {
++      "id": "list-numbered-from-1",
++      "spec_item": 2,
++      "description": "`node todo.js list` prints one line per todo, numbered 1..N in insertion order",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add alpha >/dev/null; node todo.js add beta >/dev/null; out=$(node todo.js list); [ \"$(printf '%s\\n' \"$out\" | grep -c .)\" -eq 2 ]; printf '%s\\n' \"$out\" | sed -n 1p | grep -Eq '^1[^0-9].*alpha'; printf '%s\\n' \"$out\" | sed -n 2p | grep -Eq '^2[^0-9].*beta'"
++    },
++    {
++      "id": "list-empty",
++      "spec_item": 2,
++      "description": "list on an empty todos.json exits 0 and prints no numbered items",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; out=$(node todo.js list); ! printf '%s\\n' \"$out\" | grep -Eq '^[0-9]'"
++    },
++    {
++      "id": "done-prints",
++      "spec_item": 3,
++      "description": "`node todo.js done 1` prints exactly \"done: <text of item 1>\"",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add \"buy milk\" >/dev/null; node todo.js add walk >/dev/null; out=$(node todo.js done 1); [ \"$out\" = \"done: buy milk\" ]"
++    },
++    {
++      "id": "done-removes",
++      "spec_item": 3,
++      "description": "done 1 removes item 1 from todos.json and the remaining items renumber from 1",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add alpha >/dev/null; node todo.js add beta >/dev/null; node todo.js done 1 >/dev/null; node -e 'const s=JSON.stringify(JSON.parse(require(\"fs\").readFileSync(\"todos.json\",\"utf8\")));process.exit(!s.includes(\"alpha\")&&s.includes(\"beta\")?0:1)'; out=$(node todo.js list); [ \"$(printf '%s\\n' \"$out\" | grep -c .)\" -eq 1 ]; printf '%s\\n' \"$out\" | grep -Eq '^1[^0-9].*beta'"
++    },
++    {
++      "id": "done-middle-item",
++      "spec_item": 3,
++      "description": "done N removes the Nth item (1-based), not the first or last",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"; cd \"$d\"; printf '[]\\n' > todos.json; node todo.js add alpha >/dev/null; node todo.js add beta >/dev/null; node todo.js add gamma >/dev/null; out=$(node todo.js done 2); [ \"$out\" = \"done: beta\" ]; out=$(node todo.js list); printf '%s\\n' \"$out\" | sed -n 1p | grep -Eq '^1[^0-9].*alpha'; printf '%s\\n' \"$out\" | sed -n 2p | grep -Eq '^2[^0-9].*gamma'"
++    }
++  ]
++}

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)",
+      "passed": true,
+      "evidence": "Each of the 8 features in features.json has a concrete bash `check` field, e.g. add-prints runs `out=$(node todo.js add \"buy milk\"); [ \"$out\" = \"added: buy milk\" ]` in a fresh temp dir, and the file includes a `runner` command that runs every check."
+    },
+    {
+      "text": "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'",
+      "passed": true,
+      "evidence": "The condition says done means the features.json runner 'prints PASS for all 8 features and \"ALL PASS\", and exits 0', plus a sha256sum hash match and `git diff --quiet SPEC.md todos.json`, and adds constraints: 'Only create or edit todo.js; never modify features.json, SPEC.md or todos.json.'"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

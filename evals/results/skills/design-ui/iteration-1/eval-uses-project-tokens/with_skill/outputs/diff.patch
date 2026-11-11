@@ -1,0 +1,276 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..37091b5
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,121 @@
++import { useState } from "react";
++import { Button } from "./Button";
++import "./settings.css";
++
++const MAX_NAME_LENGTH = 50;
++
++export function SettingsPage({
++  initialDisplayName = "",
++  initialEmailNotifications = true,
++  onSave,
++}) {
++  const [displayName, setDisplayName] = useState(initialDisplayName);
++  const [emailNotifications, setEmailNotifications] = useState(initialEmailNotifications);
++  const [nameError, setNameError] = useState("");
++  const [status, setStatus] = useState("idle"); // idle | saving | saved | error
++
++  const trimmedName = displayName.trim();
++
++  async function handleSubmit(event) {
++    event.preventDefault();
++
++    if (!trimmedName) {
++      setNameError("Enter a display name so others know who you are.");
++      return;
++    }
++    if (trimmedName.length > MAX_NAME_LENGTH) {
++      setNameError(`Shorten your display name to ${MAX_NAME_LENGTH} characters or fewer.`);
++      return;
++    }
++
++    setNameError("");
++    setStatus("saving");
++    try {
++      await onSave?.({ displayName: trimmedName, emailNotifications });
++      setStatus("saved");
++    } catch {
++      setStatus("error");
++    }
++  }
++
++  function markDirty() {
++    if (status !== "saving") setStatus("idle");
++  }
++
++  return (
++    <main className="settings">
++      <h1 className="settings__title">Settings</h1>
++
++      <form className="settings__card" onSubmit={handleSubmit} noValidate>
++        <div className="settings__field">
++          <label className="settings__label" htmlFor="display-name">
++            Display name
++          </label>
++          <p className="settings__hint" id="display-name-hint">
++            Shown to other people on your profile and in comments.
++          </p>
++          <input
++            id="display-name"
++            className="settings__input"
++            type="text"
++            name="displayName"
++            autoComplete="nickname"
++            value={displayName}
++            onChange={(e) => {
++              setDisplayName(e.target.value);
++              if (nameError) setNameError("");
++              markDirty();
++            }}
++            aria-invalid={nameError ? "true" : undefined}
++            aria-describedby={nameError ? "display-name-hint display-name-error" : "display-name-hint"}
++          />
++          {nameError && (
++            <p className="settings__error" id="display-name-error">
++              {nameError}
++            </p>
++          )}
++        </div>
++
++        <div className="settings__field settings__field--row">
++          <div>
++            <label className="settings__label" htmlFor="email-notifications">
++              Email notifications
++            </label>
++            <p className="settings__hint" id="email-notifications-hint">
++              Get an email when someone replies to you or mentions you.
++            </p>
++          </div>
++          <input
++            id="email-notifications"
++            className="settings__switch"
++            type="checkbox"
++            role="switch"
++            name="emailNotifications"
++            checked={emailNotifications}
++            onChange={(e) => {
++              setEmailNotifications(e.target.checked);
++              markDirty();
++            }}
++            aria-describedby="email-notifications-hint"
++          />
++        </div>
++
++        <div className="settings__actions">
++          <p className="settings__status" role="status" aria-live="polite">
++            {status === "saved" && "Changes saved."}
++            {status === "error" && (
++              <span className="settings__error">
++                Couldn't save your changes. Check your connection and try again.
++              </span>
++            )}
++          </p>
++          <Button type="submit" disabled={status === "saving"} aria-busy={status === "saving"}>
++            {status === "saving" ? "Saving…" : "Save changes"}
++          </Button>
++        </div>
++      </form>
++    </main>
++  );
++}
++
++export default SettingsPage;
+diff --git a/button.css b/button.css
+index d1689a7..16eff2d 100644
+--- a/button.css
++++ b/button.css
+@@ -1 +1,3 @@
+ .btn { background: var(--color-accent); color: var(--color-bg); border-radius: var(--radius); font-family: var(--font-ui); padding: 6px 12px; }
++.btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
++.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..a97b806
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,128 @@
++.settings {
++  max-width: 40rem;
++  margin: 0 auto;
++  padding: 32px 16px;
++  color: var(--color-text);
++  font-family: var(--font-ui);
++}
++
++.settings__title {
++  margin: 0 0 16px;
++  font-size: 1.5rem;
++  font-weight: 600;
++}
++
++.settings__card {
++  display: flex;
++  flex-direction: column;
++  gap: 24px;
++  padding: 24px;
++  background: var(--color-surface);
++  border-radius: var(--radius);
++}
++
++.settings__field {
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++}
++
++.settings__field--row {
++  flex-direction: row;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.settings__label {
++  font-weight: 500;
++}
++
++.settings__hint {
++  margin: 0;
++  font-size: 0.875rem;
++  opacity: 0.75;
++  max-width: 60ch;
++}
++
++.settings__input {
++  margin-top: 4px;
++  padding: 8px 10px;
++  font: inherit;
++  color: var(--color-text);
++  background: var(--color-bg);
++  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
++  border-radius: var(--radius);
++}
++
++.settings__input[aria-invalid="true"] {
++  border-color: var(--color-danger);
++}
++
++.settings__error {
++  margin: 4px 0 0;
++  font-size: 0.875rem;
++  color: var(--color-danger);
++}
++
++/* Native checkbox restyled as a switch: keeps built-in keyboard and form behaviour. */
++.settings__switch {
++  appearance: none;
++  flex-shrink: 0;
++  position: relative;
++  width: 44px;
++  height: 24px;
++  margin: 0;
++  background: var(--color-bg);
++  border: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent);
++  border-radius: 999px;
++  cursor: pointer;
++  transition: background-color 150ms ease;
++}
++
++.settings__switch::before {
++  content: "";
++  position: absolute;
++  top: 3px;
++  left: 3px;
++  width: 16px;
++  height: 16px;
++  border-radius: 50%;
++  background: var(--color-text);
++  transition: transform 150ms ease;
++}
++
++.settings__switch:checked {
++  background: var(--color-accent);
++  border-color: var(--color-accent);
++}
++
++.settings__switch:checked::before {
++  background: var(--color-bg);
++  transform: translateX(20px);
++}
++
++.settings__input:focus-visible,
++.settings__switch:focus-visible {
++  outline: 2px solid var(--color-accent);
++  outline-offset: 2px;
++}
++
++.settings__actions {
++  display: flex;
++  align-items: center;
++  justify-content: flex-end;
++  gap: 16px;
++}
++
++.settings__status {
++  margin: 0;
++  font-size: 0.875rem;
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .settings__switch,
++  .settings__switch::before {
++    transition: none;
++  }
++}
+diff --git a/theme.css b/theme.css
+index a9660f5..9060d23 100644
+--- a/theme.css
++++ b/theme.css
+@@ -1 +1 @@
+-:root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif; }
++:root { --color-bg: #0f172a; --color-surface: #1e293b; --color-text: #e2e8f0; --color-accent: #38bdf8; --color-danger: #fca5a5; --radius: 6px; --font-ui: "IBM Plex Sans", system-ui, sans-serif; }

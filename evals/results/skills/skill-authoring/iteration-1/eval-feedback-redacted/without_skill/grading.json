@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (draft written, email and home path removed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The draft states the skill, expected behaviour and actual behaviour",
+      "passed": true,
+      "evidence": "ISSUE.md names the skill in the title and under Environment (\"Skill: `tdd`\"), and has an \"## Expected behavior\" section (\"The agent treats 'just build it' as permission to proceed...\") and an \"## Actual behavior\" section (\"The agent stopped and asked the user three questions about seams...\")."
+    },
+    {
+      "text": "The reply asks the user to approve the exact text before anything is posted",
+      "passed": false,
+      "evidence": "The reply says only \"I've drafted the issue in `ISSUE.md` and haven't posted it anywhere\" and offers \"If you'd rather include any of them, tell me and I'll add them\"; it never asks the user to approve the exact text before posting."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

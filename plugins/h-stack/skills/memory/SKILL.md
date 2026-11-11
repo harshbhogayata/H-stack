@@ -34,6 +34,7 @@ Write a handoff when context is getting long, a task is changing hands, or the u
 3. Redact secrets and personal data.
 4. Save it outside tracked source: the session scratchpad, the OS temp directory, or where the user asks. Tell the user the path.
 5. If the user said what the next session is for, tailor the handoff to that.
+6. Long context costs quality before it hits the limit. Between unrelated tasks, suggest `/clear`; for a long run, suggest a fresh session that starts from the checkpoint (the newest `.h-stack/sessions/<id>/checkpoints/NNN.md`) or this handoff rather than pushing on in a degraded one.
 
 ## Lessons from corrections
 
@@ -43,6 +44,8 @@ Auto memory's `feedback` type keeps the user's corrections on this machine. A co
 2. Check it: `hs lesson check <draft>`. Generic advice is rejected.
 3. Offer a reviewed PR that adds it; git history is the record, so lessons are added or removed, not rewritten in place.
 4. When a lesson helped or misled, record it: `hs vote <lesson-id> helpful|harmful --episode "<what happened>"`. A lesson with more harmful than helpful votes gets a removal PR.
+
+Corrections also arrive as code: `hs retro` lists files you edited that the user later changed in a quiet commit (`user_edit_candidates`). Read those diffs; if the same preference shows up in two or more contexts (different paths or task kinds), draft it as a path-scoped lesson as above. One occurrence is not a preference.
 
 When an auto-memory rewrite drops specifics, H-Stack says so and keeps the earlier text in `.h-stack/memory-shadow.jsonl`; offer to restore what matters.
 

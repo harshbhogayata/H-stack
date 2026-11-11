@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+      "passed": true,
+      "evidence": "The reply says \"It has a SQL injection vulnerability. **The problem is at `users.js:5`.** The value of `req.query.name` goes straight into the SQL string\" and quotes the concatenated `db.query(\"SELECT ... LIKE '%\" + name + \"%'\")` line."
+    },
+    {
+      "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+      "passed": true,
+      "evidence": "The reply notes \"`db.query` already accepts a `params` argument (`db.js` exports `query(sql, params)`), so use a placeholder\" and shows `db.query(\"... WHERE name LIKE ? ESCAPE '\\\\'\", ['%' + escaped + '%'])`; the same code block also adds wildcard escaping and a typeof check, which go beyond the mini"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

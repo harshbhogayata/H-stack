@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (SettingsPage.jsx created)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+      "passed": true,
+      "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\"`, and settings.css uses only tokens such as `background: var(--color-surface)`, `background: var(--color-accent)` and `font-family: var(--font-ui)`; the one new colour (`--color-danger: #fca5a5`) was added as a token in theme.css rather than ha"
+    },
+    {
+      "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+      "passed": true,
+      "evidence": "Both inputs have matching labels (`<label ... htmlFor=\"display-name\">` with `id=\"display-name\"`, and `<label ... htmlFor=\"email-notifications\">` with `id=\"email-notifications\"`), and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so it keeps built-in "
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

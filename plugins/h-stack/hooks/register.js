@@ -22,6 +22,7 @@ const state = {
   testsPassed: 0,
   edits: 0,
   calls: [],
+  tools: {},
   concernAsked: '',
   pane: { receipts: [], assumptions: [], decisions: [], wishes: [] },
   overseerNoted: '',
@@ -150,12 +151,14 @@ export function register(on) {
     state.testsPassed = 0
     state.edits = 0
     state.calls = []
+    state.tools = {}
     return next(e)
   })
 
   on('tool.call', async ($, e, next) => {
     const result = await next(e)
     const input = e.input || e
+    if (e.tool) state.tools[e.tool] = (state.tools[e.tool] || 0) + 1
     if (e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit') state.edits += 1
     if (e.tool === 'Bash') {
       const cmd = String(input.command || '')
@@ -176,7 +179,7 @@ export function register(on) {
   on('turn.complete', async ($, e, next) => {
     if (e.agentId) return next(e)
     const u = e.usage || {}
-    await appendTelemetry($, { turn: state.turn, prompt_id: state.route.prompt_id || null, size: state.route.size || null, skills: state.route.skills || [], steps: state.steps, input_tokens: u.input_tokens || 0, output_tokens: u.output_tokens || 0, cache_read: u.cache_read_input_tokens || 0, cache_write: u.cache_creation_input_tokens || 0, duration_ms: e.durationMs || 0, edits: state.edits, aborted: Boolean(e.isAborted) })
+    await appendTelemetry($, { turn: state.turn, prompt_id: state.route.prompt_id || null, size: state.route.size || null, skills: state.route.skills || [], steps: state.steps, input_tokens: u.input_tokens || 0, output_tokens: u.output_tokens || 0, cache_read: u.cache_read_input_tokens || 0, cache_write: u.cache_creation_input_tokens || 0, duration_ms: e.durationMs || 0, edits: state.edits, tools: state.tools, aborted: Boolean(e.isAborted) })
     await refreshPane($)
     $.ui.invalidate('ui.render')
     if (e.isAborted) return next(e)

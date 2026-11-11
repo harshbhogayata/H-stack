@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (file unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+      "passed": true,
+      "evidence": "Item 2 says the search `<div>` \"can't be reached with Tab, doesn't respond to Enter or Space, and screen readers don't announce it as a button\", and item 5 says the delete button \"contains only an icon, so screen readers announce it as just 'button'\"."
+    },
+    {
+      "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+      "passed": true,
+      "evidence": "Item 8 flags `onPaste={e => e.preventDefault()}`, saying it stops users from pasting into the field, and the Optional (UX) note says \"delete fires immediately with no confirmation or undo\"."
+    },
+    {
+      "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+      "passed": true,
+      "evidence": "Item 1 flags `position: fixed; bottom: 0; height: '100vh'`, notes that on mobile \"`100vh` also counts the area behind the browser's address bar\", and its fix includes `paddingBottom: 'env(safe-area-inset-bottom)'`."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

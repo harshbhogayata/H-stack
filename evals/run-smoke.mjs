@@ -144,7 +144,9 @@ for (const [g, names] of Object.entries(groups)) for (const arm of ARMS) {
   const ds = names.map((nm) => results.find((r) => r.task.eval_name === nm && r.arm === arm && r.n === 1)?.diff || '');
   if (ds.length === 2) (sameness[g] ||= {})[arm] = +similarity(ds[0], ds[1]).toFixed(3);
 }
-const summary = { metadata: { tasks: tasks.length, runs_per_arm: RUNS, iteration: ITER, model: MODEL || 'default', timestamp: new Date().toISOString() }, metrics: agg, sameness };
+const passOf = (nm, arm) => { const rs = results.filter((r) => r.task.eval_name === nm && r.arm === arm); return rs.length ? rs.filter((r) => r.metrics.pass).length / rs.length : null; };
+const regressions = tasks.map((t) => t.eval_name).filter((nm) => passOf(nm, 'with_skill') !== null && passOf(nm, 'without_skill') !== null && passOf(nm, 'with_skill') < passOf(nm, 'without_skill'));
+const summary = { metadata: { tasks: tasks.length, runs_per_arm: RUNS, iteration: ITER, model: MODEL || 'default', timestamp: new Date().toISOString() }, tasks: tasks.map((t) => t.eval_name), timestamp: new Date().toISOString(), metrics: agg, regressions, sameness };
 fs.mkdirSync(base, { recursive: true });
 fs.writeFileSync(path.join(base, 'smoke-summary.json'), JSON.stringify(summary, null, 2));
 console.log(JSON.stringify(summary));

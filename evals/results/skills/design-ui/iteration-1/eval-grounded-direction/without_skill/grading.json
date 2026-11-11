@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The proposal says \"The home screen *is* the kid's garden. They shouldn't land on a dashboard with a garden widget in it,\" and calls for a button \"at least 88pt tall\" plus icon buttons \"each at least 64pt\" for ages 6–8."
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It gives hex values such as \"Morning Cream `#FFF6E5`\" and \"Bark `#3B2A20`\" and names Baloo 2/Fredoka and Andika, explaining that \"Andika was designed for beginning readers, with single-story 'a' and 'g' and clearly distinct b/d/p/q.\" It also covers high-contrast text so \"early readers can decode let"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

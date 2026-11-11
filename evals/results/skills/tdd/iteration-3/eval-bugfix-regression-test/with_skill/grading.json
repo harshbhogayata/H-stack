@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (bug fixed and a regression test for 1h30m added)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The existing tests in tests/test_duration.py were not weakened or removed",
+      "passed": true,
+      "evidence": "The diff only changes duration.py and adds the new file tests/test_duration_combined.py, so tests/test_duration.py is untouched, and the agent says \"I didn't touch the existing test file.\""
+    },
+    {
+      "text": "The final message reports a test run after the fix with its result",
+      "passed": true,
+      "evidence": "The final message says \"After the fix, all three tests pass\" and explains that it ran the test functions directly with python3 because pytest isn't installed (separately, the check command exited 1)."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

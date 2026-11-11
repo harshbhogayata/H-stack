@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (briefs.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+      "passed": true,
+      "evidence": "Each brief has a goal such as \"Make `<PATH>/auth.test.js` pass by fixing the real cause... Done means the file passes, and the rest of the suite fails no worse than it does now,\" says \"Stay inside auth-specific code and the test file,\" and includes a \"Report back (keep it short)\" section that lists "
+    },
+    {
+      "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+      "passed": true,
+      "evidence": "Each brief says \"Don't make the test pass by weakening it... no loosening assertions,\" tells the agent to \"Leave those files alone, along with the code under test that only they use,\" and asks for \"Files changed, with a one-line description of each change\" and \"Root cause... whether it was in the co"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

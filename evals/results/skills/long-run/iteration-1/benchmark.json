@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "skill_name": "long-run",
+    "skill_path": "plugins/h-stack/skills/long-run",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.406Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "goal-condition",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 98.361,
+        "tokens": 656810,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)",
+          "passed": true,
+          "evidence": "Each of the four features in features.json has a concrete shell 'check' field, e.g. F1: `[ \"$(node todo.js add 'alpha one')\" = 'added: alpha one' ]`, and F4 checks `[ \"$(node todo.js done 1)\" = 'done: alpha one' ]`."
+        },
+        {
+          "text": "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'",
+          "passed": true,
+          "evidence": "The condition says 'Done means this command ... exits 0 and prints \"4/4 passing\"', includes the full node runner command with a hash guard, and adds constraints ('do not edit any \"check\" field...', 'No force-push') plus a turn bound ('Stop after 30 turns even if not done')."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "goal-condition",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 77.781,
+        "tokens": 388155,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)",
+          "passed": false,
+          "evidence": "check exit 1: "
+        },
+        {
+          "text": "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)",
+          "passed": true,
+          "evidence": "Each of the 8 features in features.json has a concrete bash `check` field, e.g. add-prints runs `out=$(node todo.js add \"buy milk\"); [ \"$out\" = \"added: buy milk\" ]` in a fresh temp dir, and the file includes a `runner` command that runs every check."
+        },
+        {
+          "text": "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'",
+          "passed": true,
+          "evidence": "The condition says done means the features.json runner 'prints PASS for all 8 features and \"ALL PASS\", and exits 0', plus a sha256sum hash match and `git diff --quiet SPEC.md todos.json`, and adds constraints: 'Only create or edit todo.js; never modify features.json, SPEC.md or todos.json.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "bulk-as-code",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 16.748,
+        "tokens": 210501,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (correct total 1911)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent wrote a script or one command that processes all files (code mode) rather than reading the 40 files one by one with separate tool calls",
+          "passed": true,
+          "evidence": "The agent's final message says 'A script summed the files' and reports that all 40 files parsed. This is the agent's own account, since no transcript of tool calls was provided, but nothing in it suggests 40 separate reads."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "bulk-as-code",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "pass_rate": 0.5,
+        "time_seconds": 9.723,
+        "tokens": 157557,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (correct total 1911)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent wrote a script or one command that processes all files (code mode) rather than reading the 40 files one by one with separate tool calls",
+          "passed": false,
+          "evidence": "The evidence has only the final message ('All 40 files parsed without errors...') and a diff that adds just refunds.txt containing '1911', with no tool-call transcript or script, so it is unclear whether the agent used one script or read the files one by one."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "parallel-brief",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 48.236,
+        "tokens": 217223,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (briefs.md written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+          "passed": true,
+          "evidence": "Each brief limits edits to its own test file plus the source it tests (\"Scope (may change)... `<path>/auth.test.js`... Auth source modules under test\"). Each has a done criterion (\"`<TEST_CMD> <path>/auth.test.js` exits 0 with all tests passing in a run made after your last edit\") and a section head"
+        },
+        {
+          "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+          "passed": true,
+          "evidence": "Each brief marks everything else read-only (\"Read-only. Everything else, especially shared test helpers, global config, and other modules such as `cart` and `search`\") and allows a test-file change only when \"a test asserts behaviour the code was intentionally changed away from, and say why in `deci"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "parallel-brief",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 31.703,
+        "tokens": 82775,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (briefs.md written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+          "passed": true,
+          "evidence": "Each brief has a goal such as \"Make `<PATH>/auth.test.js` pass by fixing the real cause... Done means the file passes, and the rest of the suite fails no worse than it does now,\" says \"Stay inside auth-specific code and the test file,\" and includes a \"Report back (keep it short)\" section that lists "
+        },
+        {
+          "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+          "passed": true,
+          "evidence": "Each brief says \"Don't make the test pass by weakening it... no loosening assertions,\" tells the agent to \"Leave those files alone, along with the code under test that only they use,\" and asks for \"Files changed, with a one-line description of each change\" and \"Root cause... whether it was in the co"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 54.448,
+        "stddev": 33.607,
+        "min": 16.748,
+        "max": 98.361
+      },
+      "tokens": {
+        "mean": 361511.333,
+        "stddev": 208825.722,
+        "min": 210501,
+        "max": 656810
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.722,
+        "stddev": 0.208,
+        "min": 0.5,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 39.736,
+        "stddev": 28.359,
+        "min": 9.723,
+        "max": 77.781
+      },
+      "tokens": {
+        "mean": 209495.667,
+        "stddev": 129967.829,
+        "min": 82775,
+        "max": 388155
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.28",
+      "time_seconds": "+14.7",
+      "tokens": "+152016"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

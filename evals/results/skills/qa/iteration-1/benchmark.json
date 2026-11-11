@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "skill_name": "qa",
+    "skill_path": "plugins/h-stack/skills/qa",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.405Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "form-in-browser",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 26.613,
+        "tokens": 247299,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (signup.html not changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent drove the page with a browser (a Playwright script that submits the form) rather than only reading the HTML",
+          "passed": true,
+          "evidence": "The final message says \"I opened the page in headless Chromium with a short Playwright script and submitted the form three times\" and lists the saved files qa.js and empty-submit.png, though this rests on the agent's own report rather than a transcript."
+        },
+        {
+          "text": "The reply reports that submitting an empty email shows 'Thanks!' instead of an error",
+          "passed": true,
+          "evidence": "The reply states \"signup.html does not show an error when you submit an empty email. It shows \\\"Thanks!\\\", the success message.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "form-in-browser",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 24.836,
+        "tokens": 237693,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (signup.html not changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The agent drove the page with a browser (a Playwright script that submits the form) rather than only reading the HTML",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        },
+        {
+          "text": "The reply reports that submitting an empty email shows 'Thanks!' instead of an error",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "tests-have-teeth",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 39.644,
+        "tokens": 332494,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: 2 passed\n"
+        },
+        {
+          "text": "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes",
+          "passed": true,
+          "evidence": "The agent states 'they never touch the upper bound' and its mutation table shows 'Delete `if (x > hi) return hi;`' and '`return hi` → `return lo`' both 'Passes (not caught)'."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "tests-have-teeth",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 12.246,
+        "tokens": 116251,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: 2 passed\n"
+        },
+        {
+          "text": "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes",
+          "passed": true,
+          "evidence": "The final message says \"Nothing checks a value above `hi`. The `if (x > hi) return hi;` line in `clamp.js` never runs during the tests. If you deleted that line, or changed it to `return x` or `return lo`, both tests would still pass.\" It names the gap and describes mutations that would survive. The"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "console-error",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 24.234,
+        "tokens": 285598,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports the uncaught JSON parse error (SyntaxError) captured from the page console or page errors after the click",
+          "passed": true,
+          "evidence": "The reply says that clicking the button in headless Chromium threw \"Expected ',' or '}' after property value in JSON at position 12 (line 1 column 13)\" and that `JSON.parse` throws a `SyntaxError`."
+        },
+        {
+          "text": "The reply names the malformed JSON literal (missing closing brace) as the cause",
+          "passed": true,
+          "evidence": "The reply quotes `JSON.parse('{\"total\": 12');` at app.html:5 and says \"The JSON string is missing its closing `}`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "console-error",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333,
+        "time_seconds": 19.574,
+        "tokens": 156365,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply reports the uncaught JSON parse error (SyntaxError) captured from the page console or page errors after the click",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        },
+        {
+          "text": "The reply names the malformed JSON literal (missing closing brace) as the cause",
+          "passed": false,
+          "evidence": "judge output unparseable"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 30.164,
+        "stddev": 6.774,
+        "min": 24.234,
+        "max": 39.644
+      },
+      "tokens": {
+        "mean": 288463.667,
+        "stddev": 34839.69,
+        "min": 247299,
+        "max": 332494
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.556,
+        "stddev": 0.314,
+        "min": 0.3333333333333333,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 18.885,
+        "stddev": 5.163,
+        "min": 12.246,
+        "max": 24.836
+      },
+      "tokens": {
+        "mean": 170103,
+        "stddev": 50521.212,
+        "min": 116251,
+        "max": 237693
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.44",
+      "time_seconds": "+11.3",
+      "tokens": "+118361"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

@@ -3,7 +3,8 @@
 // FAILURE_MODE=open
 import fs from 'node:fs';
 import path from 'node:path';
-import { runHook, projectDir, stateDir, sessionDir, readJson, writeJsonAtomic, context, looksLikeSecret, treeHash, sha } from '../lib/core.mjs';
+import { runHook, projectDir, stateDir, sessionDir, readJson, writeJsonAtomic, context, looksLikeSecret, treeHash, sha, appendLine, redact } from '../lib/core.mjs';
+import { effortFor, taskClass } from '../lib/retro.mjs';
 import { loadIndex } from '../lib/index.mjs';
 import { classify } from '../lib/pure/classify-rules.mjs';
 import { logActivation } from '../lib/telemetry.mjs';
@@ -36,12 +37,16 @@ await runHook('classify', 'open', async (input) => {
   const next = {
     ...route,
     prompt_id: input.prompt_id || null,
+    prompt_excerpt: secretKind ? '' : redact(prompt).slice(0, 200),
+    verify: effortFor(readJson(path.join(stateDir(proj), 'solo-boundary.json'), {})[taskClass({ picked: route.skills, size: route.size })]),
     turn_seq: (prev.turn_seq || 0) + 1,
     turn_tree: treeHash(proj),
     trusted_values: trusted,
     scope_numbers: route.override === 'why-that' ? prev.scope_numbers || [] : [...prompt.matchAll(/(?:#|\b(?:issue|pr|pull request)\s+#?)(\d{1,7})\b/gi)].map((m) => m[1]),
   };
   writeJsonAtomic(routeFile, next);
+  // HS-021: a correction becomes a context-keyed routing example for description tuning.
+  if (CORRECTION.test(prompt) && (prev.skills || []).length) appendLine(path.join(stateDir(proj), 'routing-examples.jsonl'), { ts: Date.now(), prompt: prev.prompt_excerpt || '', picked: prev.skills, rules: prev.rules || [], correction: redact(prompt).slice(0, 200) }, proj);
   logActivation(proj, {
     session: sid, prompt, size: route.size, picked: route.skills, rules: route.rules, override: route.override,
     correction_of_previous: CORRECTION.test(prompt) ? (prev.skills || []) : null,

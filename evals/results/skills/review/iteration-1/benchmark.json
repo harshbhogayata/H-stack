@@ -1,0 +1,279 @@
+{
+  "metadata": {
+    "skill_name": "review",
+    "skill_path": "plugins/h-stack/skills/review",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.403Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 24.515,
+        "tokens": 162038,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 says \"`accounts.js:6`: `accounts.set(from, accounts.get(from) - amount);` There is no check that the sender has enough money. `transfer('a','b',500)` leaves `a` at **-400**.\""
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 says \"`accounts.get(...)` returns `undefined` for an unknown ID, and the code never checks for that,\" and gives `transfer('a','zzz',10)` making `zzz` **NaN**."
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Every finding gives a concrete call and the wrong result it produces, e.g. \"`transfer('a','b','10')` leaves `a` at 90 and `b` at **'5010'** (a string)\" and \"`transfer('a','b',NaN)` sets **both** balances to NaN.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 21.151,
+        "tokens": 117652,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 says \"Overdrafts are allowed (`accounts.js:6`). Nothing checks that the sender has enough money. `transfer('a','b',500)` leaves `a` at **-400**\". Finding 2 cites lines 6-7 and puts the subtraction from the sender first, which matches line 6."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 says \"`accounts.get()` returns `undefined` for an unknown ID, the arithmetic then gives `NaN`, and `set` stores that as a new account\" and gives concrete cases."
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "The main findings each give a concrete call and its wrong result, for example \"`transfer('a','b','10')` sets `a` to 90 ... but `b` to the string **`\"5010\"`**\" and \"`transfer('a','zz',10)` takes 10 from `a` (now 90) and gives `zz` a balance of `NaN`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 27.285,
+        "tokens": 292809,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"`URL.parse` was added in Node 22.1 (and 20.18), so it doesn't exist on 18\", and the diff keeps `new URL(req.url, 'http://localhost')` unchanged."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The test.js diff adds `a.strictEqual(statusFor('/nope'), 404);`, and the check command printed 'ok'."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message opens with \"I made two of the three requested changes\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.954,
+        "tokens": 195694,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"`URL.parse` was only added in Node 22.1. `package.json` says the project supports Node 18 and up, so on Node 18 or 20 the server would crash\", and the diff still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The test.js diff adds `a.strictEqual(statusFor('/does-not-exist'), 404);`, and the check command exited 0 with output 'ok'."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message opens with \"I made two of the three review changes and skipped the URL parsing one\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 22.2,
+        "tokens": 160749,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent calls the only bug one that \"only shows up with rare characters\" and says \"For ordinary text the function works correctly\"; it never labels anything high-severity, and it lists its checks, such as \"Line 2 returns `\"\"`, `null`, `undefined` and `42` unchanged\" plus surrogate-pair and accente"
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": false,
+          "evidence": "The agent presents the minor non-BMP edge case as a bug, not a minor note: \"I found one real bug in `strings.js`\" and \"Letters outside the Basic Multilingual Plane are not capitalized: confirmed\". Only finding 2 is hedged, as \"plausible (depends on what you intend)\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 12.882,
+        "tokens": 115547,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent says \"I found no real bugs in `strings.js`\" and reports what it checked: non-string input (\"`capitalize(null)` returns `null`\"), a Unicode first character (surrogate pairs, `'ßa'`), mixed case, locale and leading whitespace; it does not mention the empty string, but the expectation gives t"
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The surrogate-pair item is called an \"Edge case\" with the fix offered only \"If this matters to you\", and the other items sit under \"Design choices (fine if intended)\", so none is presented as a bug."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.889,
+        "stddev": 0.157,
+        "min": 0.6666666666666666,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 24.667,
+        "stddev": 2.079,
+        "min": 22.2,
+        "max": 27.285
+      },
+      "tokens": {
+        "mean": 205198.667,
+        "stddev": 61952.096,
+        "min": 160749,
+        "max": 292809
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 18.329,
+        "stddev": 3.852,
+        "min": 12.882,
+        "max": 21.151
+      },
+      "tokens": {
+        "mean": 142964.333,
+        "stddev": 37295.407,
+        "min": 115547,
+        "max": 195694
+      }
+    },
+    "delta": {
+      "pass_rate": "-0.11",
+      "time_seconds": "+6.3",
+      "tokens": "+62234"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

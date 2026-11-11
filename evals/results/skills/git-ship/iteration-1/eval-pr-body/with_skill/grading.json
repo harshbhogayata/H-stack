@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (PR.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "PR.md tells the reviewer where to look first (the window filter or the limit comparison in rate.js) with a risk note",
+      "passed": true,
+      "evidence": "The 'Where to look first' section opens with \"**`rate.js:6`, the expiry boundary `t - x < windowMs`** (logic)\" and adds risk notes such as \"This is the main risk in the change.\""
+    },
+    {
+      "text": "PR.md includes evidence from running node test.js (pass count or output), and a section saying what was not verified (or states nothing unverified with a reason)",
+      "passed": true,
+      "evidence": "The Evidence section says \"`node test.js` on the final tree: `rate tests passed (4 assertions)`\", and a separate \"## Not verified\" section lists the before/after comparison, memory growth, throughput and other gaps."
+    },
+    {
+      "text": "PR.md states whether the change is easy to roll back (one-way or two-way door) or its blast radius",
+      "passed": true,
+      "evidence": "The 'Merge danger' section says \"**Two-way door.** ... reverting restores the old behaviour. Blast radius: every caller of `createLimiter`.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

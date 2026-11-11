@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no merge commit was made)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent runs the tests before offering integration options",
+      "passed": true,
+      "evidence": "The final message reports running the tests before listing any options: \"**Tests:** `node test.js` → `rate tests passed (4 assertions)`\", run \"on the current tree, `main` at `fe6f5bf`\"."
+    },
+    {
+      "text": "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own",
+      "passed": true,
+      "evidence": "The agent says \"I haven't merged, pushed or created a branch\", the diff is empty, and it ends with \"What would you like?\". The options are adapted to a repo with no feature branch and no remote: \"Leave it as is\" (keep), \"Split it out for review... so I can push and open a PR\", and \"Something else\". "
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

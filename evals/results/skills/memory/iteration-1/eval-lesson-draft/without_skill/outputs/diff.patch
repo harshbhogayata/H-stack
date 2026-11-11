@@ -1,0 +1,56 @@
+diff --git a/lesson-draft.md b/lesson-draft.md
+new file mode 100644
+index 0000000..f68d45b
+--- /dev/null
++++ b/lesson-draft.md
+@@ -0,0 +1,50 @@
++# Lesson: Money in `src/billing` is integer cents, never floats
++
++## The rule
++
++In `src/billing`, store and calculate all money as **integer cents** (`int`).
++Do not use floats for money, and do not use `round()` on a float to "fix" a total.
++
++## What went wrong
++
++In the March invoice run, a float total came out as `10.299999…`. Rounding it
++did not give the right answer: `npm run invoices` showed **10.29** where the
++correct amount was **10.30**.
++
++Floats are binary, so they can't hold most decimal amounts exactly. Small
++errors pile up when you add amounts together. Rounding at the end can't recover
++the right value, because the value is already wrong before you round it.
++
++## What to do instead
++
++- Keep prices, line items and totals as integer cents (`1030`, not `10.30`).
++- Add up the cents as integers. Integer addition is exact.
++- Convert to dollars only when you display the amount, using integer math.
++  For example: `f"{cents // 100}.{cents % 100:02d}"`.
++- If a calculation really needs fractions (tax rates, proration, currency
++  conversion), use `decimal.Decimal` with a rounding mode you choose on purpose,
++  then convert the result back to integer cents.
++
++```python
++# Wrong: float money, rounded at the end
++def total(items):
++    return round(sum(i["price"] for i in items), 2)
++
++# Right: integer cents all the way through
++def total_cents(items):
++    return sum(i["price_cents"] for i in items)
++```
++
++## Where this applies now
++
++`src/billing/total.py` still sums float `price` values and calls
++`round(..., 2)`. That is the pattern this lesson warns against. It should move
++to integer cents, along with any callers and stored data that pass float prices.
++
++## Review checklist for billing changes
++
++- [ ] No `float` money values or float literals like `10.30` for amounts
++- [ ] No `round()` on money
++- [ ] Field names make the unit clear (`*_cents`)
++- [ ] Conversion to a display string happens only at the output edge
++- [ ] Tests include amounts that floats get wrong (for example `0.10 + 0.20`, and totals like 10.30)

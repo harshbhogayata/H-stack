@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply reports the uncaught JSON parse error (SyntaxError) captured from the page console or page errors after the click",
+      "passed": false,
+      "evidence": "judge output unparseable"
+    },
+    {
+      "text": "The reply names the malformed JSON literal (missing closing brace) as the cause",
+      "passed": false,
+      "evidence": "judge output unparseable"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 2,
+    "total": 3,
+    "pass_rate": 0.3333333333333333
+  }
+}

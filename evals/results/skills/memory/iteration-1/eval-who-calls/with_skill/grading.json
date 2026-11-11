@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply lists both call sites, src/cart.js and src/refund.js, with line references, and does not list src/other.js",
+      "passed": true,
+      "evidence": "The reply lists \"`src/cart.js:2`\" and \"`src/refund.js:2`\" as the two call sites, and names src/other.js only to exclude it: \"`notCharge` in `src/other.js:1`, which is an unrelated constant.\""
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

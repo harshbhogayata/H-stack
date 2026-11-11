@@ -6,7 +6,7 @@
 // that sees the final message, the diff and the check output (binary verdicts with evidence).
 //
 //   node evals/skill-bench.mjs --skill core-rules [--skill tdd ...] [--all] [--parallel 4]
-//        [--model <id>] [--judge-model <id>] [--iteration 1] [--max-turns 30]
+//        [--model <id>] [--judge-model <id>] [--iteration 1] [--max-turns 30] [--effort low|medium|high]
 //
 // Writes evals/results/skills/<skill>/iteration-N/eval-<name>/{with_skill,without_skill}/
 // {outputs/final.md, outputs/diff.patch, timing.json, grading.json} and
@@ -27,6 +27,7 @@ const JUDGE = opt('judge-model', null);
 const ITER = Number(opt('iteration', 1));
 const MAX_TURNS = Number(opt('max-turns', 30));
 const ONLY_EVAL = opt('eval', null);
+const EFFORT = opt('effort', null); // HS-007: compare a skill at two effort levels
 const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(npm run:*)', 'Bash(npx vitest:*)', 'Bash(npx jest:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(grep:*)', 'Bash(rg:*)', 'Bash(find:*)', 'Bash(mkdir:*)', 'Bash(git stash:*)'];
 
 function run(cmd, argv, { cwd, input, timeout = 900000, env } = {}) {
@@ -60,7 +61,7 @@ async function agentRun(skill, ev, arm) {
   const prompt = arm === 'with_skill'
     ? `Before you start, read the skill file ${path.join(skillDir, 'SKILL.md')} and follow it (it may point to files in the same folder). H-Stack's helper commands it mentions (hs, receipts) are not installed in this run; skip those steps.\n\nTask: ${ev.prompt}`
     : ev.prompt;
-  const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(MAX_TURNS), '--permission-mode', 'acceptEdits', '--allowedTools', ...TOOLS];
+  const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(MAX_TURNS), '--permission-mode', 'acceptEdits', ...(EFFORT ? ['--effort', EFFORT] : []), '--allowedTools', ...TOOLS];
   if (arm === 'with_skill') argv.push('--add-dir', skillDir);
   if (MODEL) argv.push('--model', MODEL);
   const r = await run('claude', argv, { cwd: ws });
@@ -137,7 +138,7 @@ function summarise(skill, base, runs) {
   const w = sum('with_skill'); const wo = sum('without_skill');
   const sign = (x, d = 2) => (x >= 0 ? '+' : '') + x.toFixed(d);
   const bench = {
-    metadata: { skill_name: skill, skill_path: `plugins/h-stack/skills/${skill}`, executor_model: MODEL || 'session default', judge_model: JUDGE || 'session default', timestamp: new Date().toISOString(), evals_run: [...new Set(runs.map((r) => r.eval_id))], runs_per_configuration: 1 },
+    metadata: { skill_name: skill, skill_path: `plugins/h-stack/skills/${skill}`, executor_model: MODEL || 'session default', effort: EFFORT || 'session default', judge_model: JUDGE || 'session default', timestamp: new Date().toISOString(), evals_run: [...new Set(runs.map((r) => r.eval_id))], runs_per_configuration: 1 },
     runs,
     run_summary: { with_skill: w, without_skill: wo, delta: { pass_rate: sign(w.pass_rate.mean - wo.pass_rate.mean), time_seconds: sign(w.time_seconds.mean - wo.time_seconds.mean, 1), tokens: sign(w.tokens.mean - wo.tokens.mean, 0) } },
     notes: ['Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise.'],

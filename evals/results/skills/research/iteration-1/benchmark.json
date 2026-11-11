@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "skill_name": "research",
+    "skill_path": "plugins/h-stack/skills/research",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.407Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "node-api-from-source",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 49.838,
+        "tokens": 381039,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (findings saved as a new file)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The answer names the recursive: true option (and force where relevant) as the fix",
+          "passed": true,
+          "evidence": "ANSWER.md says \"Pass `recursive: true`\" and shows `fs.rmSync(dir, { recursive: true, force: true }); // same, and no error if dir doesn't exist (like `rm -rf`)`."
+        },
+        {
+          "text": "The answer cites a primary source (Node's documentation URL or a reproduction run with node) for the claim",
+          "passed": true,
+          "evidence": "ANSWER.md cites \"Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options\" and has a \"Measured behaviour (Node v22.23.4, local probe script)\" table."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "node-api-from-source",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 23.788,
+        "tokens": 236654,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (findings saved as a new file)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The answer names the recursive: true option (and force where relevant) as the fix",
+          "passed": true,
+          "evidence": "ANSWER.md says \"`recursive: true` is the option that fixes it. `force` does **not** fix it on its own,\" and shows `fs.rmSync(dir, { recursive: true, force: true })` for the rm -rf case."
+        },
+        {
+          "text": "The answer cites a primary source (Node's documentation URL or a reproduction run with node) for the claim",
+          "passed": true,
+          "evidence": "ANSWER.md has no documentation URL, but its \"Checked on Node v22.23.4\" section reports a node reproduction: `fs.rmSync(dir)` and `{ force: true }` throw `ERR_FS_EISDIR`, while `{ recursive: true }` removes the directory."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "follows-notes-convention",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 75.762,
+        "tokens": 867236,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (new note saved in docs/research, following the existing convention)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The note cites Node's own docs or source and states clearly whether fetch honours HTTPS_PROXY by default (it does not without extra configuration in Node 22), marking uncertainty if the source was not reachable",
+          "passed": true,
+          "evidence": "The note cites the bundled man page (`node.1` lines 848–859) and the built-in source (`lib/internal/process/pre_execution.js` `setupHttpProxy()`), and states \"**No.** On Node 22, global `fetch()` ignores `HTTPS_PROXY`... unless you opt in with `NODE_USE_ENV_PROXY=1`\"; it also marks what it couldn't "
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "follows-notes-convention",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 59.434,
+        "tokens": 665909,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (new note saved in docs/research, following the existing convention)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The note cites Node's own docs or source and states clearly whether fetch honours HTTPS_PROXY by default (it does not without extra configuration in Node 22), marking uncertainty if the source was not reachable",
+          "passed": true,
+          "evidence": "The note opens with '**No.** In Node 22, global `fetch()` ignores `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` unless you opt in'. It quotes Node's own `setupHttpProxy` source from the v22.23.4 binary and the `node --help` text. It says 'Network access to nodejs.org and GitHub was blocked' and labels t"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "compare-with-citations",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 49.404,
+        "tokens": 416562,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (note saved)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Each claim about ajv and zod is attributed to a source or explicitly marked as not verified when the source could not be read here",
+          "passed": true,
+          "evidence": "The note says 'no primary source was opened' and marks each numbered claim '*Inferred.*' with a specific source to check, e.g. 'Check: https://ajv.js.org/json-schema.html (section \"draft-2020-12\") and `node_modules/ajv/dist/2020.d.ts`.'"
+        },
+        {
+          "text": "The note distinguishes that ajv validates JSON Schema documents (with draft 2020-12 support via its 2020 build) while zod defines schemas in code rather than validating JSON Schema documents",
+          "passed": true,
+          "evidence": "The table says ajv is 'Yes. Use the separate `Ajv2020` class.' and zod is 'No. Zod checks data against its own TypeScript-built schemas, not JSON Schema documents.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "compare-with-citations",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 33.98,
+        "tokens": 317400,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (note saved)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Each claim about ajv and zod is attributed to a source or explicitly marked as not verified when the source could not be read here",
+          "passed": true,
+          "evidence": "ANSWER.md has a 'Sources: unverified' section saying 'The fetches of the docs sites (ajv.js.org, zod.dev) were blocked... The facts below come from my knowledge of the projects' docs and source. Check them against the links', and each library section names its doc URLs and source paths."
+        },
+        {
+          "text": "The note distinguishes that ajv validates JSON Schema documents (with draft 2020-12 support via its 2020 build) while zod defines schemas in code rather than validating JSON Schema documents",
+          "passed": true,
+          "evidence": "The note says ajv 'validates data against draft 2020-12 JSON Schema documents' via `require(\"ajv/dist/2020\")`, and says zod 'schemas are built in code (`z.object({...})`)... Zod has no API for compiling an arbitrary JSON Schema document and validating data against it.'"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 58.335,
+        "stddev": 12.324,
+        "min": 49.404,
+        "max": 75.762
+      },
+      "tokens": {
+        "mean": 554945.667,
+        "stddev": 221298.306,
+        "min": 381039,
+        "max": 867236
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 39.067,
+        "stddev": 14.99,
+        "min": 23.788,
+        "max": 59.434
+      },
+      "tokens": {
+        "mean": 406654.333,
+        "stddev": 186260.956,
+        "min": 236654,
+        "max": 665909
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+19.3",
+      "tokens": "+148291"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

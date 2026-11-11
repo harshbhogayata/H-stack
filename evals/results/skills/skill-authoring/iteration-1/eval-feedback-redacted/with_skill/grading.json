@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (draft written, email and home path removed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The draft states the skill, expected behaviour and actual behaviour",
+      "passed": true,
+      "evidence": "ISSUE.md has a line for each: \"**Skill:** tdd\", \"**Expected:** When the user has said \\\"just build it\\\", proceed without questions...\" and \"**Actual:** It asked three questions to agree seams with the user...\""
+    },
+    {
+      "text": "The reply asks the user to approve the exact text before anything is posted",
+      "passed": true,
+      "evidence": "The final message says \"Nothing has been posted\" and ends with \"If you approve this exact text, tell me where to post it and I'll file it.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

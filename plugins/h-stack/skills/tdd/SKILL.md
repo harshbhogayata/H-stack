@@ -51,7 +51,7 @@ If the tests turn out to contradict the spec, don't edit them to pass; record `h
 
 ## Migrations: account for every item
 
-When moving data, config or code from one shape to another, every source item maps to a target or to a "not migrated: reason" row. Count items per stage (source, transformed, written) and stop on any mismatch instead of continuing.
+When moving data, config or code from one shape to another, every source item maps to a target or to a "not migrated: reason" row. Count items per stage (source, transformed, written) and stop on any mismatch instead of continuing. With id lists per stage, `node ${CLAUDE_SKILL_DIR}/scripts/accounting.mjs --source <ids> --target <ids> --skipped <id\treason>` does the check.
 
 ## Before you finish
 

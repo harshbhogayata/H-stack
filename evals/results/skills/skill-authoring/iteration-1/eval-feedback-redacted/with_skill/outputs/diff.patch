@@ -1,0 +1,16 @@
+diff --git a/ISSUE.md b/ISSUE.md
+new file mode 100644
+index 0000000..44fd6bf
+--- /dev/null
++++ b/ISSUE.md
+@@ -0,0 +1,10 @@
++# [tdd] agreeing seams with the user: asked three questions after "just build it"
++
++**Skill:** tdd
++**File / section:** agreeing seams with the user
++
++**Expected:** When the user has said "just build it", proceed without questions and log the assumptions made about seams.
++
++**Actual:** It asked three questions to agree seams with the user, despite the user having said "just build it".
++
++_Drafted by H-Stack; the user approved this exact text before posting._

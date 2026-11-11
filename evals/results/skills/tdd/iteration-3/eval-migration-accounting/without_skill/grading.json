@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (4 users migrated with trimmed names)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The final message accounts for all 5 source users: 4 migrated and user 3 not migrated because it has no email",
+      "passed": true,
+      "evidence": "The final message says \"It migrated 4 of the 5 users\", lists \"users 1, 2, 4 and 5\" as migrated, and says \"Skipped: user 3 (Cy Ode), because they have no email\"."
+    },
+    {
+      "text": "The script or its output compares source and target counts (or lists skipped items with a reason) rather than silently dropping the record",
+      "passed": true,
+      "evidence": "The script logs `Migrated ${out.length} of ${users.length} users.` and warns `Skipped (no email): uid ${skipped.join(', ')}`."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (README documents both flags)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)",
+      "passed": true,
+      "evidence": "The README says \"tidyjson reformats a JSON file and writes the result back to the same file\" and \"If the file is not valid JSON, it exits with code 2 and leaves the file unchanged.\" The agent reports that both come from the usage comments in cli.js, which has no implementation yet."
+    },
+    {
+      "text": "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'",
+      "passed": true,
+      "evidence": "The full 31-line README in the diff uses only plain descriptive text such as \"This puts the `tidyjson` command on your PATH\" and contains none of the listed filler words."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

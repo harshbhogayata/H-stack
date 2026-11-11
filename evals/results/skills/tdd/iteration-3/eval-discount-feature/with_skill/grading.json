@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (behaviour correct, discount tests exist, suite passes)",
+      "passed": true,
+      "evidence": "check exit 0: ok 4 - subtotal multiplies price by quantity\n  ---\n  duration_ms: 0.733565\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 110.127862\n"
+    },
+    {
+      "text": "The new tests call discount() through its exported interface and assert literal expected values (e.g. 900), not values recomputed with the same formula",
+      "passed": true,
+      "evidence": "test/discount.test.js does `import { discount } from '../src/pricing.js'` and checks hard-coded values, for example `assert.equal(discount(2000, 'SAVE10'), 1800)`, `assert.equal(discount(1995, 'SAVE10'), 1796)` and `assert.equal(discount(2000, 'BOGUS'), 2000)`. None of the expected values are recomp"
+    },
+    {
+      "text": "The final message or transcript evidence shows a failing test run before the implementation and a passing run after it",
+      "passed": true,
+      "evidence": "The final message says the SAVE10 test 'failed because `discount` wasn't exported yet. Then I added the code and it passed', and the unknown-code test 'failed first (it got 1800, expected 2000)' before passing. The check command shows the final run with 4 passing and 0 failing. The earlier failing r"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

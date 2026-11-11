@@ -1,0 +1,80 @@
+diff --git a/docs/research/2026-11-11-node22-fetch-https-proxy.md b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+new file mode 100644
+index 0000000..a3ffaf9
+--- /dev/null
++++ b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+@@ -0,0 +1,74 @@
++# 2026-11-11 Does Node 22 global fetch() honour HTTPS_PROXY by default?
++
++## Answer
++
++**No.** In Node 22, global `fetch()` ignores `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY`
++unless you opt in, either with the environment variable `NODE_USE_ENV_PROXY=1` or with
++the CLI flag `--use-env-proxy`. When you opt in, Node installs undici's `EnvHttpProxyAgent`
++as the global dispatcher, and `fetch()` then sends requests through the proxy.
++
++## Evidence
++
++Checked against the installed Node **v22.23.4**. Network access to nodejs.org and GitHub
++was blocked in this environment, so the evidence comes from the Node binary itself and
++from a local test.
++
++### 1. Node source (embedded in the v22.23.4 binary, `setupHttpProxy` in pre-execution)
++
++```js
++function setupHttpProxy() {
++  // This normalized from both --use-env-proxy and NODE_USE_ENV_PROXY settings.
++  if (!getOptionValue('--use-env-proxy')) {
++    return;
++  }
++  if (!process.env.HTTP_PROXY && !process.env.HTTPS_PROXY &&
++      !process.env.http_proxy && !process.env.https_proxy) {
++    return;
++  }
++  const { setGlobalDispatcher, EnvHttpProxyAgent } = require('internal/deps/undici/undici');
++  const envHttpProxyAgent = new EnvHttpProxyAgent();
++  setGlobalDispatcher(envHttpProxyAgent);
++  // For fetch, we need to set the global dispatcher from here.
++  ...
++  // TODO(joyeecheung): This is currently guarded with NODE_USE_ENV_PROXY and --use-env-proxy.
++  // Investigate whether it's possible to enable it by default without stepping on other
++  // existing libraries that sets the global dispatcher or monkey patches the global agent.
++}
++```
++
++The `http`/`https` global agents use the same option:
++`proxyEnv: getOptionValue('--use-env-proxy') ? filterEnvForProxies(process.env) : undefined`.
++
++### 2. `node --help` (v22.23.4)
++
++```
++--use-env-proxy   parse proxy settings from HTTP_PROXY/HTTPS_PROXY/NO_PROXY environment
++                  variables and apply the setting in global HTTP/HTTPS clients
++```
++
++### 3. Local test
++
++I ran a fake proxy on `127.0.0.1:18080` with `HTTPS_PROXY` pointing at it, then called
++`fetch('https://example.invalid/')`. The script is reproducible: a minimal proxy that
++records `CONNECT` requests.
++
++| Configuration                          | Did the proxy see a request?        | fetch outcome                     |
++|----------------------------------------|-------------------------------------|-----------------------------------|
++| `HTTPS_PROXY` only (default)           | **No**                              | `ENOTFOUND`: direct DNS lookup    |
++| `HTTPS_PROXY` + `NODE_USE_ENV_PROXY=1` | Yes: `CONNECT example.invalid:443`  | proxied                           |
++| `HTTPS_PROXY` + `--use-env-proxy`      | Yes: `CONNECT example.invalid:443`  | proxied                           |
++
++When you opt in, Node prints `[UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental`.
++
++## Practical notes
++
++- To proxy on Node 22, use `NODE_USE_ENV_PROXY=1 node app.js` or `node --use-env-proxy app.js`.
++- Another option is to call undici's `setGlobalDispatcher(new EnvHttpProxyAgent())`
++  (or `ProxyAgent`) in code, using the npm `undici` package.
++- The setting is read at startup. If some other library later replaces the global
++  dispatcher, that library's setting wins.
++- **Not verified here (no network):** the exact Node 22.x release where this opt-in first
++  appeared. My recollection is that `NODE_USE_ENV_PROXY` arrived in v24.0.0 and both
++  options were backported to v22.21.0. Older 22.x releases have neither option, so on
++  those fetch never reads proxy environment variables. Check the version history in
++  `doc/api/cli.md` on the v22.x branch before relying on this.

@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "skill_name": "skill-authoring",
+    "skill_path": "plugins/h-stack/skills/skill-authoring",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.407Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "script-not-prose",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 50.888,
+        "tokens": 349013,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (a script or package script was added)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The result is an executable script (or package script) that runs the steps in order and stops when the bundle-size check fails, rather than only a prose checklist or skill text",
+          "passed": true,
+          "evidence": "The diff adds `scripts/release.sh` with `set -euo pipefail` and runs build, check-bundle-size, git tag and changelog in that order, plus a package script `\"release\":\"bash scripts/release.sh\"`; the test \"oversized bundle stops the release before tagging\" checks that a failing size check leaves no tag"
+        },
+        {
+          "text": "The script keeps the defaults that worked (--max-kb 250, tag from package.json version)",
+          "passed": true,
+          "evidence": "The script sets `MAX_KB=\"${MAX_KB:-250}\"`, runs `check-bundle-size.js --max-kb \"${MAX_KB}\"`, and builds the tag with `VERSION=\"$(node -p 'require(\"./package.json\").version')\"` and `TAG=\"v${VERSION}\"`."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "script-not-prose",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 31.039,
+        "tokens": 320500,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (a script or package script was added)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The result is an executable script (or package script) that runs the steps in order and stops when the bundle-size check fails, rather than only a prose checklist or skill text",
+          "passed": true,
+          "evidence": "The diff adds scripts/release.sh, which uses `set -euo pipefail` and runs `npm run build`, then `node scripts/check-bundle-size.js --max-kb \"${MAX_KB}\"`, then `git tag \"${TAG}\"`, then the changelog step, in that order, and package.json gains `\"release\": \"bash scripts/release.sh\"`. A failing size che"
+        },
+        {
+          "text": "The script keeps the defaults that worked (--max-kb 250, tag from package.json version)",
+          "passed": true,
+          "evidence": "The script sets `MAX_KB=\"${MAX_KB:-250}\"`, passes it as `--max-kb \"${MAX_KB}\"`, and builds the tag as `TAG=\"v${VERSION}\"` from `require(\"./package.json\").version`."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "feedback-redacted",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 20.259,
+        "tokens": 246460,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (draft written, email and home path removed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The draft states the skill, expected behaviour and actual behaviour",
+          "passed": true,
+          "evidence": "ISSUE.md has a line for each: \"**Skill:** tdd\", \"**Expected:** When the user has said \\\"just build it\\\", proceed without questions...\" and \"**Actual:** It asked three questions to agree seams with the user...\""
+        },
+        {
+          "text": "The reply asks the user to approve the exact text before anything is posted",
+          "passed": true,
+          "evidence": "The final message says \"Nothing has been posted\" and ends with \"If you approve this exact text, tell me where to post it and I'll file it.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "feedback-redacted",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 16.537,
+        "tokens": 155155,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (draft written, email and home path removed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The draft states the skill, expected behaviour and actual behaviour",
+          "passed": true,
+          "evidence": "ISSUE.md names the skill in the title and under Environment (\"Skill: `tdd`\"), and has an \"## Expected behavior\" section (\"The agent treats 'just build it' as permission to proceed...\") and an \"## Actual behavior\" section (\"The agent stopped and asked the user three questions about seams...\")."
+        },
+        {
+          "text": "The reply asks the user to approve the exact text before anything is posted",
+          "passed": false,
+          "evidence": "The reply says only \"I've drafted the issue in `ISSUE.md` and haven't posted it anywhere\" and offers \"If you'd rather include any of them, tell me and I'll add them\"; it never asks the user to approve the exact text before posting."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "reject-generic-prose",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1,
+        "time_seconds": 26.936,
+        "tokens": 162459,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply points out that generic advice ('write good code', 'be careful') adds no behaviour or measurably hurts, and proposes project-specific content, a script, or measuring it with an eval before shipping, instead of silently writing the generic skill",
+          "passed": true,
+          "evidence": "The final message says generic advice like \"Always write good code. Be careful with edge cases. Test things.\" tends to make results worse, citing SkillsBench scores \"8 to 11.5 points below having no skill at all\". It turns the advice into concrete checks with project placeholders (<TEST_CMD>, <LINT_"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "reject-generic-prose",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "pass_rate": 0.5,
+        "time_seconds": 21.409,
+        "tokens": 117948,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply points out that generic advice ('write good code', 'be careful') adds no behaviour or measurably hurts, and proposes project-specific content, a script, or measuring it with an eval before shipping, instead of silently writing the generic skill",
+          "passed": false,
+          "evidence": "The agent said the three lines are 'too vague for Claude to act on', but it never said such advice adds no behaviour or hurts, and it went ahead and shipped a longer generic checklist ('follow the conventions already in the code, reuse existing helpers...'). It did not propose project-specific conte"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 32.694,
+        "stddev": 13.15,
+        "min": 20.259,
+        "max": 50.888
+      },
+      "tokens": {
+        "mean": 252644,
+        "stddev": 76285.779,
+        "min": 162459,
+        "max": 349013
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.722,
+        "stddev": 0.208,
+        "min": 0.5,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 22.995,
+        "stddev": 6.026,
+        "min": 16.537,
+        "max": 31.039
+      },
+      "tokens": {
+        "mean": 197867.667,
+        "stddev": 88034.49,
+        "min": 117948,
+        "max": 320500
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.28",
+      "time_seconds": "+9.7",
+      "tokens": "+54776"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

@@ -1,0 +1,62 @@
+diff --git a/SKILL.md b/SKILL.md
+new file mode 100644
+index 0000000..2fc224e
+--- /dev/null
++++ b/SKILL.md
+@@ -0,0 +1,56 @@
++---
++name: code-quality-checklist
++description: Concrete checklist for writing, edge-case-hardening, and testing code changes. Use when implementing a feature, fixing a bug, or refactoring, before declaring the change done.
++---
++
++# Code Quality Checklist
++
++The rule of thumb is "write good code, be careful with edge cases, test things."
++That is too vague to act on, so this skill breaks each part into specific checks.
++Work through all three sections for every non-trivial change.
++
++## 1. Write good code
++
++Before writing:
++- Read the code around the change and copy its conventions (naming, error handling, file layout, formatting). Being consistent with the codebase matters more than personal preference.
++- Search for an existing helper before writing a new one.
++
++While writing:
++- Keep the change scoped to the task. Don't refactor unrelated code or rename things you didn't need to touch.
++- Give functions and variables names that describe what they do or hold. If a name needs a comment to explain it, pick a better name.
++- Handle errors where you can do something useful with them. Don't swallow exceptions silently, and don't catch broad exception types just to make an error go away.
++- Comment on *why*, not *what*: non-obvious constraints, workarounds, and invariants.
++- Don't leave debug prints, commented-out code, or TODOs you could resolve now.
++
++## 2. Be careful with edge cases
++
++For each input, output, and state change, check how the code behaves with:
++
++| Category | Examples |
++|---|---|
++| Empty / missing | empty string, empty list, `null`/`None`/`undefined`, missing key, missing file |
++| Boundaries | 0, 1, -1, max/min int, last index, off-by-one in loops and slices |
++| Size | very large inputs, very long strings, deep nesting |
++| Format | Unicode and emoji, whitespace, mixed case, unexpected types, malformed data |
++| Time | time zones, DST, leap years, ordering, timeouts |
++| Concurrency | repeated or duplicate calls, races, partial failure partway through |
++| External failure | network errors, permission denied, disk full, non-2xx responses |
++
++For each case that applies, decide whether the code should handle it, reject it with a clear error, or document it as out of scope. Make that choice on purpose.
++
++## 3. Test things
++
++- **Run the existing tests** before and after your change. If tests were already failing before you started, note that so you don't mistake them for regressions.
++- **Add tests for the new behavior.** Cover the main path and the edge cases you found in section 2.
++- **For bug fixes, write a test that fails without the fix** and passes with it.
++- **Exercise the real thing when possible.** Run the CLI, call the endpoint, or load the page. Passing unit tests don't prove the feature works.
++- **Run the project's linter, formatter, and type checker** if it has them.
++- **Report results honestly.** If a test fails, show the output. If you skipped something, say what and why. Never claim code is tested when it wasn't.
++
++## Done means
++
++- [ ] The change does what was asked, and nothing it wasn't asked to do
++- [ ] Each relevant edge case is handled, rejected, or documented
++- [ ] New or updated tests cover the change, and the full suite passes
++- [ ] Lint, format, and type checks pass
++- [ ] Any skipped checks or known limitations are stated in your summary

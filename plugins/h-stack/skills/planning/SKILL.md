@@ -53,6 +53,10 @@ Show the plan and ask the user to confirm it before implementing. Agreeing in co
 
 For `full`-size work, after the plan and before code, get a rubric from the `h-stack:rubric-writer` subagent and show it to the user to strike items. See `references/rubric.md`. Must-have items feed H-Stack's Stop gate.
 
+## Several attempts (high risk only)
+
+When the change is high-risk (hard to roll back, security, data loss) and `hs status` shows verification effort `full` for this kind of task, try 2–4 genuinely different approaches in separate worktrees (native `isolation: worktree` subagents), score each against the rubric with `h-stack:rubric-grader`, and keep the best. Score; don't debate. Skip this for anything the model already does reliably.
+
 ## Executing
 
 Run the plan yourself, task by task: see `references/executing.md`. Decide conflicts and plan defects yourself, recording each with `hs decide`; stop only for an irreversible or security-sensitive action, a side effect outside the workspace (merge, push to a shared branch, publish), or a plan so broken that every path is a guess.

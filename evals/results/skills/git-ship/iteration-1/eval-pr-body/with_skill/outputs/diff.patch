@@ -1,0 +1,57 @@
+diff --git a/PR.md b/PR.md
+new file mode 100644
+index 0000000..d69d122
+--- /dev/null
++++ b/PR.md
+@@ -0,0 +1,51 @@
++# Rate limiter: replace fixed-window counter with sliding-window log
++
++## What changed
++
++`createLimiter(limit, windowMs, now)` in `rate.js` now keeps a per-key list of accepted-call timestamps instead of a per-window counter. A call is allowed when fewer than `limit` accepted calls happened in the last `windowMs` ms. The public API is unchanged.
++
++```
++allow(key):
++  t = now()
++  recent = hits[key].filter(x => t - x < windowMs)   // drop expired timestamps
++  if recent.length >= limit: hits[key] = recent; return false   // a rejected call is not recorded
++  recent.push(t); hits[key] = recent; return true
++```
++
++What this changes for callers: a fixed window let a client make up to `2 × limit` calls around a window edge (a burst at the end of one window, then another at the start of the next). With the sliding window, any `windowMs` span holds at most `limit` accepted calls. Each capacity slot comes back exactly `windowMs` after the call that used it, not at a shared reset time.
++
++## Where to look first
++
++1. **`rate.js:6`, the expiry boundary `t - x < windowMs`** (logic). A hit made exactly `windowMs` ago has expired, so the window is half-open: `(t - windowMs, t]`. Check that this is the boundary we want. No test covers it (see Evidence).
++2. **`rate.js:3`, `const hits = new Map()`** (memory / availability). Keys are never removed. Each key holds up to `limit` timestamps, where the old counter was one number per key, and expired timestamps for a key are only cleared when that key is called again. A service that rate-limits on high-cardinality or attacker-controlled keys (IP, token, user ID) will grow memory without bound. This is the main risk in the change.
++3. **`rate.js:6`, `filter` on every call** (performance). Each call costs O(`limit`) time and allocates a new array. That's fine for small limits. For large ones (e.g. 10k/min) a ring buffer or the sliding-window-counter approximation would be cheaper.
++4. **`rate.js:7`, rejected calls aren't recorded** (behaviour). A client that keeps retrying while blocked doesn't push its unblock time further back. This looks intended, but it's a policy choice worth confirming.
++
++## Evidence
++
++- `node test.js` on the final tree: `rate tests passed (4 assertions)`.
++- **The existing test doesn't distinguish sliding from fixed windows.** It makes 2 calls at t=0, a third that's rejected, then one at t=1001 that's allowed, and a fixed-window counter passes that too. To check the sliding behaviour I ran a throwaway probe (limit 2, window 1000 ms; not committed):
++
++  | t (ms) | result | why |
++  |---|---|---|
++  | 0 | allow | |
++  | 600 | allow | |
++  | 999 | deny | 2 hits in window |
++  | 1000 | allow | t=0 hit expires exactly at `windowMs` |
++  | 1001 | **deny** | t=600 and t=1000 still live (a fixed window would allow this) |
++  | 1600 | allow | t=600 hit expires |
++  | 1600, other key | allow | keys are independent |
++
++  Suggest committing these cases to `test.js` before merge, so the sliding behaviour and the boundary are pinned.
++
++## Not verified
++
++- **Before/after comparison.** The repo history is a single fixture commit, so the previous fixed-window code isn't available to diff or run against. The "before" behaviour above is described from CHANGE.md, not observed.
++- Memory growth under many distinct keys: not measured.
++- Throughput with large `limit` values: not benchmarked.
++- Clock going backwards (NTP step, a non-monotonic `now`): not tested. Timestamps from the "future" would count as live until real time catches up. Using `performance.now()` or another monotonic source as `now` avoids this.
++- Concurrency across processes: the limiter is in-memory per process, the same as before. Nothing here makes it distributed.
++
++## Merge danger
++
++**Two-way door.** It's a self-contained change to one function with an unchanged signature, and reverting restores the old behaviour. Blast radius: every caller of `createLimiter`. Clients that time requests to the old window reset will see more denials right after the reset point. Memory per key rises from one counter to up to `limit` timestamps, and with unbounded keys that can grow until the process runs out of memory. Fix this first (add eviction or a periodic sweep of empty or expired keys) if the limiter faces untrusted keys.

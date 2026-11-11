@@ -1,0 +1,18 @@
+diff --git a/prices.js b/prices.js
+index eb396c1..d755fd7 100644
+--- a/prices.js
++++ b/prices.js
+@@ -1,10 +1,6 @@
+ function priceWithTax(cents, rate) {
+-<<<<<<< HEAD
+-  // Round half up to the nearest cent (finance asked for this in issue #41).
+-  return Math.round(cents * (1 + rate));
+-=======
+-  // Support a minimum charge of 50 cents for card payments (issue #57).
+-  return Math.max(50, Math.floor(cents * (1 + rate)));
+->>>>>>> feature/min-charge
++  // Round half up to the nearest cent (finance asked for this in issue #41),
++  // then apply the 50-cent minimum charge for card payments (issue #57).
++  return Math.max(50, Math.round(cents * (1 + rate)));
+ }
+ module.exports = { priceWithTax };

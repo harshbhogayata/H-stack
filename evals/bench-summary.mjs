@@ -5,9 +5,10 @@ import path from 'node:path';
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const dir = path.join(REPO, 'evals', 'results', 'skills');
 const rows = [];
-for (const skill of fs.existsSync(dir) ? fs.readdirSync(dir).sort() : []) {
+for (const skill of fs.existsSync(dir) ? fs.readdirSync(dir).filter((d) => fs.statSync(path.join(dir, d)).isDirectory()).sort() : []) {
   const iters = fs.readdirSync(path.join(dir, skill)).filter((d) => /^iteration-\d+$/.test(d)).sort((a, b) => Number(b.split('-')[1]) - Number(a.split('-')[1]));
-  const it = iters.find((d) => fs.existsSync(path.join(dir, skill, d, 'benchmark.json')));
+  // Effort experiments (HS-007) are reported separately; the summary uses default-effort runs.
+  const it = iters.find((d) => { const f = path.join(dir, skill, d, 'benchmark.json'); if (!fs.existsSync(f)) return false; const e = JSON.parse(fs.readFileSync(f, 'utf8')).metadata.effort; return !e || e === 'session default'; });
   if (!it) continue;
   const b = JSON.parse(fs.readFileSync(path.join(dir, skill, it, 'benchmark.json'), 'utf8'));
   const s = b.run_summary;

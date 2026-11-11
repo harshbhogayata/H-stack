@@ -1,0 +1,52 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..bcd396c
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,46 @@
++# fs.rmSync on a non-empty folder (Node 22)
++
++**Question** (QUESTION.md): `fs.rmSync(dir)` throws on non-empty folders. What options does Node 22 document for `fs.rmSync`, and which one fixes this?
++
++## Answer
++
++Pass `recursive: true`:
++
++```js
++fs.rmSync(dir, { recursive: true });               // deletes the folder and its contents
++fs.rmSync(dir, { recursive: true, force: true });  // same, and no error if dir doesn't exist (like `rm -rf`)
++```
++
++`force` alone does **not** fix it. It only stops the error when the path doesn't exist.
++
++## Options documented for `fs.rmSync(path[, options])` in Node 22
++
++Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options (read 2026-11-11, "latest-v22.x" docs). Added in v14.14.0.
++
++| Option | Type | Default | Documented meaning |
++|---|---|---|---|
++| `force` | boolean | `false` | When `true`, exceptions are ignored if `path` does not exist. |
++| `maxRetries` | integer | `0` | Number of retries on `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY` or `EPERM`, with a linear backoff of `retryDelay` ms. Ignored unless `recursive` is `true`. |
++| `recursive` | boolean | `false` | If `true`, perform a recursive directory removal. Operations are retried on failure in recursive mode. |
++| `retryDelay` | integer | `100` | Milliseconds to wait between retries. Ignored unless `recursive` is `true`. |
++
++## Measured behaviour (Node v22.23.4, local probe script)
++
++| Call | Result |
++|---|---|
++| `rmSync(nonEmptyDir)` | throws `ERR_FS_EISDIR` ("Path is a directory: rm returned EISDIR") |
++| `rmSync(emptyDir)` | also throws `ERR_FS_EISDIR` |
++| `rmSync(nonEmptyDir, { force: true })` | still throws `ERR_FS_EISDIR` |
++| `rmSync(nonEmptyDir, { recursive: true })` | folder and contents deleted |
++| `rmSync(missing, { recursive: true })` | throws `ENOENT` |
++| `rmSync(missing, { force: true })` | no error |
++
++## Notes
++
++- **Measured:** Without `recursive`, `rmSync` refuses *any* directory, even an empty one, and the error is `ERR_FS_EISDIR`, not `ENOTEMPTY`. So the problem isn't really that the folder is non-empty. The real issue is that `rmSync` without `recursive` only removes files.
++- **Read:** For removing only an empty directory, the dedicated API is `fs.rmdirSync`. That isn't needed here.
++- **Inferred:** Add `maxRetries` (e.g. `{ recursive: true, force: true, maxRetries: 3 }`) only if deletes fail with transient `EBUSY`/`EPERM` errors, which happen most often on Windows.
++
++## Open questions
++
++- None for the question as asked. The repo contains no source code, so the actual `fs.rmSync(dir)` call site wasn't inspected.

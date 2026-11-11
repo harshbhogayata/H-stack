@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+      "passed": true,
+      "evidence": "The reply opens with \"I found no exploitable vulnerabilities in `hash.js`\" and lists its hardening points under \"Things to check outside this file (low severity)\", each depending on assumptions such as \"It's fine if tokens are long random values\", ending with \"No code changes are needed unless your "
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

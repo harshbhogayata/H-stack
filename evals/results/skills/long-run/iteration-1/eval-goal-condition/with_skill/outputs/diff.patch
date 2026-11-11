@@ -1,0 +1,73 @@
+diff --git a/features.json b/features.json
+new file mode 100644
+index 0000000..2399e3e
+--- /dev/null
++++ b/features.json
+@@ -0,0 +1,35 @@
++{
++  "spec": "SPEC.md",
++  "target": "todo.js",
++  "note": "Each check runs in a fresh temp dir holding a copy of todo.js and a todos.json reset to [], so checks never touch the repo's todos.json. Exit code 0 = pass. Do not edit the check fields; only flip passes after the check passes on the latest edit.",
++  "features": [
++    {
++      "id": "F1-add-prints",
++      "spec": "1",
++      "behaviour": "`node todo.js add \"x\"` prints exactly \"added: x\"",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"/; cd \"$d\"; echo '[]' > todos.json; [ \"$(node todo.js add 'alpha one')\" = 'added: alpha one' ]",
++      "passes": false
++    },
++    {
++      "id": "F2-add-appends-and-persists",
++      "spec": "1",
++      "behaviour": "Each add appends to todos.json (still a valid JSON array, earlier items kept, order preserved)",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"/; cd \"$d\"; echo '[]' > todos.json; node todo.js add 'alpha one' >/dev/null; node todo.js add 'bravo two' >/dev/null; node -e 'const t=JSON.parse(require(\"fs\").readFileSync(\"todos.json\",\"utf8\"));const s=JSON.stringify(t);const a=s.indexOf(\"alpha one\"),b=s.indexOf(\"bravo two\");process.exit(Array.isArray(t)&&t.length===2&&a>=0&&b>a?0:1)'",
++      "passes": false
++    },
++    {
++      "id": "F3-list-numbered-from-1",
++      "spec": "2",
++      "behaviour": "`node todo.js list` prints one line per todo, numbered from 1 in insertion order",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"/; cd \"$d\"; echo '[]' > todos.json; node todo.js add 'alpha one' >/dev/null; node todo.js add 'bravo two' >/dev/null; out=$(node todo.js list | grep -v '^[[:space:]]*$'); [ \"$(printf '%s\\n' \"$out\" | wc -l)\" -eq 2 ]; printf '%s\\n' \"$out\" | sed -n 1p | grep -Eq '^[[:space:]]*1[^0-9].*alpha one'; printf '%s\\n' \"$out\" | sed -n 2p | grep -Eq '^[[:space:]]*2[^0-9].*bravo two'",
++      "passes": false
++    },
++    {
++      "id": "F4-done-removes-and-prints",
++      "spec": "3",
++      "behaviour": "`node todo.js done 1` prints exactly \"done: <text of item 1>\" and removes it from todos.json; the remaining item becomes number 1",
++      "check": "set -e; d=$(mktemp -d); cp todo.js \"$d\"/; cd \"$d\"; echo '[]' > todos.json; node todo.js add 'alpha one' >/dev/null; node todo.js add 'bravo two' >/dev/null; [ \"$(node todo.js done 1)\" = 'done: alpha one' ]; ! grep -q 'alpha one' todos.json; grep -q 'bravo two' todos.json; out=$(node todo.js list | grep -v '^[[:space:]]*$'); [ \"$(printf '%s\\n' \"$out\" | wc -l)\" -eq 1 ]; printf '%s\\n' \"$out\" | grep -Eq '^[[:space:]]*1[^0-9].*bravo two'",
++      "passes": false
++    }
++  ]
++}
+diff --git a/progress.md b/progress.md
+new file mode 100644
+index 0000000..065df0d
+--- /dev/null
++++ b/progress.md
+@@ -0,0 +1,26 @@
++# Progress: SPEC.md -> todo.js
++
++Goal: implement SPEC.md in todo.js until every check in features.json passes.
++
++## How to check
++Run every `check` in features.json with bash from the repo root (exit 0 = pass). Each check uses a temp copy, so the repo's todos.json is never touched.
++Check-integrity hash (sha256 of JSON.stringify of the list of `check` strings): `4fbf84442cd8b2fea3f35f0977b4710452302375c51e5308a5235ea368756daa`
++
++## Rules
++- Do not edit `check` fields, SPEC.md or the fixture todos.json. Only flip `passes` after the check passes on the latest edit of todo.js.
++- Call something blocked only after it stays the same for 3 rounds; then record it under Blocked and go on to the next feature.
++- No force-push, no history rewrites.
++
++## Status (baseline 2026-11-11, commit 9021c9d, no todo.js yet)
++- 0/4 passing: F1, F2, F3, F4 all FAIL.
++
++## Log
++<!-- one line per round: commit sha, N/4 passing, what changed -->
++
++## Blocked
++<!-- none -->
++
++## Open spec questions (not checked; decide and note here)
++- How `list` behaves with no todos (checks don't cover it).
++- How `done` handles an out-of-range or non-numeric index (checks don't cover it).
++- The todos.json item shape (strings or objects). Checks accept either.

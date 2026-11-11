@@ -1,0 +1,36 @@
+diff --git a/src/slug.js b/src/slug.js
+index 935ab6e..78488b7 100644
+--- a/src/slug.js
++++ b/src/slug.js
+@@ -1,3 +1,15 @@
+ export function slugify(title) {
+-  return title.toLowerCase().replace(/\s+/g, '-');
++  return title
++    .toLowerCase()
++    .replace(/\s+/g, '-')
++    .replace(/[^a-z0-9-]/g, '')
++    .replace(/-+/g, '-');
++}
++
++export function uniqueSlug(title, taken) {
++  const base = slugify(title);
++  if (!taken.has(base)) return base;
++  let n = 2;
++  while (taken.has(`${base}-${n}`)) n++;
++  return `${base}-${n}`;
+ }
+diff --git a/test/slug.test.js b/test/slug.test.js
+index 9cab08f..560ce34 100644
+--- a/test/slug.test.js
++++ b/test/slug.test.js
+@@ -1,4 +1,9 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+-import { slugify } from '../src/slug.js';
++import { slugify, uniqueSlug } from '../src/slug.js';
+ test('lowercases and joins words', () => { assert.equal(slugify('Hello World'), 'hello-world'); });
++test('strips punctuation', () => { assert.equal(slugify('Hello, World!'), 'hello-world'); });
++test('appends a counter when taken', () => {
++  assert.equal(uniqueSlug('Hello World', new Set(['hello-world'])), 'hello-world-2');
++  assert.equal(uniqueSlug('Hello World', new Set(['hello-world', 'hello-world-2'])), 'hello-world-3');
++});

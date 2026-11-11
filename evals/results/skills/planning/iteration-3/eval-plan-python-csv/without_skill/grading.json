@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no source or test files were changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The plan uses the project's own test command (make test or python3 -m pytest) and Python file paths in app/ and tests/, not JavaScript files or npm",
+      "passed": true,
+      "evidence": "The plan says \"Run the suite with `make test`\" and names Python paths such as `app/csv_export.py`, `app/web.py`, `tests/test_csv_export.py` and `tests/test_web.py`; it mentions no JavaScript files or npm."
+    },
+    {
+      "text": "The plan's interface for the CSV function uses Python naming and types consistent with app/invoices.py (snake_case, amount_cents)",
+      "passed": true,
+      "evidence": "The plan defines `format_amount(cents: int) -> str`, `escape_field(value: str) -> str` and `invoices_to_csv(invoices) -> str`, and says rows use `amount_cents` for the amount."
+    },
+    {
+      "text": "The plan covers the quoting rule for fields containing commas or quotes with a concrete test value",
+      "passed": true,
+      "evidence": "The escape_field tests list `Acme, Inc.` → `\"Acme, Inc.\"` and `say \"hi\"` → `\"say \"\"hi\"\"\"`, which are concrete test values for the comma and quote rules."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,88 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..9127eaa
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,32 @@
++import { readFileSync, writeFileSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++
++export function migrate(users) {
++  const migrated = [];
++  const skipped = [];
++  for (const u of users) {
++    if (typeof u.mail !== 'string' || u.mail.trim() === '') {
++      skipped.push({ id: u.uid, reason: 'no email' });
++      continue;
++    }
++    migrated.push({
++      id: u.uid,
++      email: u.mail,
++      name: `${u.first ?? ''} ${u.last ?? ''}`.trim(),
++    });
++  }
++  return { migrated, skipped };
++}
++
++if (process.argv[1] === fileURLToPath(import.meta.url)) {
++  const source = JSON.parse(readFileSync('users.json', 'utf8'));
++  const { migrated, skipped } = migrate(source);
++  if (migrated.length + skipped.length !== source.length) {
++    console.error('Count mismatch; aborting without writing.');
++    process.exit(1);
++  }
++  writeFileSync('users-v2.json', JSON.stringify(migrated, null, 2) + '\n');
++  const written = JSON.parse(readFileSync('users-v2.json', 'utf8')).length;
++  console.log(`source: ${source.length}, migrated: ${migrated.length}, written: ${written}, skipped: ${skipped.length}`);
++  for (const s of skipped) console.log(`  not migrated: id ${s.id} (${s.reason})`);
++}
+diff --git a/migrate.test.js b/migrate.test.js
+new file mode 100644
+index 0000000..9fb77b2
+--- /dev/null
++++ b/migrate.test.js
+@@ -0,0 +1,16 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { migrate } from './migrate.js';
++
++test('maps fields, trims name, skips users without email', () => {
++  const r = migrate([
++    { uid: 1, mail: 'a@x.com', first: 'Ana', last: 'Silva' },
++    { uid: 3, first: 'Cy', last: 'Ode' },
++    { uid: 5, mail: 'e@x.com', first: 'Ed', last: '' },
++  ]);
++  assert.deepEqual(r.migrated, [
++    { id: 1, email: 'a@x.com', name: 'Ana Silva' },
++    { id: 5, email: 'e@x.com', name: 'Ed' },
++  ]);
++  assert.deepEqual(r.skipped, [{ id: 3, reason: 'no email' }]);
++});
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

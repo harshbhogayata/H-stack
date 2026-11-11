@@ -1,0 +1,269 @@
+{
+  "metadata": {
+    "skill_name": "design-ui",
+    "skill_path": "plugins/h-stack/skills/design-ui",
+    "executor_model": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T15:08:56.405Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 41.221,
+        "tokens": 210203,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\"`, and settings.css uses only tokens such as `background: var(--color-surface)`, `background: var(--color-accent)` and `font-family: var(--font-ui)`; the one new colour (`--color-danger: #fca5a5`) was added as a token in theme.css rather than ha"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs have matching labels (`<label ... htmlFor=\"display-name\">` with `id=\"display-name\"`, and `<label ... htmlFor=\"email-notifications\">` with `id=\"email-notifications\"`), and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so it keeps built-in "
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.424,
+        "tokens": 156787,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx imports `import { Button } from \"./Button\";` and renders `<Button type=\"submit\">Save</Button>`, and every colour and font in settings.css is a theme variable (e.g. `background: var(--color-surface); color: var(--color-text); ... font-family: var(--font-ui)`, `outline: 2px solid var("
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Each input sits inside a `<label>` element with visible text (`<span className=\"settings__label\">Display name</span>`, `<span className=\"settings__label\">Email notifications</span>`), and the toggle is a native `<input type=\"checkbox\" role=\"switch\">`, which is focusable and can be toggled with Space"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 40.066,
+        "tokens": 122225,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The message says the direction comes from the brief, 'children aged 6–8 reading aloud... big touch targets', proposes 'the garden is the home screen' where 'Each plant is one day the child read', and sets 'Touch targets at least 64px'."
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex colours such as 'Sunflower #FFC93C' and 'Beetle #1F2A44' with a contrast note ('well above the 4.5:1 accessibility minimum'), and picks 'Andika... designed for beginning readers' because look-alike letters 'are easy to tell apart'."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 26.482,
+        "tokens": 78500,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The proposal says \"The home screen *is* the kid's garden. They shouldn't land on a dashboard with a garden widget in it,\" and calls for a button \"at least 88pt tall\" plus icon buttons \"each at least 64pt\" for ages 6–8."
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex values such as \"Morning Cream `#FFF6E5`\" and \"Bark `#3B2A20`\" and names Baloo 2/Fredoka and Andika, explaining that \"Andika was designed for beginning readers, with single-story 'a' and 'g' and clearly distinct b/d/p/q.\" It also covers high-contrast text so \"early readers can decode let"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 21.672,
+        "tokens": 121137,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Row 3 says 'Search is a `<div onClick>`... no focus, no Enter/Space handling and no role', row 4 says the search control 'has no accessible name', and row 5 says 'The delete button has an icon only and no accessible name'."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Row 8 says '`onPaste={(e) => e.preventDefault()}` blocks paste', and row 6 says 'Delete runs straight away with no confirmation'."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Row 1 flags `height: '100vh'` and suggests `'100dvh'`, and row 2 says '`position: fixed; bottom: 0` ignores the safe area' and suggests `env(safe-area-inset-bottom)`."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 21.111,
+        "tokens": 116742,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Item 2 says the search `<div>` \"can't be reached with Tab, doesn't respond to Enter or Space, and screen readers don't announce it as a button\", and item 5 says the delete button \"contains only an icon, so screen readers announce it as just 'button'\"."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Item 8 flags `onPaste={e => e.preventDefault()}`, saying it stops users from pasting into the field, and the Optional (UX) note says \"delete fires immediately with no confirmation or undo\"."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Item 1 flags `position: fixed; bottom: 0; height: '100vh'`, notes that on mobile \"`100vh` also counts the area behind the browser's address bar\", and its fix includes `paddingBottom: 'env(safe-area-inset-bottom)'`."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 34.32,
+        "stddev": 8.956,
+        "min": 21.672,
+        "max": 41.221
+      },
+      "tokens": {
+        "mean": 151188.333,
+        "stddev": 41732.035,
+        "min": 121137,
+        "max": 210203
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 22.006,
+        "stddev": 3.35,
+        "min": 18.424,
+        "max": 26.482
+      },
+      "tokens": {
+        "mean": 117343,
+        "stddev": 31963.359,
+        "min": 78500,
+        "max": 156787
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+12.3",
+      "tokens": "+33845"
+    }
+  },
+  "notes": [
+    "Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise."
+  ]
+}

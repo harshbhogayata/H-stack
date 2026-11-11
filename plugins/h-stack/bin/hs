@@ -187,9 +187,16 @@ switch (cmd) {
     const d = latestById(readJsonl(F('decisions.jsonl')));
     const r = readJsonl(F('ledger.jsonl')).filter((x) => x.kind === 'receipt');
     const w = latestById(readJsonl(path.join(proj, '.h-stack', 'wishlist.jsonl'))).filter((x) => x.status === 'open');
-    out('ok', redact(`session ${sid}: ${r.length} receipts (last ${r.slice(-1).map((x) => `${x.id} exit ${x.exit}`).join('') || 'none'}), ${a.filter((x) => x.status === 'open').length} open assumptions, ${d.length} decisions, ${w.length} open wishes`));
+    out('ok', redact(`session ${sid}: ${r.length} receipts (last ${r.slice(-1).map((x) => `${x.id} exit ${x.exit}`).join('') || 'none'}), ${a.filter((x) => x.status === 'open').length} open assumptions, ${d.length} decisions, ${w.length} open wishes; verification effort ${route.verify || 'medium'}`));
+    break;
+  }
+  case 'retro': {
+    const { retro } = await import(path.join(here, '..', 'lib', 'retro.mjs'));
+    const r = retro(proj);
+    const solo = Object.entries(r.solo_boundary).map(([c, s]) => `${c} ${s.passed}/${s.runs} -> ${s.verify}`).join('; ') || 'no routed turns yet';
+    out('ok', `prompts ${r.activation.prompts}, routed ${r.activation.routed}, corrections ${r.activation.corrections}; turns ${r.turns.count} (${r.turns.tokens} tokens, ${r.turns.aborted} aborted); routing examples ${r.routing_examples}; verification effort: ${solo}`, { retro: r });
     break;
   }
   default:
-    out('error', 'usage: hs assume|verify-assumption|decide|failed|wish|resolve-wish|stop|phase|rubric|goal|lesson|vote|manifest|review-override|status');
+    out('error', 'usage: hs assume|verify-assumption|decide|failed|wish|resolve-wish|stop|phase|rubric|goal|lesson|vote|manifest|review-override|retro|status');
 }

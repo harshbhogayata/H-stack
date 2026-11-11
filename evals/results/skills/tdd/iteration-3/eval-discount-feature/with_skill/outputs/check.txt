@@ -1,0 +1,35 @@
+exit 0
+TAP version 13
+# Subtest: SAVE10 takes 10% off the total
+ok 1 - SAVE10 takes 10% off the total
+  ---
+  duration_ms: 1.579919
+  type: 'test'
+  ...
+# Subtest: SAVE10 rounds to the nearest cent
+ok 2 - SAVE10 rounds to the nearest cent
+  ---
+  duration_ms: 0.340958
+  type: 'test'
+  ...
+# Subtest: an unknown code leaves the total unchanged
+ok 3 - an unknown code leaves the total unchanged
+  ---
+  duration_ms: 0.201932
+  type: 'test'
+  ...
+# Subtest: subtotal multiplies price by quantity
+ok 4 - subtotal multiplies price by quantity
+  ---
+  duration_ms: 0.733565
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 110.127862

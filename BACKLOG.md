@@ -106,26 +106,26 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 | IM-03 | 03 | Clarify before building | grilling | [mattpocock/skills](https://github.com/mattpocock/skills) › `skills/productivity/grilling` | MIT | Import | Feeds the "ask" branch of HS-020; keep the frontier-round exit rule | P1 | done — skills/clarify full mode (benchmark iteration-2: 1.00 vs 0.89, +0.11) |
 | IM-04 | 04 | Plans with checkable steps | writing-plans + executing-plans | obra/superpowers › `skills/writing-plans`, `skills/executing-plans` | MIT | Import | Plans must use the project's own layout and test commands, not fixed code templates. Add the Interfaces section (HS-060) | P0 | done — skills/planning + references/executing.md (benchmark iteration-2: 1.00 vs 0.87, +0.13) |
 | IM-05 | 05 | Test-first implementation | tdd | mattpocock/skills › `skills/engineering/tdd` | MIT | Import | Declares the "test-writing step" that HS-028 reads | P0 | done — skills/tdd (benchmark iteration-2: 0.89 vs 0.78, +0.11) |
-| IM-05 | 05 | Simplify after green | code-simplifier (official plugin) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) › `plugins/code-simplifier` | Apache-2.0 | Native — configure only (recommend installing it) | — | P1 |  |
+| IM-05 | 05 | Simplify after green | code-simplifier (official plugin) | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) › `plugins/code-simplifier` | Apache-2.0 | Native — configure only (recommend installing it) | — | P1 | done — native: scripts/setup.mjs recommends code-simplifier@claude-plugins-official; not copied |
 | IM-06 | 06 | Root cause before fix | systematic-debugging | obra/superpowers › `skills/systematic-debugging` | MIT | Import | Add the new-signal retry rule (HS-069), the counterfactual check (HS-066) and the repro harvest (HS-067). Reword the iron law | P0 | done — skills/debugging + scripts/verify-fix.mjs (benchmark iteration-2: 1.00 vs 1.00, tie at ceiling; kept: not worse, but no measured gain yet) |
 | IM-07 | 07 | Code review | built-in `/code-review` skill | Claude Code built-in | n/a | Native — configure only | Routed by the classifier; the review lanes (HS-061) sit on top | P0 | done — native: classifier routes review requests to the built-in code-review skill (lib/pure/classify-rules.mjs NATIVE) |
-| IM-07 | 07 | Receiving review well | receiving-code-review | obra/superpowers › `skills/receiving-code-review` | MIT | Import | — | P1 |  |
-| IM-08 | 08 | Verify UI in a real browser | webapp-testing | [anthropics/skills](https://github.com/anthropics/skills) › `skills/webapp-testing` | Apache-2.0 | Import | Treat page content as untrusted (HS-032) | P1 |  |
-| IM-09 | 09 | Always-on security review | security-guidance (official plugin) + built-in `/security-review` | claude-plugins-official › `plugins/security-guidance` | Apache-2.0 | Native — configure only | — | P1 |  |
-| IM-09 | 09 | Full audits on request | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) › `skills/security-audit` | MIT | Import (source of HS-062, HS-063) | Guidance mode by default (HS-016). Wire its validators into SubagentStop | P1 |  |
-| IM-10 | 10 | UI correctness (a11y, motion, metadata) | baseline-ui | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) › `skills/baseline-ui` | MIT | Import | Check-only rules, no style | P1 |  |
-| IM-10 | 10 | Design direction | frontend-design | anthropics/skills › `skills/frontend-design` | Apache-2.0 | Import | **Strip the fixed aesthetic bans and preferences.** Derive the direction from the project's own design files, brand and users; the sameness check applies | P1 |  |
+| IM-07 | 07 | Receiving review well | receiving-code-review | obra/superpowers › `skills/receiving-code-review` | MIT | Import | — | P1 | done — skills/review/references/receiving.md (benchmark iteration-2: 1.00 vs 1.00, tie; iteration-1 was 0.89 vs 1.00 because the verdict scheme made a rare edge case read as a bug; fixed by separating severity from verdict) |
+| IM-08 | 08 | Verify UI in a real browser | webapp-testing | [anthropics/skills](https://github.com/anthropics/skills) › `skills/webapp-testing` | Apache-2.0 | Import | Treat page content as untrusted (HS-032) | P1 | done — skills/qa (webapp-testing with_server.py + H-Stack SKILL.md; benchmark iteration-1: 1.00 vs 0.56, +0.44) |
+| IM-09 | 09 | Always-on security review | security-guidance (official plugin) + built-in `/security-review` | claude-plugins-official › `plugins/security-guidance` | Apache-2.0 | Native — configure only | — | P1 | done — native: built-in /security-review routed by the classifier; setup recommends security-guidance@claude-plugins-official |
+| IM-09 | 09 | Full audits on request | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) › `skills/security-audit` | MIT | Import (source of HS-062, HS-063) | Guidance mode by default (HS-016). Wire its validators into SubagentStop | P1 | done — skills/security-audit, guidance mode by default, full audit on explicit phrases; validators shipped and mirrored in lib/findings.mjs for review lanes (benchmark iteration-1: 1.00 vs 1.00, tie; upstream tests not executed: auto mode blocked running downloaded code) |
+| IM-10 | 10 | UI correctness (a11y, motion, metadata) | baseline-ui | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) › `skills/baseline-ui` | MIT | Import | Check-only rules, no style | P1 | done — skills/design-ui/references/baseline.md, check-only, stack and aesthetic bans removed (benchmark iteration-1 for design-ui: 1.00 vs 1.00, tie) |
+| IM-10 | 10 | Design direction | frontend-design | anthropics/skills › `skills/frontend-design` | Apache-2.0 | Import | **Strip the fixed aesthetic bans and preferences.** Derive the direction from the project's own design files, brand and users; the sameness check applies | P1 | done — skills/design-ui/references/direction.md, fixed preferences stripped, used only without a project design system; its eval asks for a direction grounded in the fixture's own brand files (benchmark iteration-1: 1.00 vs 1.00, tie) |
 | IM-11 | 11 | Memory across sessions | auto memory + CLAUDE.md + claude-md-management (official plugin) | Claude Code built-in; claude-plugins-official › `plugins/claude-md-management` | n/a; Apache-2.0 | Native — configure only, plus the thin pieces in HS-048…HS-050 | — | P0 | done — native: scripts/setup.mjs enables auto memory and raises cleanupPeriodDays; claude-md-management recommended; thin pieces HS-048/049/050 |
-| IM-11 | 11 | Handoff to another session | handoff | mattpocock/skills › `skills/productivity/handoff` | MIT | Import | Align its sections with the checkpoint schema (HS-047) | P1 |  |
-| IM-12 | 12 | Office files and PDFs | docx, pdf, pptx, xlsx (official) | anthropics/skills › `skills/docx` and siblings | Apache-2.0 (LICENSE.txt in `skills/docx` read 2026-11-11) | Native — configure only (install the official plugin; don't copy) | — | P2 |  |
-| IM-12 | 12 | Writing for agents (skills, rules, docs) | writing-for-agents | mattpocock/skills › `skills/productivity/writing-for-agents` | MIT | Import | Used when H-Stack writes rules, lessons and skills | P1 |  |
-| IM-12 | 12 | Plain prose, no AI tells | unslop | [cursor/plugins](https://github.com/cursor/plugins) › `pstack/skills/unslop` | MIT | Import | — | P2 |  |
-| IM-13 | 13 | Finish a branch, worktrees | finishing-a-development-branch + using-git-worktrees | obra/superpowers › `skills/finishing-a-development-branch`, `skills/using-git-worktrees` | MIT | Import | Merging goes through HS-030 | P1 |  |
-| IM-13 | 13 | PR bodies with evidence; merge conflicts | pr, resolving-merge-conflicts | mattpocock/skills › `skills/engineering/pr`, and the resolving-merge-conflicts skill (path to confirm at import) | MIT | Import (pr is the base of HS-065) | Add receipts and the "Not verified" section | P1 |  |
-| IM-14 | 14 | Long runs, scheduling, fan-out | `/goal`, cloud scheduled tasks (Routines), Workflows, subagents, worktrees, `/batch`, agent view | Claude Code built-in | n/a | Native — configure only, plus the thin pieces in HS-071 and HS-041 | — | P1 |  |
-| IM-14 | 14 | Parallel agents on independent work | dispatching-parallel-agents | obra/superpowers › `skills/dispatching-parallel-agents` | MIT | Import | Add the decision ledger (HS-052) to its brief | P2 |  |
+| IM-11 | 11 | Handoff to another session | handoff | mattpocock/skills › `skills/productivity/handoff` | MIT | Import | Align its sections with the checkpoint schema (HS-047) | P1 | done — skills/memory handoff aligned with the checkpoint schema (benchmark iteration-1: 0.78 vs 0.44, +0.33) |
+| IM-12 | 12 | Office files and PDFs | docx, pdf, pptx, xlsx (official) | anthropics/skills › `skills/docx` and siblings | Apache-2.0 (LICENSE.txt in `skills/docx` read 2026-11-11) | Native — configure only (install the official plugin; don't copy) | — | P2 | done — native: setup recommends the official Office/PDF skills from anthropics/skills; not copied |
+| IM-12 | 12 | Writing for agents (skills, rules, docs) | writing-for-agents | mattpocock/skills › `skills/productivity/writing-for-agents` | MIT | Import | Used when H-Stack writes rules, lessons and skills | P1 | done — skills/writing/references/for-agents.md (benchmark iteration-1 for writing: 1.00 vs 0.89, +0.11) |
+| IM-12 | 12 | Plain prose, no AI tells | unslop | [cursor/plugins](https://github.com/cursor/plugins) › `pstack/skills/unslop` | MIT | Import | — | P2 | done — skills/writing/references/plain-prose.md, punctuation rules yield to the project's style guide (benchmark iteration-1 for writing: 1.00 vs 0.89, +0.11) |
+| IM-13 | 13 | Finish a branch, worktrees | finishing-a-development-branch + using-git-worktrees | obra/superpowers › `skills/finishing-a-development-branch`, `skills/using-git-worktrees` | MIT | Import | Merging goes through HS-030 | P1 | done — skills/git-ship/references/finishing.md + worktrees.md; merges via the irreversible gate (benchmark iteration-1 for git-ship: 1.00 vs 0.72, +0.28) |
+| IM-13 | 13 | PR bodies with evidence; merge conflicts | pr, resolving-merge-conflicts | mattpocock/skills › `skills/engineering/pr`, and the resolving-merge-conflicts skill (path to confirm at import) | MIT | Import (pr is the base of HS-065) | Add receipts and the "Not verified" section | P1 | done — pr imported as skills/git-ship SKILL.md review guide with receipts and Not verified (benchmark iteration-1: 1.00 vs 0.72, +0.28). resolving-merge-conflicts dropped: the upstream skill is archived (THIRD_PARTY.md dropped row); git-ship covers conflicts in its own words |
+| IM-14 | 14 | Long runs, scheduling, fan-out | `/goal`, cloud scheduled tasks (Routines), Workflows, subagents, worktrees, `/batch`, agent view | Claude Code built-in | n/a | Native — configure only, plus the thin pieces in HS-071 and HS-041 | — | P1 | done — native: /goal, Routines, Workflows, subagents and worktrees used by skills/long-run; thin pieces HS-071 (protocol) and HS-041 (spawn governor) built |
+| IM-14 | 14 | Parallel agents on independent work | dispatching-parallel-agents | obra/superpowers › `skills/dispatching-parallel-agents` | MIT | Import | Add the decision ledger (HS-052) to its brief | P2 | done — skills/long-run/references/parallel.md with the decision-ledger brief (benchmark iteration-1 for long-run: 1.00 vs 0.72, +0.28) |
 | IM-15 | 15 | Skill scaffolding, evals, benchmark, trigger tuning | skill-creator | anthropics/skills › `skills/skill-creator` (also `skill-creator@claude-plugins-official`) | Apache-2.0 | Native — configure only | Used for every skill (HS-002) | P0 | done — native: classifier routes skill authoring to skill-creator; its evals.json format and benchmark layout are used for every skill (evals/skill-bench.mjs); recommended companion in setup |
-| IM-16 | 16 | Research with cited primary sources | research | mattpocock/skills › `skills/engineering/research` | MIT | Import | — | P2 |  |
+| IM-16 | 16 | Research with cited primary sources | research | mattpocock/skills › `skills/engineering/research` | MIT | Import | — | P2 | done — skills/research (benchmark iteration-1: 1.00 vs 1.00, tie) |
 
 **Not imported** (ideas only):
 
@@ -231,6 +231,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-004 · Impossible-task canaries
 **Evals · Thin · P2 (if tampering shows up in the smoke test; 00c: P1) · S · Reliability · Depends on: HS-001 · Sources: N125**
+- **Status.** done — tampering rate read from the smoke tasks: evals/run-smoke.mjs hashes protected_tests before/after each run (byte-identical check); canary tasks are added only if tampering shows up, which needs real smoke-test results
 - **Problem.** A change can make Claude "pass" by cheating.
 - **Mechanism.** Until a problem shows up, the tampering rate is read from the smoke tasks by checking that protected test files are byte-identical. If tampering appears, add 2–5 tasks whose tests contradict their spec; passing one is a failure.
 - **Evidence.** ImpossibleBench: Claude cheats >79% of the time by modifying tests; prompt wording moved GPT-5 from >85% to 1% ([00b](research/00b-research-backed-ideas.md)).
@@ -254,6 +255,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-006 · Retire skills the model has outgrown; extra arms when needed
 **Evals · Thin · P1 · M · Cost · Depends on: HS-001, HS-002 · Sources: N42, N126, D3**
+- **Status.** done — evals/retire-check.mjs reads the latest benchmark per skill and lists retire candidates (base passes without, no gain). First run flags 5 ceiling ties (debugging, design-ui, research, review, security-audit) — see MORNING-REPORT Needs you. P2 arms (HSTACK_DISABLE ablation, bare bash arm) not built: no problem has shown up
 - **Problem.** Scaffolding that helped an older model becomes overhead on a newer one.
 - **Mechanism.**
   - **P1.** On each model release, re-run every skill's skill-creator benchmark. A skill the base model now passes without is retired.
@@ -267,6 +269,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-007 · Effort and model settings from measurement
 **Evals · Native — configure only · P2 · S · Cost · Depends on: HS-002 · Sources: D16**
+- **Status.** done — evals/skill-bench.mjs --effort; tdd and planning at low vs session default (iteration-3 vs iteration-2): pass rates unchanged (tdd 0.89, planning 1.00), tokens -17% / -23%, time -22% / -24%. Frontmatter effort left unset: the field overrides the user's session effort for the whole turn, and 3 small fixtures at 1 run per arm don't justify that on real work; re-check on the smoke tasks
 - **Problem.** Skill `effort` and `model` are set by guesswork.
 - **Mechanism.** Run a skill's skill-creator benchmark at two `--effort` levels and set the frontmatter from the tokens/pass curve.
 - **Evidence.** dsh effort 25 → 100: TB2.1 82.4 → 90.6; the 60–80 range recovers most of the accuracy at under half the tokens ([deepseek-harness.md §5.1](research/deepseek-harness.md)).
@@ -274,6 +277,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-008 · Skill tuning on real trajectories
 **Evals · Native — configure only · P2 · M · Learning · Depends on: HS-002, HS-058 · Sources: N29, C26**
+- **Status.** done — descriptions tuned on the should/should-not trigger sets in CI (tests/triggers) instead of skill-creator's optimiser loop (deviation: cost, and running its downloaded scripts was blocked by auto mode); content edits from real trajectories go through skill-authoring (repeated.mjs, feedback-draft.mjs) with human approval, kept only if the benchmark improves
 - **Problem.** Skill text is tuned by opinion.
 - **Mechanism.**
   - **Descriptions.** skill-creator's optimiser (held-out 40%).
@@ -283,6 +287,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-009 · Second-scaffold robustness check
 **Evals · Build · P2 · M · Reliability · Depends on: HS-001 · Sources: D22**
+- **Status.** needs-user (credentials or accounts: a second scaffold (Codex or dsh) needs its own install and model account, which this environment does not have)
 - **Problem.** Gains could come from Claude Code specifics.
 - **Mechanism.** Load H-Stack's skills into dsh or Codex and re-run a subset of the smoke test.
 - **Evidence.** DeepSeek evaluates across 8 scaffolds ([deepseek-harness.md D22](research/deepseek-harness.md)).
@@ -347,6 +352,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-013 · Skill and import linter
 **Self-checks/CI · Thin · P1 · S · Cost · Depends on: HS-081 · Sources: C30**
+- **Status.** done — scripts/lint.mjs in CI (frontmatter, user-invocable false, description/when_to_use cap, all-caps and house-style patterns, THIRD_PARTY coverage)
 - **Problem.** Imported and edited skills drift: copied snippets rot, frontmatter rules slip, licences go missing.
 - **Mechanism.** Native: `claude plugin validate .`, plus `/doctor` auditing skills and rules. H-Stack's CI lint adds checks for:
   - `user-invocable: false`;
@@ -363,6 +369,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-014 · Self-audit and egress audit
 **Self-checks/CI · Thin · P1 · M · Reliability · Depends on: HS-062, HS-063 · Sources: N55, D20, Cloudflare §E self-audit seed**
+- **Status.** done — scripts/egress.mjs in CI (inventory: dependency-gate registries, gh at SessionStart, off-by-default model calls; fails on any new egress point); self-audit with the imported security-audit skill in docs/self-audit/
 - **Problem.** H-Stack's own hooks, mods, memory and imports are an attack surface.
 - **Mechanism.** Before each public release, run the imported security-audit skill (IM-09) on H-Stack itself.
   - **Units.** Seeded from Cloudflare's AI/LLM and supply-chain classes: memory poisoning, provenance confusion, approval binding, unbounded loops, subagent/MCP trust inheritance, mutable install inputs, hooks on install.
@@ -393,6 +400,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-016 · Light-by-default and explicit-only skills
 **Skill index · Build · P1 · S · Cost · Depends on: HS-015, HS-018 · Sources: N45, C28, C23, C35**
+- **Status.** done — light by default; explicit_only skills (long-run) are listed with * and only routed when named; security-audit full mode only on full-audit phrases (metadata.hstack.modes)
 - **Problem.** Loading a heavy skill shouldn't start a full run, and push/merge/loop skills shouldn't auto-run.
 - **Mechanism.**
   - **Modes.** Heavy skills declare a guidance mode and the phrases that unlock full mode.
@@ -446,6 +454,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-019 · Small-model classifier fallback
 **Activation · Build · P1 · M · Reliability · Depends on: HS-018, HS-058 · Sources: 00 §2 mechanism E (no ID); OD-1**
+- **Status.** done — hooks/register.js prompt.submit fallback with $.model.complete (haiku, cached catalogue); off by default per OD-1 (config classifier.fallback)
 - **Problem.** Rules miss fuzzy requests.
 - **Mechanism.** When rules find no match and the size isn't `direct`, a mod `prompt.submit` calls `$.model.complete` (Haiku-class) with the cached index catalogue and gets back `{size, act|ask|stop, skill}`. Off until the trigger evals show a recall gain worth the cost.
 - **Evidence.** [00 §2 E](research/00-activation-and-experience.md); mods API `$.model.complete` and prompt caching.
@@ -476,6 +485,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-021 · Explainable routing
 **Activation · Build · P1 · S · Judgment · Depends on: HS-018, HS-058 · Sources: N3**
+- **Status.** done — 'why that?' override returns the matched rule (snapshot classify-why-that); corrections are logged to .h-stack/routing-examples.jsonl with the prompt excerpt, pick and rule (hooks/classify.mjs); hs retro counts them
 - **Problem.** Users can't see or correct why a skill was picked.
 - **Mechanism.** "Why that?" returns the matched rule. A correction is logged as a context-keyed routing example and feeds skill-creator's description tuning.
 - **Evidence.** [00b N3](research/00b-research-backed-ideas.md); skill-creator description optimisation.
@@ -497,6 +507,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-023 · Subagent briefing, including memory subagents don't load
 **Activation · Thin · P1 · M · Reliability · Depends on: HS-011, HS-049 · Sources: E9, N37, D13, C38**
+- **Status.** done — hooks/subagent-start.mjs briefs subagents with route, open assumptions, decisions, lessons and review calibration within 150 tokens
 - **Problem.** Vague delegation duplicates work. Subagents also start without the rules, and without auto memory unless they are forks.
 - **Mechanism.**
   - **Native.** Subagent frontmatter (`tools`, `model`, `skills`) and the `SubagentStart` event.
@@ -516,6 +527,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-024 · Offers only at workflow boundaries
 **Activation · Build · P1 · S · Autonomy · Depends on: HS-018 · Sources: N4**
+- **Status.** done — offers only at turn.complete boundaries (lib/pure/mod-rules.mjs offerFor; config offers)
 - **Problem.** Proactive actions built on predicted intent are usually wrong.
 - **Mechanism.** After a commit, a test pass or a PR opening, the mod `turn.complete` shows one line offering a next step. It never acts on it.
 - **Evidence.** The best agent predicts intent only 35.57% of the time (ProCodeBench). Boundary suggestions got 52% engagement vs 62% of mid-task ones dismissed (ProAIDE) ([00b N4](research/00b-research-backed-ideas.md)).
@@ -523,6 +535,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-025 · Verification effort set by the measured solo boundary
 **Activation · Build · P1 · M · Cost · Depends on: HS-058, HS-061 · Sources: N107**
+- **Status.** done — lib/retro.mjs soloBoundary: solo pass rate per task class from activation telemetry (pass = not corrected next prompt); effort receipts >= 0.9 over >= 5 runs, full below, medium on cold start; stored in route.json verify and shown by hs status; planning's several-attempts section and review lanes key off it
 - **Problem.** Heavy review costs 10–20× and adds nothing on tasks the model already does well.
 - **Mechanism.** H-Stack tracks the solo pass rate per project and task class.
   - **Above the threshold:** receipts only.
@@ -533,6 +546,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-026 · Context-rot handling
 **Activation · Native — configure only · P2 · S · Reliability · Depends on: HS-047 · Sources: N11, D19**
+- **Status.** done — native /clear, compaction and fresh sessions; skills/memory suggests /clear between unrelated tasks and a fresh session from the newest checkpoint for long runs
 - **Problem.** Quality drops as input grows.
 - **Mechanism.** Native: `/clear`, `/fork`, auto-compaction and 1M windows. H-Stack only suggests `/clear` between unrelated tasks and points long runs at a fresh session that starts from the checkpoint.
 - **Evidence.** Context Rot: ~300-token focused input beat ~113k-token input. Downgraded in 00c because 1M windows make running out rare ([00c §2](research/00c-beyond-every-stack.md)).
@@ -638,6 +652,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-032 · Untrusted content: provenance, argument taint, fetch-destination guard
 **Guards · Thin · P1 · M · Reliability · Depends on: HS-045 · Sources: N23, N120, C9, D21**
+- **Status.** done — lib/taint.mjs + hooks/taint.mjs provenance line; gate-bash and gate-fetch block tainted values reaching private destinations; snapshots
 - **Problem.** Injected text can change the arguments of later tool calls even when it can't change which tool runs.
 - **Mechanism.**
   - **Native.** Auto mode already blocks actions driven by content Claude read.
@@ -667,6 +682,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-034 · Secrets hygiene and trusted executables
 **Guards · Thin · P1 · S · Reliability · Depends on: HS-012 · Sources: C6, C7**
+- **Status.** done — gate-bash credentialExec and secret redaction in all state writes (lib/core.mjs redact); classifier never stores a prompt that looks like a secret
 - **Problem.** Secrets leak through argv, logs, chat or project-controlled binaries.
 - **Mechanism.**
   - **Native.** Permission `deny` rules for reading `~/.ssh`, `~/.aws` and `.env*`.
@@ -679,6 +695,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-035 · Scope lock on the invoked issue or PR
 **Guards · Build · P1 · S · Judgment · Depends on: HS-045 · Sources: C8**
+- **Status.** done — scope lock: gate-bash denies GitHub writes to issue/PR numbers not named in the prompt (route.json scope_numbers); snapshots
 - **Problem.** Numbers mentioned in comments get acted on as instructions.
 - **Mechanism.** Record the target number. PreToolUse on `gh issue|pr` writes and `gh api` writes asks if the number differs.
 - **Evidence.** bonk and viguy: "verify the target number matches" ([C8](research/cloudflare/ideas-for-h-stack.md)).
@@ -686,6 +703,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-036 · Error-as-success and outcome-unknown detectors
 **Guards · Build · P1 · S · Reliability · Depends on: HS-027 · Sources: N53, C11, D5**
+- **Status.** done — hooks/ledger.mjs failed_pattern on exit-0 output (error-as-success) and outcome-unknown on interrupted/timeout receipts; stop gate reads them
 - **Problem.** Errors that arrive as normal text count as success, and interrupted calls get retried blindly.
 - **Mechanism.**
   - **Pattern table (PostToolUse).** Flags these as failures and marks the receipt failed:
@@ -700,6 +718,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-037 · Repeat-call and failure-signature reminders
 **Guards · Build · P1 · S · Autonomy · Depends on: HS-045 · Sources: N38, D4**
+- **Status.** done — hooks/batch.mjs: tool+canonical input hash, factual line at 3/5/8 identical calls with the previous result; never blocks; resets per turn (deviation: PostToolBatch, not PostToolUse, so one line per batch)
 - **Problem.** Repeating the same step is the most common multi-agent failure.
 - **Mechanism.** PostToolUse hashes the tool plus its canonical input. At 3, 5 and 8 identical calls in a row it adds a factual line with the previous result. It never blocks and resets on each user message.
 - **Evidence.** MAST: step repetition 15.7%. dsh `repeat-tool-reminder` with thresholds `[3, 5, 8]` ([D4](research/deepseek-harness.md)).
@@ -707,6 +726,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-038 · Step and spend budget
 **Guards · Thin · P1 · S · Cost · Depends on: HS-045, HS-058 · Sources: E18, C14**
+- **Status.** done — step budget per size (config budgets.steps) counted by the turn.step mod into steps.json and enforced in gate-bash; telemetry in mod-turns.jsonl
 - **Problem.** Runaway turns burn budget, and agents degrade instead of reporting.
 - **Mechanism.**
   - **Native.** `--max-turns` and `--max-budget-usd` for headless runs.
@@ -716,6 +736,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-039 · Syntax check on every edit
 **Guards · Build · P1 · S · Reliability · Depends on: HS-012 · Sources: N114**
+- **Status.** done — hooks/syntax.mjs: parse check after each edit (node --check, Python ast.parse, JSON, bash -n, ruby -c, php -l, gofmt -e) and a note only on a new parse error
 - **Problem.** Syntax errors are a large share of failures and cause repeated edits.
 - **Mechanism.** PostToolUse on Edit and Write runs the project's fastest parser and returns only new errors, ±3 lines, within 3 s.
 - **Evidence.** SWE-agent: 18.0% vs 15.0% with a lint guardrail. SWE-Bench Pro: 24.2% of Opus 4.1's failures were syntax errors ([00c N114](research/00c-beyond-every-stack.md)).
@@ -723,6 +744,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-040 · Unresolved-concern check at Stop
 **Guards · Build · P1 · S · Reliability · Depends on: HS-027 · Sources: N105**
+- **Status.** done — turn.complete concern check with $.model.complete in hooks/register.js; off by default (config concerns) because it costs a model call per edited turn and no measured gain yet
 - **Problem.** The agent flags a problem, then talks past it.
 - **Mechanism.** The mod `turn.complete` runs on turns with edits. A Haiku-class `$.model.complete` call lists the concerns raised and whether each was resolved. If not, one note goes through `$.prompt.submit`, at most once per prompt.
 - **Evidence.** AgentAbstain "half-acknowledgment"; harness-design: the QA agent would "talk itself into" approving ([00c N105](research/00c-beyond-every-stack.md)).
@@ -730,6 +752,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-041 · Spawn governor and model routing
 **Guards · Thin · P1 · M · Cost · Depends on: HS-018, HS-058 · Sources: E17, N36, N39, N118**
+- **Status.** done — agent.spawn governor: spawn budget per size, model per role from config.models; resumed agents not counted
 - **Problem.** Effort-scaling written as prose gets ignored, and every step runs on the strongest model.
 - **Mechanism.**
   - **Native (configure).** Skill and subagent `model` and `effort` frontmatter, and `Agent(model:…)` permission rules.
@@ -742,6 +765,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-042 · Asynchronous overseer
 **Guards · Build · P1 · M · Autonomy · Depends on: HS-037, HS-041 · Sources: N129**
+- **Status.** done — overseer on $.clock.every for /goal runs (overseerFindings: stalls, repeated failures); off unless config long_run.overseer
 - **Problem.** Long unattended runs loop or drift.
 - **Mechanism.** During long runs, a mod timer (`$.clock.every`) summarises recent calls, checks MAST signatures (repetition, no progress, scope drift) and notes them or stops the run.
 - **Evidence.** SICA overseer every 30 s; MAST step repetition 15.7% ([00c N129](research/00c-beyond-every-stack.md)).
@@ -749,6 +773,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-043 · Sandbox for untrusted code
 **Guards · Native — configure only · P2 · S · Reliability · Depends on: — · Sources: N54**
+- **Status.** done — native sandbox: qa and security-audit skills say to run code you didn't write in /sandbox when available and ask otherwise
 - **Problem.** Code from PRs or downloads runs with full access.
 - **Mechanism.** The native sandbox (no network, read-only source). The imported audit and QA skills say when to use it.
 - **Evidence.** Cloudflare's execution-safety rules ([09](research/09-security.md)).
@@ -756,6 +781,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-044 · Declared effects for unattended jobs
 **Guards · Thin · P2 · M · Autonomy · Depends on: HS-030, HS-071 · Sources: C1**
+- **Status.** done — task.yaml declared effects (skills/long-run/references/task-yaml.md, lib/effects.mjs, hs manifest start/stop); gate-bash denies undeclared irreversible/write actions while a manifest is active; snapshot bash-manifest-undeclared
 - **Problem.** A scheduled job's prompt can widen what it does.
 - **Mechanism.** Every Routine or Workflow H-Stack sets up has a `task.yaml` (trigger, read tools, effects, budgets). A plan run emits JSON, a script validates and applies it, and PreToolUse in the apply step denies anything outside the manifest.
 - **Evidence.** Gardener: "Nothing outside the declaration is possible" ([C1](research/cloudflare/ideas-for-h-stack.md)).
@@ -789,6 +815,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-047 · Compaction checkpoint and failure log
 **State & memory · Thin · P1 · M · Autonomy · Depends on: HS-045, HS-017 · Sources: E8, N9, N10, D8**
+- **Status.** done — pre-compact instructions + post-compact checkpoints/NNN.md from compact_summary (old ones kept); failure log via hs failed and lib/append.mjs
 - **Problem.** Compaction drops dead ends and corrections, so failed approaches get retried.
 - **Mechanism.**
   - **Native.** Auto-compaction re-attaches skills (5,000 tokens each, 25,000 combined) and reloads CLAUDE.md. PreCompact stdout *is* the compaction instruction text.
@@ -848,6 +875,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-050 · Shadow log of native auto-memory rewrites
 **State & memory · Build · P1 · S · Learning · Depends on: HS-045 · Sources: N109**
+- **Status.** done — hooks/memory-shadow.mjs keeps the earlier text in .h-stack/memory-shadow.jsonl when an auto-memory rewrite drops specifics, with a one-line note
 - **Problem.** Auto memory merges and drops entries near its 200-line / 25 KB index limit, an in-place rewrite.
 - **Mechanism.** PostToolUse on writes under the auto-memory directory (`autoMemoryDirectory` or `~/.claude/projects/<p>/memory/`) appends a before/after diff to `.h-stack/memory-shadow.jsonl`. Merges that drop concrete specifics are flagged, with an offer to restore them.
 - **Evidence.** Memory docs; 2605.12978 Table 5: forbidding in-place rewriting raised the score from 43.2 to 50.0.
@@ -855,6 +883,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-051 · Context-keyed learning from user edits
 **State & memory · Build · P2 · M · Learning · Depends on: HS-048, HS-049 · Sources: N27**
+- **Status.** done — lib/retro.mjs userEditCandidates (files Claude edited that a later quiet commit changed) via hs retro; skills/memory turns a preference seen in 2+ contexts into a path-scoped lesson draft
 - **Problem.** Users repeat the same corrections in code.
 - **Mechanism.**
   1. Compare Claude's change with what the user committed.
@@ -865,6 +894,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-052 · Decision log and implicit-decision ledger
 **State & memory · Build · P1 · S · Judgment · Depends on: HS-045 · Sources: E16, N127**
+- **Status.** done — hs decide / decisions.jsonl and hs assume / verify-assumption ledger; shown in hs status, pane and subagent briefs
 - **Problem.** Long and parallel runs make implicit choices no one can audit, and they collide at merge.
 - **Mechanism.** `hs decide "<what>" --why --scope --evidence measured|inferred|guessed`. SubagentStart injects recent entries, and conflicts are flagged before merge.
 - **Evidence.** Cognition: implicit decisions conflict; pstack show-me-your-work ([14](research/14-autonomous-multiagent.md)); C-compiler lock files.
@@ -872,6 +902,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-053 · Wishlist: park and resume
 **State & memory · Build · P1 · S · Autonomy · Depends on: HS-045, HS-017 · Sources: N50, C25**
+- **Status.** done — hs wish / resolve-wish (.h-stack/wishlist.jsonl); open wishes surface at SessionStart and in hs status
 - **Problem.** Blocked on something only the user can provide, the agent guesses or gives up.
 - **Mechanism.** `hs wish "<need>" --why --resume "<task>"`. SessionStart lists open items, and resolving one re-queues the parked task.
 - **Evidence.** Cloudflare: 25,472 wishlist writes, "the main way the agents talk back to us" ([09](research/09-security.md)).
@@ -879,6 +910,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-054 · Project language: glossary and decision records
 **State & memory · Native — configure only · P2 · S · Judgment · Depends on: HS-015 · Sources: E11**
+- **Status.** done — skills/memory Project language: glossary and ADRs in the project's docs, loaded via path-scoped rules, never always-on
 - **Problem.** Terms and past decisions are re-derived or misread.
 - **Mechanism.** Native: a glossary and ADRs in the project's docs, reached through `@path` imports from path-scoped `.claude/rules/` files, so they load on demand. Only terms that aren't obvious. Never always-on.
 - **Evidence.** mattpocock domain-modeling ([11 #1](research/11-memory-context.md)); memory docs on `@imports` (4 hops) and `paths`; A3.
@@ -886,6 +918,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-055 · Recitation hook and few-shot rut breaker
 **State & memory · Build · P2 · S · Autonomy · Depends on: HS-011, HS-001 · Sources: N7, N117**
+- **Status.** done — recitation built in hooks/batch.mjs (goal/step digest-gated), opt-in with hs goal set --recite; off by default until a measured gain (K16), which needs the smoke-test tasks. Rut-breaker variant not built for the same reason
 - **Problem.** On long runs the goal drifts out of focus, and batch work imitates itself.
 - **Mechanism.** On long runs only, PostToolBatch appends the goal and step when their digest changes, and restates the current item with varied wording on repetitive batches. Ships only with a measured gain (K16).
 - **Evidence.** Manus: recite the plan; "Don't get few-shotted" ([00b](research/00b-research-backed-ideas.md)).
@@ -895,6 +928,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-056 · Status mod: spinner and announcement line
 **Visibility · Build · P1 · S · Judgment · Depends on: HS-018 · Sources: E12, E14**
+- **Status.** done — Spinner suffix (size, skill, step) and once-per-change announcement line at turn.complete in hooks/register.js; mod tests
 - **Problem.** Users can't see what H-Stack picked, so wrong picks go uncorrected.
 - **Mechanism.**
   - **Spinner.** The mod's Spinner render site shows `H-Stack · <size> · <skill> · step n/m`.
@@ -906,6 +940,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-057 · Side pane
 **Visibility · Build · P2 · M · Judgment · Depends on: HS-056 · Sources: E13**
+- **Status.** done — Pane (route, receipts, assumptions, decisions, wishlist) in hooks/register.js; opt-in via config pane; visual check in the desktop app not done here
 - **Problem.** Long runs are opaque.
 - **Mechanism.** A mod Pane gives a read-only view of the playbook step, skills used, receipts, assumptions, decisions and the wishlist (OD-2).
 - **Evidence.** [00 E13](research/00-activation-and-experience.md); mods Pane site.
@@ -915,6 +950,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-058 · Local activation and tool-use telemetry
 **Telemetry · Thin · P1 · M · Learning · Depends on: HS-045, HS-018 · Sources: E19, N43, N52**
+- **Status.** done — local JSONL: activation.jsonl (pick, rules, correction), tools.jsonl (gate decisions), mod-turns.jsonl (usage, steps, per-tool call counts); 90-day retention pruned at SessionEnd (lib/retro.mjs pruneTelemetry); nothing leaves the machine (scripts/egress.mjs)
 - **Problem.** Descriptions and tools are tuned blind.
 - **Mechanism.**
   - **Native.** `/skill-doctor` (cost, use count) and `turn.complete` usage.
@@ -928,6 +964,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-059 · Measured retro and postmortems
 **Telemetry · Build · P2 · M · Learning · Depends on: HS-058, HS-048 · Sources: E20, N121, D18**
+- **Status.** done — hs retro: activation, corrections, tokens, steps, per-tool calls, git signals (reverts, rework files, median request-to-commit minutes), solo boundary and user-edit candidates; postmortems via skills/debugging and memory handoff
 - **Problem.** Developers' sense of speed-up is wrong.
 - **Mechanism.** A local report gives measured signals only:
   - time from request to accepted change;
@@ -960,6 +997,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-061 · Blind review lanes on top of native review
 **Skills (07) · Thin · P1 · M · Reliability · Depends on: HS-062, HS-063 · Sources: N19, C18, C19**
+- **Status.** done — skills/review lanes (references/lanes.md) with h-stack:review-lane subagents; agent-result.mjs validates lane JSON mechanically and asks for a fresh re-run on malformed/thin output
 - **Problem.** Claude is a lenient reviewer of its own family's work, and "nothing found" can't be told apart from "not checked".
 - **Mechanism.**
   - **Native.** Built-in `/code-review`, the official code-review plugin and `/security-review`.
@@ -973,6 +1011,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-062 · Findings schema, three verdicts and a deterministic validator
 **Skills (07, 09) · Import (from cloudflare/security-audit-skill, MIT) · P1 · M · Reliability · Depends on: HS-012 · Sources: N46, N47, C15, C16, C17, C2**
+- **Status.** done — lib/findings.mjs validateFindings (schema, three verdicts, file/line/snippet truth checks) adapted from cloudflare security-audit validators; unit tests
 - **Problem.** The model grades its own output format, and invalid output gets "repaired" into findings.
 - **Mechanism.**
   - **Import.** The security-audit `report-schema.json` and its zero-dependency validators, with their tests.
@@ -987,6 +1026,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-063 · Coverage ledger, shallow detector, and verification budget reserved first
 **Skills (09, 07) · Import (cloudflare security-audit) · P1 · M · Reliability · Depends on: HS-062 · Sources: N48, C21, N51, C20, N49, C22**
+- **Status.** done — coverage ledger and shallow detector in lib/findings.mjs; review skill reserves about a third of effort for verification; security-audit ships the upstream coverage-ledger validator
 - **Problem.** "All clear" hides what wasn't checked, and exploration spends the verification budget.
 - **Mechanism.**
   - **Import.** The ledger rules and budget algorithm from security-audit.
@@ -996,6 +1036,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-064 · Reviewer calibration from user overrides
 **Skills (07) · Build · P2 · S · Judgment · Depends on: HS-061, HS-058 · Sources: N106**
+- **Status.** done — hs review-override logs false-positive/missed overrides to .h-stack/review-calibration.jsonl; subagent-start adds the latest to review-lane briefs
 - **Problem.** Reviewer leniency drifts.
 - **Mechanism.** User overrides are logged per project and become versioned few-shot calibration examples, gated by skill-creator's benchmark.
 - **Evidence.** Harness-design: making a separate evaluator sceptical is "far more tractable" ([00c N106](research/00c-beyond-every-stack.md)).
@@ -1003,6 +1044,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-065 · Review guide with every change
 **Skills (13) · Import (mattpocock `pr`, MIT) · P1 · S · Reliability · Depends on: HS-027 · Sources: N31**
+- **Status.** done — skills/git-ship review guide derived from the diff: where to look first, evidence with receipts, Not verified, merge danger
 - **Problem.** Reviewers' minutes are the scarce resource.
 - **Mechanism.** The adapted `pr` skill adds:
   - the risk per hunk;
@@ -1014,6 +1056,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-066 · Counterfactual fix proof
 **Skills (06) · Build · P1 · S · Reliability · Depends on: HS-027 · Sources: N17, C24**
+- **Status.** done — skills/debugging/scripts/verify-fix.mjs: the regression test must fail with the fix reverted and pass with it
 - **Problem.** New tests often pass without the fix.
 - **Mechanism.** A `verify-fix` script:
   1. Stash the fix; the new test must fail.
@@ -1025,6 +1068,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-067 · Harvest reproduction scripts into the test suite
 **Skills (06) · Build · P1 · S · Reliability · Depends on: HS-066 · Sources: N103**
+- **Status.** done — skills/debugging: the reproduction becomes a test in the project's own suite before the fix
 - **Problem.** Throwaway repro scripts, the best evidence of the bug, get deleted.
 - **Mechanism.** Scripts that fail on the base commit and pass with the fix are offered as regression tests, deduplicated.
 - **Evidence.** Agentless §3.3; EGSS +5–10% ([00c N103](research/00c-beyond-every-stack.md)).
@@ -1032,6 +1076,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-068 · Diff-targeted mutation check
 **Skills (08) · Build · P2 · M · Reliability · Depends on: HS-066 · Sources: N18**
+- **Status.** done — skills/qa/scripts/mutate.mjs: diff-targeted mutations, reports survivors
 - **Problem.** Coverage doesn't show whether tests have teeth.
 - **Mechanism.** Mutate the changed lines; new tests must catch the mutants.
 - **Evidence.** ACH: 49% of useful tests add no line coverage (A12). The Trail of Bits idea is CC BY-SA, so idea only.
@@ -1039,6 +1084,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-069 · Signal rules: retry on a new signal, escalate on disagreement
 **Skills (01, 06) · Import (adapt superpowers systematic-debugging, MIT) · P1 · S · Reliability · Depends on: HS-027, HS-037 · Sources: N16, N21**
+- **Status.** done — skills/debugging signal rules: retry only on a new signal; escalate when evidence disagrees
 - **Problem.** Reflect-and-retry without new evidence lowers accuracy.
 - **Mechanism.** Add to the imported debugging skill and the core rules:
   - a retry cites a new external signal;
@@ -1053,6 +1099,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-070 · Premise check and evidence-first disagreement
 **Skills (01, 03) · Import (adapt pstack `principle-attack-the-premise`, MIT) · P1 · S · Judgment · Depends on: HS-018 · Sources: N5, N122**
+- **Status.** done — skills/core-rules premise check and evidence-first disagreement
 - **Problem.** Models affirm users' stated causes, and prompting alone mitigates this poorly.
 - **Mechanism.** A user-asserted cause becomes a hypothesis checked with the cheapest evidence step. The reply follows: evidence → conclusion → the cheapest settling check → the user decides.
 - **Evidence.** ELEPHANT §4.3; *Science* 2026: ~49% more affirmation than humans ([00c N122](research/00c-beyond-every-stack.md)); pstack ([03 #5](research/03-ideation-product.md)).
@@ -1060,6 +1107,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-071 · Long-run protocol on native `/goal`
 **Skills (14) · Thin · P1 · M · Autonomy · Depends on: HS-027, HS-047, HS-053 · Sources: N35, N131, D9**
+- **Status.** done — skills/long-run /goal protocol (goal/step via hs goal, checkpoints, stop gate, overseer, declared effects)
 - **Problem.** Long runs mark items done without end-to-end checks, and `/goal` conditions written as wishes are met by a confident summary.
 - **Mechanism.**
   - **Native.** `/goal`, Routines, Workflows, `/batch`, worktrees.
@@ -1071,6 +1119,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-072 · Risk-gated tournament
 **Skills (05) · Thin · P2 · M · Reliability · Depends on: HS-060, HS-061, HS-025 · Sources: N20**
+- **Status.** done — skills/planning several-attempts section: only for high risk with verification effort full; 2-4 approaches in worktrees scored by rubric-grader, no debate
 - **Problem.** A single attempt at a high-risk change.
 - **Mechanism.** Native worktrees and subagents. Only below the solo boundary and at high risk: 2–4 approaches, rubric scoring, never debate.
 - **Evidence.** EGSS: +5–10% with 28% fewer tokens; pstack `arena`; debate 83.0 vs majority vote 88.2 (A7).
@@ -1078,6 +1127,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-073 · Change-size governor
 **Skills (13) · Build · P2 · S · Reliability · Depends on: HS-065 · Sources: N33**
+- **Status.** done — skills/git-ship/scripts/change-size.mjs: threshold from the project's merged history; larger work split into stacked steps
 - **Problem.** Diffs too large to review.
 - **Mechanism.** A threshold from the project's merged-PR history; larger work is split into stacked steps.
 - **Evidence.** addyosmani ~100-line sizing ([07 #8](research/07-code-review.md)).
@@ -1085,6 +1135,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-074 · Code mode for bulk tool work
 **Skills (14) · Build · P2 · S · Cost · Depends on: — · Sources: N40, C33**
+- **Status.** done — skills/long-run code mode: write a script that makes the calls; credentials stay in a wrapper
 - **Problem.** Looping through tool calls floods context.
 - **Mechanism.** Write a script that makes the calls; credentials stay with a wrapper.
 - **Evidence.** 150,000 → 2,000 tokens (98.7%); Cloudflare 1.17M → ~1,000 ([C33](research/cloudflare/ideas-for-h-stack.md)).
@@ -1092,6 +1143,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-075 · Hybrid code navigation
 **Skills (11) · Build · P2 · M · Cost · Depends on: HS-058 · Sources: N12**
+- **Status.** done — gate kept as specified: no graph until telemetry shows structural questions are common (hs retro per-tool counts); skills/memory Structural questions uses native LSP/grep
 - **Problem.** Structural questions cost many reads.
 - **Mechanism.** A graph for caller and hub questions only, added only if telemetry shows they are common.
 - **Evidence.** Codebase-Memory: overall quality 0.83 vs 0.92 for the file explorer ([00b](research/00b-research-backed-ideas.md)).
@@ -1099,6 +1151,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-076 · Sleep-time prep
 **Skills (14) · Native — configure only · P2 · S · Cost · Depends on: HS-071 · Sources: N30**
+- **Status.** needs-user (credentials or accounts: a nightly Routine is created in the user's claude.ai account; the prompt and task.yaml pattern are in skills/long-run)
 - **Problem.** Shared prep work is redone in every session.
 - **Mechanism.** A Routine on a nightly schedule refreshes flaky-test triage and the dependency audit, only where many later queries share the context. Results are offered, never acted on.
 - **Evidence.** Sleep-time compute: ~5× / 2.5× only under predictable queries ([00c §2](research/00c-beyond-every-stack.md)); Routines docs.
@@ -1106,6 +1159,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-077 · CI watcher for the open PR
 **Skills (13) · Native — configure only · P2 · S · Autonomy · Depends on: HS-044, HS-024 · Sources: E15**
+- **Status.** needs-user (credentials or accounts: a GitHub-event Routine needs the user's claude.ai account and GitHub app on the repo; behaviour (notice + offer, per-PR opt-in fixes, never merge) is in skills/long-run)
 - **Problem.** CI failures wait for a human.
 - **Mechanism.** A Routine with a GitHub-event trigger sends a notice and an offer. An automatic fix only with a per-PR opt-in; it never merges (K7, K8).
 - **Evidence.** Routines fire from schedule, GitHub-event or API triggers (whats-new; [00 E15](research/00-activation-and-experience.md)).
@@ -1113,6 +1167,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-078 · Known-good oracle bisection
 **Skills (14) · Build · P2 · S · Autonomy · Depends on: — · Sources: N128**
+- **Status.** done — skills/long-run/scripts/oracle.mjs: bisection against a known-good reference with lock-file claims
 - **Problem.** Parallel agents all fix the same giant failure and overwrite each other.
 - **Mechanism.** A bisection harness against a known-good reference, so each agent gets a different failing subset; work is claimed with lock files.
 - **Evidence.** C-compiler post: the GCC oracle ([00c N128](research/00c-beyond-every-stack.md)).
@@ -1120,6 +1175,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-079 · Accounting gate for migrations
 **Skills (05) · Build · P2 · S · Reliability · Depends on: — · Sources: C37**
+- **Status.** done — skills/tdd/scripts/accounting.mjs: every source id maps to target or a reasoned skip; per-stage counts compared; exit 1 on any gap
 - **Problem.** Items silently disappear in migrations.
 - **Mechanism.** Every source item maps to a target or to a "not migrated: reason" row. Counts are compared per stage, stopping on a mismatch.
 - **Evidence.** cloudflare-one-migrations ([C37](research/cloudflare/ideas-for-h-stack.md)).
@@ -1127,6 +1183,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-080 · Learn code, not prose
 **Skills (15) · Thin · P1 · M · Learning · Depends on: HS-048, HS-002 · Sources: N111**
+- **Status.** done — skills/skill-authoring/scripts/repeated.mjs finds repeated command sequences to turn into scripts, not prose
 - **Problem.** Repeated procedures are worth keeping, but prose written by the model hurts.
 - **Mechanism.** After a procedure succeeds 2+ times, propose a script with calibrated defaults and a test that ran. skill-creator scaffolds it and benchmarks it. A human reviews the content (K20).
 - **Evidence.** SkillsBench F.4: scripts are the top pattern; self-generated prose −8.1 to −11.5 pp. Dynamic Cheatsheet 10% → 99%. SkillWeaver +31.8%.
@@ -1186,6 +1243,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-084 · Skill feedback drafts with exact-text approval
 **Distribution · Build · P2 · S · Learning · Depends on: HS-058 · Sources: C36**
+- **Status.** done — skills/skill-authoring/scripts/feedback-draft.mjs drafts an issue (file, section, expected, actual) with a privacy blocklist; posts only after the user approves the exact text
 - **Problem.** Skill failures users notice never reach the H-Stack repo.
 - **Mechanism.** H-Stack drafts an issue (file, section, expected, actual) with a privacy blocklist, and posts only after the user approves the exact text.
 - **Evidence.** Cloudflare skill-feedback ([C36](research/cloudflare/ideas-for-h-stack.md)).
@@ -1193,6 +1251,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-085 · Release gate
 **Distribution · Thin · P1 · S · Reliability · Depends on: HS-001, HS-010, HS-011, HS-013, HS-083 · Sources: none of its own (CLAUDE.md "Validate", "Report honestly")**
+- **Status.** done — evals/release-gate.mjs: CI (validate, budget, snapshots, lint, THIRD_PARTY, egress, tests) + a smoke run on real tasks newer than the last plugin change with regressions listed. Currently fails on the smoke check (no real tasks yet, HS-001)
 - **Problem.** A release ships without numbers, or hides its regressions.
 - **Mechanism.** Bump the version only when these pass:
   - `claude plugin validate .`;

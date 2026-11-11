@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply points out that generic advice ('write good code', 'be careful') adds no behaviour or measurably hurts, and proposes project-specific content, a script, or measuring it with an eval before shipping, instead of silently writing the generic skill",
+      "passed": true,
+      "evidence": "The final message says generic advice like \"Always write good code. Be careful with edge cases. Test things.\" tends to make results worse, citing SkillsBench scores \"8 to 11.5 points below having no skill at all\". It turns the advice into concrete checks with project placeholders (<TEST_CMD>, <LINT_"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

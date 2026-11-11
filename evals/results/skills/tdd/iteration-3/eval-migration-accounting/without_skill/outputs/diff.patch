@@ -1,0 +1,44 @@
+diff --git a/migrate.js b/migrate.js
+new file mode 100644
+index 0000000..2b948f0
+--- /dev/null
++++ b/migrate.js
+@@ -0,0 +1,10 @@
++import fs from 'node:fs';
++const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
++const out = [], skipped = [];
++for (const u of users) {
++  if (!u.mail) { skipped.push(u.uid); continue; }
++  out.push({ id: u.uid, email: u.mail, name: `${u.first ?? ''} ${u.last ?? ''}`.trim() });
++}
++fs.writeFileSync('users-v2.json', JSON.stringify(out, null, 2) + '\n');
++console.log(`Migrated ${out.length} of ${users.length} users.`);
++if (skipped.length) console.warn(`Skipped (no email): uid ${skipped.join(', ')}`);
+diff --git a/users-v2.json b/users-v2.json
+new file mode 100644
+index 0000000..c0df595
+--- /dev/null
++++ b/users-v2.json
+@@ -0,0 +1,22 @@
++[
++  {
++    "id": 1,
++    "email": "ana@example.com",
++    "name": "Ana Silva"
++  },
++  {
++    "id": 2,
++    "email": "bo@example.com",
++    "name": "Bo Chen"
++  },
++  {
++    "id": 4,
++    "email": "di@example.com",
++    "name": "Di Ng"
++  },
++  {
++    "id": 5,
++    "email": "ed@example.com",
++    "name": "Ed"
++  }
++]

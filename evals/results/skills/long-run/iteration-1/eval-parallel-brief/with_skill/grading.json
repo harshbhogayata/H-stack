@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (briefs.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+      "passed": true,
+      "evidence": "Each brief limits edits to its own test file plus the source it tests (\"Scope (may change)... `<path>/auth.test.js`... Auth source modules under test\"). Each has a done criterion (\"`<TEST_CMD> <path>/auth.test.js` exits 0 with all tests passing in a run made after your last edit\") and a section head"
+    },
+    {
+      "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+      "passed": true,
+      "evidence": "Each brief marks everything else read-only (\"Read-only. Everything else, especially shared test helpers, global config, and other modules such as `cart` and `search`\") and allows a test-file change only when \"a test asserts behaviour the code was intentionally changed away from, and say why in `deci"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

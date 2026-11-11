@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (features.json has the three spec behaviours, all passes:false; todo.js not written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each feature names an exact command that checks it (e.g. node todo.js add \"x\" prints added: x)",
+      "passed": true,
+      "evidence": "Each of the four features in features.json has a concrete shell 'check' field, e.g. F1: `[ \"$(node todo.js add 'alpha one')\" = 'added: alpha one' ]`, and F4 checks `[ \"$(node todo.js done 1)\" = 'done: alpha one' ]`."
+    },
+    {
+      "text": "The proposed /goal condition is one measurable end state with the exact check, plus constraints or a turn bound, not a vague wish like 'everything works'",
+      "passed": true,
+      "evidence": "The condition says 'Done means this command ... exits 0 and prints \"4/4 passing\"', includes the full node runner command with a hash guard, and adds constraints ('do not edit any \"check\" field...', 'No force-push') plus a turn bound ('Stop after 30 turns even if not done')."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

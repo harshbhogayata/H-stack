@@ -1,0 +1,41 @@
+diff --git a/PR.md b/PR.md
+new file mode 100644
+index 0000000..4b0f518
+--- /dev/null
++++ b/PR.md
+@@ -0,0 +1,35 @@
++# Replace fixed-window rate limiter with sliding-window limiter
++
++## Summary
++
++`createLimiter` in `rate.js` now uses a sliding-window log instead of a fixed-window counter. The function signature is unchanged: `createLimiter(limit, windowMs, now = () => Date.now())` returns `allow(key)`, so callers don't need to change.
++
++## Why
++
++A fixed-window counter resets at window boundaries, so a client can send up to `2 × limit` requests in a short burst across a boundary (`limit` at the end of one window, `limit` at the start of the next). A sliding window counts calls in the trailing `windowMs` from each call, so no `windowMs`-long span ever allows more than `limit` calls.
++
++## How it works
++
++- Each key keeps a list of timestamps for its allowed calls.
++- On each `allow(key)`, timestamps older than `windowMs` are dropped (`t - x < windowMs` keeps a hit; a hit exactly `windowMs` old has expired).
++- If `limit` or more timestamps remain, the call is rejected and **not** recorded, so rejected calls don't extend the lockout.
++- Otherwise the current time is recorded and the call is allowed.
++
++## Behavior changes to note
++
++- **Memory:** each key stores up to `limit` timestamps instead of one counter. The `Map` never removes keys, so idle keys stay in memory for the life of the limiter. This was also true of a per-key counter, but each entry is now larger. With high-cardinality keys (such as per-IP), we may want periodic eviction as a follow-up.
++- **Per-call cost:** `allow` is O(`limit`) because it filters the timestamp list on every call. That's fine for small limits but worth knowing if `limit` is large.
++
++## Testing
++
++`node test.js` passes (4 assertions): with `limit=2, windowMs=1000`, two calls are allowed, the third is rejected, and a call at `t=1001` is allowed again.
++
++**Coverage gap:** these assertions would also pass with the old fixed-window implementation, so they don't test the sliding behavior itself. A test that tells the two apart would make calls at `t=900` and `t=1100` and check that a third call at `t=1200` is rejected (a fixed window resetting at `t=1000` would allow it). It's worth adding before merge.
++
++## Notes for reviewers
++
++The repo history has a single commit (`fe6f5bf fixture`), so the previous fixed-window code isn't in `git log` for a side-by-side diff. This description is based on the current `rate.js` and `CHANGE.md`.
++
++🤖 Generated with [Claude Code](https://claude.com/claude-code)
++
++https://claude.ai/code/session_015Kd4u8doc5d9SKnX1T2Xfz

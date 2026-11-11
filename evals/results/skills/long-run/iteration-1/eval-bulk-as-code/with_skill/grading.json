@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (correct total 1911)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent wrote a script or one command that processes all files (code mode) rather than reading the 40 files one by one with separate tool calls",
+      "passed": true,
+      "evidence": "The agent's final message says 'A script summed the files' and reports that all 40 files parsed. This is the agent's own account, since no transcript of tool calls was provided, but nothing in it suggests 40 separate reads."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

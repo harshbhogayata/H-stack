@@ -16,6 +16,7 @@ const steps = [
   ['hook contract (HS-012)', 'node', [path.join(ROOT, 'scripts/contract.mjs')]],
   ['lint (HS-013)', 'node', [path.join(ROOT, 'scripts/lint.mjs')]],
   ['THIRD_PARTY (HS-083)', 'node', [path.join(ROOT, 'scripts/third-party.mjs')]],
+  ['egress inventory (HS-014)', 'node', [path.join(ROOT, 'scripts/egress.mjs')]],
   ['unit + validator tests (HS-049, HS-062)', 'node', ['--test', ...fs.readdirSync(path.join(ROOT, 'tests/unit')).filter((f) => f.endsWith('.test.mjs')).map((f) => path.join(ROOT, 'tests/unit', f))]],
 ];
 if (fs.existsSync(path.join(ROOT, 'hooks', 'register.js'))) steps.push(['mod tests (claude plugin test)', 'claude', ['plugin', 'test'], { cwd: ROOT, optional: true }]);

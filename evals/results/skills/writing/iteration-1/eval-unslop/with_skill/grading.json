@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (facts kept, AI vocabulary removed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The unsupported claim 'Experts believe' is removed or replaced with a sourced statement",
+      "passed": true,
+      "evidence": "The diff removes the line containing 'Experts believe this is a game-changer.', and the new draft.md has no 'Experts believe' wording."
+    },
+    {
+      "text": "The result states what the cache does in concrete terms (stores rendered pages on disk for 10 minutes, serves them while the database is down, 83% hit rate in staging)",
+      "passed": true,
+      "evidence": "The new file reads 'The cache stores rendered pages on disk for 10 minutes. While the database is down, it serves pages from the cache.' and 'In staging, the hit rate was 83%.'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

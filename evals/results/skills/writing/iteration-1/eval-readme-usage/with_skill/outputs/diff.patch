@@ -1,0 +1,37 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..dd62c7a
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,31 @@
++# tidyjson
++
++tidyjson reformats a JSON file and writes the result back to the same file.
++
++## Install
++
++From a clone of this repository:
++
++```sh
++npm install -g .
++```
++
++This puts the `tidyjson` command on your PATH.
++
++## Usage
++
++```sh
++tidyjson <file> [--indent N] [--sort-keys]
++```
++
++- `--indent N` sets the indentation width to N.
++- `--sort-keys` sorts object keys.
++
++tidyjson overwrites the file you pass. If the file is not valid JSON, it exits with code 2 and leaves the file unchanged.
++
++## Examples
++
++```sh
++tidyjson config.json --indent 2
++tidyjson data.json --indent 4 --sort-keys
++```

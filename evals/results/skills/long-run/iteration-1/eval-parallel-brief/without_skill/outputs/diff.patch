@@ -1,0 +1,101 @@
+diff --git a/briefs.md b/briefs.md
+new file mode 100644
+index 0000000..657a0bd
+--- /dev/null
++++ b/briefs.md
+@@ -0,0 +1,95 @@
++# Subagent briefs: fix three failing test files
++
++Three parallel agents, one per test file. Each runs in its own git worktree (`isolation: "worktree"`), so their edits can't collide while they work. The main risk is two agents changing the same shared module in different ways. Each brief therefore limits the agent to its own area and tells it to stop and report if the fix needs changes in shared code.
++
++**Fill in before dispatching** (the code isn't available to me, so these are placeholders):
++- `<TEST_CMD>`: how to run a single test file (e.g. `npx jest path/to/file`, `npx vitest run path/to/file`)
++- `<PATH>`: where each test file lives
++- `<FAILURE_OUTPUT>`: paste the current failure output for each file if you have it. Otherwise the agent reproduces it first.
++- Any recent change you suspect, and anything you've already ruled out
++
++---
++
++## Brief 1: auth.test.js
++
++**Goal:** Make `<PATH>/auth.test.js` pass by fixing the real cause of the failure. Done means the file passes, and the rest of the suite fails no worse than it does now.
++
++**Context:**
++- Two other agents are fixing `cart.test.js` and `search.test.js` in parallel, each in its own worktree. Leave those files alone, along with the code under test that only they use.
++- Current failure: `<FAILURE_OUTPUT or "not captured; reproduce it first">`
++- Already ruled out / suspected: `<fill in or delete>`
++
++**How to work:**
++1. Run `<TEST_CMD> <PATH>/auth.test.js` and record the exact failures before you change anything.
++2. Read the test and the auth code it exercises. Decide whether the **code** is wrong or the **test** is wrong (stale expectation, bad mock, time or order dependence). State which one and why before you edit.
++3. Make the smallest fix that addresses the root cause.
++4. Run the file again, then run the full suite once to check for regressions.
++
++**Constraints:**
++- Don't make the test pass by weakening it. That means no deleting or skipping tests, no loosening assertions, no `.only`/`.skip`, and no mocking away the behavior under test. If you think an assertion really is wrong, explain why in your report.
++- Stay inside auth-specific code and the test file. If the fix needs changes to **shared** code (shared fixtures, test setup files, DB/HTTP helpers, config, package.json/lockfile), don't make them. Stop and report what change you'd make and why, so I can coordinate it with the other two agents.
++- Don't add dependencies. Don't commit or push.
++
++**Report back (keep it short):**
++- Root cause in one or two sentences, and whether it was in the code or the test
++- Files changed, with a one-line description of each change
++- Before/after test output for this file, and the full-suite result (if anything else fails, say whether it was already failing before your change)
++- Any shared-code change you needed but held back on, plus anything you're unsure about
++
++---
++
++## Brief 2: cart.test.js
++
++**Goal:** Make `<PATH>/cart.test.js` pass by fixing the real cause of the failure. Done means the file passes, and the rest of the suite fails no worse than it does now.
++
++**Context:**
++- Two other agents are fixing `auth.test.js` and `search.test.js` in parallel, each in its own worktree. Leave those files alone, along with the code under test that only they use.
++- Current failure: `<FAILURE_OUTPUT or "not captured; reproduce it first">`
++- Already ruled out / suspected: `<fill in or delete>`
++- Cart tests often depend on an authenticated user or session fixture. If the failure comes from auth behavior and not from cart logic, don't fix auth here. Report it, because the auth agent may be changing the same code.
++
++**How to work:**
++1. Run `<TEST_CMD> <PATH>/cart.test.js` and record the exact failures before you change anything.
++2. Read the test and the cart code it exercises. Decide whether the **code** is wrong or the **test** is wrong (stale expectation, bad mock, rounding or currency math, shared state leaking between tests). State which one and why before you edit.
++3. Make the smallest fix that addresses the root cause.
++4. Run the file again, then run the full suite once to check for regressions.
++
++**Constraints:**
++- Don't make the test pass by weakening it. That means no deleting or skipping tests, no loosening assertions, no `.only`/`.skip`, and no mocking away the behavior under test. If you think an assertion really is wrong, explain why in your report.
++- Stay inside cart-specific code and the test file. If the fix needs changes to **shared** code (shared fixtures, test setup files, auth/session helpers, DB helpers, config, package.json/lockfile), don't make them. Stop and report what change you'd make and why.
++- Don't add dependencies. Don't commit or push.
++
++**Report back (keep it short):**
++- Root cause in one or two sentences, and whether it was in the code or the test
++- Files changed, with a one-line description of each change
++- Before/after test output for this file, and the full-suite result (if anything else fails, say whether it was already failing before your change)
++- Any shared-code change you needed but held back on, plus anything you're unsure about
++
++---
++
++## Brief 3: search.test.js
++
++**Goal:** Make `<PATH>/search.test.js` pass by fixing the real cause of the failure. Done means the file passes, and the rest of the suite fails no worse than it does now.
++
++**Context:**
++- Two other agents are fixing `auth.test.js` and `cart.test.js` in parallel, each in its own worktree. Leave those files alone, along with the code under test that only they use.
++- Current failure: `<FAILURE_OUTPUT or "not captured; reproduce it first">`
++- Already ruled out / suspected: `<fill in or delete>`
++- Search tests often fail intermittently because of result ordering, debounce timers, async indexing, or fake vs. real timers. Run the file several times to check whether the failure is deterministic, and say what you found.
++
++**How to work:**
++1. Run `<TEST_CMD> <PATH>/search.test.js` (a few times) and record the exact failures, and whether they're stable, before you change anything.
++2. Read the test and the search code it exercises. Decide whether the **code** is wrong or the **test** is wrong (it relies on unspecified ordering, has a timing race, or has a stale expectation). State which one and why before you edit.
++3. Make the smallest fix that addresses the root cause. For a timing race, fix it with proper awaiting or controlled timers, not by adding sleeps or raising timeouts.
++4. Run the file several times, then run the full suite once to check for regressions.
++
++**Constraints:**
++- Don't make the test pass by weakening it. That means no deleting or skipping tests, no loosening assertions, no `.only`/`.skip`, no retries or longer timeouts used to hide flakiness, and no mocking away the behavior under test. If you think an assertion really is wrong, explain why in your report.
++- Stay inside search-specific code and the test file. If the fix needs changes to **shared** code (shared fixtures, test setup files, DB/index helpers, config, package.json/lockfile), don't make them. Stop and report what change you'd make and why.
++- Don't add dependencies. Don't commit or push.
++
++**Report back (keep it short):**
++- Root cause in one or two sentences, whether it was in the code or the test, and whether the failure was deterministic or flaky
++- Files changed, with a one-line description of each change
++- Before/after test output for this file (several runs), and the full-suite result (if anything else fails, say whether it was already failing before your change)
++- Any shared-code change you needed but held back on, plus anything you're unsure about
