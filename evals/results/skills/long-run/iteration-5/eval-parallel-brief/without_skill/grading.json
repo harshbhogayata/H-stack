@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (briefs.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+      "passed": true,
+      "evidence": "Each brief says \"Your job is only `auth.test.js`\" (and the same for cart and search), gives the goal \"get every test in `auth.test.js` to pass\", and has a \"Report back (under 200 words)\" section with set bullet items."
+    },
+    {
+      "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+      "passed": true,
+      "evidence": "Each brief's constraints say \"Do not delete, skip (`.skip`, `xit`), or weaken assertions\" and \"Do not edit `cart.test.js` or `search.test.js`\", and the report asks for \"Each failing test, its root cause, and the fix\" and \"Files you changed\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

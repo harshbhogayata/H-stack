@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (draft exists, path-scoped to src/billing)",
+      "passed": false,
+      "evidence": "check exit 1: "
+    },
+    {
+      "text": "The lesson states when it applies and when it doesn't (applicability bounds), not just a general rule",
+      "passed": false,
+      "evidence": "The lesson limits its scope to \"In `src/billing`, money is stored and computed as **integer cents**\" but never says when the rule does not apply, such as exceptions or out-of-scope cases."
+    },
+    {
+      "text": "The lesson includes the concrete evidence (10.299999 / 10.29 vs 10.30, or the npm run invoices run) and marks its provenance as coming from the user",
+      "passed": false,
+      "evidence": "The lesson includes the evidence (\"a total that should have been **10.30** came out as **10.29**. The float total was 10.299999…\") but never says it came from the user's correction or CONTEXT.md, and the agent deliberately left out the npm run invoices command."
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3,
+    "pass_rate": 0
+  }
+}

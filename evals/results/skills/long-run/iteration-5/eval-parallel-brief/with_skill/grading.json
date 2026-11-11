@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (briefs.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each brief has a narrow scope (one test file and the code it covers), a clear done-criterion (that test file passes) and the expected output format",
+      "passed": true,
+      "evidence": "Each brief lists 'Scope (may edit): auth.test.js; the auth module(s) it tests' (and likewise for cart and search). Its 'Done when' says 'The command above exits 0, run after your last edit, with no skipped or .only tests'. Brief 1 gives a JSON 'Return (exactly this shape)', and Briefs 2 and 3 point "
+    },
+    {
+      "text": "The briefs tell each subagent what it must not change (other areas or the tests' assertions) and to report what it changed and why",
+      "passed": true,
+      "evidence": "The shared rules say 'Don't edit other test files or shared helpers/config/mocks... loosen assertions just to make them pass'. Each brief marks everything outside its scope as read-only. The return JSON asks for 'changes': [{file, summary}], 'test_expectations_changed' with 'why_justified', and 'dec"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

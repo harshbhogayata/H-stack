@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The proposal says it is based on \"children aged 6–8, reading aloud, a garden as the reward... big touch targets\". Its concept is \"The garden is the home screen\", and it specifies \"Every tap target is at least 64pt... Small fingers aren't precise.\""
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It gives hex colours such as \"Garden green `#2F7D3E`\" and names \"Andika. It was designed for early readers. Its 'a' and 'g' are the simple shapes children learn to write.\" It also covers accessibility: \"Both combinations should pass WCAG AA\" and \"Never rely on colour alone... which helps colour-blin"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

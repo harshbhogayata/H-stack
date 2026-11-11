@@ -1,0 +1,45 @@
+diff --git a/lesson-draft.md b/lesson-draft.md
+new file mode 100644
+index 0000000..c29c76d
+--- /dev/null
++++ b/lesson-draft.md
+@@ -0,0 +1,39 @@
++# Lesson: No float money in `src/billing`
++
++**Rule:** In `src/billing`, money is stored and computed as **integer cents**. Don't use floats for money, and don't use `round()` on floats to "fix" a total.
++
++## What happened
++
++In the March invoice run, a total that should have been **10.30** came out as **10.29**. The float total was 10.299999…, and rounding it with `round()` didn't fix the error before it reached the invoice output.
++
++## Why it happens
++
++Binary floats can't represent most decimal amounts exactly (0.1, 0.2, 10.30, …). Summing prices as floats builds up small errors. `round(x, 2)` still returns a float, so the error stays, and any later truncation or formatting can turn 10.2999… into 10.29.
++
++## Do this
++
++- Store and pass amounts as `int` cents (e.g. `1030`, not `10.30`).
++- Sum cents with plain integer addition. No rounding needed.
++- Convert to a decimal display string only at the edge (rendering or export), e.g. `f"{cents // 100}.{cents % 100:02d}"`.
++- If a value arrives as a decimal string from outside, parse it with `decimal.Decimal` and convert to cents right away. Never go through `float`.
++
++## Don't do this
++
++```python
++# src/billing/total.py, as it stands today
++def total(items):
++    return round(sum(i["price"] for i in items), 2)   # float prices + round()
++```
++
++## Instead
++
++```python
++def total_cents(items):
++    return sum(i["price_cents"] for i in items)       # ints in, int out
++```
++
++## Review checklist for billing changes
++
++- [ ] No `float` or `round()` applied to money values
++- [ ] Field names make the unit clear (`*_cents`)
++- [ ] Tests include amounts that floats get wrong (e.g. 0.10 + 0.20, a 10.30 total)

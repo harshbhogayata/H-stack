@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+      "passed": true,
+      "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+    },
+    {
+      "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+      "passed": true,
+      "evidence": "ui-review.json entry at SignupForm.jsx:30 says \"The email input has id=\\\"email\\\" but its label uses htmlFor=\\\"signup-email\\\", so the label is not associated: screen readers announce an unnamed field\"."
+    },
+    {
+      "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+      "passed": true,
+      "evidence": "ui-review.json entry at SignupForm.css:10 says \"Focused inputs remove the outline and set border-color to the same var(--color-border) as the resting state, so keyboard users see no focus indicator at all\"."
+    },
+    {
+      "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+      "passed": true,
+      "evidence": "The entry at line 34 says \"the error text is never rendered; the only signal is a red border... on the password field... and the field gets no aria-invalid\", with a fix that adds aria-describedby. The entry at line 40 says the <div onClick> \"cannot be reached or toggled by keyboard, has no checkbox "
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (PR.md written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "PR.md tells the reviewer where to look first (the window filter or the limit comparison in rate.js) with a risk note",
+      "passed": false,
+      "evidence": "The 'Trade-offs / things for reviewers to check' section covers memory, key eviction and per-call cost, but it never tells the reviewer to start with the window filter or the limit comparison; the strict `<` comparison appears only in the 'How it works' list, with no risk note."
+    },
+    {
+      "text": "PR.md includes evidence from running node test.js (pass count or output), and a section saying what was not verified (or states nothing unverified with a reason)",
+      "passed": true,
+      "evidence": "PR.md says \"`node test.js` passes locally (4 assertions)\" and adds \"Coverage gap: none of the tests would fail under the old fixed-window behavior... There's also no test for the exact `windowMs` boundary or for independent keys.\""
+    },
+    {
+      "text": "PR.md states whether the change is easy to roll back (one-way or two-way door) or its blast radius",
+      "passed": false,
+      "evidence": "PR.md never mentions rollback, reversibility or blast radius; the closest it comes is \"The public API is unchanged\", which does not address either."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  }
+}

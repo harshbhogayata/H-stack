@@ -27,7 +27,8 @@ const JUDGE = opt('judge-model', null);
 const ITER = Number(opt('iteration', 1));
 const MAX_TURNS = Number(opt('max-turns', 30));
 const ONLY_EVAL = opt('eval', null);
-const EFFORT = opt('effort', null); // HS-007: compare a skill at two effort levels
+const EFFORT = opt('effort', null);
+const RUNS = Number(opt('runs', 1)); // runs per arm per eval // HS-007: compare a skill at two effort levels
 const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(npm run:*)', 'Bash(npx vitest:*)', 'Bash(npx jest:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(grep:*)', 'Bash(rg:*)', 'Bash(find:*)', 'Bash(mkdir:*)', 'Bash(git stash:*)'];
 
 function run(cmd, argv, { cwd, input, timeout = 900000, env } = {}) {
@@ -86,6 +87,9 @@ async function agentRun(skill, ev, arm) {
   };
 }
 
+// Keep the grader blind to the arm: drop lines that say a skill file was read or followed.
+const blind = (t) => String(t || '').split('\n').filter((l) => !/SKILL\.md|h-stack[:/]|\bthe skill\b|skill (file|says|instructions)/i.test(l)).join('\n');
+
 async function grade(ev, res) {
   const out = [];
   const judged = [];
@@ -94,7 +98,7 @@ async function grade(ev, res) {
     else { out.push(null); judged.push(text); }
   }
   if (judged.length) {
-    const prompt = `You are grading one run of a coding agent. Judge each expectation strictly from the evidence below. Answer "passed": true only if the evidence clearly shows it; if the evidence is missing or ambiguous, answer false and say so.\n\nTASK GIVEN TO THE AGENT:\n${ev.prompt}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${res.check ? `exit ${res.check.code}\n${res.check.out}` : '(no check)'}\n\nFINAL MESSAGE FROM THE AGENT:\n${res.final.slice(0, 6000)}\n\nDIFF OF THE AGENT'S CHANGES:\n${res.diff.slice(0, 12000) || '(no changes)'}\n\nEXPECTATIONS:\n${judged.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"text":"...","passed":true|false,"evidence":"one sentence quoting the evidence"}]} in the same order.`;
+    const prompt = `You are grading one run of a coding agent. Judge each expectation strictly from the evidence below. Answer "passed": true only if the evidence clearly shows it; if the evidence is missing or ambiguous, answer false and say so.\n\nTASK GIVEN TO THE AGENT:\n${ev.prompt}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${res.check ? `exit ${res.check.code}\n${res.check.out}` : '(no check)'}\n\nFINAL MESSAGE FROM THE AGENT:\n${blind(res.final).slice(0, 6000)}\n\nDIFF OF THE AGENT'S CHANGES:\n${blind(res.diff).slice(0, 12000) || '(no changes)'}\n\nEXPECTATIONS:\n${judged.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"text":"...","passed":true|false,"evidence":"one sentence quoting the evidence"}]} in the same order.`;
     const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', '1'];
     if (JUDGE) argv.push('--model', JUDGE);
     const r = await run('claude', argv, { cwd: os.tmpdir(), timeout: 300000 });
@@ -124,8 +128,8 @@ async function benchSkill(skill) {
   const evs = JSON.parse(fs.readFileSync(path.join(skillDir, 'evals', 'evals.json'), 'utf8')).evals.filter((e) => !ONLY_EVAL || e.eval_name === ONLY_EVAL);
   const base = path.join(REPO, 'evals', 'results', 'skills', skill, `iteration-${ITER}`);
   const tasks = [];
-  for (const ev of evs) for (const arm of ['with_skill', 'without_skill']) tasks.push(async () => {
-    const dir = path.join(base, `eval-${ev.eval_name}`, arm);
+  for (const ev of evs) for (const arm of ['with_skill', 'without_skill']) for (let n = 1; n <= RUNS; n++) tasks.push(async () => {
+    const dir = RUNS > 1 ? path.join(base, `eval-${ev.eval_name}`, arm, `run-${n}`) : path.join(base, `eval-${ev.eval_name}`, arm);
     fs.mkdirSync(path.join(dir, 'outputs'), { recursive: true });
     const res = await agentRun(skill, ev, arm);
     const g = await grade(ev, res);
@@ -134,8 +138,8 @@ async function benchSkill(skill) {
     if (res.check) fs.writeFileSync(path.join(dir, 'outputs', 'check.txt'), `exit ${res.check.code}\n${res.check.out}`);
     fs.writeFileSync(path.join(dir, 'timing.json'), JSON.stringify(res.timing, null, 2));
     fs.writeFileSync(path.join(dir, 'grading.json'), JSON.stringify(g, null, 2));
-    process.stderr.write(`${skill} ${ev.eval_name} ${arm}: ${g.summary.passed}/${g.summary.total} (${Math.round(res.timing.duration_ms / 1000)}s)\n`);
-    return { eval_id: ev.id, eval_name: ev.eval_name, configuration: arm, run_number: 1, result: { ...g.summary, time_seconds: res.timing.total_duration_seconds, tokens: res.timing.total_tokens, errors: res.timing.error ? 1 : 0 }, expectations: g.expectations };
+    process.stderr.write(`${skill} ${ev.eval_name} ${arm}#${n}: ${g.summary.passed}/${g.summary.total} (${Math.round(res.timing.duration_ms / 1000)}s)\n`);
+    return { eval_id: ev.id, eval_name: ev.eval_name, configuration: arm, run_number: n, result: { ...g.summary, time_seconds: res.timing.total_duration_seconds, tokens: res.timing.total_tokens, errors: res.timing.error ? 1 : 0 }, expectations: g.expectations };
   });
   return { skill, base, tasks };
 }
@@ -146,10 +150,10 @@ function summarise(skill, base, runs) {
   const w = sum('with_skill'); const wo = sum('without_skill');
   const sign = (x, d = 2) => (x >= 0 ? '+' : '') + x.toFixed(d);
   const bench = {
-    metadata: { skill_name: skill, skill_path: `plugins/h-stack/skills/${skill}`, executor_model: MODEL || 'session default', effort: EFFORT || 'session default', judge_model: JUDGE || 'session default', timestamp: new Date().toISOString(), evals_run: [...new Set(runs.map((r) => r.eval_id))], runs_per_configuration: 1 },
+    metadata: { skill_name: skill, skill_path: `plugins/h-stack/skills/${skill}`, executor_model: MODEL || 'session default', effort: EFFORT || 'session default', judge_model: JUDGE || 'session default', timestamp: new Date().toISOString(), evals_run: [...new Set(runs.map((r) => r.eval_id))], runs_per_configuration: RUNS, grader: 'fresh claude -p per run, not told the arm; skill mentions redacted from the evidence' },
     runs,
     run_summary: { with_skill: w, without_skill: wo, delta: { pass_rate: sign(w.pass_rate.mean - wo.pass_rate.mean), time_seconds: sign(w.time_seconds.mean - wo.time_seconds.mean, 1), tokens: sign(w.tokens.mean - wo.tokens.mean, 0) } },
-    notes: ['Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise.'],
+    notes: [RUNS > 1 ? `${RUNS} runs per configuration per eval.` : 'Light benchmark: 1 run per configuration per eval, so differences under ~0.15 are within noise.'],
   };
   fs.writeFileSync(path.join(base, 'benchmark.json'), JSON.stringify(bench, null, 2));
   const md = [`# ${skill} benchmark (iteration ${ITER})`, '', `| eval | with skill | without skill |`, '|---|---|---|',

@@ -1,0 +1,304 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..105dce3
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,147 @@
++import { useId, useState } from "react";
++import { Button } from "./Button.jsx";
++import "./settings.css";
++
++const NAME_MAX = 50;
++
++/**
++ * Settings form: display name + email notifications.
++ *
++ * Props:
++ *  - initialValues: { displayName?: string, emailNotifications?: boolean }
++ *  - onSave(values): may return a Promise; a rejection shows its message next to the Save button.
++ */
++export function SettingsPage({ initialValues = {}, onSave }) {
++  const [saved, setSaved] = useState({
++    displayName: initialValues.displayName ?? "",
++    emailNotifications: initialValues.emailNotifications ?? true,
++  });
++  const [displayName, setDisplayName] = useState(saved.displayName);
++  const [emailNotifications, setEmailNotifications] = useState(saved.emailNotifications);
++  const [nameError, setNameError] = useState("");
++  const [status, setStatus] = useState({ state: "idle", message: "" });
++
++  const id = useId();
++  const nameId = `${id}-name`;
++  const nameHintId = `${id}-name-hint`;
++  const nameErrorId = `${id}-name-error`;
++  const notifId = `${id}-notif`;
++  const notifHintId = `${id}-notif-hint`;
++
++  const isDirty =
++    displayName.trim() !== saved.displayName || emailNotifications !== saved.emailNotifications;
++  const isSaving = status.state === "saving";
++
++  function validateName(value) {
++    const trimmed = value.trim();
++    if (!trimmed) return "Enter a display name. This is how others see you.";
++    if (trimmed.length > NAME_MAX) return `Use ${NAME_MAX} characters or fewer.`;
++    return "";
++  }
++
++  async function handleSubmit(event) {
++    event.preventDefault();
++    const error = validateName(displayName);
++    setNameError(error);
++    if (error) {
++      document.getElementById(nameId)?.focus();
++      return;
++    }
++
++    const values = { displayName: displayName.trim(), emailNotifications };
++    setStatus({ state: "saving", message: "Saving…" });
++    try {
++      await onSave?.(values);
++      setSaved(values);
++      setDisplayName(values.displayName);
++      setStatus({ state: "success", message: "Changes saved." });
++    } catch (err) {
++      setStatus({
++        state: "error",
++        message: `Couldn't save your changes${err?.message ? `: ${err.message}` : ""}. Try again.`,
++      });
++    }
++  }
++
++  function clearStatus() {
++    if (status.state !== "idle" && status.state !== "saving") {
++      setStatus({ state: "idle", message: "" });
++    }
++  }
++
++  return (
++    <main className="settings">
++      <h1 className="settings__title">Settings</h1>
++
++      <form className="settings__card" onSubmit={handleSubmit} noValidate>
++        <div className="settings__field">
++          <label className="settings__label" htmlFor={nameId}>
++            Display name
++          </label>
++          <p className="settings__hint" id={nameHintId}>
++            Shown on your profile and next to your activity.
++          </p>
++          <input
++            id={nameId}
++            className="settings__input"
++            type="text"
++            name="displayName"
++            autoComplete="nickname"
++            value={displayName}
++            aria-invalid={nameError ? "true" : undefined}
++            aria-describedby={nameError ? `${nameHintId} ${nameErrorId}` : nameHintId}
++            onChange={(e) => {
++              setDisplayName(e.target.value);
++              if (nameError) setNameError(validateName(e.target.value));
++              clearStatus();
++            }}
++            onBlur={(e) => setNameError(validateName(e.target.value))}
++          />
++          {nameError && (
++            <p className="settings__error" id={nameErrorId}>
++              {nameError}
++            </p>
++          )}
++        </div>
++
++        <div className="settings__field settings__field--row">
++          <div>
++            <label className="settings__label" htmlFor={notifId}>
++              Email notifications
++            </label>
++            <p className="settings__hint" id={notifHintId}>
++              Get an email when something needs your attention.
++            </p>
++          </div>
++          <input
++            id={notifId}
++            className="settings__switch"
++            type="checkbox"
++            role="switch"
++            name="emailNotifications"
++            checked={emailNotifications}
++            aria-describedby={notifHintId}
++            onChange={(e) => {
++              setEmailNotifications(e.target.checked);
++              clearStatus();
++            }}
++          />
++        </div>
++
++        <div className="settings__actions">
++          <p
++            className={`settings__status settings__status--${status.state}`}
++            role={status.state === "error" ? "alert" : "status"}
++          >
++            {status.message}
++          </p>
++          <Button type="submit" disabled={!isDirty || isSaving}>
++            {isSaving ? "Saving…" : "Save changes"}
++          </Button>
++        </div>
++      </form>
++    </main>
++  );
++}
++
++export default SettingsPage;
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..fe80424
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,145 @@
++/* Settings page — built on theme.css tokens. */
++.settings {
++  max-width: 40rem;
++  margin: 0 auto;
++  padding: 32px 16px;
++  font-family: var(--font-ui);
++  color: var(--color-text);
++}
++
++.settings__title {
++  margin: 0 0 16px;
++  font-size: 1.5rem;
++  font-weight: 600;
++}
++
++.settings__card {
++  display: flex;
++  flex-direction: column;
++  gap: 24px;
++  padding: 24px;
++  background: var(--color-surface);
++  border-radius: var(--radius);
++}
++
++.settings__field {
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++}
++
++.settings__field--row {
++  flex-direction: row;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.settings__label {
++  font-weight: 600;
++}
++
++.settings__hint {
++  margin: 0;
++  font-size: 0.875rem;
++  color: var(--color-text);
++  opacity: 0.8; /* #e2e8f0 @ 80% on #1e293b stays well above AA */
++}
++
++.settings__input {
++  margin-top: 4px;
++  padding: 8px 12px;
++  font: inherit;
++  color: var(--color-text);
++  background: var(--color-bg);
++  border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
++  border-radius: var(--radius);
++}
++
++.settings__input[aria-invalid="true"] {
++  border-color: #f87171;
++}
++
++/* Native checkbox restyled as a switch; keeps keyboard + screen reader behaviour. */
++.settings__switch {
++  appearance: none;
++  flex-shrink: 0;
++  position: relative;
++  width: 44px;
++  height: 24px;
++  margin: 0;
++  background: color-mix(in srgb, var(--color-text) 30%, transparent);
++  border-radius: 999px;
++  cursor: pointer;
++  transition: background-color 150ms ease;
++}
++
++.settings__switch::after {
++  content: "";
++  position: absolute;
++  top: 3px;
++  left: 3px;
++  width: 18px;
++  height: 18px;
++  background: var(--color-text);
++  border-radius: 50%;
++  transition: transform 150ms ease;
++}
++
++.settings__switch:checked {
++  background: var(--color-accent);
++}
++
++.settings__switch:checked::after {
++  background: var(--color-bg);
++  transform: translateX(20px);
++}
++
++.settings__input:focus-visible,
++.settings__switch:focus-visible,
++.settings .btn:focus-visible {
++  outline: 2px solid var(--color-accent);
++  outline-offset: 2px;
++}
++
++.settings .btn {
++  border: 0;
++  cursor: pointer;
++  font: inherit;
++  font-weight: 600;
++}
++
++.settings .btn:disabled {
++  opacity: 0.5;
++  cursor: not-allowed;
++}
++
++.settings__actions {
++  display: flex;
++  align-items: center;
++  justify-content: flex-end;
++  gap: 16px;
++}
++
++.settings__status {
++  margin: 0;
++  font-size: 0.875rem;
++}
++
++.settings__status--success {
++  color: var(--color-accent);
++}
++
++.settings__error,
++.settings__status--error {
++  margin: 0;
++  font-size: 0.875rem;
++  color: #f87171;
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .settings__switch,
++  .settings__switch::after {
++    transition: none;
++  }
++}

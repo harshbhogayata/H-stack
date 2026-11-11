@@ -1,0 +1,28 @@
+diff --git a/lesson-draft.md b/lesson-draft.md
+new file mode 100644
+index 0000000..31d7585
+--- /dev/null
++++ b/lesson-draft.md
+@@ -0,0 +1,22 @@
++---
++paths: ["src/billing/**"]
++---
++# Lessons: billing
++
++### L-bill-1 Keep money as integer cents in src/billing; never round() floats
++- **Trigger:** editing money arithmetic in `src/billing/` (e.g. `total()` in `src/billing/total.py`, which today does `round(sum(i["price"] for i in items), 2)` on floats)
++- **Applies when:** prices or amounts are summed, compared, rounded or stored; store and compute in integer cents and convert only at the edge
++- **Doesn't apply when:** formatting cents into a display string for output (divide by 100 only there)
++- **Provenance:** user
++- **Date:** 2026-11-11
++- **Evidence:**
++```text
++User correction (2026-11-11), quoted:
++"Never use float money in src/billing. We store integer cents; round() on
++floats gave 10.299999 in the March invoice run (npm run invoices showed
++10.29 instead of 10.30)."
++
++Current code at src/billing/total.py:
++    def total(items):
++        return round(sum(i["price"] for i in items), 2)
++```

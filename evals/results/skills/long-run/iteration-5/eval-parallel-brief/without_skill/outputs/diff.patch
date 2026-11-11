@@ -1,0 +1,102 @@
+diff --git a/briefs.md b/briefs.md
+new file mode 100644
+index 0000000..34e7b70
+--- /dev/null
++++ b/briefs.md
+@@ -0,0 +1,96 @@
++# Subagent briefs: fix three failing test files
++
++Three agents run in parallel, one per test file. Each brief is self-contained because the agent sees nothing else.
++
++**Fill in before dispatch:** `<REPO>` (repo path or URL and branch), `<TEST_CMD>` (for example `npx jest` or `npm test --`), and anything you already know about why the tests fail (paste the failure output if you have it).
++
++**Dispatch settings:** `isolation: "worktree"` for all three, so their edits can't collide. Send all three in one message so they run at the same time.
++
++---
++
++## Brief 1: auth.test.js
++
++You're fixing the failing tests in `auth.test.js` in `<REPO>`. Two other agents are working on `cart.test.js` and `search.test.js` at the same time, each in its own worktree. Your job is only `auth.test.js`.
++
++**Goal:** get every test in `auth.test.js` to pass by fixing the real cause of each failure.
++
++**Steps:**
++1. Run `<TEST_CMD> auth.test.js` and record exactly which tests fail and the error for each.
++2. Read the test and the code it exercises (likely the auth module, plus any session, token or password helpers it imports). For each failure, decide whether the bug is in the source code or in the test (for example an outdated expectation, a broken mock, or a missing setup/teardown step).
++3. Fix the cause. If the source code is wrong, fix the source code. Change the test only when the test itself is wrong, and say why in your report.
++4. Run `auth.test.js` again until it passes. Then run the full suite once to check you didn't break anything else.
++
++**Constraints:**
++- Do not delete, skip (`.skip`, `xit`), or weaken assertions to get tests passing.
++- Do not edit `cart.test.js` or `search.test.js`.
++- Keep edits to shared code (config, test setup files, shared utils, fixtures, package.json) to a minimum, because the other agents may touch the same files. If you have to change one, list it in your report.
++- Don't add dependencies, and don't commit or push.
++- If the failure comes from the environment (a missing env var, a service that isn't running, a wrong Node version) and not from the code, stop and report it. Don't work around it.
++
++**Report back (under 200 words):**
++- Each failing test, its root cause, and the fix, one line per test.
++- Files you changed, with any shared or non-auth files marked.
++- Final result for `auth.test.js` and the full suite, as pass/fail counts. If other files fail, say whether they also failed before your change.
++- Anything you weren't sure about, or left unfixed, and why.
++
++---
++
++## Brief 2: cart.test.js
++
++You're fixing the failing tests in `cart.test.js` in `<REPO>`. Two other agents are working on `auth.test.js` and `search.test.js` at the same time, each in its own worktree. Your job is only `cart.test.js`.
++
++**Goal:** get every test in `cart.test.js` to pass by fixing the real cause of each failure.
++
++**Steps:**
++1. Run `<TEST_CMD> cart.test.js` and record exactly which tests fail and the error for each.
++2. Read the test and the code it exercises (likely the cart module, plus any pricing, totals, inventory or persistence code it imports). Look out for floating-point rounding in money math, shared state between tests, and async code that isn't awaited. For each failure, decide whether the bug is in the source code or in the test.
++3. Fix the cause. If the source code is wrong, fix the source code. Change the test only when the test itself is wrong, and say why in your report.
++4. Run `cart.test.js` again until it passes. Then run the full suite once to check you didn't break anything else.
++
++**Constraints:**
++- Do not delete, skip (`.skip`, `xit`), or weaken assertions to get tests passing.
++- Do not edit `auth.test.js` or `search.test.js`.
++- Keep edits to shared code (config, test setup files, shared utils, fixtures, package.json) to a minimum, because the other agents may touch the same files. If you have to change one, list it in your report.
++- Don't add dependencies, and don't commit or push.
++- If the failure comes from the environment (a missing env var, a service that isn't running, a wrong Node version) and not from the code, stop and report it. Don't work around it.
++
++**Report back (under 200 words):**
++- Each failing test, its root cause, and the fix, one line per test.
++- Files you changed, with any shared or non-cart files marked.
++- Final result for `cart.test.js` and the full suite, as pass/fail counts. If other files fail, say whether they also failed before your change.
++- Anything you weren't sure about, or left unfixed, and why.
++
++---
++
++## Brief 3: search.test.js
++
++You're fixing the failing tests in `search.test.js` in `<REPO>`. Two other agents are working on `auth.test.js` and `cart.test.js` at the same time, each in its own worktree. Your job is only `search.test.js`.
++
++**Goal:** get every test in `search.test.js` to pass by fixing the real cause of each failure.
++
++**Steps:**
++1. Run `<TEST_CMD> search.test.js` and record exactly which tests fail and the error for each.
++2. Read the test and the code it exercises (likely the search module, plus any query parsing, indexing, ranking or pagination code it imports). Look out for result ordering that isn't guaranteed, case or whitespace normalisation, off-by-one errors in pagination, and debounce or timer code that needs fake timers. For each failure, decide whether the bug is in the source code or in the test.
++3. Fix the cause. If the source code is wrong, fix the source code. Change the test only when the test itself is wrong, and say why in your report.
++4. Run `search.test.js` again until it passes, and run it 3 times to catch flaky tests. Then run the full suite once to check you didn't break anything else.
++
++**Constraints:**
++- Do not delete, skip (`.skip`, `xit`), or weaken assertions to get tests passing.
++- Do not edit `auth.test.js` or `cart.test.js`.
++- Keep edits to shared code (config, test setup files, shared utils, fixtures, package.json) to a minimum, because the other agents may touch the same files. If you have to change one, list it in your report.
++- Don't add dependencies, and don't commit or push.
++- If the failure comes from the environment (a missing env var, a service that isn't running, a wrong Node version) and not from the code, stop and report it. Don't work around it.
++
++**Report back (under 200 words):**
++- Each failing test, its root cause, and the fix, one line per test.
++- Files you changed, with any shared or non-search files marked.
++- Final result for `search.test.js` (all 3 runs) and the full suite, as pass/fail counts. If other files fail, say whether they also failed before your change.
++- Anything you weren't sure about, or left unfixed, and why.
++
++---
++
++## After they return
++
++1. Compare the three lists of changed files. If two agents changed the same shared file, merge those changes by hand before anything else.
++2. Merge the three worktrees and run the full suite once on the combined result.
++3. Before accepting any change to a test file, read it to confirm the test was actually wrong and the agent didn't just make the test easier to pass.

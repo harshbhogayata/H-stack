@@ -1,0 +1,46 @@
+diff --git a/PR.md b/PR.md
+new file mode 100644
+index 0000000..1956d18
+--- /dev/null
++++ b/PR.md
+@@ -0,0 +1,40 @@
++# Replace fixed-window rate limiter with a sliding-window limiter
++
++## Summary
++
++`createLimiter(limit, windowMs, now)` in `rate.js` now uses a sliding window instead of a fixed-window counter. A call for a given key is allowed only if fewer than `limit` calls were allowed for that key in the last `windowMs` milliseconds, measured back from the current call.
++
++## Why
++
++A fixed-window counter resets at each window boundary. A client can therefore send `limit` calls at the end of one window and another `limit` right at the start of the next, which is up to 2× the intended rate in a short span. A sliding window applies the limit to any `windowMs`-long span, so that burst at the boundary is no longer possible.
++
++## How it works
++
++- Each key stores a list of the timestamps of its allowed calls (a sliding log).
++- On each call, timestamps with `t - x >= windowMs` are dropped, and the call is allowed if fewer than `limit` remain.
++- Rejected calls are **not** recorded, so a client that keeps getting rejected doesn't push its own reset further out.
++- A timestamp stops counting once it is exactly `windowMs` old (strict `<` comparison).
++- The public API is unchanged: `createLimiter(limit, windowMs, now = () => Date.now())` returns `allow(key) → boolean`.
++
++## Trade-offs / things for reviewers to check
++
++- **Memory:** each active key holds up to `limit` timestamps instead of a single counter. That's fine for small limits but adds up for large ones.
++- **Keys are never evicted:** an idle key stays in the `Map`, holding an empty or stale array. With many distinct keys (per IP, per user) this grows without bound. This may be worth a follow-up (periodic sweep, or deleting the key when its list becomes empty).
++- **Per-call cost:** `filter` copies the key's list on every call, so each call is O(limit).
++
++## Testing
++
++`node test.js` passes locally (4 assertions):
++
++- two calls inside the window are allowed and a third is rejected
++- a call is allowed again once the window has passed (`t = 1001`)
++
++Coverage gap: none of the tests would fail under the old fixed-window behavior, because nothing tests the boundary burst. A test worth adding uses calls at t=900 and t=999, then t=1001: the call at 1001 should be **rejected** by the sliding window, while a fixed window starting at 1000 would allow it. There's also no test for the exact `windowMs` boundary or for independent keys.
++
++## Note
++
++The repo history has only a single commit, so the previous fixed-window code isn't available to diff against. This description is based on CHANGE.md and the current `rate.js`.
++
++🤖 Generated with [Claude Code](https://claude.com/claude-code)
++
++https://claude.ai/code/session_015Kd4u8doc5d9SKnX1T2Xfz

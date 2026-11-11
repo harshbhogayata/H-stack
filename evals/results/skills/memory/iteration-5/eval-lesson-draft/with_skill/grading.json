@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (draft exists, path-scoped to src/billing)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The lesson states when it applies and when it doesn't (applicability bounds), not just a general rule",
+      "passed": true,
+      "evidence": "The diff includes '**Applies when:** prices or amounts are summed, compared, rounded or stored' and '**Doesn't apply when:** formatting cents into a display string for output (divide by 100 only there)'."
+    },
+    {
+      "text": "The lesson includes the concrete evidence (10.299999 / 10.29 vs 10.30, or the npm run invoices run) and marks its provenance as coming from the user",
+      "passed": true,
+      "evidence": "The Evidence block quotes 'round() on floats gave 10.299999 in the March invoice run (npm run invoices showed 10.29 instead of 10.30)', and the lesson sets '**Provenance:** user'."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

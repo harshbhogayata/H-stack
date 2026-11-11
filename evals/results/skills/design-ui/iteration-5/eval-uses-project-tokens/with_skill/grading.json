@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (SettingsPage.jsx created)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+      "passed": false,
+      "evidence": "The page imports `{ Button } from \"./Button.jsx\"` and uses var(--color-accent), var(--color-surface) and var(--font-ui), but settings.css also hard-codes a new colour, `#f87171`, three times (for example `.settings__input[aria-invalid=\"true\"] { border-color: #f87171; }`), and the agent admits it 'ad"
+    },
+    {
+      "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+      "passed": true,
+      "evidence": "Both inputs have `<label ... htmlFor={nameId}>` / `htmlFor={notifId}` matching their ids, and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so it stays keyboard-operable."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

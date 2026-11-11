@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no merge commit was made)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent runs the tests before offering integration options",
+      "passed": true,
+      "evidence": "Before listing any options, the final message reports: \"Test run on this exact code: `node test.js` printed `rate tests passed (4 assertions)`.\""
+    },
+    {
+      "text": "The agent offers the options (merge locally, open a PR, keep the branch) and waits for the user's choice instead of merging or pushing on its own",
+      "passed": true,
+      "evidence": "The agent offered \"1. Leave it as it is\", \"2. Open a pull request\" and \"3. Something else\", then asked \"Which one?\"; it also said \"I've stopped before merging or pushing anything\", and the diff shows no changes. A local merge option was left out only because the work is already on `main` with no oth"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

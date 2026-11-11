@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (file unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+      "passed": true,
+      "evidence": "Item 3 says 'the search control is a `<div onClick>`, not a button. Keyboard users can't tab to it...', item 4 says it has no accessible name, and item 5 says 'the delete button is icon-only with no accessible name.'"
+    },
+    {
+      "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+      "passed": true,
+      "evidence": "Item 6 says 'delete runs immediately, with no confirmation', and item 7 says 'the filter input blocks paste... remove the `onPaste` handler.'"
+    },
+    {
+      "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+      "passed": true,
+      "evidence": "Item 1 flags that the toolbar 'is fixed but ignores the phone's safe area' and item 2 says '`vh` is the wrong unit on mobile... use `height: '100dvh'`.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

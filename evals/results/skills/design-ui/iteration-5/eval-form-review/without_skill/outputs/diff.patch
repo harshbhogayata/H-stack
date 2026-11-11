@@ -1,0 +1,50 @@
+diff --git a/ui-review.json b/ui-review.json
+new file mode 100644
+index 0000000..c1f1536
+--- /dev/null
++++ b/ui-review.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 30,
++    "problem": "The Email label points to htmlFor=\"signup-email\", but the input's id is \"email\". The label isn't linked to the field, so the input has no accessible name and clicking the label doesn't focus it.",
++    "fix": "Change the input to id=\"signup-email\" so it matches the label's htmlFor."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 10,
++    "problem": "The input focus style sets outline: none and keeps border-color as var(--color-border), the same as the unfocused state. Focused inputs look no different, so keyboard users can't see where focus is (WCAG 2.4.7).",
++    "fix": "Replace it with a visible indicator, e.g. `.signup input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }`, or at least set border-color: var(--color-accent) together with a box-shadow ring."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 40,
++    "problem": "The terms checkbox is a <div> with an onClick handler. It can't be focused or toggled with the keyboard, and it has no role or checked state, so screen readers don't announce it as a checkbox or say whether it's checked.",
++    "fix": "Use a native control: <label className=\"signup__check\"><input type=\"checkbox\" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /> I agree to the terms</label>. Hide the native input visually if you need the custom look, style .signup__box from input:checked + .signup__box, and show a focus-visible ring on it."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 18,
++    "problem": "When a submission fails, the code stores `error` in state but never renders it. Users get no message. The only sign of an error is a red border on the password field (color alone), even when the error is about the email or the terms. Screen reader users get no announcement at all.",
++    "fix": "Render the message in a live region, e.g. <p id=\"signup-error\" role=\"alert\">{error}</p>. Put aria-invalid=\"true\" and aria-describedby=\"signup-error\" on whichever field the error is about, and move focus to that field or to the message."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 34,
++    "problem": "The is-invalid class is applied to the password input only, based on a single generic `error`. An email error therefore highlights the wrong field. The invalid state is also visual only: there is no aria-invalid.",
++    "fix": "Track errors per field (e.g. error.field or an errors object). Apply the is-invalid class and aria-invalid only to the field the error is about, and link each field to its message with aria-describedby."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 4,
++    "problem": "Input borders and the custom checkbox border (line 16) use var(--color-border) = #a8a29e, which is about 2.5:1 against the white surface. That's below the 3:1 non-text contrast WCAG 1.4.11 requires for the edges of form controls.",
++    "fix": "Use a darker border for interactive controls (e.g. #78716c, about 4.8:1). You could add a --color-border-strong token for controls and keep --color-border for decorative dividers."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 17,
++    "problem": "Nothing shows a pending state or blocks resubmission while onSubmit is awaited. Users can click Create account several times and create duplicate requests. If onSubmit throws, the error isn't handled and the user sees nothing.",
++    "fix": "Add a `submitting` state. Set it before the await and clear it in finally. Disable the submit button (or set aria-disabled) and show a busy label while it is true. Wrap the call in try/catch and turn a thrown error into a user-visible message with setError."
++  }
++]

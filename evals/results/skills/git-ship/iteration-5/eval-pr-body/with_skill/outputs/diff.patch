@@ -1,0 +1,60 @@
+diff --git a/PR.md b/PR.md
+new file mode 100644
+index 0000000..d73532e
+--- /dev/null
++++ b/PR.md
+@@ -0,0 +1,54 @@
++# Rate limiter: switch from fixed-window counter to sliding window
++
++## What changed
++
++`rate.js`: `createLimiter(limit, windowMs, now)` now keeps a timestamp log per key instead of a counter that resets at window boundaries.
++
++```
++allow(key):
++  t = now()
++  recent = hits[key] with (t - x < windowMs)   # drop timestamps older than the window
++  if recent.length >= limit: hits[key] = recent; return false   # denied calls are NOT recorded
++  recent.push(t); hits[key] = recent; return true
++```
++
++The public API (`createLimiter(limit, windowMs, now?)` returning `allow(key) → boolean`) is unchanged. `test.js` covers allow, allow, deny, then allow again once the window has passed.
++
++## Where to look first
++
++1. **`rate.js:6`, the expiry comparison `t - x < windowMs`** (logic). A timestamp counts as expired at exactly `windowMs` old, so a call at `t0 + windowMs` is allowed. Check this is the boundary you want (see the probe below).
++2. **`rate.js:7`, early return on deny** (logic). Denied calls aren't added to the log, so a client that keeps getting refused isn't locked out longer. This is intended, but it's a behaviour choice worth confirming.
++3. **`rate.js:3`, `hits` Map** (resources). A key's array is capped at `limit` entries, but keys are **never evicted**. An idle key keeps its last array forever. Under many distinct keys (e.g. per-IP), memory grows without bound. The old fixed-window counter likely had the same issue, but this PR doesn't fix it.
++4. **Behaviour change for callers** (compatibility). Under a fixed window, clients could burst up to `2 × limit` across a window boundary. That's no longer possible, so any client that depended on it will now see denials.
++
++## Evidence
++
++Run on the final tree (HEAD `fe6f5bf`):
++
++```
++$ node test.js
++rate tests passed (4 assertions)
++```
++
++Boundary-burst probe (`limit=2, windowMs=1000`, injected clock), the case a fixed window gets wrong:
++
++```
++t=900   allow, allow     -> true true
++t=1001  allow            -> false   # fixed window would reset here and allow 2 more (4 calls in 101 ms)
++t=1900  allow            -> true    # 900-stamps expire at exactly +1000
++t=1901  allow            -> true
++edge: limit=1, call at 0, call at 1000 -> true   # expiry is exclusive at windowMs
++separate key 'z'         -> true    # keys are isolated
++```
++
++## Not verified
++
++- **No before/after against the old code.** The repo history has only one commit (`fixture`), so the fixed-window implementation isn't available to diff or run. The "fixed window would allow" line above is reasoning, not a recorded run.
++- The test suite doesn't cover the window boundary, burst across a boundary, multiple keys, or deny-not-recorded. Those were checked only by the ad hoc probe above, not by committed tests. Consider adding them.
++- Performance: each `allow` filters up to `limit` entries (O(limit)), so large limits will be slower. Not benchmarked.
++- Memory growth with many keys (point 3) wasn't measured.
++- Real-clock behaviour (`Date.now()` going backwards or jumping) wasn't tested. A backwards jump makes `t - x` negative, so those entries stay "recent" longer.
++
++## Merge danger
++
++**Two-way door.** The change is local to `rate.js` and the API is unchanged, so a revert restores the old behaviour. Blast radius: every caller of `createLimiter`. Clients that relied on boundary bursts will get more `false` results. Memory per key changes from one counter to up to `limit` timestamps, which matters with large `limit` × many keys.

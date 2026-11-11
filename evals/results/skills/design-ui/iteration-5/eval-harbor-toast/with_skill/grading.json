@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+      "passed": true,
+      "evidence": "Toast.jsx imports `IconButton` from './IconButton' and `CloseIcon` from './icons'. Toast.css takes its colour, spacing, shadow, z-index and motion values from tokens: `var(--hb-color-surface)`, `var(--hb-space-6)`, `var(--hb-shadow-raised)`, `var(--hb-z-toast)` and `var(--hb-motion-base) var(--hb-ea"
+    },
+    {
+      "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+      "passed": true,
+      "evidence": "The code sets `const paused = hovered || focused;` and the timer effect returns early `if (paused)`. The reply says \"The 5-second timer stops while the pointer is over the toast or keyboard focus is inside it.\""
+    },
+    {
+      "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+      "passed": true,
+      "evidence": "The reply lists \"Accessibility checks, done by reading the code\" (label, focus-visible, reduced motion, safe areas, AA contrast, wrapping, pointer-events). It also says \"I haven't run or seen it\" and \"Not verified: rendering, the animation, and timer behaviour in a browser.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

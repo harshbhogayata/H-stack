@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+      "passed": false,
+      "evidence": "The final message only says \"under `TZ=America/Los_Angeles` the original suite fails 3 of 4\"; it shows no command output and doesn't make clear the run happened before the fix rather than afterwards (the agent also says it later put the old dates.js back temporarily), so the evidence is ambiguous."
+    },
+    {
+      "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+      "passed": true,
+      "evidence": "The message says \"`new Date('2026-03-01')` reads a date-only string as midnight UTC, but `formatDate` printed it using the server's local time. In California that moment is 4–5pm the day before... The same thing happens in any timezone west of UTC.\""
+    },
+    {
+      "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+      "passed": true,
+      "evidence": "The diff parses with `Date.UTC(y, mo - 1, d)`, adds `days * MS_PER_DAY` to the UTC milliseconds and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no zone-specific or conditional adjustment."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

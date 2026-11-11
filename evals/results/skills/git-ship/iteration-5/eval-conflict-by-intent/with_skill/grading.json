@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (markers removed, both rounding half up and the 50-cent minimum hold)",
+      "passed": true,
+      "evidence": "check exit 0: ok\n"
+    },
+    {
+      "text": "The resolution keeps both intents (Math.round and the 50-cent minimum) instead of picking one side",
+      "passed": true,
+      "evidence": "The diff shows the resolved line `return Math.max(50, Math.round(cents * (1 + rate)));`, which keeps both Math.round and the 50-cent minimum."
+    },
+    {
+      "text": "The reply names both issues (#41 and #57) as the sources of the two sides",
+      "passed": true,
+      "evidence": "The reply says \"**Main (issue #41):** totals round half up\" and \"**`feature/min-charge` (issue #57):** charges have a 50-cent minimum\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

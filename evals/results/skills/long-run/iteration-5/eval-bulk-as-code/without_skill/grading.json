@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (correct total 1911)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent wrote a script or one command that processes all files (code mode) rather than reading the 40 files one by one with separate tool calls",
+      "passed": false,
+      "evidence": "The evidence includes only the final message ('All 40 order files read cleanly...') and a diff adding refunds.txt with '1911'. Neither shows the agent's tool calls, so there is no way to tell whether it used one script or read the files one at a time."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 1,
+    "total": 2,
+    "pass_rate": 0.5
+  }
+}

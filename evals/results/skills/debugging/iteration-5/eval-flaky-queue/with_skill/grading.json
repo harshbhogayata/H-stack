@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (10 consecutive passing runs)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+      "passed": true,
+      "evidence": "The diff removes the fixed `setTimeout(r, 25)` sleep and adds `await waitFor(() => q.done.length === 3, '3 jobs to finish')`, which checks `done.length` every 5 ms and gives up after 2 s."
+    },
+    {
+      "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+      "passed": true,
+      "evidence": "The final message says \"each job finishes after a random 5–44 ms. The test slept a fixed 25 ms and then checked that all 3 jobs were done.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

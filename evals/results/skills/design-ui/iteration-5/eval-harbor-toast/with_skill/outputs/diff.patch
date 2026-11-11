@@ -1,0 +1,108 @@
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..234c854
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,38 @@
++.hb-toast-region {
++  position: fixed;
++  right: max(var(--hb-space-6), env(safe-area-inset-right));
++  bottom: max(var(--hb-space-6), env(safe-area-inset-bottom));
++  z-index: var(--hb-z-toast);
++  width: min(360px, calc(100vw - 2 * var(--hb-space-6)));
++  pointer-events: none; /* the empty region must not block clicks underneath */
++}
++
++.hb-toast {
++  display: flex;
++  align-items: center;
++  gap: var(--hb-space-2);
++  padding: var(--hb-space-1) var(--hb-space-1) var(--hb-space-1) var(--hb-space-4);
++  background: var(--hb-color-surface);
++  color: var(--hb-color-ink);
++  border: 1px solid var(--hb-color-border);
++  border-left: 4px solid var(--hb-color-accent);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  pointer-events: auto;
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out);
++}
++
++.hb-toast__message {
++  flex: 1;
++  min-width: 0;
++  margin: 0;
++  padding-block: var(--hb-space-2);
++  overflow-wrap: anywhere; /* long container IDs shouldn't overflow */
++}
++
++@keyframes hb-toast-in {
++  from {
++    transform: translateX(calc(100% + var(--hb-space-6)));
++    opacity: 0;
++  }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..ba63740
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,58 @@
++import { useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon } from './icons';
++import './Toast.css';
++
++/**
++ * Fixed bottom-right live region. Keep it mounted for the page's lifetime and
++ * render a <Toast> inside it when there's something to say: screen readers
++ * only announce changes inside a live region that already exists.
++ */
++export function ToastRegion({ children }) {
++  return (
++    <div className="hb-toast-region" role="status" aria-live="polite">
++      {children}
++    </div>
++  );
++}
++
++/**
++ * A short notice, e.g. "MSCU 482913 is now Delayed". Calls onClose when the
++ * close button is pressed or after `duration` ms. The countdown pauses while
++ * the pointer is over the toast or focus is inside it, so it can be read and
++ * dismissed without racing the timer.
++ *
++ * Give each toast a `key` (e.g. an event id) so a new message restarts the timer.
++ */
++export function Toast({ message, onClose, duration = 5000 }) {
++  const [hovered, setHovered] = useState(false);
++  const [focused, setFocused] = useState(false);
++  const paused = hovered || focused;
++
++  // Keep the latest onClose without restarting the timer on every parent render.
++  const onCloseRef = useRef(onClose);
++  useEffect(() => {
++    onCloseRef.current = onClose;
++  });
++
++  useEffect(() => {
++    if (paused) return undefined;
++    const id = setTimeout(() => onCloseRef.current(), duration);
++    return () => clearTimeout(id);
++  }, [paused, duration]);
++
++  return (
++    <div
++      className="hb-toast"
++      onMouseEnter={() => setHovered(true)}
++      onMouseLeave={() => setHovered(false)}
++      onFocus={() => setFocused(true)}
++      onBlur={(e) => {
++        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
++      }}
++    >
++      <p className="hb-toast__message">{message}</p>
++      <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={onClose} />
++    </div>
++  );
++}

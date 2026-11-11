@@ -1,0 +1,113 @@
+diff --git a/lib/dates.js b/lib/dates.js
+index d5ffd0a..a2ce2ef 100644
+--- a/lib/dates.js
++++ b/lib/dates.js
+@@ -1,15 +1,33 @@
++// Invoice dates are calendar dates ("YYYY-MM-DD"), not instants. All
++// arithmetic is done in UTC so the result never depends on the server's
++// timezone (TZ) or DST transitions. Never use local getters/setters
++// (getDate, setDate, getMonth, ...) in this module.
++
++const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
++const MS_PER_DAY = 24 * 60 * 60 * 1000;
++
+ function pad(n) {
+   return String(n).padStart(2, '0');
+ }
+ 
++function parseDate(isoDate) {
++  const m = ISO_DATE.exec(isoDate);
++  if (!m) throw new Error(`invalid date (expected YYYY-MM-DD): ${isoDate}`);
++  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
++  const ms = Date.UTC(y, mo - 1, d);
++  const check = new Date(ms);
++  if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) {
++    throw new Error(`invalid date: ${isoDate}`);
++  }
++  return ms;
++}
++
+ function formatDate(d) {
+-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
++  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+ }
+ 
+ function addDays(isoDate, days) {
+-  const d = new Date(isoDate);
+-  d.setDate(d.getDate() + days);
+-  return formatDate(d);
++  return formatDate(new Date(parseDate(isoDate) + days * MS_PER_DAY));
+ }
+ 
+-module.exports = { formatDate, addDays };
++module.exports = { parseDate, formatDate, addDays };
+diff --git a/test/invoice.test.js b/test/invoice.test.js
+index 4d0ef3a..176333f 100644
+--- a/test/invoice.test.js
++++ b/test/invoice.test.js
+@@ -2,18 +2,57 @@ const test = require('node:test');
+ const assert = require('node:assert/strict');
+ const { dueDate } = require('../lib/invoice');
+ 
+-test('net30 adds thirty days', () => {
+-  assert.equal(dueDate({ issued: '2026-03-01', terms: 'net30' }), '2026-03-31');
+-});
++// Due dates must not depend on the server's timezone. A previous bug parsed
++// "YYYY-MM-DD" as UTC but formatted with local getters, so every customer west
++// of UTC (e.g. California) got a due date one day early -- while tests passed
++// on UTC machines. Every case below runs under each of these zones.
++const TIMEZONES = [
++  'UTC',
++  'America/Los_Angeles', // UTC-8/-7, the zone customers reported
++  'America/New_York',
++  'Pacific/Honolulu',    // UTC-10, no DST
++  'Pacific/Kiritimati',  // UTC+14
++  'Asia/Kolkata',        // UTC+5:30, half-hour offset
++  'Australia/Sydney',    // southern-hemisphere DST
++];
+ 
+-test('net15 crosses a month boundary', () => {
+-  assert.equal(dueDate({ issued: '2026-01-20', terms: 'net15' }), '2026-02-04');
+-});
++const CASES = [
++  ['net30 adds thirty days', { issued: '2026-03-01', terms: 'net30' }, '2026-03-31'],
++  ['net15 crosses a month boundary', { issued: '2026-01-20', terms: 'net15' }, '2026-02-04'],
++  ['due on receipt is the issue date', { issued: '2026-05-12', terms: 'due_on_receipt' }, '2026-05-12'],
++  ['net15 crosses US DST start', { issued: '2026-03-01', terms: 'net15' }, '2026-03-16'],
++  ['net15 crosses US DST end', { issued: '2026-10-25', terms: 'net15' }, '2026-11-09'],
++  ['net30 crosses a year boundary', { issued: '2026-12-15', terms: 'net30' }, '2027-01-14'],
++  ['net30 across leap day', { issued: '2028-02-15', terms: 'net30' }, '2028-03-16'],
++];
+ 
+-test('due on receipt is the issue date', () => {
+-  assert.equal(dueDate({ issued: '2026-05-12', terms: 'due_on_receipt' }), '2026-05-12');
++const originalTZ = process.env.TZ;
++test.after(() => {
++  if (originalTZ === undefined) delete process.env.TZ;
++  else process.env.TZ = originalTZ;
+ });
+ 
++for (const tz of TIMEZONES) {
++  test(`in ${tz}`, async (t) => {
++    process.env.TZ = tz;
++    // Guard against the TZ switch silently not applying (which would make
++    // this whole matrix just re-run UTC).
++    const offset = new Date('2026-01-15T12:00:00Z').getTimezoneOffset();
++    if (tz === 'UTC') assert.equal(offset, 0);
++    else assert.notEqual(offset, 0, `TZ=${tz} did not take effect`);
++
++    for (const [name, invoice, expected] of CASES) {
++      await t.test(name, () => assert.equal(dueDate(invoice), expected));
++    }
++  });
++}
++
+ test('unknown terms are rejected', () => {
+   assert.throws(() => dueDate({ issued: '2026-05-12', terms: 'net45' }), /unknown payment terms/);
+ });
++
++test('malformed or impossible issue dates are rejected', () => {
++  for (const issued of ['2026-02-30', '2026-13-01', '05/12/2026', '2026-05-12T00:00:00Z', '', undefined]) {
++    assert.throws(() => dueDate({ issued, terms: 'net30' }), /invalid date/, String(issued));
++  }
++});

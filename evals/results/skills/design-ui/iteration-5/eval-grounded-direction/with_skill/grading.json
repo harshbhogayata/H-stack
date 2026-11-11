@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The proposal targets \"6–8-year-olds who are still learning to read\" and makes the screen \"a side view of a garden, not a dashboard\" with \"no card grid and no stats panel\"; the main button is \"at least 88px tall\". It never mentions reading aloud, but the audience, metaphor and touch-target parts are "
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It gives hex colours such as Sunflower `#FFC83D` (\"Soil-coloured text on it is about 6.7:1 contrast\") and picks Andika because \"It was designed for literacy: it has the single-storey 'a' and 'g' that children learn to write\", with \"at least 24px for any text a child reads\" and a fallback for reduced"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

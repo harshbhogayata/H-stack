@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply lists both call sites, src/cart.js and src/refund.js, with line references, and does not list src/other.js",
+      "passed": true,
+      "evidence": "The final message lists \"`src/cart.js:2`: `export const a = () => charge(100);`\" and \"`src/refund.js:2`: `export function refund(c) { return charge(-c); }`\", and src/other.js appears nowhere in it."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}
