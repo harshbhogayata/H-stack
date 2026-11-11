@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (pricing.js unchanged, the suite passes, and it fails against each of five boundary mutants: >= 50 to > 50, >= 10 to > 10, < 1 to <= 1, 50 to 49, 10 to 9)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent showed the existing tests are weak by running them against a mutated pricing.js (e.g. mutate.mjs or a manual boundary flip) and reports which mutant survived",
+      "passed": false,
+      "evidence": "The agent wrote a mutation script but says \"It was blocked by a permission prompt, so it hasn't run\", so the claim that the old tests are weak comes from reasoning only, not from running them against a mutant."
+    },
+    {
+      "text": "The new tests assert the exact boundaries from the README (qty 1, 9, 10, 49, 50, and 0 rejected) rather than more mid-range values",
+      "passed": true,
+      "evidence": "The diff adds `cases = [[1, 0], [9, 0], [10, 0.1], [11, 0.1], [49, 0.1], [50, 0.2], [51, 0.2]]` and `for (const bad of [0, -1, ...]) assert.throws(..., RangeError)`."
+    },
+    {
+      "text": "The reply confirms the strengthened suite now fails against the mutants that survived before",
+      "passed": false,
+      "evidence": "The reply says only \"Checking those cases by hand, each one fails at least one new test\" and asks the user to run mutate.sh \"To confirm\", so nothing was actually run to show it."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+      "passed": true,
+      "evidence": "PlanCard.jsx has `import { Button } from './Button'`, and PlanCard.css uses `var(--surface)`, `var(--text)`, `var(--border)` and `var(--accent)`. The reply says it 'only uses the colour and spacing tokens from `theme.css`' and that `price` is formatted 'the same way `InvoiceSummary` takes its `amoun"
+    },
+    {
+      "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+      "passed": true,
+      "evidence": "The current plan gets `{isCurrent && <span className=\"plan-card__badge\">Current plan</span>}` and a disabled button labelled 'Your plan', and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+    },
+    {
+      "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+      "passed": true,
+      "evidence": "The reply says the card 'follows the system light/dark setting and the `data-theme` override without any extra CSS' and also 'I haven't run or rendered it: the project has no build or test setup'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

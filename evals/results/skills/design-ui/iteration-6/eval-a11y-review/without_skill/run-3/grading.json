@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (file unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+      "passed": true,
+      "evidence": "The review says of line 4: \"Keyboard users can't tab to it or trigger it with Enter or Space. It has no role and no name.\" Of line 5 it says: \"It contains only an icon, so screen readers just announce 'button'\", and the fix is aria-label=\"Delete\"."
+    },
+    {
+      "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+      "passed": true,
+      "evidence": "The review says \"Line 6: pasting into the filter is blocked\", and also \"Delete also runs straight away with no confirmation or undo\", with the fix of putting a confirmation step or undo in front of onDelete."
+    },
+    {
+      "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+      "passed": true,
+      "evidence": "The review flags \"position: 'fixed', bottom: 0, height: '100vh'\" and notes that \"On mobile, `100vh` is also taller than the visible area\". It suggests `height: '100dvh'`, though it does not mention safe-area handling."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

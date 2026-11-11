@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: 2 passed\n"
+    },
+    {
+      "text": "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes",
+      "passed": true,
+      "evidence": "The reply says \"they never test the upper bound at all\", and its mutation table shows that deleting the `x > hi` check or returning `lo` instead of `hi` leaves the tests passing (\"Did the tests fail? No\")."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

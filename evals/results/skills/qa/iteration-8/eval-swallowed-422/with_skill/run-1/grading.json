@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app unchanged; QA-REPORT.md mentions the 422; e2e/subscribe.test.js fails on the current app and passes once app.js checks res.ok)",
+      "passed": false,
+      "evidence": "check exit 1: e2e test still fails once the app checks res.ok\n"
+    },
+    {
+      "text": "The agent captured the failed request in the browser flow (the POST /api/subscribe returning 422 for an address with +) rather than only reading the code",
+      "passed": true,
+      "evidence": "The test uses `page.waitForResponse((r) => r.url().endsWith('/api/subscribe'))` and asserts `response.status()` is 422 for 'ada+news@example.com'; the report quotes the browser console line 'Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)' from the Playwrigh"
+    },
+    {
+      "text": "QA-REPORT.md names the cause: public/app.js shows the success message without checking the response status, so server validation errors are hidden",
+      "passed": true,
+      "evidence": "QA-REPORT.md states 'The cause is `public/app.js:8-14`. The client `await`s `fetch('/api/subscribe')` but never checks the response status. Any HTTP response, including `422`, goes down the success path.'"
+    },
+    {
+      "text": "The e2e test starts and stops the server and browser itself and asserts on what the user sees (the status text) for a rejected address",
+      "passed": true,
+      "evidence": "The `before` hook spawns `server.js` with PORT=0 and calls `chromium.launch()`, `after` calls `browser?.close()` and `server?.kill()`, and the rejected-address tests run `assert.doesNotMatch(statusText, /subscribed/i, ...)` on the `role=\"status\"` text. Separately, the check command failed ('e2e test"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

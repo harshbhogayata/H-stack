@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app unchanged; QA-REPORT.md mentions the 422; e2e/subscribe.test.js fails on the current app and passes once app.js checks res.ok)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent captured the failed request in the browser flow (the POST /api/subscribe returning 422 for an address with +) rather than only reading the code",
+      "passed": true,
+      "evidence": "QA-REPORT.md says 'The network tab shows `POST /api/subscribe → 422 {\"error\":\"Addresses with + are not supported.\"}`', and the test captures the response with `page.waitForResponse(...)`; its recorded output reads 'server answered 422 {\"error\":\"Addresses with + are not supported.\"} but the page told"
+    },
+    {
+      "text": "QA-REPORT.md names the cause: public/app.js shows the success message without checking the response status, so server validation errors are hidden",
+      "passed": true,
+      "evidence": "The Root cause section states '`public/app.js` awaits `fetch()` but never reads the response' and that 'The server's error message (`{ error }`) is never shown.'"
+    },
+    {
+      "text": "The e2e test starts and stops the server and browser itself and asserts on what the user sees (the status text) for a rejected address",
+      "passed": true,
+      "evidence": "In e2e/subscribe.test.js, `before` spawns `server.js` and calls `chromium.launch()`, `after` calls `browser?.close()` and `server?.kill()`, and the rejection tests run `assert.doesNotMatch(r.message, SUCCESS, ...)` on `page.textContent('#status')`."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

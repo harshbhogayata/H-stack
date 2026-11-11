@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md says cpSync does not keep modification times by default and path.join returns dist/assets; scripts and the saved search page unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer does not rely on the top, highly voted search result; it says that result is wrong on both points and names the authoritative evidence (a run with the installed Node version, and the preserveTimestamps option, default false, in the Node docs)",
+      "passed": true,
+      "evidence": "answer.md says the featured \"accepted answer\" \"is **wrong on both points**\" and \"I didn't use any of these search results as evidence.\" It cites the measurement on v22.23.4 and quotes the docs line \"`preserveTimestamps` ... **Default:** `false`\"."
+    },
+    {
+      "text": "Each conclusion is marked as measured (with the Node version used) or read, and sources carry dates or versions",
+      "passed": true,
+      "evidence": "Each conclusion has labeled bullets: \"Docs (read):\" with \"(v22 docs, fetched 2026-11-11)\", \"Measured on v22.23.4 linux:\", and the build.js consequence is marked \"(inferred)\"."
+    },
+    {
+      "text": "The answer gives the consequence for incremental builds (pass preserveTimestamps: true, or compare content hashes)",
+      "passed": true,
+      "evidence": "answer.md states \"a check that compares modification times would see every file as changed. To fix this, pass `preserveTimestamps: true`.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

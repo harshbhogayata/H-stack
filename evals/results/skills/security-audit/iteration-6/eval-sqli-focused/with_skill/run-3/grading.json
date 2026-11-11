@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+      "passed": true,
+      "evidence": "The reply's heading is \"Finding: SQL injection in `searchUsers` (`users.js:5`)\". It quotes `const name = req.query.name;` and the concatenated `\"...WHERE name LIKE '%\" + name + \"%'\"` query, and explains that `name` goes from `req.query` straight into the SQL text."
+    },
+    {
+      "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+      "passed": true,
+      "evidence": "The reply says \"Use a parameterised query\" and shows `db.query(\"... WHERE name LIKE ? ESCAPE '\\\\'\", ['%' + escaped + '%'])`, noting \"`db.query` already accepts `(sql, params)`\". It also adds input type checks and wildcard escaping, which go beyond the minimal change, but the core fix is the paramete"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

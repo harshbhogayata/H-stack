@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply says \"JavaScript tries alternatives left to right, so on \\\"500ms\\\" the `m` option matches before `ms` gets a chance... so the function throws.\""
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": true,
+      "evidence": "Under \"Other spec rules, checked and correct\" the reply lists \"Unknown or uppercase units (`10x`, `1d`, `1H`): throw\", \"Malformed numbers (`.5s`, `1.s`): throw\", \"Whitespace inside a part (`1 h`): throws\", and \"repeated units\" as correctly handled; the float note is explicitly labelled \"Not a bug\"."
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply says \"a config timeout like \\\"250ms\\\" will crash when the config is read. The fix is to put `ms` first in the alternation (`(ms|h|m|s)`)\", and the diff shows only cases.json was added, with duration.js left unchanged."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

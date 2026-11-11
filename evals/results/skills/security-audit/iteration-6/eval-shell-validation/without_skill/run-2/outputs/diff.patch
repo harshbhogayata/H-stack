@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..6c3a042
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; id"}},
++    "file": "app/tasks.py",
++    "line": 24,
++    "why": "OS command injection. BRANCH_RE (tasks.py:7) is used with re.match and has no end anchor, so it only checks that the value starts with an allowed character. Anything after that, such as '; id', '$(...)', backticks or '|', is still accepted. The branch value is then put into an f-string and run by subprocess.run(..., shell=True) in _git (tasks.py:11). Any signed-in employee can run arbitrary shell commands as the service account in /srv/ops/repo, and stdout comes back in the response."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abcdef0; id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "This also uses shell=True, but is_sha (validate.py:7) calls SHA_RE.fullmatch, so the whole string must be 7-40 lowercase hex characters. That rules out shell metacharacters, whitespace, a trailing newline and option injection (a value can't start with '-'). Tested: 'abcdef0;id' and 'abcdef0\\n' both fail."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "Path traversal is blocked. The joined path goes through os.path.realpath, which resolves '..' and symlinks, and commonpath must equal the realpath of the reports directory. Absolute names like '/etc/passwd' replace the join base and are rejected the same way. A name of '' resolves to the directory itself and raises IsADirectoryError, which is caught and returned as a 400."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "ast.literal_eval only accepts Python literals and refuses calls, names and attribute access (tested: it raises ValueError). The result has to be a dict and is only used for equality comparisons against an in-memory list that every employee is allowed to see. No code runs and no data is exposed."
++  }
++]

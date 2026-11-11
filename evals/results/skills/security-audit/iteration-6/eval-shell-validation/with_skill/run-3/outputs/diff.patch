@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..9a4ffc7
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; cat /proc/self/environ; id"}},
++    "file": "app/tasks.py",
++    "line": 22,
++    "why": "BRANCH_RE (line 7) is used with re.match and has no end anchor, so it only checks that the value starts with an alphanumeric character. Anything after that, including ';', '$()', '|' and newlines, passes, and the value is put into an f-string run by subprocess.run(shell=True) (line 11). Any signed-in employee can run arbitrary shell commands as the API service account in /srv/ops/repo, and the output comes back in the 'log' field. That gives them the service's environment and secrets, such as config/deploy.env's DEPLOY_TOKEN. Fix: use fullmatch, reject a leading '-', and call subprocess with an argument list (shell=False) plus '--end-of-options' or '--' before the ref."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abcdef0; id"}},
++    "file": "app/validate.py",
++    "line": 7,
++    "why": "This passes the sha to the same shell=True git call, but is_sha uses SHA_RE.fullmatch with [0-9a-f]{7,40}, so it accepts only 7-40 lowercase hex characters. Shell metacharacters, whitespace, a trailing newline and leading '-' all fail the check (I tested 'abcdef0;id' and 'abcdef0\\n'). The value can't be used for injection."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "read_report realpath-resolves the joined path, which collapses '..' and symlinks, and requires commonpath with the realpath'd REPORTS directory to equal REPORTS. '../../config/deploy.env', absolute paths like '/etc/passwd' (os.path.join drops REPORTS), '..' and symlink escapes all resolve outside the directory and raise PermissionError, which returns 400. Only files inside app/reports/ can be read, and that is the intended behaviour."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "The filter goes to ast.literal_eval, not eval. It accepts only literals, so calls, names and attribute access raise ValueError, which returns 400, and no code runs. The deploy list it filters is static and readable by every signed-in user anyway, so the filter can't reach data the user isn't allowed to see. A deeply nested literal could at most raise a RecursionError or MemoryError inside that one request. That is a robustness issue, not a crossed boundary."
++  }
++]

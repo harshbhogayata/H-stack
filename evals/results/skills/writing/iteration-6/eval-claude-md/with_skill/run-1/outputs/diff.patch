@@ -1,0 +1,30 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..4d93bdd
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,24 @@
++# CLAUDE.md
++
++shop-api, a TypeScript service. Team rules live in CONTRIBUTING.md; this file restates them as instructions for agents.
++
++## Money
++
++Store and compute every amount as integer cents, typed `Cents` from `src/money.ts`. `Cents` is a plain alias for `number`, so the compiler will accept a float; keep values whole yourself.
++
++## Migrations
++
++A migration that has shipped is permanent. To change the schema, add a new migration that alters the result of the old one.
++
++## legacy/
++
++`legacy/` is frozen. Change it only for a security fix; build new behaviour outside it.
++
++## Before you push
++
++Run `npm test` and `npm run lint`. CONTRIBUTING only asks for tests, but CI also runs lint and will fail on it.
++
++## Gotchas
++
++- `npm run dev` watches `src/index.ts`, which does not exist yet. Create it before expecting the dev server to start.
++- `legacy/` and the migrations directory are not in the repo yet. The rules above apply once they appear.

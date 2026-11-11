@@ -1,0 +1,2 @@
+exit 1
+e2e test still fails once the app checks res.ok

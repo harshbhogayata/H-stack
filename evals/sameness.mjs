@@ -68,13 +68,15 @@ async function agent(task, ctx, arm) {
 const blind = (t) => String(t).split('\n').filter((l) => !/SKILL\.md|h-stack[:/]|\bthe skill\b/i.test(l)).join('\n');
 async function gradeFit(ctx, task, out) {
   const crit = spec.fit_criteria[ctx] || [];
-  const prompt = `You are checking whether a change fits the project it was made in. Judge each criterion strictly from the evidence; if it is missing or ambiguous, answer false.\n\nREQUEST: ${task.prompt}\n\nTHE PROJECT'S FILES BEFORE THE CHANGE:\n${projectView(ctx)}\n\nTHE AGENT'S FINAL MESSAGE:\n${blind(out.final).slice(0, 5000)}\n\nTHE AGENT'S DIFF:\n${blind(out.diff).slice(0, 10000) || '(no changes)'}\n\nCRITERIA:\n${crit.map((c, i) => `${i + 1}. ${c}`).join('\n')}\n\nReply with only JSON: {"criteria":[{"passed":true|false,"evidence":"one short quote"}]} in the same order.`;
-  const raw = await run('claude', ['-p', prompt, '--output-format', 'json', '--max-turns', '1'], os.tmpdir(), 300000);
-  try { const j = JSON.parse(raw.trim().split('\n').pop()); const v = JSON.parse(String(j.result).match(/\{[\s\S]*\}/)[0]).criteria || []; return { passed: v.filter((x) => x.passed).length, total: crit.length, verdicts: v }; } catch { return { passed: 0, total: crit.length, verdicts: [], error: 'unparseable' }; }
+  const prompt = `You are checking whether a change fits the project it was made in. Judge each criterion strictly from the evidence; if it is missing or ambiguous, answer false.\n\nREQUEST: ${task.prompt}\n\nTHE PROJECT'S FILES BEFORE THE CHANGE:\n${projectView(ctx)}\n\nTHE AGENT'S FINAL MESSAGE:\n${blind(out.final).slice(0, 5000)}\n\nTHE AGENT'S DIFF:\n${blind(out.diff).slice(0, 10000) || '(no changes)'}\n\nCRITERIA:\n${crit.map((c, i) => `${i + 1}. ${c}`).join('\n')}\n\nA criterion is "applicable" only if this kind of request could reasonably meet it (a README intro cannot add a command or call an audit function; a settings page can). Reply with only JSON: {"criteria":[{"applicable":true|false,"passed":true|false,"evidence":"one short quote"}]} in the same order; passed is false when not applicable.`;
+  const raw = await run('claude', ['-p', prompt, '--output-format', 'json', '--max-turns', '1', '--tools', ''], os.tmpdir(), 300000);
+  try { const j = JSON.parse(raw.trim().split('\n').pop()); const v = JSON.parse(String(j.result).match(/\{[\s\S]*\}/)[0]).criteria || []; const app = v.filter((x) => x.applicable !== false); return { passed: app.filter((x) => x.passed).length, total: app.length, of: crit.length, verdicts: v }; } catch { return { passed: 0, total: crit.length, verdicts: [], error: 'unparseable' }; }
 }
 async function pool(jobs) { const r = new Array(jobs.length); let i = 0; await Promise.all(Array.from({ length: PAR }, async () => { while (i < jobs.length) { const k = i++; r[k] = await jobs[k](); } })); return r; }
 
 const tasks = spec.tasks.filter((t) => !ONLY.length || ONLY.includes(t.skill));
+// --regrade <report.json>: re-grade the stored outputs of an earlier run with the current grader.
+const REGRADE = opt('regrade', null);
 const jobs = [];
 for (const t of tasks) for (const arm of ['with_skill', 'without_skill']) for (let n = 1; n <= RUNS; n++) for (const ctx of spec.contexts) jobs.push(async () => {
   const out = await agent(t, ctx, arm);
@@ -83,7 +85,16 @@ for (const t of tasks) for (const arm of ['with_skill', 'without_skill']) for (l
   process.stderr.write(`${t.skill} ${arm}#${n} ${ctx}: fit ${fit.passed}/${fit.total}\n`);
   return { skill: t.skill, arm, run: n, ctx, fit, text: out.text, final: out.final.slice(0, 4000), diff: out.diff.slice(0, 8000) };
 });
-const res = await pool(jobs);
+let res;
+if (REGRADE) {
+  const prev = JSON.parse(fs.readFileSync(path.resolve(REGRADE), 'utf8')).runs.filter((r) => tasks.some((t) => t.skill === r.skill));
+  res = await pool(prev.map((r) => async () => {
+    const t = tasks.find((x) => x.skill === r.skill);
+    const fit = await gradeFit(r.ctx, t, { final: r.final, diff: r.diff });
+    process.stderr.write(`regrade ${r.skill} ${r.arm}#${r.run} ${r.ctx}: fit ${fit.passed}/${fit.total}\n`);
+    return { ...r, fit, text: `${r.final}\n${r.diff}` };
+  }));
+} else res = await pool(jobs);
 const summary = {};
 for (const t of tasks) for (const arm of ['with_skill', 'without_skill']) {
   const rs = res.filter((r) => r.skill === t.skill && r.arm === arm);

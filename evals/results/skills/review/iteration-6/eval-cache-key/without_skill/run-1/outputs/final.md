@@ -1,0 +1,8 @@
+I wrote the review to `REVIEW.md` and left the code alone. I'd hold the merge: the module charges the wrong amount whenever one process quotes more than one currency. I ran every example input against the current code. The 3 existing tests pass, but none of them catches finding 1.
+
+1. **Critical: the price cache ignores currency** (`src/pricing.js:6`, caused by `src/memoize.js:4`). The cache is keyed on the SKU alone, so the first currency quoted for a SKU sets its price in every currency until restart. For example, `quote([{sku:'TSHIRT-01'}],'USD')` followed by `quote([{sku:'TSHIRT-01'}],'GBP')` gives a GBP total of 2400 instead of 1920. The reverse order undercharges: MUG-02 comes out at 950 in USD instead of 1200. Since it depends on which request came first, it would be hard to reproduce in production.
+2. **High: `qty` isn't checked** (`src/pricing.js:12-13`). `qty: -3` gives a total of -3600, and a negative line can cancel out part of another: one T-shirt plus a `-1` mug totals 800. Fractional and string quantities (`1.5`, `'2'`, `''`) are also accepted.
+3. **Medium: the currency check lets through built-in object names** (`src/pricing.js:9`, same pattern in `catalogue.js:8,10`). `quote([{sku:'MUG-02'}], 'toString')` returns a `NaN` total instead of an "unsupported currency" error.
+4. **Low:** a `var` that should be `let`, tax showing as `-0` on negative totals, an unclear error when `cart` is missing, and no tests for mixed currencies, bad quantities or unknown SKUs.
+
+Each finding in the file includes a suggested fix.

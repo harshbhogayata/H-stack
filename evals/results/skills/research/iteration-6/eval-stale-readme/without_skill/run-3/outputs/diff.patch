@@ -1,0 +1,46 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..618b51a
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,40 @@
++retries_429_by_default: no
++honours_http_date_retry_after: no
++
++## Explanation (vendor/tinyretry, version 3.1.0)
++
++The README is out of date and contradicts the code on both points. These answers come from the code itself.
++
++### 1. 429 is not retried by default
++
++`vendor/tinyretry/defaults.js`:
++
++```js
++retryOn: [408, 502, 503, 504],
++```
++
++`index.js` returns the response straight away if its status is not in `opts.retryOn`:
++
++```js
++if (!opts.retryOn.includes(res.status) || attempt >= opts.retries) return res;
++```
++
++The README says 408, 429, 500, 502, 503 and 504 are retried, but that list is from before 3.0.0. The 3.0.0 changelog says "The default `retryOn` list changed; see `defaults.js`", and 429 (and 500) were dropped. `src/client.js` passes only `{ retries: 4 }`, so a 429 goes back to `pushOrders` on the first attempt, and `pushOrders` throws `partner API returned 429`.
++
++### 2. An HTTP-date `Retry-After` is ignored
++
++```js
++function parseRetryAfter(value) {
++  if (value == null) return null;
++  const seconds = Number(value);
++  return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : null;
++}
++```
++
++Only a number of seconds is understood. `Number('Wed, 11 Nov 2026 10:00:00 GMT')` is `NaN`, so the function returns `null`. The loop then uses the normal jittered exponential backoff, a random delay between 0 and `min(10000, 200 * 2^attempt)` ms, and does not wait for the given time. The changelog says HTTP-date support was added in 2.4.0, but the 3.0.0 rewrite dropped it. The README's "Honours the `Retry-After` response header" is only true for the seconds form.
++
++Even a seconds value is capped at `maxDelay` (10 s by default) since 3.1.0, so a long `Retry-After` would be cut short in any case.
++
++### What this means for src/client.js
++
++Adding 429 to the options, `retry(fetch, { retries: 4, retryOn: [408, 429, 502, 503, 504] })`, would make tinyretry retry 429s. They would still come back quickly, after short random delays, not at the time the partner gives. To actually wait for an HTTP-date `Retry-After`, you would need to handle 429 yourself: parse the date with `Date.parse(value) - Date.now()` and sleep for that long. Another option is to patch or replace tinyretry's `parseRetryAfter` and raise `maxDelay` so the wait isn't cut short.

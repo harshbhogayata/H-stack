@@ -1,0 +1,36 @@
+diff --git a/test/pricing.test.js b/test/pricing.test.js
+index a707a21..035d70c 100644
+--- a/test/pricing.test.js
++++ b/test/pricing.test.js
+@@ -21,3 +21,31 @@ test('line total applies the discount', () => {
+ test('rejects non-integer quantities', () => {
+   assert.throws(() => discountRate(2.5), RangeError);
+ });
++
++// Tier boundaries: each threshold is checked on both sides so an off-by-one
++// (> vs >=, 10 vs 9/11, 50 vs 49/51) fails.
++test('discount tier boundaries', () => {
++  const cases = [
++    [1, 0],
++    [9, 0],
++    [10, 0.1],
++    [11, 0.1],
++    [49, 0.1],
++    [50, 0.2],
++    [51, 0.2],
++  ];
++  for (const [qty, rate] of cases) {
++    assert.equal(discountRate(qty), rate, `discountRate(${qty})`);
++  }
++});
++
++test('rejects zero, negative and non-numeric quantities', () => {
++  for (const qty of [0, -1, NaN, Infinity, '10', null, undefined]) {
++    assert.throws(() => discountRate(qty), RangeError, `discountRate(${String(qty)})`);
++  }
++});
++
++test('line total rounds to the nearest cent', () => {
++  assert.equal(lineTotal(13, 11), 129); // 128.7 rounds up
++  assert.equal(lineTotal(16, 11), 158); // 158.4 rounds down
++});

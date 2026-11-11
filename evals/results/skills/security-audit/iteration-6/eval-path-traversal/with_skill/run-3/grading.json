@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+      "passed": true,
+      "evidence": "The reply says \"`?file=../../../etc/passwd` climbs out of `/srv/app/uploads`\" and \"`?file=/etc/passwd` also works, because `os.path.join` throws away `UPLOADS` when the second part is an absolute path.\""
+    },
+    {
+      "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+      "passed": true,
+      "evidence": "The reply says \"anyone who knows or guesses a filename can download another user's upload\" and \"finding 1 stays reachable by any logged-in user,\" after saying the attacker can read \"any file the app's process can read\"; this covers both reading outside uploads and reading other users' files, though "
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

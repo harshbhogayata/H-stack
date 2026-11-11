@@ -1,0 +1,38 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..8469ba5
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,32 @@
++# Answer: `fs.rmSync` options in Node 22
++
++## Documented options
++
++Source: Node.js v22 docs, `fs.rmSync(path[, options])`
++(https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options).
++
++| Option | Type | Default | Meaning |
++|---|---|---|---|
++| `force` | boolean | `false` | If `true`, no error is thrown when `path` does not exist. |
++| `maxRetries` | integer | `0` | How many times to retry after an `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY` or `EPERM` error. Each retry waits `retryDelay` ms longer than the one before (linear backoff). Ignored unless `recursive: true`. |
++| `recursive` | boolean | `false` | If `true`, removes the directory and everything inside it. In recursive mode, failed operations are retried. |
++| `retryDelay` | integer | `100` | Milliseconds to wait between retries. Ignored unless `recursive: true`. |
++
++## The fix: `recursive: true`
++
++```js
++fs.rmSync(dir, { recursive: true });              // deletes the folder and its contents
++fs.rmSync(dir, { recursive: true, force: true }); // same, and no error if dir is missing (like `rm -rf`)
++```
++
++`force` alone does **not** fix this. It only stops errors for paths that don't exist.
++
++## Checked on Node v22.23.4
++
++- `fs.rmSync(dir)` on a non-empty directory → throws `ERR_FS_EISDIR`.
++- `fs.rmSync(dir)` on an **empty** directory → also throws `ERR_FS_EISDIR` ("Path is a directory: rm returned EISDIR"). Without `recursive`, `rmSync` refuses any directory, empty or not. The problem is not specific to non-empty folders.
++- `fs.rmSync(dir, { force: true })` → still throws `ERR_FS_EISDIR`.
++- `fs.rmSync(dir, { recursive: true })` → succeeds, and the directory is gone.
++- `fs.rmSync(missing)` → throws `ENOENT`. `fs.rmSync(missing, { force: true })` → succeeds without error.
++
++(To remove only an empty directory, `fs.rmdirSync(dir)` also works.)

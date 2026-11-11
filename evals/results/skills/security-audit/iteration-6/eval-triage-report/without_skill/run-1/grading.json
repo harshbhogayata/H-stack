@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (src unchanged; R1 and R3 rejected, R2 confirmed, and the R2 request, replayed with a mocked HTTP client, makes the server fetch an internal address)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "R1 is rejected with a boundary trace: the user value is passed through encodeURIComponent into a path on the fixed avatar origin, so the reported payloads cannot change the host",
+      "passed": true,
+      "evidence": "triage.json R1 is 'rejected' and says avatarUrl() \"passes the user value through encodeURIComponent and resolves it as a path under the fixed origin https://avatars.example-cdn.net\", then traces both payloads to CDN-host URLs."
+    },
+    {
+      "text": "R3 is rejected because sort is looked up in the SORT_COLUMNS allowlist and dir is mapped to ASC/DESC, so no request text reaches the SQL",
+      "passed": true,
+      "evidence": "triage.json R3 is 'rejected': \"The ORDER BY column comes from the fixed SORT_COLUMNS map... The direction can only be 'ASC' or 'DESC'. User input is never put into the SQL.\""
+    },
+    {
+      "text": "R2 names the blocklist gaps (e.g. 169.254.169.254, 172.16.0.0/12, ::1, other 127.x addresses) and the boundary (any signed-in member can make the server request internal services and read the first 500 bytes of the response), with a fix that resolves the host and checks it against private and link-local ranges (or uses an allowlist)",
+      "passed": false,
+      "evidence": "R2 names the gaps (\"link-local 169.254.0.0/16... 172.16.0.0/12, other 127.x addresses, IPv6 such as [::1]\") and the boundary (\"Any signed-in member can make the server POST... and read back up to 500 characters\"), but neither triage.json nor the final message proposes a fix such as resolving the hos"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

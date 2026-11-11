@@ -1,0 +1,177 @@
+diff --git a/src/components/ShipmentRow.jsx b/src/components/ShipmentRow.jsx
+index 37642d9..39051ae 100644
+--- a/src/components/ShipmentRow.jsx
++++ b/src/components/ShipmentRow.jsx
+@@ -1,7 +1,7 @@
+ import { TruckIcon } from './icons';
+ import './ShipmentRow.css';
+ 
+-const STATUS_LABEL = { booked: 'Booked', in_transit: 'In transit', delayed: 'Delayed', delivered: 'Delivered' };
++export const STATUS_LABEL = { booked: 'Booked', in_transit: 'In transit', delayed: 'Delayed', delivered: 'Delivered' };
+ 
+ export function ShipmentRow({ shipment }) {
+   return (
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..4cb72a6
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,53 @@
++.hb-toast-region {
++  position: fixed;
++  right: calc(var(--hb-space-4) + env(safe-area-inset-right, 0px));
++  bottom: calc(var(--hb-space-4) + env(safe-area-inset-bottom, 0px));
++  z-index: var(--hb-z-toast);
++  display: flex;
++  flex-direction: column;
++  align-items: flex-end;
++  gap: var(--hb-space-2);
++  /* Let clicks through the empty region; toasts themselves re-enable them. */
++  pointer-events: none;
++}
++
++.hb-toast {
++  display: flex;
++  align-items: center;
++  gap: var(--hb-space-2);
++  width: min(360px, calc(100vw - 2 * var(--hb-space-4)));
++  padding-left: var(--hb-space-4);
++  background: var(--hb-color-surface);
++  color: var(--hb-color-ink);
++  border: 1px solid var(--hb-color-border);
++  border-left: var(--hb-space-1) solid var(--hb-toast-tone);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  pointer-events: auto;
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast--info { --hb-toast-tone: var(--hb-color-accent); }
++.hb-toast--success { --hb-toast-tone: var(--hb-color-success); }
++.hb-toast--warning { --hb-toast-tone: var(--hb-color-warning); }
++
++.hb-toast--leaving {
++  animation: hb-toast-out var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast__message {
++  flex: 1;
++  margin: 0;
++  padding-block: var(--hb-space-3);
++  overflow-wrap: anywhere;
++}
++
++@keyframes hb-toast-in {
++  from { opacity: 0; transform: translateX(calc(100% + var(--hb-space-4))); }
++  to { opacity: 1; transform: none; }
++}
++
++@keyframes hb-toast-out {
++  from { opacity: 1; transform: none; }
++  to { opacity: 0; transform: translateX(calc(100% + var(--hb-space-4))); }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..c717ed7
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,99 @@
++import { useCallback, useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon } from './icons';
++import { STATUS_LABEL } from './ShipmentRow';
++import './Toast.css';
++
++const DISMISS_AFTER_MS = 5000;
++
++/**
++ * A single notification. Slides in, dismisses itself after 5 seconds, and can
++ * be closed early. The countdown pauses while the pointer is over the toast or
++ * focus is inside it, so nobody loses a message they're reading or reaching for.
++ */
++export function Toast({ message, tone = 'info', onClose, duration = DISMISS_AFTER_MS }) {
++  const [leaving, setLeaving] = useState(false);
++  const [paused, setPaused] = useState(false);
++  const remaining = useRef(duration);
++
++  const dismiss = useCallback(() => setLeaving(true), []);
++
++  useEffect(() => {
++    if (paused || leaving) return undefined;
++    const startedAt = Date.now();
++    const timer = setTimeout(dismiss, remaining.current);
++    return () => {
++      clearTimeout(timer);
++      remaining.current -= Date.now() - startedAt;
++    };
++  }, [paused, leaving, dismiss]);
++
++  return (
++    <div
++      className={`hb-toast hb-toast--${tone}${leaving ? ' hb-toast--leaving' : ''}`}
++      onAnimationEnd={leaving ? onClose : undefined}
++      onMouseEnter={() => setPaused(true)}
++      onMouseLeave={() => setPaused(false)}
++      onFocus={() => setPaused(true)}
++      onBlur={(event) => {
++        if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
++      }}
++    >
++      <p className="hb-toast__message">{message}</p>
++      <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={dismiss} />
++    </div>
++  );
++}
++
++/**
++ * Fixed bottom-right stack. Always mounted so screen readers have a live
++ * region in place before the first toast arrives (a region added together
++ * with its content is often not announced).
++ */
++export function ToastRegion({ toasts, onClose }) {
++  return (
++    <section className="hb-toast-region" aria-label="Notifications" aria-live="polite" role="status">
++      {toasts.map((toast) => (
++        <Toast key={toast.id} message={toast.message} tone={toast.tone} onClose={() => onClose(toast.id)} />
++      ))}
++    </section>
++  );
++}
++
++const STATUS_TONE = { booked: 'info', in_transit: 'info', delayed: 'warning', delivered: 'success' };
++
++/**
++ * Watches a shipment list and returns a toast for every status change.
++ *
++ *   const { toasts, closeToast } = useShipmentStatusToasts(shipments);
++ *   <ToastRegion toasts={toasts} onClose={closeToast} />
++ */
++export function useShipmentStatusToasts(shipments) {
++  const [toasts, setToasts] = useState([]);
++  const previous = useRef(null);
++  const nextId = useRef(0);
++
++  useEffect(() => {
++    const seen = previous.current;
++    previous.current = new Map(shipments.map((s) => [s.container, s.status]));
++    if (!seen) return; // first load: nothing has changed yet
++
++    const changed = shipments.filter((s) => seen.has(s.container) && seen.get(s.container) !== s.status);
++    if (changed.length === 0) return;
++
++    setToasts((current) => [
++      ...current,
++      ...changed.map((s) => ({
++        id: nextId.current++,
++        tone: STATUS_TONE[s.status] ?? 'info',
++        message: `${s.container} is now ${STATUS_LABEL[s.status] ?? s.status}`,
++      })),
++    ]);
++  }, [shipments]);
++
++  const closeToast = useCallback((id) => {
++    setToasts((current) => current.filter((t) => t.id !== id));
++  }, []);
++
++  return { toasts, closeToast };
++}

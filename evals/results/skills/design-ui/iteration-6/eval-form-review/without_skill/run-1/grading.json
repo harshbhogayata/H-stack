@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+      "passed": true,
+      "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+    },
+    {
+      "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+      "passed": true,
+      "evidence": "The SignupForm.jsx:30 entry says \"The email label points to htmlFor=\\\"signup-email\\\" but the input's id is \\\"email\\\"... Screen readers announce the input with no name.\""
+    },
+    {
+      "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+      "passed": true,
+      "evidence": "The SignupForm.css:10 entry says \"The focus style removes the outline and sets border-color to var(--color-border), the same colour as the unfocused border. Focused inputs therefore look identical to unfocused ones.\""
+    },
+    {
+      "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+      "passed": true,
+      "evidence": "The line 18 entry says \"the error is stored in state but never shown... The only sign of failure is a red border on the password input\", the line 34 entry says \"there is no aria-invalid and no aria-describedby\", and the line 40 entry says the checkbox \"is a <div> with an onClick... can't be reached "
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

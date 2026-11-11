@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..ff9252c
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main;id"}},
++    "file": "app/tasks.py",
++    "line": 24,
++    "why": "BRANCH_RE (app/tasks.py:7) is applied with re.match and has no end anchor, so it only checks the first character(s); 'main;id' passes. branch_log then interpolates the value into a shell=True command (_git, app/tasks.py:11), so any signed-in employee runs arbitrary shell commands as the API service account in /srv/ops/repo and gets stdout back in the response. OS command injection / authenticated RCE (high). Fix: use fullmatch (or \\Z anchor) and call subprocess with an argv list and shell=False, with '--' before the ref."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abcdef1;id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "Also builds a shell=True command, but is_sha uses SHA_RE.fullmatch on [0-9a-f]{7,40} (app/validate.py:3-7), so only hex characters reach the shell. Injection payloads, trailing newlines and option-like values ('-...') are rejected with ValueError -> 400."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "read_report realpath-resolves the joined path (which also resolves symlinks and makes absolute names like '/etc/passwd' replace the base) and then requires os.path.commonpath([path, REPORTS]) == REPORTS. That check works on path components, so '../' traversal, absolute paths and sibling-prefix directories all raise PermissionError -> 400. An empty name resolves to the directory and raises IsADirectoryError -> 400. No read outside app/reports."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "The filter goes through ast.literal_eval, not eval, so call expressions are rejected with ValueError -> 400 and no code runs. The result must be a dict and is only compared for equality against the static DEPLOYS list, which every employee may already read. Deeply nested literals could raise an uncaught RecursionError (a 500 for that one request), but that only affects the caller and crosses no boundary."
++  }
++]

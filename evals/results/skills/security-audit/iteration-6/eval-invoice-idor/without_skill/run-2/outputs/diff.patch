@@ -1,0 +1,50 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..1f9a626
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 6,
++    "why": "The ownership check is registered with router.use('/invoices/:id'), but Router.compile anchors every pattern with ^...$ (src/router.js:13), so it only matches the exact path /invoices/:id and never /invoices/:id/pdf. getInvoicePdf (src/invoices.js:25) looks the invoice up by id and checks only that it exists, not who owns it. Alice gets 200 with a base64 PDF of Bob's inv_1002 (customer cust_bob, Consulting 990.00, total 990.00)."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 8,
++    "why": "requireOwner matches this exact path and runs before getInvoice, so it returns 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv%5F1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 34,
++    "why": "Both the middleware and the handler get params from the same decodeURIComponent of the same match, so an encoded id resolves to the same invoice in both and the owner check still runs: 403."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 13,
++    "why": "A trailing slash matches neither the middleware nor any GET route, so the request returns 404 and no data."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "HEAD", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 31,
++    "why": "The use() layer has method null, so it applies to every method and returns 403 first. Even without it, no non-GET route exists, so the result would be 404. A lowercase 'get' method behaves the same way."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 12,
++    "why": "Tested with and without query {status: 'open'}. listInvoices filters by req.user.id before applying the status filter, so query parameters only narrow the caller's own invoices. Alice gets an empty list for status=open."
++  }
++]

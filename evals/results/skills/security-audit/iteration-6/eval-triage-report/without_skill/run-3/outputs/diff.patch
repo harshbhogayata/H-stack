@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..638dba2
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "The user value goes through encodeURIComponent and is placed inside a fixed path under the hardcoded origin https://avatars.example-cdn.net. '//169.254.169.254/...' becomes '/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png' and '@internal.host' becomes '/u/%40internal.host.png'. The host is always avatars.example-cdn.net, so an attacker can't change where the server sends the request."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 2,
++    "why": "isAllowedTarget only blocks localhost, 127.0.0.1, 0.0.0.0 and the 10. and 192.168. prefixes. It misses link-local 169.254.0.0/16 (cloud metadata), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback [::1], and internal DNS names. Any signed-in member can make the server POST to https://169.254.169.254/latest/meta-data/, and testWebhook (line 20-21) returns the first 500 chars of the response body, so this is a full-read SSRF."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "The sort value is only used as a key into the SORT_COLUMNS allowlist, and any unknown value falls back to 'created_at'. dir maps only to ASC or DESC. 'name;DROP TABLE users' produces 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50', so no user input reaches the SQL."
++  }
++]

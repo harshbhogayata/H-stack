@@ -1,0 +1,43 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..8d75e2e
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,37 @@
++cpsync_keeps_mtime_by_default: no
++path_join_result: dist/assets
++
++# fs.cpSync timestamps and path.join with a leading slash (Node 22)
++
++**Runtime in scope.** `package.json` declares `"engines": {"node": ">=22"}`, and the installed `node` is **v22.23.4** on linux (measured with `node --version`).
++
++## 1. Does `fs.cpSync(src, dest, { recursive: true })` keep modification times by default? **No.**
++
++- **Read:** In the Node.js v22 docs, the `fs.cpSync` options say: "`preserveTimestamps` <boolean> When `true` timestamps from `src` will be preserved. **Default:** `false`." (https://nodejs.org/docs/latest-v22.x/api/fs.html#fscpsyncsrc-dest-options, read 2026-11-11). `fsPromises.cp` / `fs.cp` document the same default.
++- **Measured:** On Node v22.23.4 I set two source files (`a.txt` and `sub/b.txt`) to an mtime of 2020-01-01, then copied them:
++  - `fs.cpSync(src, d1, { recursive: true })`: both copies got the time of the copy (`2026-11-11T21:17:43Z`). **The mtime was not kept.**
++  - `fs.cpSync(src, d2, { recursive: true, preserveTimestamps: true })`: both copies kept `2020-01-01T00:00:00Z`.
++- **What this means for `scripts/build.js`:** `publish()` calls `fs.cpSync(..., { recursive: true })` without `preserveTimestamps`. Every copied file therefore gets a new mtime on each build. An incremental build that compares mtimes would treat each copied asset as newer than its source, so nothing would ever look unchanged. If the build should keep source mtimes, pass `preserveTimestamps: true` (inferred from the two points above).
++
++## 2. What does `path.join('dist', '/assets')` return on Linux? **`dist/assets`**
++
++- **Read:** The docs say `path.join()` "joins all given `path` segments together using the platform-specific separator as a delimiter, then normalizes the resulting path." (https://nodejs.org/docs/latest-v22.x/api/path.html#pathjoinpaths, read 2026-11-11). It does not reset at absolute segments. That reset is how `path.resolve()` behaves: the "sequence of paths is processed from right to left … until an absolute path is constructed" (same page, `#pathresolvepaths`).
++- **Measured (Node v22.23.4, linux):**
++  - `path.join('dist', '/assets')` returned `"dist/assets"`
++  - `path.posix.join('dist', '/assets')` returned `"dist/assets"`
++  - `path.resolve('dist', '/assets')` returned `"/assets"`, for contrast
++- **What this means for `scripts/build.js`:** `path.join(outDir, assetDir)` stays under `outDir` even if `assetDir` starts with `/`. You don't need to strip the slash.
++
++## About the saved search (`docs/research/search-results.html`)
++
++The featured "accepted answer" (devanswers.example, 2021) is **wrong on both points**:
++- It says cpSync acts like `cp -a` and keeps timestamps. The docs and the test above both show the default is `false`.
++- It says `path.join('dist', '/assets')` returns `'/assets'`. That is what `path.resolve` does, not `path.join`.
++
++It is a third-party post that cites no sources. Only the nodejs.org result in that file is a primary source.
++
++## Open questions
++
++- None for these two facts. I didn't check `fs.cpSync`'s per-API history or stability table (the fetch was cut off). The `preserveTimestamps` default is stated in the v22 docs and confirmed by the test.
++
++Probe script used: a throwaway Node script that creates files with a 2020 mtime, runs both `cpSync` variants and prints mtimes and the `path` results. It ran from the session scratchpad and was not committed.

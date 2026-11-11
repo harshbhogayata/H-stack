@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+      "passed": true,
+      "evidence": "The reply states that \"`GET /download?file=../../../etc/passwd` resolves to `/etc/passwd`\" and that with `file=/etc/shadow`, `os.path.join` \"ignores `UPLOADS` and serves `/etc/shadow`\"."
+    },
+    {
+      "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+      "passed": true,
+      "evidence": "The reply says \"any file the app's process can read can be downloaded\" and that \"any caller who knows or guesses a filename can download another user's upload\", and it ends with \"the path traversal and the missing ownership check are still exploitable by any logged-in user.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

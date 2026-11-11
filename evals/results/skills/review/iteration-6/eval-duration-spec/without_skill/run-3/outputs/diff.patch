@@ -1,0 +1,11 @@
+diff --git a/cases.json b/cases.json
+new file mode 100644
+index 0000000..d19b7ae
+--- /dev/null
++++ b/cases.json
+@@ -0,0 +1,5 @@
++[
++  { "input": "500ms", "expected": 500 },
++  { "input": "1m5ms", "expected": 60005 },
++  { "input": "1.5ms 2s", "expected": 2001.5 }
++]

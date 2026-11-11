@@ -1,0 +1,19 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..6f625b8
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,13 @@
++# CLAUDE.md
++
++shop-api: a TypeScript API. Scripts are in `package.json`; team rules come from `CONTRIBUTING.md`.
++
++## Rules
++
++- **Money is integer cents.** Use the `Cents` type from `src/money.ts` for every amount, and do arithmetic in whole cents. `Cents` is a plain `number` alias, so the compiler accepts a float; round explicitly (e.g. `Math.round`) wherever division or percentages produce one.
++- **Shipped migrations are immutable.** To change the schema, add a new migration.
++- **`legacy/` is frozen.** Change it only for a security fix; put new behaviour outside it.
++
++## Before you finish
++
++`npm test` and `npm run lint` both pass. CI runs both, and the team expects `npm test` green before every push.

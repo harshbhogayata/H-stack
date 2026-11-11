@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: 2 passed\n"
+    },
+    {
+      "text": "The reply identifies that the upper bound (x > hi returning hi) is not tested, ideally by showing that a mutation of that line still passes",
+      "passed": true,
+      "evidence": "The reply says \"The tests check the lower bound, but they never check the upper bound\", and its mutation table shows \"Upper bound removed (`clamp(15,0,10)` returns 15) | **tests still pass**\"."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed: guidance mode, not a full audit)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies SQL injection through req.query.name concatenated into the query, citing users.js and the query line",
+      "passed": true,
+      "evidence": "The reply says \"`searchUsers` has a **SQL injection** bug at `users.js:5`\", quotes the concatenated `LIKE '%\" + name + \"%'` query, and states \"`req.query.name` goes straight into the SQL string.\""
+    },
+    {
+      "text": "The reply gives the smallest source fix (a parameterised query using db.query's params argument)",
+      "passed": false,
+      "evidence": "The fix does use db.query's params argument (\"`db.query(sql, params)` already accepts a `params` argument\"), but it also adds a `typeof` type check, `%`/`_` escaping with `name.replace(/[\\\\%_]/g, '\\\\$&')` and an `ESCAPE '\\\\'` clause, so it is not the smallest change."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

@@ -1,0 +1,41 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..11097aa
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,35 @@
++# Answer: `fs.rmSync` options in Node 22
++
++Node 22 documents the signature `fs.rmSync(path[, options])`. It accepts these four options:
++
++| Option | Type | Default | Meaning |
++|---|---|---|---|
++| `force` | boolean | `false` | When `true`, exceptions are ignored if `path` does not exist. |
++| `maxRetries` | integer | `0` | If an `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY` or `EPERM` error occurs, Node retries the operation with a linear backoff that waits `retryDelay` ms longer on each try. This sets the number of retries. It is ignored unless `recursive` is `true`. |
++| `recursive` | boolean | `false` | When `true`, Node removes the directory recursively. In recursive mode, failed operations are retried. |
++| `retryDelay` | integer | `100` | The time in milliseconds to wait between retries. It is ignored unless `recursive` is `true`. |
++
++## Which option fixes it
++
++**`recursive: true`** is the fix:
++
++```js
++fs.rmSync(dir, { recursive: true });
++// common idiom: also don't throw if it's already gone
++fs.rmSync(dir, { recursive: true, force: true });
++```
++
++`force` alone does **not** fix the problem. It only suppresses the error when the path does not exist. `maxRetries` and `retryDelay` only matter when `recursive: true` is also set.
++
++Without `recursive`, `rmSync` refuses to remove any directory, including an empty one. So the failure is not limited to non-empty folders.
++
++## Verified locally (Node v22.23.4)
++
++```
++fs.rmSync(dir)                                  -> throws ERR_FS_EISDIR "Path is a directory: rm returned EISDIR"
++fs.rmSync(dir, { recursive: true })             -> directory and contents removed
++fs.rmSync(missing, { recursive: true })         -> throws ENOENT
++fs.rmSync(missing, { recursive: true, force: true }) -> no error
++```
++
++Reference: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options

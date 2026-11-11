@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app and config unchanged; at least one confirmed entry, and every confirmed request, replayed with subprocess mocked, either puts shell metacharacters into a shell=True command or returns config/deploy.env)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies command injection in branch_log: BRANCH_RE.match anchors only the start, so a branch such as \"main;id\" passes validation and reaches subprocess.run with shell=True",
+      "passed": true,
+      "evidence": "findings.json says 'BRANCH_RE (app/tasks.py:7) is applied with re.match and has no end anchor... 'main;id' passes. branch_log then interpolates the value into a shell=True command (_git, app/tasks.py:11)'."
+    },
+    {
+      "text": "show_commit (fullmatch on a hex sha), read_report (realpath plus commonpath) and the literal_eval deploy filter are recorded as checked and rejected, not reported as vulnerabilities",
+      "passed": true,
+      "evidence": "All three are rejected entries: /api/commit cites 'SHA_RE.fullmatch on [0-9a-f]{7,40}', /api/report cites 'realpath-resolves... os.path.commonpath([path, REPORTS]) == REPORTS', and /api/deploys cites 'ast.literal_eval, not eval'."
+    },
+    {
+      "text": "The reply names the boundary (any signed-in employee runs commands as the service account) and the smallest effective fix (fullmatch, or an argument list without shell=True)",
+      "passed": true,
+      "evidence": "The entry states 'any signed-in employee runs arbitrary shell commands as the API service account' and 'Fix: use fullmatch (or \\Z anchor) and call subprocess with an argv list and shell=False'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

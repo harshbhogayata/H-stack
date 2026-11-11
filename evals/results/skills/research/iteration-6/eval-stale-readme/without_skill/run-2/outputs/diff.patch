@@ -1,0 +1,44 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..7aaec76
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,38 @@
++retries_429_by_default: no
++honours_http_date_retry_after: no
++
++## Summary
++
++With the installed tinyretry (vendor/tinyretry, v3.1.0, linked via `"tinyretry": "file:vendor/tinyretry"`), `src/client.js` does **not** retry 429s, and even if 429 were added to `retryOn`, an HTTP-date `Retry-After` would be ignored.
++
++## 1. 429 is not retried by default
++
++`vendor/tinyretry/defaults.js`:
++
++```js
++retryOn: [408, 502, 503, 504],
++```
++
++429 (and 500) are not in the list. `src/client.js` only passes `{ retries: 4 }`, so it gets this default. In `index.js`, `if (!opts.retryOn.includes(res.status) || ...) return res;` hands the 429 straight back, and `pushOrders` throws `partner API returned 429`.
++
++The CHANGELOG for 3.0.0 says "The default `retryOn` list changed; see `defaults.js`". The README ("Retries ... 408, 429, 500, 502, 503 and 504") and the team wiki (last edited 2025-10-14, before 3.0.0) are out of date.
++
++## 2. An HTTP-date `Retry-After` is not honoured
++
++`index.js`:
++
++```js
++function parseRetryAfter(value) {
++  if (value == null) return null;
++  const seconds = Number(value);
++  return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : null;
++}
++```
++
++`Number("Wed, 11 Nov 2026 10:00:00 GMT")` is `NaN`, so the function returns `null`. The code then uses the normal jittered exponential backoff (`random(0, min(10000, 200 * 2^attempt))` ms) and ignores the date. Date support was added in 2.4.0 but was lost in the 3.0.0 rewrite, and nothing in the changelog says so. Seconds values still work, but they are capped at `maxDelay` (10 s by default, per 3.1.0).
++
++## What to do
++
++- Pass `retryOn: [408, 429, 502, 503, 504]` (add 500 if you want it) in `src/client.js`.
++- Handle HTTP-date `Retry-After` yourself, or patch `parseRetryAfter` to fall back to `Date.parse(value) - Date.now()`. Also raise `maxDelay` if the partner's rate-limit windows can be longer than 10 s.
++- Update the team wiki, which currently says not to add your own 429 handling.

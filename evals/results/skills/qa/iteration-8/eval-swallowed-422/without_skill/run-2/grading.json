@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app unchanged; QA-REPORT.md mentions the 422; e2e/subscribe.test.js fails on the current app and passes once app.js checks res.ok)",
+      "passed": false,
+      "evidence": "check exit 1: e2e test still fails once the app checks res.ok\n"
+    },
+    {
+      "text": "The agent captured the failed request in the browser flow (the POST /api/subscribe returning 422 for an address with +) rather than only reading the code",
+      "passed": true,
+      "evidence": "The test uses `page.waitForResponse((r) => r.url().endsWith('/api/subscribe') && r.request().method() === 'POST')` and asserts `r.status` is 422, and the report's Chromium table records `jane+news@example.com` → `422 Addresses with + are not supported.` → 'You're subscribed ❌'."
+    },
+    {
+      "text": "QA-REPORT.md names the cause: public/app.js shows the success message without checking the response status, so server validation errors are hidden",
+      "passed": true,
+      "evidence": "QA-REPORT.md states '`public/app.js` never looks at the HTTP response' and 'any server-side rejection lands on the success branch', with the snippet showing `status.textContent = \"You're subscribed. ...\"; // shown unconditionally`."
+    },
+    {
+      "text": "The e2e test starts and stops the server and browser itself and asserts on what the user sees (the status text) for a rejected address",
+      "passed": true,
+      "evidence": "`before()` spawns `server.js` with PORT 0 and calls `chromium.launch()`, `after()` calls `browser?.close()` and `server?.kill()`, and each rejected-address test asserts `assert.doesNotMatch(r.message, SUCCESS, ...)` where `r.message` is the `#status` text. The test also asserts the exact error text "
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

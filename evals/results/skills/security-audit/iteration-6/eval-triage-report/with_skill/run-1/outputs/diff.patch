@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..2752c4c
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "avatarUrl() passes the user value through encodeURIComponent before inserting it into a path relative to the fixed AVATAR_ORIGIN, so '/', '@' and ':' are percent-encoded and cannot change the host. Local check: user='//169.254.169.254/latest/meta-data' fetches https://avatars.example-cdn.net/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png, and user='@internal.host' fetches https://avatars.example-cdn.net/u/%40internal.host.png. Both requests stay on the CDN origin."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 14,
++    "why": "isAllowedTarget() blocks only localhost, 127.0.0.1, 0.0.0.0 and hostnames starting with '10.' or '192.168.'. It does not block link-local 169.254.0.0/16 (cloud metadata), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback/ULA ([::1], [fc00::]), or DNS names that resolve to internal addresses. testWebhook() then POSTs to the target and returns the first 500 bytes of the response body to the caller. Any signed-in member can therefore make the server send requests to internal hosts and read the responses. Local check with a mock http client: the request above returns 200 {delivered:true, preview:<upstream body>}, and the mock shows a POST to https://169.254.169.254/latest/meta-data/. Fix: resolve the host and reject private, loopback, link-local and ULA ranges on the resolved IP (and pin that IP for the request), or allowlist webhook destinations."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "The sort value is only used as a key into the SORT_COLUMNS allowlist, and unknown values fall back to 'created_at'. dir maps only to the constants ASC or DESC. User input never reaches the SQL string. Local check: sort='name;DROP TABLE users' produces 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50'."
++  }
++]

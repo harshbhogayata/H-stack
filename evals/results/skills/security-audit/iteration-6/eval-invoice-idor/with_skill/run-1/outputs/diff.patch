@@ -1,0 +1,43 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..32330ce
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,37 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 55,
++    "why": "The ownership check is registered as router.use('/invoices/:id', requireOwner) (src/app.js:7), but Router.compile anchors the pattern as ^/invoices/([^/]+)$ (src/router.js:13), so it never matches /invoices/:id/pdf. getInvoicePdf checks only that the invoice exists, not who owns it. Run locally with Alice's token, this request returned 200 and a base64 PDF that decodes to 'Invoice inv_1002 | Customer cust_bob | Consulting: 990.00 | Total 990.00', which is Bob's invoice. The same works for inv_1003."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 46,
++    "why": "getInvoice has no ownership check of its own, but the requireOwner middleware pattern matches this exact path and runs first. Locally it returned 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv%5F1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 28,
++    "why": "Percent-encoding the id doesn't create a mismatch. The middleware and the handler decode params the same way, so requireOwner sees inv_1002 and returns 403 (checked locally)."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 13,
++    "why": "A trailing slash skips the middleware but also matches no handler, so the request returns 404."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 42,
++    "why": "listInvoices filters by req.user.id before it applies the optional status query filter, so neither a query of status=open nor no query at all returns another customer's invoices. Checked locally: Alice saw only inv_1001, and an empty list with status=open."
++  }
++]

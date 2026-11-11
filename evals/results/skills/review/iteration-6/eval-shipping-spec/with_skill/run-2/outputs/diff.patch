@@ -1,0 +1,49 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..4212d9a
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,43 @@
++# Review: checkout.js against SPEC.md
++
++Scope: `checkout.js` (22 lines) at commit `9e7de00`, checked against `SPEC.md` rules 1–4. `npm test` passes, but none of the 4 existing tests applies a discount to a cart at or above 5000 cents, so the bug below gets past them.
++
++## Findings
++
++### 1. Free shipping uses the subtotal before the discount, not after it (spec rule 3)
++
++- **File:line:** `checkout.js:17`
++- **Code:** `const shipping = subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING;`
++- **Verdict:** confirmed (reproduced with `node`)
++- **Severity:** major. This affects any discounted order whose subtotal is at least 5000 but falls below 5000 after the discount. That is a normal case with SPRING10 or STAFF25. The customer gets free shipping they are not entitled to, and every such order loses 495 cents of revenue.
++- **Why:** SPEC rule 3 says shipping is free "when the subtotal **after the discount** is at least 5000 cents". The code checks `subtotal` before `discount` is calculated (line 18).
++
++| Input | Expected (per SPEC) | Actual |
++|---|---|---|
++| `totals([{ price: 5000, qty: 1 }], 'SPRING10')` | `{ subtotal: 5000, discount: 500, shipping: 495, total: 4995 }` | `{ subtotal: 5000, discount: 500, shipping: 0, total: 4500 }` |
++| `totals([{ price: 5500, qty: 1 }], 'STAFF25')` | `{ subtotal: 5500, discount: 1375, shipping: 495, total: 4620 }` | `{ subtotal: 5500, discount: 1375, shipping: 0, total: 4125 }` |
++
++**Suggested fix (not applied):** compute `discount` first, then `const shipping = subtotal - discount >= FREE_SHIPPING_FROM ? 0 : SHIPPING;`. Add the first row above as a regression test in `test.js`.
++
++## Rejected (checked; these are not bugs)
++
++- **Half-up rounding (rule 2), `checkout.js:12`:** `Math.round` rounds .5 upward, and amounts here are non-negative. `subtotal * percent` is an exact integer, and IEEE division produces an exact `x.5`. Example: `totals([{price:1005,qty:1}],'spring10')` gives discount `101` (100.5 rounds to 101), which is correct.
++- **Prototype keys as codes, `checkout.js:10`:** after `toUpperCase()`, inputs such as `'__proto__'` and `'toString'` become `'__PROTO__'` and `'TOSTRING'`. Neither exists on `Object.prototype`, so both return discount 0 (I verified this).
++
++## Minor (optional; outside the spec's inputs)
++
++- **`checkout.js:10`: a code that is a truthy non-string throws.** `code.toUpperCase()` fails on input like `totals(lines, 10)` with a `TypeError`. The spec treats codes as strings, so this only matters if callers can pass raw, unvalidated input. Verdict: confirmed. Severity: minor.
++- **Codes with surrounding whitespace are ignored.** `' spring10'` is treated as an unknown code. The spec says nothing about trimming, so this is spec-compliant. I'm noting it only in case the UI passes input without trimming. Severity: minor.
++
++## Cleared
++
++- Rule 1, subtotal (`checkout.js:6`): Σ price×qty with initial value 0. An empty cart gives 0.
++- Rule 2, discount (`checkout.js:9–13`): uses the percentage of the subtotal, rounds half up, is case-insensitive, ignores unknown or absent codes, and returns 0 for an empty-string code.
++- Rule 3, threshold value and comparison: `>= 5000` and 495 match the spec. Only the base being compared is wrong (Finding 1).
++- Rule 4, total (`checkout.js:19`): `subtotal - discount + shipping` matches the spec.
++- Existing tests: all 4 pass.
++
++## Not reviewed
++
++- Callers of `totals` and input validation upstream (negative or fractional prices and quantities, non-integer cents). Neither is in this repo.
++- Independent blind review lanes: the H-Stack `review-lane` subagents were not available in this run. This is a single-reviewer pass on payment code, so it should not be the only gate before merge.

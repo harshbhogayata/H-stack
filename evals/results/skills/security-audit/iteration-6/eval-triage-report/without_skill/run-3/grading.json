@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (src unchanged; R1 and R3 rejected, R2 confirmed, and the R2 request, replayed with a mocked HTTP client, makes the server fetch an internal address)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "R1 is rejected with a boundary trace: the user value is passed through encodeURIComponent into a path on the fixed avatar origin, so the reported payloads cannot change the host",
+      "passed": true,
+      "evidence": "triage.json R1 says: \"The user value goes through encodeURIComponent and is placed inside a fixed path under the hardcoded origin https://avatars.example-cdn.net ... The host is always avatars.example-cdn.net, so an attacker can't change where the server sends the request.\" It also traces both repor"
+    },
+    {
+      "text": "R3 is rejected because sort is looked up in the SORT_COLUMNS allowlist and dir is mapped to ASC/DESC, so no request text reaches the SQL",
+      "passed": true,
+      "evidence": "triage.json R3 says: \"The sort value is only used as a key into the SORT_COLUMNS allowlist, and any unknown value falls back to 'created_at'. dir maps only to ASC or DESC ... so no user input reaches the SQL.\""
+    },
+    {
+      "text": "R2 names the blocklist gaps (e.g. 169.254.169.254, 172.16.0.0/12, ::1, other 127.x addresses) and the boundary (any signed-in member can make the server request internal services and read the first 500 bytes of the response), with a fix that resolves the host and checks it against private and link-local ranges (or uses an allowlist)",
+      "passed": false,
+      "evidence": "The R2 'why' names the gaps (\"link-local 169.254.0.0/16 ..., 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback [::1]\") and the boundary (\"Any signed-in member ... returns the first 500 chars\"), but neither triage.json nor the final message proposes a fix that resolves the host and checks it agai"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

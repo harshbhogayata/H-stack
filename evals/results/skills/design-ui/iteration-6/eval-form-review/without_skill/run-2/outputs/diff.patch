@@ -1,0 +1,50 @@
+diff --git a/ui-review.json b/ui-review.json
+new file mode 100644
+index 0000000..939927d
+--- /dev/null
++++ b/ui-review.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 30,
++    "problem": "The email label points to htmlFor=\"signup-email\" but the input's id is \"email\". The label isn't associated with the field, so the input has no accessible name and clicking the label doesn't focus it.",
++    "fix": "Change the input to id=\"signup-email\" so it matches the label's htmlFor."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 18,
++    "problem": "The submit error is saved to state but never rendered. It only shows up as a red border on the password field, even when the error is about the email or the terms. Screen-reader users get nothing, sighted users get no message, and the error is never cleared after the user fixes the input.",
++    "fix": "Render the error text in an element with role=\"alert\" (or a live region) and an id. Point the related field to it with aria-describedby, and only mark that field invalid. Clear the error when the user edits the field or submits again."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 34,
++    "problem": "The invalid state is shown only with the .is-invalid class (a color change). There is no aria-invalid, so assistive technology doesn't know the field is invalid, and users who can't see the color difference don't either.",
++    "fix": "Add aria-invalid={Boolean(error)} (scoped to the field the error is about) along with aria-describedby pointing to the visible error message."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 40,
++    "problem": "The terms 'checkbox' is a div with an onClick. It can't be reached with Tab or toggled with Space, it has no checkbox role or checked state for screen readers, and the text isn't a label.",
++    "fix": "Use a real control: <label className=\"signup__check\"><input type=\"checkbox\" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /> I agree to the terms</label>. Hide the native input visually if needed (not with display:none) and style the custom box from input:checked and input:focus-visible."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 10,
++    "problem": "On focus the outline is removed and border-color is set to var(--color-border), which is the same as the unfocused border. Keyboard users get no visible focus indicator on the inputs (WCAG 2.4.7).",
++    "fix": "Remove outline:none, or replace it with a clear indicator, e.g. .signup input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; } or a border color and box-shadow in var(--color-accent)."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 17,
++    "problem": "The custom box shows the checked state only by filling in the background color. There's no checkmark, and background colors are removed in forced-colors / high-contrast mode, so 'checked' and 'unchecked' look the same there.",
++    "fix": "Add a checkmark (pseudo-element or icon) as well as the fill, and add an @media (forced-colors: active) rule (e.g. background: Highlight / forced-color-adjust) so the state stays visible. Better still, rely on a native checkbox (see the SignupForm.jsx line 40 entry)."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 17,
++    "problem": "Submitting has no pending state. The button stays active while onSubmit is awaited, so users can submit twice and get no feedback. If onSubmit rejects, the error is unhandled and the UI shows nothing.",
++    "fix": "Track a submitting state. While it's true, disable the submit button or set aria-disabled and show a busy label. Wrap the await in try/catch/finally so failures set an error message and the pending state is always reset."
++  }
++]

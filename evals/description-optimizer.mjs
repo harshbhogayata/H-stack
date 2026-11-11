@@ -112,7 +112,7 @@ Misclassified training queries (expect=true means the skill should have been inv
 ${fails.map((f) => `- expect=${f.expect} (triggered in ${Math.round(f.rate * 100)}% of runs): ${f.q}`).join('\n')}
 
 Rewrite both fields. Rules: lead the description with the use case; put trigger phrases and example requests in when_to_use; plain factual wording, no imperatives or all-caps; generalise from the failures instead of quoting them; description + when_to_use together at most ${Math.min(CAP, (cur.description.length + (cur.when_to_use || '').length) + 40)} characters. Reply with JSON only: {"description": "...", "when_to_use": "..."}`;
-  const out = await claudeRun(['-p', prompt, '--output-format', 'json', '--max-turns', '1'], os.tmpdir(), 180000);
+  const out = await claudeRun(['-p', prompt, '--output-format', 'json', '--max-turns', '1', '--tools', ''], os.tmpdir(), 180000);
   try { const j = JSON.parse(out); const m = String(j.result || '').match(/\{[\s\S]*\}/); const c = JSON.parse(m[0]); const limit = Math.min(CAP, cur.description.length + (cur.when_to_use || '').length + 40); if (c.description && (c.description + (c.when_to_use || '')).length <= limit) return c; } catch { /* bad reply */ }
   return null;
 }

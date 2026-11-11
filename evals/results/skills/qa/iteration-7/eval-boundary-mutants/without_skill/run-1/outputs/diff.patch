@@ -1,0 +1,32 @@
+diff --git a/test/pricing.test.js b/test/pricing.test.js
+index a707a21..222c049 100644
+--- a/test/pricing.test.js
++++ b/test/pricing.test.js
+@@ -21,3 +21,27 @@ test('line total applies the discount', () => {
+ test('rejects non-integer quantities', () => {
+   assert.throws(() => discountRate(2.5), RangeError);
+ });
++
++test('tier boundaries are exact', () => {
++  const cases = [
++    [1, 0], [9, 0],
++    [10, 0.1], [11, 0.1], [49, 0.1],
++    [50, 0.2], [51, 0.2], [1000, 0.2],
++  ];
++  for (const [qty, rate] of cases) {
++    assert.equal(discountRate(qty), rate, `discountRate(${qty})`);
++  }
++});
++
++test('line total at tier boundaries', () => {
++  assert.equal(lineTotal(250, 9), 2250);
++  assert.equal(lineTotal(250, 10), 2250);
++  assert.equal(lineTotal(250, 49), 11025);
++  assert.equal(lineTotal(250, 50), 10000);
++});
++
++test('rejects zero, negative, and non-number quantities', () => {
++  for (const bad of [0, -1, -50, NaN, Infinity, '10', null, undefined]) {
++    assert.throws(() => discountRate(bad), RangeError, `discountRate(${String(bad)})`);
++  }
++});

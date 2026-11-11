@@ -1,0 +1,28 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..7e02d66
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,22 @@
++# CLAUDE.md
++
++This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
++
++## Project
++
++`shop-api` — a TypeScript API. The repo is at an early stage: right now it holds only `src/money.ts`. `package.json` lists no dependencies yet, so the scripts below need `tsx`, `vitest` and `eslint` to be installed before they run.
++
++## Commands
++
++- `npm run dev` — start the dev server with `tsx watch src/index.ts`. Note that `src/index.ts` does not exist yet.
++- `npm test` — run the test suite once with `vitest run`.
++- `npm test -- path/to/file.test.ts` — run one test file. Add `-t "test name"` to run tests whose names match.
++- `npm run lint` — run ESLint on the repo.
++
++Run `npm test` before pushing. CI also runs lint, so run `npm run lint` too.
++
++## Team rules (from CONTRIBUTING.md)
++
++- **Money is always integer cents.** Use the `Cents` type from `src/money.ts` and never use floats for money. `Cents` is only an alias for `number`, so the compiler won't stop a float from getting in. Keep all money math in integers and round on purpose at the edges, for example when parsing input or converting currency.
++- **Migrations:** never edit a migration that has shipped. Add a new one instead.
++- **`legacy/` is frozen:** only security fixes are allowed there. Don't refactor it or add features to it.

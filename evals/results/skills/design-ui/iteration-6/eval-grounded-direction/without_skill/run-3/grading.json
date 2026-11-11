@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The proposal is titled \"Morning Garden\" and says \"the garden is the progress bar\" for a \"read-aloud practice app for children aged 6–8\"; it also specifies a \"large pill button, at least 80pt tall\" and \"Touch targets of 64pt or more ... spaced generously for imprecise taps.\""
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It names hex colours such as \"Sprout green `#3FA34D`\" and the typefaces \"Lexend (or Andika). Both were made for early readers, with clear letter shapes and a single-storey 'a' and 'g'\", and it notes that \"Body text must meet AA contrast.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

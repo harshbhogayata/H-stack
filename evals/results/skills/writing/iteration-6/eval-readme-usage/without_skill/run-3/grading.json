@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (README documents both flags)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)",
+      "passed": true,
+      "evidence": "The README says it \"writes the result back to the same file\" and \"If the file is not valid JSON, `tidyjson` leaves it unchanged and exits with status code `2`\"; the agent says both come from the usage comment in cli.js, which is the only behaviour description in the code."
+    },
+    {
+      "text": "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'",
+      "passed": true,
+      "evidence": "The diff opens with the plain line \"A small command-line tool that reformats a JSON file in place.\" and none of 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer' appears anywhere in it."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

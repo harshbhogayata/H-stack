@@ -1,0 +1,1374 @@
+{
+  "metadata": {
+    "skill_name": "review",
+    "skill_path": "plugins/h-stack/skills/review",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T21:52:43.807Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "runs_per_configuration": 3,
+    "grader": "fresh claude -p per run, not told the arm; skill mentions redacted from the evidence"
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 30.246,
+        "tokens": 205393,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 says \"There's no balance check, so accounts can go negative\" and cites `accounts.js:6`: `accounts.set(from, accounts.get(from) - amount);`."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 says \"Account ids aren't checked, so an unknown id corrupts balances\" and gives the example that `transfer('a','zzz',10)` creates `zzz` \"with balance `NaN`\"."
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each bug gives a concrete input and a wrong result, for example \"`transfer('a','b',500)` when `a` holds 100 leaves `a = -400` and `b = 550`\" and \"`b` went from `560` to `5605`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 24.384,
+        "tokens": 163236,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "Finding 1 says \"`accounts.js:6`: `accounts.set(from, accounts.get(from) - amount);` ... Nothing checks that `from` has enough money\" and gives the example `transfer('a','b',500)` leaving `a = -400`."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 is titled \"Unknown account IDs make NaN balances and create or destroy money\" and says the new `zz` account gets `undefined + 10 = NaN`."
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each confirmed finding gives an input and the wrong result it produces, for example `transfer('a','b',500)` → `a = -400`, `\"10\"` → `b` becomes `\"56010\"`, and `transfer('a','b',NaN)` → both balances become NaN."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 35.895,
+        "tokens": 336368,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "The review cites \"`accounts.js:6`: `accounts.set(from, accounts.get(from) - amount);` Nothing checks the balance before debiting\" and shows `a = -400`."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "Finding 2 says \"`transfer('a','zzz',10)`: `a` drops to 90 and a new account `zzz` is created holding `NaN`.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each finding gives a concrete input and the wrong result it produces, e.g. \"`transfer('a','b','5')` sets `a = 95` and `b = '505'`\", and none of them are style opinions."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 22.493,
+        "tokens": 195708,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "\"**Overdrafts are allowed** (`accounts.js:6`). Nothing checks the sender's balance. `transfer('a','b',500)` leaves `a` at `-400`.\" Line 6 is the sender debit, which the agent's own text supports (\"The sender is debited before...\", with case 4 citing lines 6-7)."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "\"Unknown receiver: `transfer('a','zz',10)` takes 10 from `a`, then creates `zz` with a balance of `NaN`.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each blocking finding gives an input and its wrong result, for example \"`transfer('a','b','10')` leaves `a = 90` and `b = \\\"5010\\\"`\", and the agent says the results were \"pasted from the run\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 19.899,
+        "tokens": 195014,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "The review says \"**Overdrafts are allowed** (`accounts.js:6`). Nothing checks that `from` has enough money. `transfer('a','b',500)` leaves a at **-400**\". Other findings place the `+` on line 7 and the debit before the credit, which puts the subtraction on line 6."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "The review says \"**Unknown account IDs make money disappear or appear** (`accounts.js:6-7`). `accounts.get()` returns `undefined` for an ID it doesn't have, and the math turns that into `NaN`.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each main finding gives an input and the wrong result it produced, for example \"`transfer('a','b','10')` gives a=90 and b=**\\\"5010\\\"**\" and \"`0.1` followed by `0.2` leaves b at `50.300000000000004`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "seeded-bug",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.48,
+        "tokens": 156623,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+          "passed": true,
+          "evidence": "The review says \"**Accounts can be overdrawn** (`accounts.js:5-6`). Nothing checks that `from` has enough money,\" and the cited range 5-6 covers the debit line (the review places the debit before the credit at lines 6-7)."
+        },
+        {
+          "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+          "passed": true,
+          "evidence": "The review says \"**Unknown account IDs lose or create money** (`accounts.js:6-7`). Neither ID is checked against the map,\" and gives the example \"`transfer('a','zz',10)`: ... a new account `zz` is created with a balance of `NaN`.\""
+        },
+        {
+          "text": "Findings state a concrete input and wrong result rather than style opinions",
+          "passed": true,
+          "evidence": "Each main finding gives an input and its wrong result, for example \"`transfer('a','b',500)` leaves `a = -400` and `b = 550`\" and \"`transfer('a','b','10')` makes `a = 90` but `b = \"5010\"`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 31.315,
+        "tokens": 341917,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"Switch to `URL.parse(req.url)`: not done\" and gave the reason \"It doesn't exist on Node 18... `URL.parse` only arrived in Node 20.18 / 22.1\". The diff shows server.js still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The diff adds `a.strictEqual(statusFor('/nope'), 404);` to test.js, and the check command exited 0 and printed ok."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message and the suggested reviewer reply only state results such as \"1: Fixed.\" and \"2: Not applied...\", with no praise phrases."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 29.103,
+        "tokens": 385013,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"Switch to `URL.parse(req.url)`: declined... `URL.parse` doesn't exist in Node 18, and `package.json` still supports Node 18\", and the diff still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The diff adds `a.strictEqual(status('/nope'),404);` to test.js, and the check command exited 0 with 'ok'."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message opens with \"I made two of the three requested changes and declined the second one\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.634,
+        "tokens": 293293,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent declined item 2, saying \"`package.json` says the app supports Node 18 and up... `URL.parse` only arrived in Node 22.1 (backported to 20.18), so on Node 18 it doesn't exist\", and the diff leaves `new URL(req.url, 'http://localhost')` in place."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The test.js diff adds `requestHandler({url:'/nope'},...);a.strictEqual(code,404);`, and the check command printed `ok`."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message starts with \"I made two of the three changes and declined item 2\" and contains no praise such as 'Great point' or 'You're absolutely right'."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 19.811,
+        "tokens": 235617,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The reply says \"`URL.parse` first appeared in Node 20.18 / 22.1. `package.json` says the service supports Node 18 and up,\" and the diff still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "test.js now contains `a.strictEqual(call('/does-not-exist'), 404);`, and the check command exited 0 with output 'ok'."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The reply opens with \"I made two of the three review changes\" and contains no praise phrases anywhere."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 23.837,
+        "tokens": 276308,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent left the change out and wrote: \"`URL.parse` was added in Node 22.1, and `package.json` says Node 18 is supported\"; the diff still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The test.js diff adds `a.strictEqual(statusFor('/does-not-exist'), 404);`, and the check command printed \"ok\"."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The final message, including the suggested reply to the reviewer (\"Not applied. `URL.parse` returns `null`...\"), has no praise phrases."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "receiving-feedback",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 28.392,
+        "tokens": 358591,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (tests pass and new URL is kept)",
+          "passed": true,
+          "evidence": "check exit 0: ok\n"
+        },
+        {
+          "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+          "passed": true,
+          "evidence": "The agent wrote \"Did not switch to `URL.parse(req.url)`\" and explained that \"`URL.parse` only exists from Node 22.1, but `package.json` supports Node 18 and up\"; the diff still uses `new URL(req.url, 'http://localhost')`."
+        },
+        {
+          "text": "A 404 test is added (comment 3)",
+          "passed": true,
+          "evidence": "The diff adds `a.strictEqual(statusFor('/does-not-exist'), 404);` to test.js, and the check command exited 0 with output \"ok\"."
+        },
+        {
+          "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+          "passed": true,
+          "evidence": "The only acknowledgment is \"The reviewer is right that `new URL(...)` can throw\", which states a fact and backs it with a concrete crash case (`//`) rather than offering empty praise; no phrases like 'Great point' appear."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 17.363,
+        "tokens": 120837,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The review opens with \"I found no bugs that matter for normal use\", rates both findings \"Severity: minor (optional)\", and lists what it checked: \"Empty string\", \"`null`, `undefined` and numbers\" and \"Emoji first (`\\\"😀a\\\"`)\", along with how Unicode characters are split."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "Both observations (non-BMP letters and uppercase vs titlecase) are marked \"Severity: minor (optional)\", the second is called \"acceptable\", and the summary says there are no bugs that matter for normal use."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 19.212,
+        "tokens": 121145,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent states \"I found no real bugs in `strings.js`\" and lists what it checked, including \"Empty string: the `length === 0` guard returns `\"\"`\", \"`null`, `undefined` and numbers don't crash\", and unicode cases such as \"`\"éa\"` gives `\"Éa\"`\" and the Deseret surrogate-pair case."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The observations are headed \"**Findings (all minor, optional to fix)**\", each carries \"Severity: minor\", and the summary says it found \"no real bugs\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.317,
+        "tokens": 120719,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent says \"I found no bugs that matter in `strings.js`\" and lists what it checked: \"Empty string returns `\\\"\\\"`\", \"`null`, numbers and other non-strings come back unchanged\", and unicode cases such as \"𐐨x\", \"😀a\" and \"ßa\"."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The one finding is headed \"Minor, confirmed\" and marked \"Severity: minor ... Only fix it if the function is meant to handle all scripts\", and the summary calls it not a bug that matters."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666,
+        "time_seconds": 16.514,
+        "tokens": 154742,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The review never calls anything high-severity; its headline item is a niche surrogate-pair case (\"capitalize(\\\"𐐨abc\\\") → \\\"𐐨abc\\\"\"). It lists what it checked: \"Empty strings are handled correctly\", \"Non-string input: null, 42... come back unchanged\", plus non-BMP characters, ß, titlecase, Turkish "
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": false,
+          "evidence": "The edge cases are labelled \"worth knowing, may be acceptable\" and \"minor\". However, the narrow non-BMP casing issue is presented as \"one real bug\" under the heading \"**Bug: it doesn't capitalize characters outside the Basic Multilingual Plane**\" rather than being labelled minor or optional."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.513,
+        "tokens": 115423,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent wrote \"I found no real bugs in `strings.js`\" and said it checked that the function \"returns non-strings and `''` unchanged\", plus first characters outside the BMP and 'ß'."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "It did not use the word 'minor', but it called the observations \"Two edge cases [that] could matter if the input isn't limited to common text\" and said one \"only matters if you rely on the length staying the same\"; it labelled the null-handling point \"A design note, not a bug\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "clean-diff",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.179,
+        "tokens": 115392,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no code was changed)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+          "passed": true,
+          "evidence": "The agent says it \"found no real bugs\" and covers the empty string (\"an empty string or a non-string is returned unchanged\"), non-string input (\"capitalize(42) returns 42\") and a Unicode first character (\"capitalize('𐐨abc')\")."
+        },
+        {
+          "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+          "passed": true,
+          "evidence": "The agent never uses the words \"minor\" or \"optional\", but it presents the three items as \"edge cases worth knowing about\" after saying it \"found no real bugs\", and qualifies them with \"This only matters if you expect such text\" and \"That's fine if it's intended\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 56.135,
+        "tokens": 347036,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "REVIEW.md says \"`memoize` keys only on the first argument (the SKU)\" and gives a concrete example: quote CAP-03 in USD and then in EUR \"gives { subtotal: 1500 ... } wrong: EUR price is 1400\". It uses CAP-03 rather than TSHIRT-01, but the expectation only gives TSHIRT-01 as an example (\"e.g.\")."
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is labelled \"**Blocker. Confirmed.**\", and `var subtotal` is listed as \"Style only, not a finding\". Tax rounding is cleared. `qty == null` comes up only as part of a real validation bug (negative and NaN quantities), not as a style complaint."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": true,
+          "evidence": "REVIEW.md has a \"## Cleared\" section listing tax rounding, unsupported currency, unknown SKU and the defaults. It also has a \"## Not reviewed\" section naming the callers of `quote` and the concurrency of the cache."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 54.445,
+        "tokens": 304933,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "REVIEW.md Finding 1 says `memoize` keys its cache on the first argument only, which is the SKU, and gives a repro: `quote([{ sku: 'MUG-02' }], 'EUR') // { subtotal: 1200, tax: 240, total: 1440 }  expected 1100 / 220 / 1320` after a USD quote. The SKU differs from the suggested TSHIRT-01, but the exa"
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is marked '**Severity:** blocker'. The style points sit under 'Rejected (checked, not a problem)', for example '`var subtotal`: style only, no behaviour difference here' and 'Rounding half up for VAT is a policy choice, not a defect'."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": true,
+          "evidence": "REVIEW.md has 'Rejected', 'Cleared' and 'Not reviewed' sections. They cover tax rounding, `qty: 0`, 'an unknown SKU throws, and a missing `qty` defaults to 1', and 'Callers of `quote()` and where `cart` and `currency` come from'."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 43.581,
+        "tokens": 213705,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "REVIEW.md says \"`memoize` uses only the first argument (`sku`) as the cache key\" and gives the concrete case `quote([{ sku: 'MUG-02' }], 'USD')` then GBP returning \"total: 1440 wrong: should be 950 / 190 / 1140\"; this is a different SKU from the suggested example, which was given only as an e.g."
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is headed \"Blocker\" with \"Severity: critical\"; `var` is never mentioned, and the review files Math.round under Rejected (\"Tax rounding ... Fine\") and calls the missing-qty default \"intended\". It cites `item.qty == null` only as the line where qty is never validated, not as a style complain"
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": true,
+          "evidence": "REVIEW.md has a \"Rejected (checked; these do not hold)\" section that covers tax rounding, cached errors, cache growth and the missing-qty default, a \"Cleared\" section that includes \"checked the unknown SKU and missing currency errors\", and a \"Not reviewed\" section."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 41.171,
+        "tokens": 204469,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "Finding 1 cites `src/memoize.js:4`: `const key = args[0];` and gives a concrete example: `quote([{ sku: 'TSHIRT-01' }], 'USD')` followed by `quote([{ sku: 'TSHIRT-01' }], 'GBP')` returns subtotal 2000 and total 2400 instead of the expected 1600 and 1920."
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is rated **Critical** under 'Verdict: do not merge yet'; the `var subtotal` and Math.round `-0` points appear only under '## 4. Minor / nits. **Low**', and `item.qty == null` is not raised as a bug."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": false,
+          "evidence": "REVIEW.md only lists defects and says 'Every input below was run against the current code'; it never names any area that was checked and found correct, and never states what was left out of the review."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 49.974,
+        "tokens": 250400,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "REVIEW.md says \"`memoize` builds its cache key from the first argument only... the first currency quoted for a SKU gets cached\" and gives the example `quote([{ sku: 'CAP-03' }], 'EUR'); // { subtotal: 1500 ... } expected 1400`; it uses the name basePrice instead of priceFor and CAP-03 instead of TSH"
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is \"Severity: **Critical**\" with the verdict \"don't merge yet\", while `var` and rounding appear under \"Minor / nits. Severity: **Low**\", and rounding is described as \"a reasonable choice... Not a bug as written\"."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": false,
+          "evidence": "The review has no section on what was checked and found fine, and no statement of what was out of scope; the only near-instance is that tax rounding, listed among the Low findings, is \"Not a bug as written\", and missing qty, unknown SKU and unknown currency are never called correct."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "cache-key",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 44.087,
+        "tokens": 287976,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+          "passed": true,
+          "evidence": "Finding 1 says \"`memoize` builds its cache key from the first argument only (the SKU)\" and shows `quote([{ sku: 'MUG-02' }], 'GBP'); // { subtotal: 1200, ... } expected 950` after a USD quote, a concrete example equivalent to the one in the expectation."
+        },
+        {
+          "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+          "passed": true,
+          "evidence": "Finding 1 is headed \"**Critical**\" with \"Verdict: do not merge yet\", and the `var` and tax-rounding points sit under \"## 5. Minor / style — **Nit**\", where the rounding is called \"fine, but confirm\"."
+        },
+        {
+          "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+          "passed": false,
+          "evidence": "There is no section listing what was checked and found fine or what was out of scope; the only sign-off is one hedged line in a nit (\"tax is rounded once on the whole subtotal. That is fine, but confirm it matches the finance or VAT rule\"), and unknown SKU is raised as an issue (\"unclear errors\"), n"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 49.331,
+        "tokens": 299981,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"the regex tries the units in order, so `m` matches before `ms` is ever tried. In \\\"500ms\\\" it matches `500m` and leaves a lone `s`... throws `TypeError: invalid duration: \\\"500ms\\\"`\"."
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": true,
+          "evidence": "The reply puts these under 'Cleared' and 'Checked and rejected', e.g. \"Correctly rejected with `TypeError`: uppercase units (`\\\"1H\\\"`), malformed numbers (`\\\"1.s\\\"`, `\\\".5s\\\"`)\" and \"`\\\"1h1h\\\"` gives 7200000\", and it reports only the ms finding."
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply rates the bug \"severity **major**\", notes that the module \"reads timeouts from config, where values like `500ms` are common\", gives the fix \"list `ms` before `m`, i.e. `(ms|h|m|s)`\", and the diff touches only cases.json."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5,
+        "time_seconds": 45.189,
+        "tokens": 256685,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": false,
+          "evidence": "check exit 1: current code already returns the expected value: {\"input\":\"1.1h\",\"expected\":3960000}\n"
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"The regex tries the units in order, so it matches `m` before it gets to `ms`... so `parseDuration(\"500ms\")` throws a `TypeError` instead of returning 500.\""
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": false,
+          "evidence": "The reply correctly treats uppercase, \".5s\", \"1 h\" and repeated units as correct, but it reports \"1.1h\" as a bug (\"Some decimals come back slightly off\"), and the check found that \"current code already returns the expected value: {\\\"input\\\":\\\"1.1h\\\",\\\"expected\\\":3960000}\", so the reported bug is beh"
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply labels it \"confirmed, major\", notes \"this module reads timeouts, where `ms` is common\", proposes \"put `ms` before `m`: `(ms|h|m|s)`\", and the diff only adds cases.json."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5,
+        "time_seconds": 56.699,
+        "tokens": 350115,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": false,
+          "evidence": "check exit 1: current code already returns the expected value: {\"input\":\"1.1h\",\"expected\":3960000}\n"
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"JavaScript tries the alternatives in order, so `m` matches before `ms` gets a chance\" and that \"`\"500ms\"`, `\"1ms\"` and `\"1m500ms\"` all throw `TypeError`\"."
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": false,
+          "evidence": "The reply correctly clears uppercase units, \".5s\", spaces and repeated units, but it also reports floating-point error in \"1.1h\" as a bug even though the code does exactly the spec's \"number × unit factor\", and the check rejected that case with \"current code already returns the expected value: {\"inp"
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply rates it \"**major**\", notes \"Millisecond timeouts in config files are common, so real inputs will hit this\", gives \"**Fix:** put `ms` first, as in `(ms|h|m|s)`\", and the diff only adds cases.json."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5,
+        "time_seconds": 45.7,
+        "tokens": 291399,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": false,
+          "evidence": "check exit 1: current code already returns the expected value: {\"input\":\"2.3h\",\"expected\":8280000}\ncurrent code already returns the expected value: {\"input\":\"1.005s\",\"expected\":1005}\n"
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"The pattern lists the units as `(h|m|s|ms)`, and a regex takes the first alternative that matches. So in `\"500ms\"` it matches `500m` and leaves the `s` over... the function throws `TypeError`.\""
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": false,
+          "evidence": "The listed grammar cases are correctly marked \"Checked and correct\", but the reply reports floating-point results for \"2.3h\" and \"1.005s\" as behaviour bug #2, and the check command says \"current code already returns the expected value\" for both, so it reported conforming behaviour as a bug."
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply says \"a config value like `timeout: \"250ms\"` fails even though the spec allows it\" and \"Fix: put `ms` before `m` in the list, e.g. `(ms|h|m|s)`\"; the diff touches only cases.json."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 37.9,
+        "tokens": 164248,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"JavaScript tries alternatives left to right, so on \\\"500ms\\\" the `m` option matches before `ms` gets a chance... so the function throws.\""
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": true,
+          "evidence": "Under \"Other spec rules, checked and correct\" the reply lists \"Unknown or uppercase units (`10x`, `1d`, `1H`): throw\", \"Malformed numbers (`.5s`, `1.s`): throw\", \"Whitespace inside a part (`1 h`): throws\", and \"repeated units\" as correctly handled; the float note is explicitly labelled \"Not a bug\"."
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply says \"a config timeout like \\\"250ms\\\" will crash when the config is read. The fix is to put `ms` first in the alternation (`(ms|h|m|s)`)\", and the diff shows only cases.json was added, with duration.js left unchanged."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "duration-spec",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 40.589,
+        "tokens": 205913,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+          "passed": true,
+          "evidence": "The reply says \"`duration.js:2` builds the pattern as `(h|m|s|ms)`. The regex tries the alternatives in order, so for `\"500ms\"` it matches `m` and stops, leaving a stray `s`,\" and concludes that \"`ms` never parses.\""
+        },
+        {
+          "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+          "passed": true,
+          "evidence": "Under \"Checked and correct\", the reply lists uppercase units (`1H`), a space between number and unit (`1 h`) and `.5s` as correctly throwing a TypeError. It labels the BOM point \"A spec question, not counted as a bug\", and the only bug it reports is `ms`."
+        },
+        {
+          "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+          "passed": true,
+          "evidence": "The reply opens with \"Not ready to merge\" and says \"any duration that uses the `ms` unit is rejected\". It proposes \"**Fix:** put the longer unit first, `(ms|h|m|s)`\" and states \"I didn't touch `duration.js`\", and the diff changes only cases.json. It never mentions config-file millisecond timeouts in"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 37.323,
+        "tokens": 253504,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "Finding 1 cites `checkout.js:17` and SPEC.md rule 3 (\"after the discount\"), and gives the input `totals([{ price: 5000, qty: 1 }], 'SPRING10')` with expected shipping 495 / total 4995 and actual shipping 0 / total 4500, plus a second STAFF25 input."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "The only finding is the shipping bug; half-up rounding, case-insensitive codes and unknown codes are listed under \"Rejected suspicions (checked; they do not hold)\" and \"Cleared\", and the >= comparison is never flagged."
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "Severity is \"major\" because a discounted cart \"gets free shipping when it shouldn't\", and the cause section says \"The comparison needs to be `subtotal - discount >= FREE_SHIPPING_FROM`, after the discount has been computed.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 43.875,
+        "tokens": 298675,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "Finding 1 at checkout.js:17 cites rule 3 'after the discount' and gives `totals([{ price: 5000, qty: 1 }], 'SPRING10')`, which is expected to give shipping 495 and total 4995 but actually gives shipping 0 and total 4500."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "Under 'Rejected' and 'Cleared' the review says 'Math.round rounds .5 upward... which is correct', and 'threshold value and comparison: `>= 5000` and 495 match the spec', and that the code 'is case-insensitive, ignores unknown or absent codes'. Its minor notes are about inputs outside the spec, and t"
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "The review rates it 'Severity: major... The customer gets free shipping they are not entitled to', and its suggested fix is 'compute `discount` first, then `const shipping = subtotal - discount >= FREE_SHIPPING_FROM ? 0 : SHIPPING;`'."
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 29.326,
+        "tokens": 209988,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "REVIEW.md finding 1 cites `checkout.js:17` and SPEC.md rule 3, and gives `totals([{price: 5200, qty: 1}], 'STAFF25')`, expected `shipping: 495, total: 4395`, actual `shipping: 0, total: 3900`."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "Under 'Checked and found correct', REVIEW.md lists the `>=` 5000 threshold, `Math.round` rounding .5 up, `toUpperCase` case-insensitivity and unknown codes giving discount 0, and none of them is reported as a finding."
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "REVIEW.md rates it 'Severity: major... gets free shipping it should not get, so the customer is undercharged 495 cents' and says 'The fix is to compute the discount first and compare `subtotal - discount` with `FREE_SHIPPING_FROM`.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 27.461,
+        "tokens": 161482,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "REVIEW.md finding 1 cites `checkout.js:17` and Rule 3 ('when the subtotal **after the discount** is at least 5000 cents'), and gives the input `totals([{ price: 5000, qty: 1 }], 'SPRING10')`: expected shipping 495, total 4995; actual shipping 0, total 4500."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "The 'Checked and conforming' section lists half-up rounding with `Math.round`, case-insensitivity and ignored unknown codes as correct, and finding 3 treats a discounted subtotal of exactly 5000 getting free shipping as correct; the only other finding (a non-string code throwing) is not one of these"
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "Finding 1 is rated 'High', says 'The store undercharges 495 cents on each of these orders', and gives the fix 'Compute the discount first, then use `subtotal - discount >= FREE_SHIPPING_FROM`.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 27.066,
+        "tokens": 161170,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "REVIEW.md cites `checkout.js:17` and quotes SPEC.md rule 3 (free shipping when the subtotal \"after the discount\" is at least 5000). Its input is `totals([{ price: 5000, qty: 1 }], 'SPRING10')`, with expected shipping 495 and total 4995 against actual shipping 0 and total 4500."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "The 'Checked and found compliant' section lists rounding half up, case-insensitive codes and unknown codes being ignored, and no finding reports the >= boundary as a bug. The only other finding is a Low test-coverage gap."
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "The finding is rated 'High' because 'Customers who use a discount code are undercharged on shipping'. The suggested fix is 'calculate `discount` first, then compare `subtotal - discount` with `FREE_SHIPPING_FROM`.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "shipping-spec",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 31.646,
+        "tokens": 244613,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+          "passed": true,
+          "evidence": "Finding 1 cites `checkout.js:17` and SPEC.md rule 3 (\"when the subtotal **after the discount** is at least 5000 cents\"), then gives `totals([{ price: 5200, qty: 1 }], 'spring10')` with expected shipping `495`, total `5175`, actual shipping `0`, total `4680`, plus a STAFF25 example."
+        },
+        {
+          "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+          "passed": true,
+          "evidence": "The \"Checked and matches the spec\" section lists rounding half up, case-insensitive codes and unknown codes being ignored as correct, and the only findings are the shipping-order bug and a test gap; nothing flags the >= comparison as a defect."
+        },
+        {
+          "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+          "passed": true,
+          "evidence": "The finding is rated \"High. Customers are charged the wrong amount: free shipping is given on orders that should pay 495 cents\", and the fix it gives is \"Calculate the discount first, then compare `subtotal - discount` against `FREE_SHIPPING_FROM`.\""
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.944,
+        "stddev": 0.157,
+        "min": 0.5,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 35.687,
+        "stddev": 12.944,
+        "min": 17.363,
+        "max": 56.699
+      },
+      "tokens": {
+        "mean": 256807.944,
+        "stddev": 83331.327,
+        "min": 120719,
+        "max": 385013
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.912,
+        "stddev": 0.151,
+        "min": 0.5,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 28.873,
+        "stddev": 11.57,
+        "min": 11.179,
+        "max": 49.974
+      },
+      "tokens": {
+        "mean": 209727.111,
+        "stddev": 64019.52,
+        "min": 115392,
+        "max": 358591
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.03",
+      "time_seconds": "+6.8",
+      "tokens": "+47081"
+    }
+  },
+  "notes": [
+    "3 runs per configuration per eval."
+  ]
+}

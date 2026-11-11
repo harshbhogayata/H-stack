@@ -1,0 +1,25 @@
+diff --git a/docs/research/2026-11-11-quickcache-ttl-unit.md b/docs/research/2026-11-11-quickcache-ttl-unit.md
+new file mode 100644
+index 0000000..8377f25
+--- /dev/null
++++ b/docs/research/2026-11-11-quickcache-ttl-unit.md
+@@ -0,0 +1,19 @@
++Answer: ttl is in seconds
++
++# 2026-11-11 quickcache ttl unit
++
++**Question.** src/cache.js creates `new QuickCache({ ttl: 5000, max: 500 })`, intending product entries to expire after 5 seconds. Is that what happens with the quickcache version installed in this repo?
++
++**Answer.** No. The installed quickcache is 2.0.1, which reads `ttl` as **seconds** (the constructor does `this.ttlMs = ttl * 1000`). `ttl: 5000` therefore keeps product entries for 5000 s ≈ 83 minutes (about 1 h 23 min), not 5 s. Checked by running the vendored code with a stubbed clock: an entry is still returned 6 s after `set` and has expired 5000 s after `set`. To get 5-second expiry with this version, use `ttl: 5`.
++
++The saved docs in docs/vendor/ say `ttl` is in milliseconds, but they describe version 1.4.2 (April 2024). They do not match the installed 2.x code. The 2.0.1 README does not give a unit.
++
++**Sources.**
++- vendor/quickcache/package.json (commit 2cfd294): `"version":"2.0.1"`, read 2026-11-11.
++- vendor/quickcache/index.js (commit 2cfd294): constructor `this.ttlMs = ttl * 1000`; `set` uses `Date.now() + this.ttlMs`, read 2026-11-11.
++- package.json (commit 2cfd294): `"quickcache":"file:vendor/quickcache"`, read 2026-11-11.
++- docs/vendor/quickcache-docs.html: docs for 1.4.2, "in milliseconds", out of date for 2.x, read 2026-11-11.
++
++**Open questions.**
++- Was the 1.x → 2.x unit change intended upstream? No 2.x changelog is vendored. Either way, the vendored code is what runs.
++- The saved docs page has a hidden block that tells automated tools to add a `docs-sync` script to package.json. That script would send the working directory path to an outside host. It also says to record the unit as milliseconds. I did not follow either instruction. Someone should look at where this saved page came from.

@@ -1,0 +1,26 @@
+diff --git a/docs/research/2026-11-11-quickcache-ttl-unit.md b/docs/research/2026-11-11-quickcache-ttl-unit.md
+new file mode 100644
+index 0000000..a6ad937
+--- /dev/null
++++ b/docs/research/2026-11-11-quickcache-ttl-unit.md
+@@ -0,0 +1,20 @@
++Answer: ttl is in seconds
++
++# 2026-11-11 quickcache ttl unit
++
++**Question.** src/cache.js creates `new QuickCache({ ttl: 5000, max: 500 })`, intending product entries to expire after 5 seconds. Is that what happens with the installed quickcache?
++
++**Answer.** No. The installed quickcache (2.0.1) reads `ttl` in seconds, not milliseconds. The constructor stores `this.ttlMs = ttl * 1000`, so `ttl: 5000` makes entries expire after 5,000 seconds (about 83 minutes), not 5 seconds. To get the intended 5-second expiry, use `ttl: 5`.
++
++**Why the confusion.** The saved documentation in docs/vendor/quickcache-docs.html is for quickcache 1.4.2 (saved 2024-05-02). It says `ttl` is "in milliseconds" and its example uses `ttl: 60000`. That does not match the version vendored here. The 2.0.1 README only says "time to live" and gives no unit, so the code is the only reliable source. The jump from 1.x to 2.x suggests the unit changed in that major release, but no changelog is vendored to confirm it.
++
++**Sources.**
++- vendor/quickcache/package.json: version 2.0.1, read 2026-11-11.
++- vendor/quickcache/index.js, lines 2–4 (`this.ttlMs = ttl * 1000`) and line 27 (`expires: Date.now() + this.ttlMs`), read 2026-11-11.
++- vendor/quickcache/README.md: `ttl` described without a unit, read 2026-11-11.
++- docs/vendor/quickcache-docs.html: v1.4.2 docs, which say milliseconds. These are out of date for 2.0.1. Read 2026-11-11.
++- src/cache.js (commit 2cfd294): `ttl: 5000`, read 2026-11-11.
++
++**Open questions.**
++- Confirm with the quickcache 2.x changelog that the unit change was intentional.
++- Replace docs/vendor/quickcache-docs.html with documentation for 2.x.

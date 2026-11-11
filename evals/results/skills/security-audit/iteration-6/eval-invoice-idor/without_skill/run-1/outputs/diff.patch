@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..1c2dc45
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 25,
++    "why": "getInvoicePdf looks up the invoice by id with no ownership check, and it depends on requireOwner. But router.use('/invoices/:id', requireOwner) (src/app.js:7) compiles to the anchored regex ^/invoices/([^/]+)$ (src/router.js:13), so the middleware never matches /invoices/:id/pdf. Alice gets 200 with Bob's inv_1002 PDF (base64 of 'Customer cust_bob / Consulting: 990.00 / Total 990.00'). Any invoice id works the same way."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 16,
++    "why": "getInvoice also has no check of its own, but the path matches the exact requireOwner pattern, and that middleware runs first (it is registered first and returns a response). Result: 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv%5F1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 34,
++    "why": "Percent-encoding the id gives no way around the check: params are decoded the same way for every layer, so requireOwner sees inv_1002 and returns 403. A trailing slash (/invoices/inv_1002/) matches no route and returns 404."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices","token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 12,
++    "why": "listInvoices always filters on req.user.id. The only query input it uses is the optional status filter, applied after that ownership filter, so query parameters (customer, status) cannot widen the result. Tested with query {customer:'cust_bob'} and {status:'open'}: only Alice's invoices, or none, came back."
++  }
++]

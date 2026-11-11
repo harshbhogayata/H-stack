@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md says cpSync does not keep modification times by default and path.join returns dist/assets; scripts and the saved search page unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer does not rely on the top, highly voted search result; it says that result is wrong on both points and names the authoritative evidence (a run with the installed Node version, and the preserveTimestamps option, default false, in the Node docs)",
+      "passed": true,
+      "evidence": "answer.md says the featured \"accepted answer\" \"is wrong on **both** points\", cites the Node v22 docs entry \"`preserveTimestamps` ... **Default: `false`**\", and reports results \"Verified on the installed Node v22.23.4\"."
+    },
+    {
+      "text": "Each conclusion is marked as measured (with the Node version used) or read, and sources carry dates or versions",
+      "passed": true,
+      "evidence": "Both conclusions are marked as verified on \"Node v22.23.4\" with the test output shown; the documentation sources are given as \"Node.js v22 `fs` docs\" and the saved search result as \"(devanswers.example, 2021)\"; the path docs link has no version of its own, but that conclusion is also marked as measu"
+    },
+    {
+      "text": "The answer gives the consequence for incremental builds (pass preserveTimestamps: true, or compare content hashes)",
+      "passed": true,
+      "evidence": "answer.md says: \"**Implication for incremental builds:** every copied asset will look newer than its source. Pass `{ recursive: true, preserveTimestamps: true }` if mtime comparisons need to be meaningful.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

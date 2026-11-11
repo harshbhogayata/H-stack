@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (signup.html not changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent drove the page with a browser (a Playwright script that submits the form) rather than only reading the HTML",
+      "passed": true,
+      "evidence": "The agent says it \"opened the page in headless Chromium with Playwright, left the email field empty and clicked **Sign up**\", and it gives a test script at scratchpad/check.js and a screenshot at empty-submit.png. This is the agent's own report; no tool transcript was provided to confirm it."
+    },
+    {
+      "text": "The reply reports that submitting an empty email shows 'Thanks!' instead of an error",
+      "passed": true,
+      "evidence": "The reply says: \"submitting `signup.html` with an empty email shows **\\\"Thanks!\\\"** where it should show an error\", and adds that the `#msg` paragraph read \"Thanks!\" with no error text."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+      "passed": true,
+      "evidence": "The diff imports `import { Button } from './Button.jsx';` and the CSS uses `background: var(--surface); color: var(--text); border: 1px solid var(--border);` plus `border-color: var(--highlight)`, and the reply says price is a formatted string 'the same way `InvoiceSummary` takes `amount`'."
+    },
+    {
+      "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+      "passed": true,
+      "evidence": "The JSX renders `<p className=\"plan-card__badge\">Your current plan</p>` and a `<Button variant=\"secondary\" disabled>Current plan</Button>`, and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+    },
+    {
+      "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+      "passed": true,
+      "evidence": "The reply says 'dark mode and the in-app light/dark setting work without extra code' and 'Text contrast meets the WCAG AA standard in both light and dark mode', then 'Not verified: I haven't seen how it looks or checked the contrast and layout in a running app.' It is somewhat self-contradictory, si"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

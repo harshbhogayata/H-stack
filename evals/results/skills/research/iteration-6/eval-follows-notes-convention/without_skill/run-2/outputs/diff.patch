@@ -1,0 +1,76 @@
+diff --git a/docs/research/2026-11-11-node22-fetch-https-proxy.md b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+new file mode 100644
+index 0000000..4f91d49
+--- /dev/null
++++ b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+@@ -0,0 +1,70 @@
++# 2026-11-11 Does Node 22 global fetch() honour HTTPS_PROXY by default?
++
++## Answer
++
++**No.** In Node 22, global `fetch()` ignores `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` by default.
++Node only reads these variables if you turn proxy support on:
++
++- set `NODE_USE_ENV_PROXY=1`, or
++- start Node with `--use-env-proxy`.
++
++Both options were **added in v22.21.0**. Node marks them *Stability 1.1 – Active Development*.
++On Node 22 releases before 22.21.0, there is no built-in way to make `fetch()` use the environment proxy.
++You have to set an undici `EnvHttpProxyAgent` or `ProxyAgent` yourself with `setGlobalDispatcher`, using the `undici` npm package.
++
++## Evidence
++
++### 1. Node's v22 documentation
++
++From the CLI docs, `--use-env-proxy` and `NODE_USE_ENV_PROXY=1` (https://nodejs.org/docs/latest-v22.x/api/cli.html):
++
++> Added in: v22.21.0 — Stability: 1.1 - Active Development
++>
++> When enabled, Node.js parses the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables
++> during startup, and tunnels requests over the specified proxy.
++>
++> This is equivalent to setting the `NODE_USE_ENV_PROXY=1` environment variable. When both are set,
++> `--use-env-proxy` takes precedence.
++
++From the HTTP docs, "Built-in Proxy Support" (https://nodejs.org/docs/latest-v22.x/api/http.html#built-in-proxy-support), added in v22.21.0:
++
++> When Node.js creates the global agent, if the `NODE_USE_ENV_PROXY` environment variable is set to `1`
++> or `--use-env-proxy` is enabled, the global agent will be constructed with `proxyEnv: process.env`,
++> enabling proxy support based on the environment variables.
++
++The same section explains how the variables are read:
++- Lowercase names win over uppercase ones (`https_proxy` beats `HTTPS_PROXY`).
++- `NO_PROXY` holds the hosts that skip the proxy.
++- Requests to Unix domain sockets ignore the proxy.
++
++v22.21.0 also added a `proxyEnv` option to `http.Agent`, for custom agents.
++
++The documentation says "when enabled", so the behaviour is opt-in. One caveat: neither docs page names `fetch()` explicitly. The HTTP section only covers `http`/`https` agents. That `fetch()` is covered comes from the test below.
++
++### 2. Test on the local Node build
++
++The test script is at `/tmp/claude-0/-tmp-hs-bench-sgr7jA/8e2ddea9-627b-4ed9-a2e9-c8d60a8fb338/scratchpad/proxytest.js`. It works like this:
++- It starts a fake proxy on 127.0.0.1.
++- It sets `HTTPS_PROXY` to point at that proxy.
++- It runs `fetch('https://example.invalid/')` in a child process under each setting and counts how many requests reach the proxy.
++
++Result on Node **v22.23.4** (bundled undici 6.29.1):
++
++| Setting | Result | Requests that reached the proxy |
++|---|---|---|
++| `HTTPS_PROXY` only (default) | `ENOTFOUND`: fetch connected directly and DNS failed | **0** |
++| `HTTPS_PROXY` + `NODE_USE_ENV_PROXY=1` | went through the proxy (the child printed a runtime warning) | **1** |
++| `HTTPS_PROXY` + `--use-env-proxy` | went through the proxy (the child printed a runtime warning) | **1** |
++
++So in Node 22.21.0 and later, the switch applies to global `fetch()` as well as `http`/`https`. Without the switch, `fetch()` ignores the variables.
++
++## Practical guidance
++
++- On Node ≥ 22.21.0, run with `NODE_USE_ENV_PROXY=1` or `--use-env-proxy`. You can also put the flag in `NODE_OPTIONS`.
++- On Node < 22.21.0, install `undici` and call
++  `setGlobalDispatcher(new EnvHttpProxyAgent())` early in startup.
++- The feature is still marked Active Development. The details may change in later 22.x releases.
++
++## Not verified
++
++I did not read Node's source code for this. Downloading `lib/internal/process/pre_execution.js` from the v22.x branch needed an approval that wasn't granted in this session. The conclusion rests on the official v22 docs and the test above.

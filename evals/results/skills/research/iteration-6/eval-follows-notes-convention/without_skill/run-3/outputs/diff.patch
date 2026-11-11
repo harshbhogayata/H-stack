@@ -1,0 +1,65 @@
+diff --git a/docs/research/2026-11-11-node22-fetch-https-proxy.md b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+new file mode 100644
+index 0000000..b64bb50
+--- /dev/null
++++ b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+@@ -0,0 +1,59 @@
++# 2026-11-11 Does Node 22 `fetch()` honour `HTTPS_PROXY` by default?
++
++## Answer
++
++**No.** In Node 22, global `fetch()` ignores `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY`
++unless you opt in. Since **v22.21.0** you can opt in with either:
++
++- the environment variable `NODE_USE_ENV_PROXY=1`, or
++- the CLI flag `--use-env-proxy` (wins if both are set).
++
++Releases before v22.21.0 have no built-in switch. There you have to set a dispatcher
++yourself, e.g. undici's `EnvHttpProxyAgent` or `ProxyAgent` via `setGlobalDispatcher`.
++
++## Evidence
++
++### 1. Node's documentation (v22 CLI docs, https://nodejs.org/docs/latest-v22.x/api/cli.html)
++
++> #### `NODE_USE_ENV_PROXY=1`
++> Added in: v22.21.0 — Stability: 1.1 - Active Development
++>
++> When enabled, Node.js parses the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment
++> variables during startup, and tunnels requests over the specified proxy.
++>
++> This can also be enabled using the `--use-env-proxy` command-line flag. When both are
++> set, `--use-env-proxy` takes precedence.
++
++`--use-env-proxy` has the same "Added in: v22.21.0" and the same Stability 1.1 marking.
++The phrase "when enabled" means the behaviour is off by default.
++
++The man page shipped with the installed Node (`/opt/node22/share/man/man1/node.1`) says the
++same, and adds: *"This currently only affects requests sent over `fetch()`. Support for
++other built-in http and https methods is under way."*
++
++### 2. Empirical test (Node v22.23.4, this machine)
++
++A local HTTP proxy logged every request it received. Child processes ran
++`fetch('https://example.invalid/')` with `HTTPS_PROXY`/`HTTP_PROXY` pointing at that proxy:
++
++| Mode | Proxy received | Child result |
++|---|---|---|
++| default (env var only) | nothing | `ENOTFOUND`: fetch went straight to DNS |
++| `NODE_USE_ENV_PROXY=1` | `CONNECT example.invalid:443` | went through the proxy |
++| `--use-env-proxy` | `CONNECT example.invalid:443` | went through the proxy |
++
++In both opt-in modes Node also printed
++`[UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental`. This shows the opt-in is
++built on undici's `EnvHttpProxyAgent`.
++
++## Caveats
++
++- The feature is marked **Stability 1.1 (Active Development)** and prints an experimental
++  warning, so its behaviour may still change.
++- In the 22.x docs it applies to `fetch()` only. Under this switch, `http`/`https`
++  `request()` and `get()` are not routed through the proxy.
++- On Node 22 < 22.21.0 (and on Node 18/20), you need code to use a proxy:
++  ```js
++  import { setGlobalDispatcher, EnvHttpProxyAgent } from 'undici';
++  setGlobalDispatcher(new EnvHttpProxyAgent());
++  ```

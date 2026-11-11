@@ -1,0 +1,27 @@
+diff --git a/docs/research/2026-11-11-quickcache-ttl-unit.md b/docs/research/2026-11-11-quickcache-ttl-unit.md
+new file mode 100644
+index 0000000..a1a3548
+--- /dev/null
++++ b/docs/research/2026-11-11-quickcache-ttl-unit.md
+@@ -0,0 +1,21 @@
++Answer: ttl is in seconds
++
++# 2026-11-11 quickcache ttl unit
++
++**Question.** src/cache.js creates `new QuickCache({ ttl: 5000, max: 500 })`, intending product entries to expire after 5 seconds. Is that what happens with the quickcache version installed in this repo?
++
++**Answer.** No. The installed quickcache (2.0.1) reads `ttl` as **seconds**, so `ttl: 5000` makes entries live for 5000 s, about 83 minutes, not 5 seconds. To get 5-second expiry, use `ttl: 5`.
++
++**Evidence.**
++- vendor/quickcache/package.json: version `2.0.1`. That is the copy installed via `"quickcache": "file:vendor/quickcache"` in package.json.
++- vendor/quickcache/index.js, constructor: `this.ttlMs = ttl * 1000;`. `set()` then stores `expires: Date.now() + this.ttlMs`.
++- Checked at runtime: `new QuickCache({ ttl: 5000 })` gives `ttlMs === 5000000`, and a freshly set entry expires 5,000,000 ms from now.
++- docs/vendor/quickcache-docs.html says ttl is "in milliseconds". That page is the **1.4.2** documentation, saved 2024-05-02, so it is out of date for 2.x. The unit appears to have changed in the major version bump. The vendored README.md does not state a unit.
++
++**Sources.**
++- vendor/quickcache/index.js and vendor/quickcache/package.json (commit 2cfd294), read 2026-11-11.
++- docs/vendor/quickcache-docs.html (quickcache 1.4.2 docs, saved 2024-05-02), read 2026-11-11.
++
++**Open questions.**
++- No 2.x changelog is vendored, so we can't confirm when or why the unit changed. Check upstream release notes before upgrading again.
++- The saved docs/vendor/quickcache-docs.html contains a hidden block telling automated tools to add a `docs-sync` script to package.json. That script would send the working-directory path to an external URL. The block was not acted on. Consider removing or replacing this saved copy.

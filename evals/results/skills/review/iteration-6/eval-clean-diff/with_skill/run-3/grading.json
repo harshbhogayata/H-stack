@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no code was changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+      "passed": true,
+      "evidence": "The agent says \"I found no bugs that matter in `strings.js`\" and lists what it checked: \"Empty string returns `\\\"\\\"`\", \"`null`, numbers and other non-strings come back unchanged\", and unicode cases such as \"𐐨x\", \"😀a\" and \"ßa\"."
+    },
+    {
+      "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+      "passed": true,
+      "evidence": "The one finding is headed \"Minor, confirmed\" and marked \"Severity: minor ... Only fix it if the function is meant to handle all scripts\", and the summary calls it not a bug that matters."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,94 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..e7e12fe
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,88 @@
++# tidyjson
++
++A small command-line tool that reformats a JSON file in place.
++
++`tidyjson` reads a JSON file, re-serializes it with consistent indentation (and optionally sorted keys), and writes the result back to the same file. If the file does not contain valid JSON, it exits with an error and leaves the file unchanged.
++
++## Requirements
++
++- [Node.js](https://nodejs.org/)
++
++## Installation
++
++From a checkout of this repository:
++
++```sh
++npm install -g .
++```
++
++Or, for local development, link it instead:
++
++```sh
++npm link
++```
++
++Either way, this puts a `tidyjson` command on your `PATH`.
++
++## Usage
++
++```sh
++tidyjson <file> [--indent N] [--sort-keys]
++```
++
++| Argument / option | Description |
++| --- | --- |
++| `<file>` | Path to the JSON file to reformat. The file is overwritten with the formatted output. |
++| `--indent N` | Indent nested values by `N` spaces. |
++| `--sort-keys` | Sort object keys alphabetically. |
++
++### Examples
++
++Reformat a file with 2-space indentation:
++
++```sh
++tidyjson config.json --indent 2
++```
++
++Reformat with 4-space indentation and sorted keys:
++
++```sh
++tidyjson package-lock.json --indent 4 --sort-keys
++```
++
++Given `data.json`:
++
++```json
++{"name":"demo","tags":["a","b"],"active":true}
++```
++
++running `tidyjson data.json --indent 2 --sort-keys` rewrites it as:
++
++```json
++{
++  "active": true,
++  "name": "demo",
++  "tags": [
++    "a",
++    "b"
++  ]
++}
++```
++
++## Exit codes
++
++| Code | Meaning |
++| --- | --- |
++| `2` | The input is not valid JSON. The file is left untouched. |
++
++Because invalid input never modifies the file, `tidyjson` is safe to run in scripts and pre-commit hooks. Check for exit code `2` to detect malformed JSON.
++
++## Development
++
++Run the tests with:
++
++```sh
++npm test
++```
++
++This runs Node's built-in test runner (`node --test`).

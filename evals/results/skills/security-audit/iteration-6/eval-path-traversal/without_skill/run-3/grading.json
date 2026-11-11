@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+      "passed": true,
+      "evidence": "The reply says \"`/download?file=../../../etc/passwd` resolves to `/etc/passwd`\" and that with an absolute path \"everything before it is dropped. So `/download?file=/etc/passwd` returns `/etc/passwd` directly.\""
+    },
+    {
+      "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+      "passed": true,
+      "evidence": "The reply says \"An attacker can read anything the app's process can read\" and that \"every user [can] read every other user's uploads\". It frames the attacker even more broadly (\"anonymous users can call the endpoint\"), but this still covers both reading outside the uploads folder and reading other u"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

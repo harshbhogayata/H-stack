@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md answers no to both questions; vendor/, src/ and package.json unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer rests on the installed source (vendor/tinyretry 3.1.0: defaults.js retryOn without 429, index.js parseRetryAfter using Number()) with file paths and the version",
+      "passed": true,
+      "evidence": "answer.md says \"The vendored tinyretry is version 3.1.0 (`vendor/tinyretry/package.json`)\". It quotes `retryOn: [408, 502, 503, 504]` from `vendor/tinyretry/defaults.js` and the `parseRetryAfter` function in `index.js`, which uses `Number(value)`."
+    },
+    {
+      "text": "The answer points out that the vendored README, the team wiki note (2025-10-14) and the 2.4.0 changelog entry describe behaviour the installed 3.1.0 code does not have",
+      "passed": false,
+      "evidence": "The answer does flag the README (\"The README's list ... is out of date\") and the 2.4.0 changelog (\"the 3.0.0 dependency-free rewrite dropped it\"). It never mentions the team wiki note from 2025-10-14."
+    },
+    {
+      "text": "The answer marks which conclusions were measured (e.g. ran the wrapper against a stub fetch) versus read, and states the consequence for src/client.js (opt in with retryOn including 429 and handle HTTP-date Retry-After itself)",
+      "passed": true,
+      "evidence": "The final message says \"I got this from reading the vendored code; I didn't run it.\" The answer also says \"To retry 429s you have to pass it yourself, e.g. `retryOn: [408, 429, ...]`\" and that to honour the date \"you need your own handling: parse it with `Date.parse(value) - Date.now()`\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

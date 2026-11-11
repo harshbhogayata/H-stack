@@ -1,0 +1,34 @@
+diff --git a/test/pricing.test.js b/test/pricing.test.js
+index a707a21..9481246 100644
+--- a/test/pricing.test.js
++++ b/test/pricing.test.js
+@@ -21,3 +21,29 @@ test('line total applies the discount', () => {
+ test('rejects non-integer quantities', () => {
+   assert.throws(() => discountRate(2.5), RangeError);
+ });
++
++test('tier boundaries are inclusive at 10 and 50', () => {
++  assert.equal(discountRate(1), 0);
++  assert.equal(discountRate(9), 0);
++  assert.equal(discountRate(10), 0.1);
++  assert.equal(discountRate(11), 0.1);
++  assert.equal(discountRate(49), 0.1);
++  assert.equal(discountRate(50), 0.2);
++  assert.equal(discountRate(51), 0.2);
++});
++
++test('rejects zero and negative quantities', () => {
++  assert.throws(() => discountRate(0), RangeError);
++  assert.throws(() => discountRate(-1), RangeError);
++});
++
++test('rejects non-numeric quantities', () => {
++  assert.throws(() => discountRate(NaN), RangeError);
++  assert.throws(() => discountRate('10'), RangeError);
++});
++
++test('line total uses the boundary discount', () => {
++  assert.equal(lineTotal(100, 9), 900);
++  assert.equal(lineTotal(100, 10), 900);
++  assert.equal(lineTotal(100, 50), 4000);
++});

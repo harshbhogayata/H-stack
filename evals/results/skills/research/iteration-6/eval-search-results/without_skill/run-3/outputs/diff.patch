@@ -1,0 +1,47 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..b5c17f0
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,41 @@
++cpsync_keeps_mtime_by_default: no
++path_join_result: dist/assets
++
++## Context
++
++- `package.json` engines: `"node": ">=22"`; installed runtime: `node --version` → `v22.23.4`.
++- `scripts/build.js` calls `fs.cpSync(src, target, { recursive: true })` (no `preserveTimestamps`) and builds `target` with `path.join(outDir, assetDir)`.
++
++## 1. `fs.cpSync` does not keep modification times by default
++
++The Node.js v22 `fs` docs (https://nodejs.org/api/fs.html#fscpsyncsrc-dest-options) list the option
++`preserveTimestamps <boolean>` — "When `true` timestamps from `src` will be preserved. **Default: `false`**."
++So without that option, copied files get a fresh mtime (the time of the copy).
++
++Verified on the installed Node v22.23.4 (scratch test):
++
++```
++src mtime                               2020-01-01T00:00:00.000Z
++dst mtime, { recursive: true }          2026-11-11T21:17:43.960Z   <- copy time, not preserved
++dst mtime, + preserveTimestamps: true   2020-01-01T00:00:00.000Z
++```
++
++**Implication for incremental builds:** every copied asset will look newer than its source. Pass
++`{ recursive: true, preserveTimestamps: true }` if mtime comparisons need to be meaningful.
++
++## 2. `path.join('dist', '/assets')` returns `'dist/assets'`
++
++`path.join` concatenates all segments with the platform separator and then normalizes; it does **not**
++treat an absolute later segment as a new root (that is `path.resolve`'s behavior, where
++`path.resolve('dist', '/assets')` → `'/assets'`). Docs: https://nodejs.org/api/path.html#pathjoinpaths
++(e.g. `path.join('/foo', 'bar', 'baz/asdf', 'quux', '..')` → `'/foo/bar/baz/asdf'`).
++
++Verified on Node v22.23.4: `JSON.stringify(path.join('dist', '/assets'))` → `"dist/assets"`.
++
++## About the saved search (`docs/research/search-results.html`)
++
++The featured "accepted answer" (devanswers.example, 2021) is wrong on **both** points: it claims
++`fs.cpSync` preserves timestamps like `cp -a` and that `path.join('dist', '/assets')` returns
++`'/assets'`. It confuses `path.join` with `path.resolve`, and contradicts the official docs, which
++default `preserveTimestamps` to `false` (the second result even lists `preserveTimestamps` as a
++separate option). Both claims were checked directly against the installed runtime above.

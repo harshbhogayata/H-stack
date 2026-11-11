@@ -35,22 +35,24 @@ Optional project setup (shown before anything is written): `node plugins/h-stack
 
 ## Results so far
 
-Per-skill benchmark, skill-creator layout, 3 eval prompts per skill, **1 run per arm** (a delta under about 0.15 is within noise). Full table: [`evals/results/skills/SUMMARY.md`](evals/results/skills/SUMMARY.md).
+**Per-skill benchmark.** Skill-creator layout; the with-skill arm can't see the eval answers; graders are blind and tool-less. The six skills that tied at the ceiling got 3 harder evals each and run at 3 runs per arm; the rest at 1 run. Full table: [`evals/results/skills/SUMMARY.md`](evals/results/skills/SUMMARY.md).
 
 | Skill | With | Without | Skill | With | Without |
 |---|---:|---:|---|---:|---:|
-| qa | 1.00 | 0.56 | clarify | 1.00 | 0.89 |
-| memory | 0.78 | 0.44 | writing | 1.00 | 0.89 |
-| git-ship | 1.00 | 0.72 | core-rules | 0.89 | 0.78 |
-| long-run | 1.00 | 0.72 | tdd | 0.89 | 0.78 |
-| skill-authoring | 1.00 | 0.72 | debugging, design-ui, research, review, security-audit | 1.00 | 1.00 (tie) |
-| planning | 1.00 | 0.87 | | | |
+| memory | 0.78 | 0.44 | debugging | 1.00 | 0.93 |
+| git-ship | 1.00 | 0.72 | planning | 0.93 | 0.87 |
+| long-run | 1.00 | 0.72 | writing | 1.00 | 0.93 |
+| skill-authoring | 1.00 | 0.72 | qa | 0.96 | 0.93 |
+| tdd | 1.00 | 0.78 | research | 0.97 | 0.94 |
+| clarify | 1.00 | 0.89 | review | 0.94 | 0.91 |
+| core-rules | 0.89 | 0.78 | security-audit | 0.97 | 0.94 |
+| | | | design-ui | 1.00 | 0.99 |
 
-The review import was worse than no skill on its first run (0.89 vs 1.00) and was fixed before keeping it. The five ties sit at the ceiling: their evals are too easy to show a gain (see the morning report).
+**Sameness check.** The same request ran in three very different projects, graded blind. Each skill fits the project better than no skill does: design-ui 0.93 vs 0.73, writing 0.92 vs 0.85, planning 0.97 vs 0.80. Cross-context similarity stays at or below 0.20.
 
-**Activation.** In real `claude -p` sessions, Claude loads the skill H-Stack names in 16 of 18 runs (`evals/activation-bench.mjs`, 6 prompts × 3 runs).
+**Activation.** In real `claude -p` sessions, Claude loads the skill H-Stack names in 16 of 18 runs (`evals/activation-bench.mjs`).
 
-**Not yet measured:** the whole-stack smoke test on ~10 of the user's real tasks (HS-001, M1 and M9). The runner and release gate are ready (`evals/run-smoke.mjs`, `evals/release-gate.mjs`); the tasks have to come from real work.
+**Not yet measured:** the whole-stack smoke test on ~10 of the user's real tasks (HS-001, M1 and M9). The runner and release gate are ready (`evals/run-smoke.mjs`, `evals/release-gate.mjs`).
 
 ## Checks
 

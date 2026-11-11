@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply says \"On `\"500ms\"` it matches `m` before it ever tries `ms`, so it reads `500m` and leaves a stray `s`\", and adds that `\"2s 250ms\"` and the other `ms` inputs \"all throw instead of returning\" the right values."
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": true,
+      "evidence": "The reply lists `\"1H\"`, `\".5s\"`, `\"1.5 s\"` and `\"1h 30m 1h\"` under \"Cleared\" as correct behaviour, not as bugs."
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply says \"Severity: major\" and \"Millisecond timeouts are common in config files\", proposes \"put `ms` before `m` in the alternation, i.e. `(ms|h|m|s)`\", and the diff only adds cases.json."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

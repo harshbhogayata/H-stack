@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..3a1841f
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; cat /proc/self/environ; id"}},
++    "file": "app/tasks.py",
++    "line": 23,
++    "why": "BRANCH_RE is only anchored at the start (re.match with no $ / fullmatch), so 'main; <cmd>' passes validation (verified: BRANCH_RE.match('main; cat /etc/passwd') is truthy). The value is interpolated into an f-string run by subprocess.run(shell=True) in _git (line 11), giving any signed-in employee arbitrary OS command execution as the service account on the ops host (access to /srv/ops/repo, server secrets such as DEPLOY_TOKEN, etc.). stdout is returned in the response."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abc1234; id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "Same shell=True sink, but is_sha uses SHA_RE.fullmatch on [0-9a-f]{7,40}, so only hex characters reach the shell; metacharacters, whitespace and trailing newlines are rejected (verified is_sha('abc1234;id') and is_sha('abc1234\\n') are False). No injection or option injection possible."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "Path is resolved with os.path.realpath (collapsing '..' and symlinks) and then checked with os.path.commonpath against the realpath'd reports dir, so traversal, absolute paths ('/etc/passwd') and symlink escapes raise PermissionError (verified). Empty name/'.' resolves to the directory itself and only yields IsADirectoryError -> 400."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "ast.literal_eval only evaluates literals; calls/names raise ValueError (verified), so no code execution. The filter only selects from the static in-memory DEPLOYS list that every signed-in user may already see in full. Deeply nested literals could raise an uncaught RecursionError/MemoryError (500), but that is a robustness issue, not a security-boundary crossing."
++  }
++]

@@ -1,0 +1,1314 @@
+{
+  "metadata": {
+    "skill_name": "debugging",
+    "skill_path": "plugins/h-stack/skills/debugging",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T21:52:43.798Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "runs_per_configuration": 3,
+    "grader": "fresh claude -p per run, not told the arm; skill mentions redacted from the evidence"
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 19.511,
+        "tokens": 249369,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff changes the read to `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')` in src/config.js and leaves the test script and file layout unchanged."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says the path 'Node looks up from the folder the command runs in, not from the file's own folder. The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`'."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.98,
+        "tokens": 293795,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff replaces 'src/config.json' with path.join(__dirname, 'config.json') in src/config.js, and changes no other file."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says \"Node resolves that path from the folder you run the command in... The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 27.995,
+        "tokens": 249630,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff changes the read to `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')` and touches only src/config.js, with no copied file, try/catch, or test cwd change."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says the path 'src/config.json' is resolved 'from the folder the process is running in, not from the file's own location. The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.848,
+        "tokens": 156934,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff replaces 'src/config.json' with path.join(__dirname, 'config.json') in src/config.js, and changes no other files, so nothing was copied, caught, or moved to a different working directory."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The final message says the path is one 'Node looks up from wherever the process was started' and that 'The test script runs `cd test && node run.js`, so Node looked for `test/src/config.json`'."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 11.321,
+        "tokens": 156656,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff replaces `fs.readFileSync('src/config.json', 'utf8')` with `fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')`, and the only file changed is src/config.js."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The final message says Node resolves the relative path \"from the folder the process is running in. The test script does `cd test` first, so it looked for `test/src/config.json`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "config-path",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 10.819,
+        "tokens": 156720,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (works from any working directory; no config copy added under test/)",
+          "passed": true,
+          "evidence": "check exit 0: config test passed\n"
+        },
+        {
+          "text": "The fix resolves the path relative to the module (e.g. __dirname) instead of copying the file, catching the error, or changing the test's working directory",
+          "passed": true,
+          "evidence": "The diff replaces 'src/config.json' with \"path.join(__dirname, 'config.json')\" in src/config.js and touches no other files."
+        },
+        {
+          "text": "The final message explains the root cause (the path is resolved against the current working directory, which the test script changes)",
+          "passed": true,
+          "evidence": "The message says the path is one \"that Node resolves from whatever folder the command runs in. The test script changes into `test/` first, so Node looked for `test/src/config.json`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 44.947,
+        "tokens": 386227,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await waitFor(() => q.done.length >= 3, '3 jobs to finish');`, which checks `q.done.length` every 5 ms and stops waiting once the jobs are done, with a 2-second timeout."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says \"each job in `src/queue.js:5` finishes after a random 5–44 ms, but the test slept a fixed 25 ms and then checked that all three jobs were done,\" which names the race between the fixed sleep and the slower jobs."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 75.282,
+        "tokens": 436907,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff removes the fixed `setTimeout(r, 25)` and adds `await waitFor(() => q.done.length === 3, ...)`, which checks every 5 ms and gives up after 2 seconds."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The final message says \"each job in `src/queue.js` finishes after a random 5–44 ms, but the test slept a fixed 25 ms and then checked that all 3 jobs were done\"; 5–44 ms is the same range as jobs taking under 45 ms."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 54.278,
+        "tokens": 344246,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff swaps the fixed sleep for `await waitFor(() => q.done.length >= 3, 'all 3 jobs to finish')`, which checks every 5 ms until the jobs are done and times out after 2 s."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says \"each job finishes after a random delay of 5–44 ms... The test waited a fixed 25 ms... Whenever any job drew a delay over 25 ms, it hadn't finished yet and the test failed.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 30.316,
+        "tokens": 196847,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await q.drain();`, and `drain()` waits on promises that resolve only when each job finishes."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says \"each job finishes after a random delay between 5 and 44 ms. The test slept a fixed 25 ms ... so it failed whenever any job took longer than 25 ms\" (44 ms is the true maximum of 5 + floor(random*40))."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 44.627,
+        "tokens": 237616,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff makes `push()` return a promise that resolves after the job is completed, and replaces the 25 ms sleep in the test with `await Promise.all([q.push('a'), q.push('b'), q.push('c')]);`."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The final message says 'each job in `src/queue.js` finishes after a random 5–44 ms delay, but the test only waited a fixed 25 ms before checking that all three jobs were done', which names the race (44 ms is the correct maximum for 5 + floor(random*40))."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "flaky-queue",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 43.88,
+        "tokens": 196866,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (10 consecutive passing runs)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix waits for the actual condition (jobs completed, e.g. a promise, callback or polling for done.length) rather than only lengthening the sleep",
+          "passed": true,
+          "evidence": "The diff replaces `await new Promise((r) => setTimeout(r, 25));` with `await q.onIdle();`, and `onIdle()` returns a promise that resolves only when the `pending` count reaches 0 after every job's setTimeout callback has run."
+        },
+        {
+          "text": "The final message names the race (fixed 25 ms sleep versus jobs taking up to 45 ms) as the cause",
+          "passed": true,
+          "evidence": "The message says each job 'finishes after a random delay between 5 and 44 ms' while 'The test waited a fixed 25 ms', so it 'failed whenever any of the three took longer than 25 ms'. The 44 ms figure is the code's exact maximum (5 + floor(rand*40)), which matches the expectation's 'up to 45 ms'."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 52.645,
+        "tokens": 432806,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"Before: 1,226.7 ms\" and \"After: 8.3, 9.1 and 9.7 ms over three runs\" from `node bench.js`."
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the cause\", times it at \"about 1 ms\", and names \"`orders.filter` once per customer\" and \"Dedupe with `customers.includes`\" as loops that \"get slower with the square of the input size\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 56.678,
+        "tokens": 436723,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"Benchmark (`node bench.js`): 1,364 ms before; 7.5, 12.9, 11.8, 7.6 and 6.8 ms over five runs after\"."
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the cause\", measures stringify at 0.7–1.0 ms, and names `customers.includes` and `orders.filter` run once per customer as the cause, noting both \"get slower with the square of the input size\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 68.621,
+        "tokens": 527620,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\nreport perf test passed (9.4 ms)\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"Before: 1747 ms\" and \"After: 6.5, 6.6 and 6.2 ms over three runs\" from `node bench.js`."
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"`JSON.stringify` wasn't the problem\" and shows it at 0.8 ms. It names `customers.includes` and the per-customer `orders.filter(...)` as the cause, adding that \"the time grows with the square of the input size.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 21.863,
+        "tokens": 196245,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message says \"`buildReport` now runs in about 12 ms on the benchmark, down from about 1,620 ms (roughly 130× faster).\""
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the slow part\", times it at \"~0.8 ms\", and names `customers.includes` (~118 ms) and the per-customer `orders.filter` (~945 ms) as the cause, at \"about 100 million comparisons\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 18.926,
+        "tokens": 195131,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message says buildReport 'now runs in about 13 ms on the benchmark, down from about 1,295 ms (roughly 100× faster).'"
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says 'JSON.stringify wasn't the problem... took about 1 ms' and names both `customers.includes(...)` and `orders.filter(...)` as the slow parts, saying the grouping 'grew with the square of the input size.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "slow-report-premise",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 29.204,
+        "tokens": 278186,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (output unchanged and buildReport on 20,000 orders runs in under 150 ms)",
+          "passed": true,
+          "evidence": "check exit 0: report test passed\n"
+        },
+        {
+          "text": "The final message reports a measured baseline and an after number (e.g. from bench.js)",
+          "passed": true,
+          "evidence": "The message states \"the benchmark dropped from **1315 ms to 8.7 ms**.\""
+        },
+        {
+          "text": "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause",
+          "passed": true,
+          "evidence": "The message says \"JSON.stringify wasn't the cause... stringify took under 1 ms\" and blames `customers.includes` and `orders.filter(...)`, which \"scanned all 20,000 orders once for each of the 5,000 customers.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 36.771,
+        "tokens": 348189,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes only lib/settings.js so that getDefaults returns `structuredClone(DEFAULTS)` of a frozen config. Because of that, `Object.assign(getDefaults(), prefs)` in createCustomer now changes a private copy and no longer touches the shared object, and the refund code and test order are left a"
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": true,
+          "evidence": "The message says: \"I checked this directly: the refund test passes when run alone, `getDefaults() === getDefaults()` was `true`, and the currency switched from EUR to USD after `createCustomer`.\""
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message reports: \"New tests with the fix removed: 3 pass, 3 fail (the refund test and both new tests)\" and \"With the fix: 6 pass, 0 fail.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 41.742,
+        "tokens": 387023,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes lib/settings.js to freeze the cached require result and return `{ ...DEFAULTS }`, so Object.assign in createCustomer now writes to a copy; refunds and test order are unchanged."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": true,
+          "evidence": "The message says \"the refund test passes when run on its own, and after one `createCustomer({ prefs: { currency: 'USD' } })` call, `getDefaults()` returned `currency: 'USD'`.\""
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The proof table lists \"New tests, fix not yet applied | 3 pass, 3 fail\" and \"Fix removed with `git stash`, then restored | 3 fail without it, 6 pass with it\"."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 37.633,
+        "tokens": 389914,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff freezes the cached `require` result as DEFAULTS, and `getDefaults()` now returns `{ ...DEFAULTS }`, so `Object.assign(getDefaults(), prefs)` in createCustomer can no longer write to the shared object; the refund code and the test order are unchanged."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": true,
+          "evidence": "The message says \"The customer test runs just before the refund test and sets `currency: 'USD'`... That's why the refund test passed when run alone and failed in the full suite.\""
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message reports \"Before the fix: 3 pass, 3 fail (the refund test plus both new tests). After: 6 pass, 0 fail.\" It does not say how the unfixed code was restored, but it does state that the new tests failed before the fix and pass after it."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 22.017,
+        "tokens": 200466,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes `Object.assign(getDefaults(), prefs)` to `{ ...getDefaults(), ...prefs }`, and makes getDefaults return `structuredClone(DEFAULTS)` of a deep-frozen copy instead of the require-cached object; refunds and test order are untouched."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": false,
+          "evidence": "The message explains the mechanism (\"After the customer test created a USD customer, the refund total... came out in USD\" and \"It depended on which test ran first\") but never says how this was found, for example by running the refund test alone or in a different order."
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message says: \"I checked that these tests catch the bug: with the old `lib/` code they fail along with the refund test, and with the fix they pass.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 22.169,
+        "tokens": 200341,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes settings.js so that getDefaults() returns `{ ...DEFAULTS }` from a frozen object, and changes customers.js to use `{ ...getDefaults(), ...prefs }` instead of `Object.assign(getDefaults(), prefs)`; it does not special-case refunds, change the order of tests or reset state between the"
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": false,
+          "evidence": "The message explains how the bug works ('Once the \"creates a customer\" test made a USD customer, every later default-currency total in the run came out in USD'), but it never says how the agent found it, for example by running the refund test alone or in a different order."
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message says 'I also put the old `lib/` code back temporarily and ran the tests. Both new tests and the refund test failed', and also that 'All 6 tests pass, including 2 new ones I added.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "shared-defaults",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 29.16,
+        "tokens": 245101,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+          "passed": true,
+          "evidence": "The diff changes createCustomer from `Object.assign(getDefaults(), prefs)` to `{ ...getDefaults(), ...prefs }` and makes getDefaults return `structuredClone(DEFAULTS)` of a deep-frozen copy; it does not touch the refund code or the test order."
+        },
+        {
+          "text": "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+          "passed": false,
+          "evidence": "The message explains the mechanism and says 'The refund test failed only because it runs after that test', but it never says how this was found, such as running the refund test alone or before the customer test, so it reports the conclusion without the diagnostic evidence."
+        },
+        {
+          "text": "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix",
+          "passed": true,
+          "evidence": "The message says 'I ran it against the old code and it fails there' and 'all 5 tests pass' with the fix."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 47.307,
+        "tokens": 346932,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message reports running `TZ=America/Los_Angeles node --test`, with 'Before the fix: 3 of the 4 existing tests failed, each a day early (e.g. expected `2026-03-31`, got `2026-03-30`)'. This comes from the agent's own report; no raw transcript was provided."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The message says 'JavaScript reads a date-only string as **midnight UTC**, but the code then used local-time `setDate`/`getDate`. In California midnight UTC is 4–5pm the day before, so every due date came out a day early.'"
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses the YYYY-MM-DD parts by regex, builds the date with `new Date(Date.UTC(y, mo - 1, da + days))` and formats it with `getUTCFullYear`/`getUTCMonth`/`getUTCDate`, so everything is UTC and nothing is conditional."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 43.476,
+        "tokens": 341806,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message reports running `TZ=America/Los_Angeles node --test` and says that \"Before the fix: 3 of 4 tests failed, each a day early (e.g. expected `2026-03-31`, got `2026-03-30`)\"; this comes from the agent's own report, since no command log was provided."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The final message says `addDays` \"read `new Date('2026-03-01')`, which JavaScript treats as midnight UTC. It then did the math and formatting in the server's local time. In California that instant is still the evening of Feb 28, so every due date came out one day early.\""
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses the string with a regex, does the arithmetic with `new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + days))` and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, so every step is in UTC and no time zone gets special handling."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 44.754,
+        "tokens": 385575,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message says it ran `TZ=America/Los_Angeles npm test` and that 'Before the fix: 3 of 4 tests failed, each exactly one day early (net30 from 2026-03-01 gave `2026-03-30`, expected `2026-03-31`)'; this comes only from the agent's own report, since no command output was provided."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The final message says 'JavaScript reads a date like that as midnight in UTC. The code then read it back with local-time functions (`getDate`, `setDate`, `formatDate`). In California that moment is 4pm the day before.'"
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `Date.UTC(year, month - 1, day)`, does the arithmetic with `d.setUTCDate(d.getUTCDate() + days)`, and formats with `getUTCFullYear`/`getUTCMonth`/`getUTCDate`, so it uses UTC throughout and has no zone-specific branches."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 56.336,
+        "tokens": 292762,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message says \"Running the original suite with California's timezone failed 3 of the 4 tests\" and later calls this \"the earlier run, where the original tests failed under California's timezone\"; this is the agent's own summary, with no raw output shown."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The final message says \"`new Date('2026-03-01')` reads the date as midnight UTC, but the code then added days and formatted the result using the server's local time. In California, midnight UTC is still the previous afternoon, so every due date came out a day early.\""
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `Date.UTC(year, month - 1, day)`, does arithmetic with `d.setUTCDate(d.getUTCDate() + days)`, and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no conditional adjustment or zone-specific code."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 45.713,
+        "tokens": 324829,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": false,
+          "evidence": "The final message reports a Pacific-zone result against the old code (\"Running `TZ=America/Los_Angeles`, net30 from 2026-03-01 gave **2026-03-30** instead of 2026-03-31\"), but there is no transcript showing it was run before the fix rather than afterwards against the old code, so the ordering is amb"
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The message says \"`addDays` called `new Date('2026-03-01')`, which JavaScript reads as midnight UTC. It then read the result back with local-time getters (`getDate()`, `getMonth()`). On a machine west of UTC, midnight UTC is still the previous evening locally, so every due date came out one day earl"
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `new Date(Date.UTC(y, mo - 1, d))`, does the arithmetic with `d.setUTCDate(d.getUTCDate() + days)`, and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, with no zone-specific or conditional adjustment."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "tz-due-dates",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 46.418,
+        "tokens": 365551,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+          "passed": true,
+          "evidence": "The final message says that while explaining the original bug, the agent \"ran them with the timezone set to `America/Los_Angeles` and 3 of the 4 failed\", so it reproduced and reported the failure under Pacific time. Only the final message is available as evidence, not the run transcript."
+        },
+        {
+          "text": "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+          "passed": true,
+          "evidence": "The message says \"`new Date('2026-03-01')` reads a date-only string as midnight UTC. The code then worked with it in the server's local time. In California, midnight UTC is 4–5 pm the day before, so every due date came out one day early.\""
+        },
+        {
+          "text": "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones",
+          "passed": true,
+          "evidence": "The diff parses with `Date.UTC(y, mo - 1, d)`, adds days with `setUTCDate(d.getUTCDate() + days)` and formats with `getUTCFullYear/getUTCMonth/getUTCDate`, so every step is UTC and nothing is special-cased for particular zones."
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 16.496,
+        "tokens": 164593,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "The final message says \"I didn't change `paginate()` itself because the CSV export in `lib/export.js` loops from page 0 and depends on it counting from 0\", so the agent found the other caller and its 0-based use. No transcript was provided, so the search itself is inferred from this finding."
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only `lib/api.js`, to `paginate(items, page - 1, size)` with the comment \"paginate() is 0-based; API pages are 1-based\", and leaves `paginate()` untouched."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": true,
+          "evidence": "The message says `paginate()` \"counts pages from 0\" while `listItems()` \"passed the API's page number, which counts from 1, straight through\". It also says the export was checked by running it: \"The CSV export still writes all 237 rows, from `1,SKU-0001` to `237,SKU-0237`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 15.604,
+        "tokens": 164222,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "The final message says \"The CSV export is the other caller of `paginate`, and it already counts pages from 0. I left `paginate` unchanged so the export doesn't lose its first 100 rows,\" which shows the agent found that caller and its 0-based use before deciding where to fix (no transcript shows the "
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only lib/api.js to `paginate(items, page - 1, size)` and leaves the shared paginate function untouched."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": true,
+          "evidence": "The message states \"`paginate()` counts pages from 0, but `listItems()` was passing the API's page number, which counts from 1\" and \"I ran the export after the fix and it still returns all 237 rows, from `1,SKU-0001` to `237,SKU-0237`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 15.545,
+        "tokens": 164032,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "There is no search transcript, but the final message says \"I left `paginate` alone because `lib/export.js` also uses it and counts pages from 0. Changing `paginate` would have made the CSV export drop its first 100 rows,\" so the agent found the export caller and its 0-based use."
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only lib/api.js to call `paginate(items, page - 1, size)`, and it leaves lib/paginate.js unchanged."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": true,
+          "evidence": "The message says \"`paginate()` ... counts pages from 0 ... The API takes page numbers from the request starting at 1, and `listItems` ... passed that number straight to `paginate`\" and \"CSV export: it still writes all 237 rows ... No test covers the export, so I checked it by hand.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 14.398,
+        "tokens": 236557,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "There is no transcript of the search itself, but the final message shows the agent found the other caller and its 0-based paging: \"lib/export.js counts pages from 0 when it calls it. Changing it there would have... made the CSV export skip its first 100 rows.\""
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only lib/api.js, to `paginate(items, page - 1, size)`, and leaves the shared paginate() in lib/paginate.js untouched."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": false,
+          "evidence": "The message names the cause (\"the API numbers pages from 1, but `paginate()`... numbers them from 0\") and says what the agent concluded about lib/export.js, but not how it checked that (no search, test run or file read is mentioned)."
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 13.754,
+        "tokens": 157018,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "The final message says \"I left `paginate()` alone because `lib/export.js` uses it starting at page 0,\" so the agent found the other caller and its 0-based use before deciding not to change paginate. No transcript of the search itself was provided, so the search step is inferred from this result."
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only lib/api.js, to `paginate(items, page - 1, size)`, and leaves lib/paginate.js untouched."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": true,
+          "evidence": "The message says \"`paginate()` ... counts pages from 0, but `listItems()` ... takes pages counted from 1 and passed the number straight through.\" It also says \"I checked that the CSV export still outputs all 237 items, from `1,SKU-0001` to `237,SKU-0237`.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "second-caller",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 13.804,
+        "tokens": 157293,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (the API tests pass unedited, and the CSV export, a second caller of paginate that no test covers, still exports all 237 items in order)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "Before changing paginate, the agent searched for its other callers and found exportCsv relying on 0-based pages",
+          "passed": true,
+          "evidence": "There is no transcript showing the search itself, but the final message says \"I left `paginate()` alone because `lib/export.js` also uses it and counts pages from 0,\" so the agent did find the export caller that relies on 0-based pages."
+        },
+        {
+          "text": "The fix converts the 1-based page at the API boundary (or changes paginate and updates every caller consistently), rather than changing the shared function for one caller",
+          "passed": true,
+          "evidence": "The diff changes only `lib/api.js` to `paginate(items, page - 1, size)` with the comment \"API pages are 1-based; paginate() is 0-based\", and leaves the shared `paginate()` unchanged."
+        },
+        {
+          "text": "The final message names the cause (the API passes a 1-based page number to a 0-based paginate) and says how the other caller was checked",
+          "passed": true,
+          "evidence": "The message says \"the API treats `page` as starting at 1, but `paginate()` in `lib/paginate.js` starts counting at 0,\" and says how the other caller was checked: \"After the change, the CSV export still produces all 237 rows.\""
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 40.07,
+        "stddev": 17.435,
+        "min": 15.545,
+        "max": 75.282
+      },
+      "tokens": {
+        "mean": 336089.389,
+        "stddev": 100687.668,
+        "min": 164032,
+        "max": 527620
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.931,
+        "stddev": 0.112,
+        "min": 0.75,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 27.032,
+        "stddev": 14.121,
+        "min": 10.819,
+        "max": 56.336
+      },
+      "tokens": {
+        "mean": 219506.611,
+        "stddev": 60082.986,
+        "min": 156656,
+        "max": 365551
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.07",
+      "time_seconds": "+13.0",
+      "tokens": "+116583"
+    }
+  },
+  "notes": [
+    "3 runs per configuration per eval."
+  ]
+}

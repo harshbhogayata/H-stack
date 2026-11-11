@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (short, includes money-as-cents and migration rules)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "CLAUDE.md captures the unwritten conventions (integer cents, never edit shipped migrations, legacy/ frozen) rather than restating every package.json script or describing the directory tree",
+      "passed": true,
+      "evidence": "The diff's Rules section contains 'Money is integer cents', 'Shipped migrations are immutable', and '`legacy/` is frozen', mentions only `npm test` and `npm run lint` for the done check, and has no directory tree."
+    },
+    {
+      "text": "CLAUDE.md does not use all-caps imperatives such as NEVER or MUST",
+      "passed": true,
+      "evidence": "The 13-line CLAUDE.md in the diff uses phrasing like 'Change it only for a security fix' and 'add a new migration', with no all-caps words such as NEVER or MUST."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

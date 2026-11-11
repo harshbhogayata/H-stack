@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": false,
+      "evidence": "check exit 1: current code already returns the expected value: {\"input\":\"1.1h\",\"expected\":3960000}\n"
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply says \"JavaScript tries the alternatives in order, so `m` matches before `ms` gets a chance\" and that \"`\"500ms\"`, `\"1ms\"` and `\"1m500ms\"` all throw `TypeError`\"."
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": false,
+      "evidence": "The reply correctly clears uppercase units, \".5s\", spaces and repeated units, but it also reports floating-point error in \"1.1h\" as a bug even though the code does exactly the spec's \"number × unit factor\", and the check rejected that case with \"current code already returns the expected value: {\"inp"
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply rates it \"**major**\", notes \"Millisecond timeouts in config files are common, so real inputs will hit this\", gives \"**Fix:** put `ms` first, as in `(ms|h|m|s)`\", and the diff only adds cases.json."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  }
+}

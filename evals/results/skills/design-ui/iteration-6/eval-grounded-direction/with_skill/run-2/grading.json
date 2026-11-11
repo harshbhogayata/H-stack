@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The agent based the proposal on 'children aged 6–8 reading aloud, parents set a daily goal, kids grow a garden', made the plant stages (seed → sprout → bud → bloom) the progress bar, and set 'Touch targets are at least 64px, larger than adult guidelines because younger children are less precise'."
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It lists hex colours such as Leaf `#2E8540` ('white text ≈ 4.6:1, passes AA') and picks Andika because it 'was designed for beginning readers, with single-storey \"a\" and \"g\" like the letters children learn to write at school', with a smallest text size of 20."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

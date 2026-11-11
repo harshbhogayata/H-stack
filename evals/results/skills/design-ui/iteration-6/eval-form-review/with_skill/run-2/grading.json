@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+      "passed": true,
+      "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+    },
+    {
+      "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+      "passed": true,
+      "evidence": "ui-review.json line 30 entry: \"The email input has id=\\\"email\\\" but its label points to htmlFor=\\\"signup-email\\\"... screen readers announce an unlabelled field\"."
+    },
+    {
+      "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+      "passed": true,
+      "evidence": "SignupForm.css line 10 entry: \"`.signup input:focus` removes the outline and sets border-color to the same --color-border the field already has, so a focused input looks no different from an unfocused one.\""
+    },
+    {
+      "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+      "passed": true,
+      "evidence": "Line 18 entry says the error \"is stored in state but never shown. The only sign of failure is a red border on the password field\" and its fix adds aria-invalid and aria-describedby; the line 40 entry says the <div onClick> \"can't be reached with the keyboard, has no checkbox role and no checked stat"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

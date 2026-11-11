@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+      "passed": true,
+      "evidence": "Toast.jsx imports `IconButton` and `CloseIcon, TruckIcon` from the project, and Toast.css uses `var(--hb-z-toast)`, `var(--hb-shadow-raised)`, `var(--hb-space-*)`, `var(--hb-color-*)` and `var(--hb-motion-base) var(--hb-ease-out)`; the two new values were added as tokens in tokens.css, leaving only "
+    },
+    {
+      "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+      "passed": true,
+      "evidence": "The code sets `onMouseEnter={() => setPaused(true)}` and `onFocus={() => setPaused(true)}`, and the timer effect returns early `if (paused || leaving)`; the reply says the timer 'pauses while the pointer is over the toast or keyboard focus is on its close button'."
+    },
+    {
+      "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+      "passed": true,
+      "evidence": "The reply has an 'Accessibility checks' section (44px close button with a screen-reader label, a polite live region, reduced motion, WCAG AA contrast) and a 'Not verified' section saying 'there's no browser available, so I couldn't build it, render it, or watch the animation.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,82 @@
+diff --git a/src/components/PlanCard.css b/src/components/PlanCard.css
+new file mode 100644
+index 0000000..5eb6778
+--- /dev/null
++++ b/src/components/PlanCard.css
+@@ -0,0 +1,36 @@
++.plan-card {
++  display: flex;
++  flex-direction: column;
++  gap: var(--space-3);
++  background: var(--surface);
++  color: var(--text);
++  border: 1px solid var(--border);
++  border-radius: var(--radius);
++  padding: var(--space-4);
++}
++
++/* Inset ring adds weight without changing the card's size next to its siblings. */
++.plan-card--current {
++  border-color: var(--accent);
++  box-shadow: inset 0 0 0 1px var(--accent);
++}
++
++.plan-card__header {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: var(--space-2);
++}
++.plan-card__name { margin: 0; }
++.plan-card__badge { margin: 0; color: var(--highlight); font-weight: 600; font-size: 0.875rem; }
++
++.plan-card__price { margin: 0; }
++.plan-card__amount { font-variant-numeric: tabular-nums; font-size: 1.5rem; }
++.plan-card__period { color: var(--text-muted); }
++
++.plan-card__features { margin: 0; padding-left: var(--space-4); flex: 1; }
++.plan-card__features li + li { margin-top: var(--space-2); }
++
++.plan-card .button { align-self: stretch; }
++.plan-card .button:disabled { cursor: default; color: var(--text-muted); }
+diff --git a/src/components/PlanCard.jsx b/src/components/PlanCard.jsx
+new file mode 100644
+index 0000000..1f81ea5
+--- /dev/null
++++ b/src/components/PlanCard.jsx
+@@ -0,0 +1,34 @@
++import { Button } from './Button.jsx';
++import './PlanCard.css';
++
++export function PlanCard({ name, price, features = [], isCurrent = false, onChoose }) {
++  return (
++    <article className={`plan-card${isCurrent ? ' plan-card--current' : ''}`}>
++      <header className="plan-card__header">
++        <h3 className="plan-card__name">{name}</h3>
++        {isCurrent && <p className="plan-card__badge">Your current plan</p>}
++      </header>
++
++      <p className="plan-card__price">
++        <span className="plan-card__amount">{price}</span>
++        <span className="plan-card__period"> per month</span>
++      </p>
++
++      {features.length > 0 && (
++        <ul className="plan-card__features">
++          {features.map((feature) => (
++            <li key={feature}>{feature}</li>
++          ))}
++        </ul>
++      )}
++
++      {isCurrent ? (
++        <Button variant="secondary" disabled>
++          Current plan
++        </Button>
++      ) : (
++        <Button onClick={onChoose}>Choose {name}</Button>
++      )}
++    </article>
++  );
++}

@@ -101,17 +101,18 @@ async function grade(ev, res) {
   }
   if (judged.length) {
     const prompt = `You are grading one run of a coding agent. Judge each expectation strictly from the evidence below. Answer "passed": true only if the evidence clearly shows it; if the evidence is missing or ambiguous, answer false and say so.\n\nTASK GIVEN TO THE AGENT:\n${ev.prompt}\n\nCHECK COMMAND RESULT (run after the agent finished):\n${res.check ? `exit ${res.check.code}\n${res.check.out}` : '(no check)'}\n\nFINAL MESSAGE FROM THE AGENT:\n${blind(res.final).slice(0, 6000)}\n\nDIFF OF THE AGENT'S CHANGES:\n${blind(res.diff).slice(0, 12000) || '(no changes)'}\n\nEXPECTATIONS:\n${judged.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n\nReply with only JSON: {"expectations":[{"text":"...","passed":true|false,"evidence":"one sentence quoting the evidence"}]} in the same order.`;
-    const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', '1'];
+    const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', '1', '--tools', ''];
     if (JUDGE) argv.push('--model', JUDGE);
     // One retry when the grader's reply doesn't parse (measured: a qa run lost 2 expectations to this).
     let verdicts = null;
     for (let attempt = 0; attempt < 2 && !verdicts; attempt++) {
       const r = await run('claude', argv, { cwd: os.tmpdir(), timeout: 300000 });
-      try {
-        const j = JSON.parse(r.out.trim().split('\n').pop());
-        const m = String(j.result).match(/\{[\s\S]*\}/);
-        verdicts = JSON.parse(m[0]).expectations || null;
-      } catch { verdicts = null; }
+      let text = '';
+      try { text = String(JSON.parse(r.out.trim().split('\n').pop()).result || ''); } catch { text = ''; }
+      if (process.env.HS_DEBUG_JUDGE) fs.appendFileSync(process.env.HS_DEBUG_JUDGE, `--- attempt ${attempt}\n${r.out.slice(0, 3000)}\n${r.err.slice(0, 1000)}\n`);
+      try { verdicts = JSON.parse(text.match(/\{[\s\S]*\}/)[0]).expectations || null; } catch { verdicts = null; }
+      // Lenient fallback: unescaped quotes in the evidence break JSON; the verdicts are still in order.
+      if (!verdicts) { const ps = [...text.matchAll(/"passed"\s*:\s*(true|false)/g)].map((m) => m[1] === 'true'); if (ps.length === judged.length) verdicts = ps.map((p) => ({ passed: p, evidence: '(verdict read leniently: grader JSON was malformed)' })); }
     }
     if (!verdicts) verdicts = judged.map((t) => ({ text: t, passed: false, evidence: 'judge output unparseable (2 attempts)' }));
     let k = 0;
@@ -177,6 +178,36 @@ function summarise(skill, base, runs) {
   return bench;
 }
 
+// --regrade: re-grade only runs whose grading failed (judge unparseable) from their stored outputs,
+// then rewrite benchmark.json for that iteration.
+if (args.includes('--regrade')) {
+  for (const skill of multi('skill')) {
+    const skillDir = path.join(SKILLS, skill);
+    const evs = JSON.parse(fs.readFileSync(path.join(skillDir, 'evals', 'evals.json'), 'utf8')).evals;
+    const base = path.join(REPO, 'evals', 'results', 'skills', skill, `iteration-${ITER}`);
+    const runs = [];
+    for (const ev of evs) for (const arm of ['with_skill', 'without_skill']) {
+      const armDir = path.join(base, `eval-${ev.eval_name}`, arm);
+      if (!fs.existsSync(armDir)) continue;
+      const dirs = fs.readdirSync(armDir).filter((d) => d.startsWith('run-')).map((d) => path.join(armDir, d));
+      for (const [i, dir] of (dirs.length ? dirs : [armDir]).entries()) {
+        let g = JSON.parse(fs.readFileSync(path.join(dir, 'grading.json'), 'utf8'));
+        const t = JSON.parse(fs.readFileSync(path.join(dir, 'timing.json'), 'utf8'));
+        if (g.expectations.some((e) => /unparseable/.test(e.evidence))) {
+          const rd = (f) => (fs.existsSync(path.join(dir, 'outputs', f)) ? fs.readFileSync(path.join(dir, 'outputs', f), 'utf8') : '');
+          const ck = rd('check.txt'); const m = ck.match(/^exit (\d+)\n([\s\S]*)$/);
+          g = await grade(ev, { final: rd('final.md'), diff: rd('diff.patch'), check: m ? { code: Number(m[1]), out: m[2] } : null });
+          fs.writeFileSync(path.join(dir, 'grading.json'), JSON.stringify(g, null, 2));
+          process.stderr.write(`regraded ${skill} ${ev.eval_name} ${arm} ${path.basename(dir)}: ${g.summary.passed}/${g.summary.total}\n`);
+        }
+        runs.push({ eval_id: ev.id, eval_name: ev.eval_name, configuration: arm, run_number: i + 1, result: { ...g.summary, time_seconds: t.total_duration_seconds, tokens: t.total_tokens, errors: t.error ? 1 : 0 }, expectations: g.expectations });
+      }
+    }
+    const b = summarise(skill, base, runs);
+    console.log(JSON.stringify({ skill, with: b.run_summary.with_skill.pass_rate.mean, without: b.run_summary.without_skill.pass_rate.mean, delta: b.run_summary.delta }));
+  }
+  process.exit(0);
+}
 const skills = args.includes('--all') ? fs.readdirSync(SKILLS).filter((s) => fs.existsSync(path.join(SKILLS, s, 'evals', 'evals.json'))) : multi('skill');
 if (!skills.length) { console.log('usage: node evals/skill-bench.mjs --skill <name> [--all]'); process.exit(2); }
 const plans = await Promise.all(skills.map(benchSkill));

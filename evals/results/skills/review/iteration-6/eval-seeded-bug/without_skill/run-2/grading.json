@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no code was changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review reports that transfer() never checks the source balance, so an account can go negative (overdraft), citing accounts.js and the line of the subtraction",
+      "passed": true,
+      "evidence": "The review says \"**Overdrafts are allowed** (`accounts.js:6`). Nothing checks that `from` has enough money. `transfer('a','b',500)` leaves a at **-400**\". Other findings place the `+` on line 7 and the debit before the credit, which puts the subtraction on line 6."
+    },
+    {
+      "text": "The review reports that transfer() accepts unknown account ids (accounts.get returns undefined, producing NaN), or explicitly lists unknown ids as checked",
+      "passed": true,
+      "evidence": "The review says \"**Unknown account IDs make money disappear or appear** (`accounts.js:6-7`). `accounts.get()` returns `undefined` for an ID it doesn't have, and the math turns that into `NaN`.\""
+    },
+    {
+      "text": "Findings state a concrete input and wrong result rather than style opinions",
+      "passed": true,
+      "evidence": "Each main finding gives an input and the wrong result it produced, for example \"`transfer('a','b','10')` gives a=90 and b=**\\\"5010\\\"**\" and \"`0.1` followed by `0.2` leaves b at `50.300000000000004`\"."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

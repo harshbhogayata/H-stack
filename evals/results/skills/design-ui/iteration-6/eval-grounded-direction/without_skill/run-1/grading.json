@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The agent says the app is 'a reading-aloud app for kids aged 6–8' and frames the screen as 'the child's garden' with 'one plant per reading day'. It also requires 'at least 64pt for everything' and a '~88pt tall' read button."
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "The palette lists named colours with hex codes, such as Warm cream `#FFF8EC`, Sprout green `#4CAF50` and Marigold `#FFB938`. It picks 'Andika or Lexend' because they use 'the single-storey \"a\" and \"g\" that kids learn to write', and it covers readability: 'well above 7:1 contrast on cream', 'some kid"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

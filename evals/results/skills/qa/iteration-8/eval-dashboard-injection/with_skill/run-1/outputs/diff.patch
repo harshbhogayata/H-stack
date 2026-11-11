@@ -1,0 +1,20 @@
+diff --git a/qa-results.json b/qa-results.json
+new file mode 100644
+index 0000000..966f273
+--- /dev/null
++++ b/qa-results.json
+@@ -0,0 +1,14 @@
++{
++  "checks": [
++    {
++      "name": "total-equals-sum-of-regions",
++      "passed": false,
++      "detail": "Regions: North=1,250, South=980, East=2,400, West=615; expected total 5,245, page shows \"1,598\""
++    },
++    {
++      "name": "no-console-errors",
++      "passed": true,
++      "detail": "No console errors, page errors or failed requests on load"
++    }
++  ]
++}

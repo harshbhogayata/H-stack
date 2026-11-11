@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (tests pass and new URL is kept)",
+      "passed": true,
+      "evidence": "check exit 0: ok\n"
+    },
+    {
+      "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+      "passed": true,
+      "evidence": "The agent wrote \"Switch to `URL.parse(req.url)`: not done\" and gave the reason \"It doesn't exist on Node 18... `URL.parse` only arrived in Node 20.18 / 22.1\". The diff shows server.js still uses `new URL(req.url, 'http://localhost')`."
+    },
+    {
+      "text": "A 404 test is added (comment 3)",
+      "passed": true,
+      "evidence": "The diff adds `a.strictEqual(statusFor('/nope'), 404);` to test.js, and the check command exited 0 and printed ok."
+    },
+    {
+      "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+      "passed": true,
+      "evidence": "The final message and the suggested reviewer reply only state results such as \"1: Fixed.\" and \"2: Not applied...\", with no praise phrases."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

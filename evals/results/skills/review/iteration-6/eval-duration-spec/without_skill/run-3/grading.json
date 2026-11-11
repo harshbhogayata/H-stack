@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply says \"`duration.js:2` builds the pattern as `(h|m|s|ms)`. The regex tries the alternatives in order, so for `\"500ms\"` it matches `m` and stops, leaving a stray `s`,\" and concludes that \"`ms` never parses.\""
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": true,
+      "evidence": "Under \"Checked and correct\", the reply lists uppercase units (`1H`), a space between number and unit (`1 h`) and `.5s` as correctly throwing a TypeError. It labels the BOM point \"A spec question, not counted as a bug\", and the only bug it reports is `ms`."
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply opens with \"Not ready to merge\" and says \"any duration that uses the `ms` unit is rejected\". It proposes \"**Fix:** put the longer unit first, `(ms|h|m|s)`\" and states \"I didn't touch `duration.js`\", and the diff changes only cases.json. It never mentions config-file millisecond timeouts in"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

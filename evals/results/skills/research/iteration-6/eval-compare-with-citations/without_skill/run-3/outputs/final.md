@@ -1,0 +1,6 @@
+I've saved the answer as `ANSWER.md` in the repo. Use **ajv**: it supports draft 2020-12 JSON Schema. Zod doesn't validate JSON Schema documents at all.
+
+I couldn't cite the libraries' own docs or source as you asked. The repo has no `node_modules`, and the doc fetches and `npm pack` needed permissions that weren't granted. So the note is based on what I know of their docs and names the doc pages and file paths to check. Installing both and reading those files would confirm it.
+
+- **ajv (v8):** supports drafts 04, 06, 07, 2019-09 and 2020-12. For 2020-12 you load a separate class from `ajv/dist/2020`, because the default import uses draft-07. That class checks data against a 2020-12 schema and can check a schema document against the 2020-12 meta-schema. You also need the `ajv-formats` package to validate `format`.
+- **zod:** you write schemas in TypeScript and Zod checks data against those. Zod 4's `z.toJSONSchema()` only goes the other way: it turns a Zod schema into JSON Schema, draft 2020-12 by default. I'm not sure whether newer Zod 4.x versions can go from JSON Schema to Zod. Even if they can, that would be a conversion step, not a validator.

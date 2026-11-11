@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (src unchanged; R1 and R3 rejected, R2 confirmed, and the R2 request, replayed with a mocked HTTP client, makes the server fetch an internal address)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "R1 is rejected with a boundary trace: the user value is passed through encodeURIComponent into a path on the fixed avatar origin, so the reported payloads cannot change the host",
+      "passed": true,
+      "evidence": "triage.json R1 is \"rejected\" and says \"avatarUrl() passes the user value through encodeURIComponent before inserting it into a path relative to the fixed AVATAR_ORIGIN... Both requests stay on the CDN origin.\""
+    },
+    {
+      "text": "R3 is rejected because sort is looked up in the SORT_COLUMNS allowlist and dir is mapped to ASC/DESC, so no request text reaches the SQL",
+      "passed": true,
+      "evidence": "triage.json R3 is \"rejected\" and says \"The sort value is only used as a key into the SORT_COLUMNS allowlist... dir maps only to the constants ASC or DESC. User input never reaches the SQL string.\""
+    },
+    {
+      "text": "R2 names the blocklist gaps (e.g. 169.254.169.254, 172.16.0.0/12, ::1, other 127.x addresses) and the boundary (any signed-in member can make the server request internal services and read the first 500 bytes of the response), with a fix that resolves the host and checks it against private and link-local ranges (or uses an allowlist)",
+      "passed": true,
+      "evidence": "triage.json R2 says \"does not block link-local 169.254.0.0/16 (cloud metadata), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback/ULA ([::1]...)\", \"returns the first 500 bytes... Any signed-in member can therefore make the server send requests to internal hosts and read the responses\", and \"Fix:"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

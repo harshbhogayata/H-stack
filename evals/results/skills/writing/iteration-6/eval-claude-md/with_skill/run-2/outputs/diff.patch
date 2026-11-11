@@ -1,0 +1,23 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..a7f7750
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,17 @@
++# shop-api
++
++## Money
++
++Store and compute money as integer cents, typed `Cents` from `src/money.ts`. `Cents` is a plain `number` alias, so the compiler accepts fractional values. Convert to integer cents at the boundary and use integer arithmetic throughout (round explicitly when dividing).
++
++## Migrations
++
++A shipped migration is immutable. To change the schema, add a new migration.
++
++## `legacy/`
++
++`legacy/` is frozen. Change it only for security fixes. Make other changes outside it.
++
++## Before pushing
++
++Run `npm test` and `npm run lint`. CI runs both, and both must pass.

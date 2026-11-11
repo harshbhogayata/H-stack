@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+      "passed": true,
+      "evidence": "Toast.jsx imports `IconButton` and `CloseIcon`. Toast.css takes its colour, spacing, radius, shadow, z-index, text size and motion values from tokens (`var(--hb-color-surface)`, `var(--hb-space-4)`, `var(--hb-shadow-raised)`, `var(--hb-z-toast)`, `var(--hb-motion-base)`). The only literal values are"
+    },
+    {
+      "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+      "passed": true,
+      "evidence": "The code sets paused state from `onMouseEnter`/`onFocus` and skips the timer `if (!message || paused)`, and `duration` is a prop. The reply says \"The 5-second countdown pauses while the toast is hovered or focused, so someone who is reading it or tabbing to the close button doesn't lose it.\""
+    },
+    {
+      "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+      "passed": true,
+      "evidence": "The reply says \"I couldn't run or render it: the repo has no build setup or tests\" and that nothing uses the Toast yet, which states plainly that it was not verified. It lists no UI checks, which fits with none having been possible."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

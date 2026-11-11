@@ -1,0 +1,151 @@
+diff --git a/QA-REPORT.md b/QA-REPORT.md
+new file mode 100644
+index 0000000..1ecb608
+--- /dev/null
++++ b/QA-REPORT.md
+@@ -0,0 +1,62 @@
++# QA report: "You're subscribed" shown but no email arrives
++
++**Date:** 2026-11-11 · **Build:** newsletter 1.2.0 (commit 3216ca3) · **Browser:** Chromium via Playwright
++
++## Summary
++
++The signup page says **"You're subscribed. Check your inbox for the first issue."** even when the server **rejects** the address. The user is never added to the list, so no email ever arrives. The address is not stored and the user sees no error, so they have no reason to try again.
++
++## Root cause
++
++`public/app.js` awaits `fetch('/api/subscribe', …)` but never checks the response. `fetch` only rejects on network failure, so a `422` response falls through to the success message and `form.reset()`. The `{ error }` body the server sends back is never read or shown.
++
++```js
++await fetch('/api/subscribe', { ... });          // response ignored
++status.textContent = "You're subscribed. ...";   // runs for 201 and 422 alike
++```
++
++## Who is affected
++
++The server (`server.js`, `validate()`) rejects addresses with `422` in two cases that the browser's `<input type="email">` allows:
++
++| Input | Browser validation | Server response | Page shows |
++|---|---|---|---|
++| `reader@example.com` | passes | `201 {"ok":true}` | "You're subscribed…" ✅ |
++| `reader+news@example.com` | passes | `422 {"error":"Addresses with + are not supported."}` | "You're subscribed…" ❌ |
++| `reader@example.c0m` (TLD not letters-only, e.g. typos or unusual TLDs) | passes | `422 {"error":"Enter a valid email address."}` | "You're subscribed…" ❌ |
++
++The most likely real-world trigger is **plus-addressing** (`name+tag@gmail.com`), which many people use for newsletter signups.
++
++## Reproduction
++
++1. `node server.js`, then open http://localhost:3000
++2. Enter `reader+news@example.com` and click **Subscribe**
++3. In DevTools > Network, `/api/subscribe` returns **422** with `{"error":"Addresses with + are not supported."}`
++4. The page shows "You're subscribed. Check your inbox for the first issue." and clears the field.
++
++## Automated test
++
++`e2e/subscribe.test.js` (node:test + Playwright; starts `server.js` itself on a random port):
++
++```
++node --test e2e/subscribe.test.js
++```
++
++Current result: **1 pass, 2 fail**
++- ✅ control: a normal address is accepted and the page confirms it
++- ❌ plus-addressed email rejected by the server must not show "You're subscribed"
++  `server answered 422 {"error":"Addresses with + are not supported."} but the page told the user: "You're subscribed. Check your inbox for the first issue."`
++- ❌ an address that passes browser validation but fails server validation shows the error
++  `server answered 422 {"error":"Enter a valid email address."} but the page told the user: "You're subscribed. ..."`
++
++The two failing tests should pass once the client checks `response.ok` and shows `body.error`. The plus-address test also requires the page to show the server's error text.
++
++## Suggested fix (not applied)
++
++- In `app.js`, check `res.ok`. If it is false, show the server's `error` message and keep the field filled.
++- Product decision: decide whether to reject `+` addresses at all. Plus-addressing is valid and common, so accepting it removes the main trigger.
++
++## Other observations
++
++- **The server doesn't send any email.** `server.js` only adds the address to an in-memory `Set` (`subscribers`). This build has no welcome or "first issue" email, and every subscriber is lost when the server restarts. If sending happens in another service, that's fine. If not, even valid signups won't receive a confirmation email "in your inbox", and the success message overpromises.
++- Addresses are trimmed in the client and lowercased before storing. A duplicate signup returns `201` again, which is harmless.
+diff --git a/e2e/subscribe.test.js b/e2e/subscribe.test.js
+new file mode 100644
+index 0000000..e2cb825
+--- /dev/null
++++ b/e2e/subscribe.test.js
+@@ -0,0 +1,77 @@
++// End-to-end tests for the newsletter signup flow, driven in a real browser.
++// Run: node --test e2e/
++const { test, before, after } = require('node:test');
++const assert = require('node:assert/strict');
++const { spawn } = require('node:child_process');
++const path = require('node:path');
++const { chromium } = require('playwright');
++
++let server;
++let baseURL;
++let browser;
++
++before(async () => {
++  server = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
++    env: { ...process.env, PORT: '0' }, // random free port
++    stdio: ['ignore', 'pipe', 'inherit'],
++  });
++  baseURL = await new Promise((resolve, reject) => {
++    const timer = setTimeout(() => reject(new Error('server did not start')), 10000);
++    let out = '';
++    server.stdout.on('data', (chunk) => {
++      out += chunk;
++      const m = out.match(/listening on (http:\/\/\S+)/);
++      if (m) { clearTimeout(timer); resolve(m[1]); }
++    });
++    server.on('exit', (code) => reject(new Error(`server exited with ${code}`)));
++  });
++  browser = await chromium.launch();
++});
++
++after(async () => {
++  await browser?.close();
++  server?.kill();
++});
++
++// Fill the form like a user, submit, and return the API response plus the final status text.
++async function subscribe(email) {
++  const page = await browser.newPage();
++  try {
++    await page.goto(baseURL);
++    await page.fill('#email', email);
++    const [response] = await Promise.all([
++      page.waitForResponse((r) => r.url().endsWith('/api/subscribe')),
++      page.click('button[type=submit]'),
++    ]);
++    const status = page.locator('#status');
++    await page.waitForFunction(() => {
++      const t = document.getElementById('status').textContent;
++      return t && t !== 'Subscribing…';
++    });
++    return { httpStatus: response.status(), body: await response.json(), text: await status.textContent() };
++  } finally {
++    await page.close();
++  }
++}
++
++test('control: a normal address is accepted and the page confirms it', async () => {
++  const r = await subscribe('reader@example.com');
++  assert.equal(r.httpStatus, 201);
++  assert.match(r.text, /subscribed/i);
++});
++
++test('plus-addressed email rejected by the server must not show "You\'re subscribed"', async () => {
++  const r = await subscribe('reader+news@example.com');
++  assert.equal(r.httpStatus, 422, 'precondition: server rejects plus-addresses');
++  assert.doesNotMatch(r.text, /subscribed/i,
++    `server answered ${r.httpStatus} ${JSON.stringify(r.body)} but the page told the user: "${r.text}"`);
++  assert.ok(r.text.includes(r.body.error), `expected the server error to be shown, got: "${r.text}"`);
++});
++
++test('address that passes browser validation but fails server validation shows the error', async () => {
++  // Valid for <input type=email>, but the server's TLD rule requires letters only.
++  const r = await subscribe('reader@example.c0m');
++  assert.equal(r.httpStatus, 422, 'precondition: server rejects this address');
++  assert.doesNotMatch(r.text, /subscribed/i,
++    `server answered ${r.httpStatus} ${JSON.stringify(r.body)} but the page told the user: "${r.text}"`);
++});

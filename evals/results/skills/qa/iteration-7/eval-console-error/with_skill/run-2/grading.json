@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply reports the uncaught JSON parse error (SyntaxError) captured from the page console or page errors after the click",
+      "passed": true,
+      "evidence": "After clicking in headless Chromium, the reply says \"The page threw an uncaught error: `Expected ',' or '}' after property value in JSON at position 12 (line 1 column 13)`\". This is the JSON.parse SyntaxError message, although the reply doesn't use the word SyntaxError."
+    },
+    {
+      "text": "The reply names the malformed JSON literal (missing closing brace) as the cause",
+      "passed": true,
+      "evidence": "The reply says \"in `app.html:5` the JSON string is missing its closing brace: `const data = JSON.parse('{\"total\": 12');`\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

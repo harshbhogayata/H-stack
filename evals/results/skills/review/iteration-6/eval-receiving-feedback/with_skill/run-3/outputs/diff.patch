@@ -1,0 +1,26 @@
+diff --git a/server.js b/server.js
+index 6595ab4..e1a9278 100644
+--- a/server.js
++++ b/server.js
+@@ -1,9 +1,9 @@
+ const http = require('http');
+ // Node 18 is the minimum supported runtime (see package.json engines).
+-function handler(req, res) {
++function requestHandler(req, res) {
+   const url = new URL(req.url, 'http://localhost');
+   if (url.pathname === '/health') { res.writeHead(200); return res.end('ok'); }
+   res.writeHead(404); res.end();
+ }
+-module.exports = { handler };
+-if (require.main === module) http.createServer(handler).listen(8080);
++module.exports = { requestHandler };
++if (require.main === module) http.createServer(requestHandler).listen(8080);
+diff --git a/test.js b/test.js
+index 5efd494..aee6c10 100644
+--- a/test.js
++++ b/test.js
+@@ -1 +1,3 @@
+-const a=require('assert');const {handler}=require('./server');let code;handler({url:'/health'},{writeHead:(c)=>{code=c},end:()=>{}});a.strictEqual(code,200);console.log('ok')
++const a=require('assert');const {requestHandler}=require('./server');let code;requestHandler({url:'/health'},{writeHead:(c)=>{code=c},end:()=>{}});a.strictEqual(code,200);
++requestHandler({url:'/nope'},{writeHead:(c)=>{code=c},end:()=>{}});a.strictEqual(code,404);
++console.log('ok')

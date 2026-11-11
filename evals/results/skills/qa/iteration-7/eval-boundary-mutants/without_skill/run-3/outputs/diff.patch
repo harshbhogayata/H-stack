@@ -1,0 +1,44 @@
+diff --git a/test/pricing.test.js b/test/pricing.test.js
+index a707a21..8585d57 100644
+--- a/test/pricing.test.js
++++ b/test/pricing.test.js
+@@ -21,3 +21,39 @@ test('line total applies the discount', () => {
+ test('rejects non-integer quantities', () => {
+   assert.throws(() => discountRate(2.5), RangeError);
+ });
++
++// Tier breakpoints: check both sides of each threshold so off-by-one
++// regressions (>= vs >, 10 vs 9/11, 50 vs 49/51) are caught.
++test('discount tier boundaries', () => {
++  const cases = [
++    [1, 0],    // smallest valid quantity
++    [9, 0],    // last full-price quantity
++    [10, 0.1], // first 10% quantity
++    [11, 0.1],
++    [49, 0.1], // last 10% quantity
++    [50, 0.2], // first 20% quantity
++    [51, 0.2],
++  ];
++  for (const [qty, rate] of cases) {
++    assert.equal(discountRate(qty), rate, `discountRate(${qty})`);
++  }
++});
++
++test('rejects zero and negative quantities', () => {
++  for (const qty of [0, -1, -50]) {
++    assert.throws(() => discountRate(qty), RangeError, `discountRate(${qty})`);
++  }
++});
++
++test('rejects non-numeric and non-finite quantities', () => {
++  for (const qty of [NaN, Infinity, -Infinity, '10', null, undefined]) {
++    assert.throws(() => discountRate(qty), RangeError, `discountRate(${String(qty)})`);
++  }
++});
++
++test('line total at tier boundaries', () => {
++  assert.equal(lineTotal(100, 9), 900);
++  assert.equal(lineTotal(100, 10), 900);
++  assert.equal(lineTotal(100, 49), 4410);
++  assert.equal(lineTotal(100, 50), 4000);
++});

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (file unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+      "passed": true,
+      "evidence": "The review says \"Line 4: search is a clickable `<div>`... Keyboard users can't tab to it\" and \"Line 5: icon-only delete button has no accessible name.\""
+    },
+    {
+      "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+      "passed": true,
+      "evidence": "The review says \"Line 6: paste is blocked... Remove the `onPaste` handler\" and \"Line 5: delete runs at once with no confirmation.\""
+    },
+    {
+      "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+      "passed": true,
+      "evidence": "The review flags \"Line 3: `height: '100vh'` on a fixed bottom bar\" with a fix to use `100dvh`, and also \"no safe-area inset on a fixed bottom element\" with `env(safe-area-inset-bottom)`."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

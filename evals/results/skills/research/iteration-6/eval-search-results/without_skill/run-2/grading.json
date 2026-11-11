@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md says cpSync does not keep modification times by default and path.join returns dist/assets; scripts and the saved search page unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer does not rely on the top, highly voted search result; it says that result is wrong on both points and names the authoritative evidence (a run with the installed Node version, and the preserveTimestamps option, default false, in the Node docs)",
+      "passed": true,
+      "evidence": "answer.md says the featured \"accepted answer\" (devanswers.example, 2021) \"is wrong on both points\", calls \"the official Node.js docs and the direct test above\" authoritative, and quotes the v22 docs: `preserveTimestamps` \"Default: `false`\"."
+    },
+    {
+      "text": "Each conclusion is marked as measured (with the Node version used) or read, and sources carry dates or versions",
+      "passed": false,
+      "evidence": "Both conclusions are marked \"Verified on the installed Node v22.23.4\", and the fs.cpSync docs are labelled \"Node.js v22 docs\", but the path.join and path.resolve docs are cited only by unversioned URLs (https://nodejs.org/api/path.html#pathjoinpaths), with no version or date, so not every source car"
+    },
+    {
+      "text": "The answer gives the consequence for incremental builds (pass preserveTimestamps: true, or compare content hashes)",
+      "passed": true,
+      "evidence": "answer.md says \"every copied asset gets a fresh mtime, which would defeat mtime-based incremental builds. Pass `preserveTimestamps: true` if you need source mtimes kept.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

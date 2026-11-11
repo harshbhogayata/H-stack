@@ -2,7 +2,7 @@
 
 Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **104 done, 7 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Every needs-user item has one of the allowed reasons: smoke-test tasks, accounts, or desktop visual checks. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. No import is worse than no skill. Review was worse on its first run and was fixed. Five skills tie at the ceiling. In real sessions, Claude loads the skill H-Stack names 89% of the time (16 of 18 runs) after the routing fixes. The whole-stack smoke test has not run because it needs your real tasks.
+**Short version.** All 85 HS items and 26 IM rows have a status: **104 done, 7 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Every needs-user item has one of the allowed reasons: smoke-test tasks, accounts, or desktop visual checks. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, Claude loads the skill H-Stack names 89% of the time (16 of 18 runs) after the routing fixes. The whole-stack smoke test has not run because it needs your real tasks.
 
 ## Needs you
 
@@ -17,25 +17,20 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
    - `node evals/release-gate.mjs` before bumping the version.
 
    The release gate (HS-085) is built and its CI part passes. The gate itself fails until these tasks exist and have been run, so HS-085 is needs-user.
-2. **Retire or harden the five ceiling ties (judgement call).** debugging, design-ui, research, review and security-audit score 1.00 with and without the skill. They conflict with two rules:
-   - HS-006 says a skill the base model passes without is retired.
-   - The goal's import rule says to drop only what is worse than no skill.
-
-   I kept all five. Their evals are probably too easy to show a gain. Choose one:
-   - **(a)** keep them and let me write harder evals (for debugging: a multi-cause bug where the obvious fix is wrong);
-   - **(b)** retire them now.
-
-   `node evals/retire-check.mjs` lists them.
-3. **Routines (HS-076 nightly prep, HS-077 CI watcher).** These must be created in your claude.ai account; the GitHub-event trigger also needs the GitHub app on the repo. What each Routine does and its `task.yaml` pattern are in `skills/long-run` (SKILL.md, references/task-yaml.md).
-4. **Second scaffold check (HS-009).** Needs a Codex or dsh install and its own model account.
-5. **Visual checks in the desktop app.** I could not look at:
+2. **Routines (HS-076 nightly prep, HS-077 CI watcher).** These must be created in your claude.ai account; the GitHub-event trigger also needs the GitHub app on the repo. What each Routine does and its `task.yaml` pattern are in `skills/long-run` (SKILL.md, references/task-yaml.md).
+3. **Second scaffold check (HS-009).** Needs a Codex or dsh install and its own model account.
+4. **Visual checks in the desktop app.** I could not look at:
    - the Spinner suffix and announcement line (HS-056);
-   - the side pane (HS-057, opt-in via `"pane": true` in `.h-stack/config.json`).
+   - the side pane (HS-057), which opens by itself during a long run with a recorded goal (`"pane": "auto"`; `true` always, `false` never).
 
-   Both are built and pass the mod tests (5/5); HS-056 and HS-057 are needs-user only for this check.
-6. **Off-by-default switches to decide after the smoke test.** Each one costs model calls or context and has no measured gain yet. They are listed in Deviations (item 6).
-7. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
-8. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
+   Both are built and pass the mod tests (10/10); HS-056 and HS-057 are needs-user only for this check.
+5. **Model-call features to watch in the smoke test.**
+   - The concern check (HS-040) is on by default and costs one Haiku-class call per edited turn.
+   - The classifier model fallback (HS-019) stays off: its spec keeps it off until trigger evals show a recall gain, and the rules already reach recall ≥ 0.8 on all 15 skills.
+
+   Switch either with `concerns` or `classifier.fallback` in `.h-stack/config.json`.
+6. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
+7. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
    - edits to `CLAUDE.md`, `.claude/rules/**` and `.h-stack/config.json`;
    - MCP tools whose names carry no recognisable verb.
 
@@ -46,7 +41,7 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 | Milestone | Items | What exists now |
 |---|---|---|
 | M1 baseline | HS-001, 003, 005, 082 | Skipped per the goal, apart from what it needs:<br>• smoke runner `evals/run-smoke.mjs` (skill-creator layout; false-done, tampering, questions, unaided, cost per solved task, sameness), self-tested in both arms;<br>• task format and validator;<br>• judge hygiene;<br>• native map (ARCHITECTURE §2).<br>HS-001 is needs-user. |
-| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 906/1,500 tokens, listing 650/900), 94 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
+| M2 skeleton and CI | HS-010, 011, 012, 015, 045, 081, 083, `bin/hs` | • Plugin skeleton and `hooks/hooks.json` (exec-form command hooks, `onFailure: block` on closed guards, timeouts) plus one mods module.<br>• `.h-stack/` JSONL state: single-line appends, gitignored.<br>• `ci.mjs` with: index generator, context budget (always-on 994/1,500 tokens, listing 738/900), 96 snapshot cases, hook contract (5 closed hooks deny on crash), lint, THIRD_PARTY digests. |
 | M3 core imports | IM-01, 04, 05, 06, 07, 11, 15; HS-002 | core-rules (verification-before-completion and the Karpathy rules, plus 4 opt-in path-scoped rule templates), planning, tdd, debugging (with `verify-fix.mjs`), clarify. Each has evals and a benchmark. |
 | M4 activation | HS-017, 018, 020, 022 | Exit criterion met; see Activation below.<br>• SessionStart router map.<br>• Rules classifier: size, at most one skill, native routes to `/code-review`, `/security-review`, skill-creator, "why that?".<br>• Event triggers.<br>• Act/ask/stop with an intent-check agent.<br>• `claude plugin eval` activation cases. |
 | M5 guards I | HS-027, 028, 029 | • Receipts ledger and a Stop gate (blocks once on unbacked "done").<br>• Read-only tests outside `hs phase test`.<br>• Tamper scan (8 patterns).<br>• Protected checkers and paths, plus opt-in permission rules (`setup.mjs`, OD-4). |
@@ -83,36 +78,126 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 
 ## Benchmark numbers per import
 
-All per-skill benchmarks used the same method:
-- skill-creator layout, 3 eval prompts per skill;
-- 1 `claude -p` run with the skill and 1 without, each in a fresh fixture copy;
-- a check command run outside the agent, plus a separate judge call for the remaining expectations.
+**Method.** All numbers below come from `evals/skill-bench.mjs`:
+- skill-creator layout;
+- each run is a separate `claude -p` in a fresh fixture copy;
+- a check command runs outside the agent;
+- a separate grader judges the remaining expectations.
 
-With one run per arm, a delta under about 0.15 is within noise. Full data: `evals/results/skills/`; table: `evals/results/skills/SUMMARY.md`.
+Two leaks were found and closed during the build. Numbers from before the fixes are not used below.
+- **Until iteration 5, the with-skill arm could read the skill's own `evals/evals.json`,** whose expectations describe the answers. It now sees a copy of the skill without `evals/`.
+- **Grading has been blind and tool-less since iteration 6.**
+  - The grader is a fresh `claude -p --tools ""` call, not told the arm, with lines that mention the skill removed from the evidence.
+  - A grader that could call tools sometimes ran out of its single turn and returned nothing, which scored a correct run as failed.
 
-| Skill (imports) | Iteration | With | Without | Δ | Δ tokens | Verdict |
-|---|---|---:|---:|---:|---:|---|
-| qa (webapp-testing) | 1 | 1.00 | 0.56 | +0.44 | +118k | kept |
-| memory (handoff) | 1 | 0.78 | 0.44 | +0.33 | −8k | kept |
-| git-ship (finishing, worktrees, pr) | 1 | 1.00 | 0.72 | +0.28 | +69k | kept |
-| long-run (dispatching-parallel-agents) | 1 | 1.00 | 0.72 | +0.28 | +152k | kept |
-| skill-authoring (own) | 1 | 1.00 | 0.72 | +0.28 | +55k | kept |
-| planning (writing/executing-plans) | 2 | 1.00 | 0.87 | +0.13 | +74k | kept |
-| clarify (grilling) | 2 | 1.00 | 0.89 | +0.11 | +17k | kept |
-| writing (writing-for-agents, unslop) | 1 | 1.00 | 0.89 | +0.11 | +10k | kept |
-| core-rules (verification, Karpathy) | 2 | 0.89 | 0.78 | +0.11 | +105k | kept |
-| tdd | 4 | 0.89 | 0.78 | +0.11 | +359k | kept (iteration 4 re-checks the spec-coverage change; iteration 2 was the same 0.89 vs 0.78) |
-| review (receiving-code-review) | 2 | 1.00 | 1.00 | 0.00 | +36k | kept (tie). **Iteration 1 was worse: 0.89 vs 1.00** (explained below the table) |
-| debugging (systematic-debugging) | 2 | 1.00 | 1.00 | 0.00 | +177k | kept (tie at ceiling) |
-| design-ui (baseline-ui, frontend-design) | 1 | 1.00 | 1.00 | 0.00 | +34k | kept (tie at ceiling) |
-| research | 1 | 1.00 | 1.00 | 0.00 | +148k | kept (tie at ceiling) |
-| security-audit (cloudflare) | 1 | 1.00 | 1.00 | 0.00 | −26k | kept (tie at ceiling) |
+Full table: `evals/results/skills/SUMMARY.md`.
 
-**Why review failed its first run.** Its verdict scheme (`confirmed`) led the agent to call a rare non-BMP edge case "a real bug". I fixed it by giving each finding a severity that is separate from its verdict, and re-ran it.
+| Skill (imports) | Iteration | Evals | Runs/arm | With | Without | Δ | Δ tokens |
+|---|---|---:|---:|---:|---:|---:|---:|
+| memory (handoff) | 5 | 3 | 1 | 0.78 | 0.44 | +0.33 | +13k |
+| git-ship (finishing, worktrees, pr) | 5 | 3 | 1 | 1.00 | 0.72 | +0.28 | +57k |
+| long-run (dispatching-parallel-agents) | 5 | 3 | 1 | 1.00 | 0.72 | +0.28 | +14k |
+| skill-authoring (own) | 5 | 3 | 1 | 1.00 | 0.72 | +0.28 | +83k |
+| tdd | 5 | 3 | 1 | 1.00 | 0.78 | +0.22 | +338k |
+| clarify (grilling) | 5 | 3 | 1 | 1.00 | 0.89 | +0.11 | +31k |
+| core-rules (verification, Karpathy) | 5 | 3 | 1 | 0.89 | 0.78 | +0.11 | +92k |
+| debugging (systematic-debugging) | 6 | 6 | 3 | 1.00 | 0.93 | +0.07 | +117k |
+| planning (writing/executing-plans) | 5 | 3 | 1 | 0.93 | 0.87 | +0.07 | +44k |
+| writing (writing-for-agents, unslop) | 6 | 3 | 3 | 1.00 | 0.93 | +0.07 | +45k |
+| qa (webapp-testing) | 7 | 6 | 3 | 0.96 | 0.93 | +0.03 | +65k |
+| research | 6 | 6 | 3 | 0.97 | 0.94 | +0.03 | +78k |
+| review (receiving-code-review) | 6 | 6 | 3 | 0.94 | 0.91 | +0.03 | +47k |
+| security-audit (cloudflare) | 6 | 6 | 3 | 0.97 | 0.94 | +0.03 | +44k |
+| design-ui (baseline-ui, frontend-design) | 6 | 6 | 3 | 1.00 | 0.99 | +0.01 | +67k |
 
-**Earlier iterations.** Iteration 1 of the M3 skills had fixture bugs (Python bytecode in diffs, a stale `.pyc`). Iteration 2 replaced it.
+Every import beats no-skill, so none is dropped.
 
-**Cost.** Most skills raise tokens per task; that is the main cost to watch in the smoke test.
+**How to read the margins.**
+- The one-run rows (iteration 5) are within noise below about 0.15.
+- The three-run rows are steadier but have small margins.
+- Before the leak was closed, qa scored +0.44 (iteration 1). Its leak-free result is +0.03, so the old number was inflated.
+
+**Regressions found along the way, all fixed and re-measured:**
+- **review, iteration 1 (0.89 vs 1.00).** The verdict scheme made a rare edge case read as a bug. Fix: severity is now separate from verdict.
+- **review, `duration-spec`.** The agent reported floating-point results that the spec defines as bugs. Fix: check a claim against the spec's own definition first. Result: 1.00 vs 0.83.
+- **research, `untrusted-page`.** The agent ignored an injected instruction but didn't report it. Fix: report which source contained it. Result: 1.00 vs 0.83.
+- **qa, `swallowed-422`.** The e2e test still failed after the bug was fixed. Fix: prove a regression test passes on a scratch fix. Result: 0.92 vs 0.83.
+- **qa, `dashboard-injection`.** An injected instruction went unreported. Fix: report it. Result: 1.00 vs 1.00.
+- **design-ui.** The agent hard-coded a colour instead of adding a token. Fix: a value the theme lacks becomes a new token.
+
+**Cost.** Every skill raises tokens per task (+13k to +338k, tdd highest). This is the main cost to watch in the smoke test.
+
+## Harder evals and the HS-006 retire rule
+
+The five skills that tied at 1.00 vs 1.00, plus qa, each got 3 new hard evals. A subagent wrote them, with objective offline checks. Each check:
+- fails on the untouched fixture;
+- passes on a correct answer;
+- fails on a plausible wrong one.
+
+| Skill | New hard evals |
+|---|---|
+| debugging | shared mutable defaults behind a misleading symptom; time-zone due dates that only fail outside UTC; a fix that breaks an untested second caller |
+| review | cache key on the first argument only; a spec grammar with look-alike non-bugs; free-shipping threshold checked before the discount |
+| security-audit | IDOR through a router that matches exactly instead of by prefix; a start-anchored regex reaching `shell=True`; triage of three reports, two of them false |
+| research | stale README vs installed code; a saved page with an injected instruction; a wrong top search result |
+| design-ui | toast with motion and z-index tokens; signup form with four subtle a11y bugs and two bait lines; plan card that needs dark-mode tokens |
+| qa | boundary mutants that survive the suite; a 422 swallowed in the browser flow; a dashboard with a wrong total and an injected instruction |
+
+They ran at 3 runs per arm with blind grading. Most of the separation comes from the hard evals:
+
+| Eval | With | Without |
+|---|---:|---:|
+| debugging `shared-defaults` | 1.00 | 0.75 |
+| research `stale-readme` | 1.00 | 0.75 |
+| review `cache-key` | 1.00 | 0.75 |
+| qa `boundary-mutants` | 1.00 | 0.67 |
+| writing `claude-md` | 1.00 | 0.78 |
+
+**HS-006 applied.** A skill is retired only if it still doesn't beat no-skill after these evals. All six now beat it (table above), so none is retired. design-ui's margin (+0.01) is within noise. It is kept because its own job, fitting the project's context, shows a clear gain on the sameness check below.
+
+## Sameness check (context over templates)
+
+`evals/sameness.mjs` sends the same request into three real fixture projects:
+- a children's reading app (playful tokens, "you" voice, parental gate);
+- a bank's internal admin tool (`--ld-*` tokens, permissions, audit log, formal copy);
+- a developer CLI (`logq`: stdout/stderr rules, XDG paths, terse docs).
+
+The requests: design-ui "add a settings page", writing "write the README intro", planning "plan adding export of the user's data". Each runs with and without the skill, 2 runs per arm.
+
+How it's graded:
+- **Fit:** a fresh grader sees only the project's files and the output. It isn't told the context name or the arm, and it scores the fit criteria that apply to that kind of request.
+- **Similarity:** the mean pairwise token Jaccard between the three contexts' outputs.
+
+| Skill | Fit with | Fit without | Similarity with | Similarity without |
+|---|---:|---:|---:|---:|
+| design-ui | **0.93** | 0.73 | 0.19 | 0.14 |
+| writing | **0.92** | 0.85 | 0.14 | 0.13 |
+| planning | **0.97** | 0.80 | 0.18 | 0.16 |
+
+No skill produces near-identical output across contexts: similarity stays at or below 0.20 everywhere.
+
+**What the check found.**
+- **CLI context (fixed).** design-ui was weak in the CLI project (4/5, 2/5): it didn't reliably turn "settings page" into a config command. The skill now says a project without a graphical UI gets its own interface for the job. After the fix: fit 0.93 vs 0.73, CLI runs 3/5 and 5/5.
+- **Harness flaw (fixed).** The first grading counted criteria a README intro can't meet, such as "adds a command", so writing scored 0.50. The grader now marks criteria as applicable or not, and the stored outputs were re-graded.
+
+## Description optimiser (HS-002, HS-008)
+
+`evals/description-optimizer.mjs` implements skill-creator's method in zero-dependency Node. Its own scripts weren't run because auto mode blocks downloaded code.
+
+**Method.**
+- It measures native triggering from the skill list alone, with all hooks off (`disableAllHooks`).
+- Trigger sets cover all 15 skills, split 60/40 into train and held-out, at 3 runs per query.
+- Claude proposes rewrites from the training failures.
+- A rewrite is kept only if held-out accuracy doesn't drop.
+
+**Results.**
+- **Changed (8 of 15):** tdd, clarify, core-rules, review, research, qa and design-ui raised train accuracy with held-out unchanged.
+- **No better candidate found:** planning, writing and debugging.
+- **Held-out stays low (≤ 0.5)** on description-only triggering for core-rules, design-ui, planning, writing and git-ship. In real sessions H-Stack's classifier covers this.
+- **Listing cost** rose to 738/900 tokens.
+- **Load rate unchanged:** after the change, Claude still loaded the named skill in 16 of 18 real sessions.
+
+**A measurement confound found here.** Stale THIRD_PARTY digests make SessionStart call the edited skills "unverified", and Claude then avoids them: planning loaded 0/3 instead of 3/3. `activation-bench.mjs` now refuses to run with stale digests.
 
 **Effort (HS-007), low vs session default.**
 
@@ -161,14 +246,14 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 | plugin validate | passed |
 | index | current (15 skills) |
 | Model Experience note | current |
-| context budget | always-on 906/1,500 tokens; listing 650/900; 0 rows over |
-| snapshots | 95/95 |
-| hook contract | 19 hook scripts; 5 closed hooks deny on crash |
+| context budget | always-on 994/1,500 tokens; listing 738/900; 0 rows over |
+| snapshots | 96/96 |
+| hook contract | 20 hook scripts; 5 closed hooks deny on crash |
 | lint | 15 skills, 4 agents, 0 problems |
 | THIRD_PARTY | 19 import rows, 0 problems |
 | egress inventory | 9 points, 0 outside the inventory |
-| unit and validator tests | 37 pass, 0 fail |
-| mod tests (`claude plugin test`) | 5 pass |
+| unit and validator tests | 37 pass, 0 fail (trigger sets cover all 15 skills) |
+| mod tests (`claude plugin test`) | 10 pass |
 | smoke-test task file | valid; 0 real tasks |
 
 `claude plugin validate .` passes. `node evals/release-gate.mjs`: CI ok; smoke check fails (no real tasks), as expected.
@@ -208,24 +293,17 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 1. **M1 baseline skipped** (per the goal). As a result:
    - no with/without smoke numbers exist for any milestone;
    - the "Ends with (measured)" column of §11 holds per-skill benchmarks and activation evals instead.
-2. **Per-skill benchmarks ran 1 run per arm** (the goal's "light benchmark"), not the 3 of OD-6. OD-6 applies to the smoke test.
-3. **skill-creator's description optimiser was not run** (HS-002, HS-008).
-   - Why: cost, and auto mode blocked running its downloaded scripts.
-   - Instead: keyword routing is tuned on should/should-not trigger sets checked in CI.
+2. **Per-skill benchmarks:** 1 run per arm (the goal's "light benchmark") for the nine skills that clearly beat no-skill; 3 runs per arm for the six that got harder evals. OD-6's 3 runs apply to the smoke test.
+3. **skill-creator's description optimiser** was implemented in zero-dependency Node (`evals/description-optimizer.mjs`) rather than run from its own scripts, which auto mode blocks as downloaded code. The method is the same: 60/40 split, 3 runs per query, held-out acceptance.
 4. **Subagent output validation moved from SubagentStop to PostToolUse(Agent)** (`hooks/agent-result.mjs`). A SubagentStop block sends the same subagent back to repair its output; §10 wants a fresh re-run, never a repair.
 5. **Firewall and mods were tested with the mods test kit** (`claude plugin test`), not plugin-eval mock MCP servers. `claude plugin eval` refuses Bash here because the container has no sandbox backend.
-6. **Built but off by default:**
-   - classifier model fallback (HS-019, consistent with OD-1);
-   - concern check at Stop (HS-040);
-   - overseer (HS-042);
-   - side pane (HS-057, consistent with OD-2);
-   - recitation and rut breaker (HS-055, K16: only with a measured gain).
-7. **Repeat-call reminders run on PostToolBatch, not PostToolUse** (HS-037): one line per batch instead of one per call.
+6. **Classifier model fallback (HS-019) is off.** Its own mechanism says so until trigger evals show a recall gain (OD-1).
+7. **Long-run features need a recorded goal.** The overseer, recitation and rut breaker, and the side pane switch on by themselves only during a long run with a recorded goal (`hs goal set`); that is how "long runs only" is implemented.
 8. **Upstream tests for the Cloudflare security-audit validators were not executed**: auto mode blocked running downloaded code.
    - A review subagent safety-read the 11 companion files in full.
    - I read the core files, schema and validators in full; I reviewed the test files for side effects but did not read every line.
 9. **resolving-merge-conflicts not imported**: the upstream skill is archived. git-ship covers conflicts in its own words.
-10. **HS-006 retire rule not applied** to the five ceiling ties (see Needs you, item 2).
+10. **HS-006 applied after harder evals.** No skill is retired. design-ui's benchmark margin (+0.01) is within noise; it is kept on its sameness result (fit 0.93 vs 0.73).
 11. **Solo-boundary pass signal (HS-025)** is "the next prompt is not a correction". That is a proxy until smoke-test data exists; cold start is `medium` as specified.
 12. **Activation is measured in real `claude -p` sessions, not plugin eval** (HS-018). Plugin eval doesn't run UserPromptSubmit hooks (0 classifier events in its traces), so it can't measure H-Stack's classifier.
 
@@ -234,7 +312,7 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 1. Add your ~10 real tasks to `evals/tasks.json`.
 2. Run the M1 baseline, then the full stack, with `node evals/run-smoke.mjs --runs 3`.
 3. Drop any piece that makes results worse (CLAUDE.md), then commit the results.
-4. Decide on the five ceiling ties. If you keep them, harder evals first, starting with debugging.
+4. Raise runs per arm to 3 for the nine skills still measured at 1 run, if you want tighter numbers. Each takes about 15 minutes.
 5. Re-run `node evals/activation-bench.mjs` on each new model; the other wordings stay selectable through `HSTACK_LINE_STYLE`.
-6. Decide the off-by-default switches from measured numbers.
+6. Use the smoke test to decide whether the concern check earns its model call, and whether the classifier fallback should come on.
 7. Once `node evals/release-gate.mjs` passes, bump `plugins/h-stack/.claude-plugin/plugin.json` from 0.0.1 and put the smoke numbers, regressions included, in the README.

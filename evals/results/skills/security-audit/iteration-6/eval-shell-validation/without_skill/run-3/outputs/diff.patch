@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..dc5af02
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; cat /tmp/hs-bench-hQwKjm/config/deploy.env"}},
++    "file": "app/tasks.py",
++    "line": 24,
++    "why": "BRANCH_RE (line 7) is applied with re.match and has no end anchor, so it only checks the first character(s); anything after them, such as ';', '$( )' or a newline, is accepted. The branch is then put into an f-string and run with subprocess.run(shell=True) (line 11), so any signed-in employee can run arbitrary shell commands as the service account. Verified locally: the request returned the contents of config/deploy.env (DEPLOY_TOKEN)."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abc1234;id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "This also uses shell=True, but is_sha uses SHA_RE.fullmatch([0-9a-f]{7,40}), so only hex characters get through: no shell metacharacters, whitespace, newlines or leading '-' for option injection. Tested: 'abc1234;id' and 'abc1234\\n' are both rejected."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "The path is resolved with realpath (which follows .. and symlinks) and then checked with commonpath against the realpath of the reports dir, so a name that resolves outside app/reports raises PermissionError. Absolute names such as '/etc/passwd' are also rejected, because os.path.join drops the base and the commonpath check then fails. Tested both."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "ast.literal_eval only evaluates literals. Calls, names and attribute access raise ValueError, which the handler returns as a 400. No code runs, and the result only filters the hard-coded, non-sensitive DEPLOYS list."
++  }
++]

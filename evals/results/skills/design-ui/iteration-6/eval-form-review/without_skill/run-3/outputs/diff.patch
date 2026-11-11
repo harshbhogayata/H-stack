@@ -1,0 +1,50 @@
+diff --git a/ui-review.json b/ui-review.json
+new file mode 100644
+index 0000000..099cf3a
+--- /dev/null
++++ b/ui-review.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 30,
++    "problem": "The email input has id=\"email\" but its label points to htmlFor=\"signup-email\", so the label is not linked to the field. Screen readers announce the input with no name, and clicking the label does not focus the input.",
++    "fix": "Change the input to id=\"signup-email\" so it matches the label's htmlFor."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 10,
++    "problem": "`.signup input:focus` removes the outline and sets border-color to the same --color-border as the unfocused state. Keyboard users get no visible focus indicator on the email or password fields (WCAG 2.4.7).",
++    "fix": "Remove `outline: none` or add a visible replacement, e.g. `.signup input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-color: var(--color-accent); }`."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 40,
++    "problem": "The terms checkbox is a clickable <div> with an empty <span> as the box. It has no checkbox role or checked state, cannot receive keyboard focus, and cannot be toggled with Space, so keyboard and screen-reader users cannot agree to the terms.",
++    "fix": "Use a native checkbox: `<label className=\"signup__check\"><input type=\"checkbox\" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /> I agree to the terms</label>`. Style the native input (e.g. with accent-color) instead of the fake box."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 18,
++    "problem": "The error is saved with setError but never shown. When submission fails, the user sees no message, and assistive technology announces nothing.",
++    "fix": "Render the error in the form, e.g. `{error && <p id=\"signup-error\" role=\"alert\" className=\"signup__error\">{error}</p>}`, and clear it with setError(null) at the start of each submit."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 34,
++    "problem": "The invalid state is shown only by a red border (the is-invalid class), and only on the password field, even if the error is about the email. Nothing sets aria-invalid or points to an error message, so the state relies on color alone and screen readers never hear it (WCAG 1.4.1, 3.3.1).",
++    "fix": "Set aria-invalid={!!error} and aria-describedby=\"signup-error\" on the field(s) the error actually applies to, and pair the red border with the visible error text."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 17,
++    "problem": "Nothing shows a pending state while onSubmit is awaited, and the submit button stays enabled. Users get no feedback and can submit several times, creating duplicate signup requests. If onSubmit rejects, the error is unhandled and the user sees nothing.",
++    "fix": "Add a `submitting` state: set it before the await, pass disabled={submitting} or aria-busy to the Button and show text like 'Creating account…', wrap the await in try/catch so failures go to setError, and reset submitting in finally."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 4,
++    "problem": "Input borders (and the checkbox box at line 16) use --color-border #a8a29e on a white surface, which is about 2.5:1 contrast. That is below the 3:1 WCAG 1.4.11 minimum for the edges that show where a control is.",
++    "fix": "Use a darker border for form controls, e.g. #78716c (about 4.8:1 on white), either through a dedicated --color-control-border token or by darkening --color-border."
++  }
++]

@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (note saved)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each claim about ajv and zod is attributed to a source or explicitly marked as not verified when the source could not be read here",
+      "passed": true,
+      "evidence": "The note opens with \"**Unverified:** ... The points below are from my own knowledge of ajv v8 and zod v4. Check them against the URLs listed before relying on them.\" Each section then lists the sources to check (ajv.js.org/json-schema.html, zod.dev/json-schema)."
+    },
+    {
+      "text": "The note distinguishes that ajv validates JSON Schema documents (with draft 2020-12 support via its 2020 build) while zod defines schemas in code rather than validating JSON Schema documents",
+      "passed": true,
+      "evidence": "The summary table says ajv \"**Yes**, via `ajv/dist/2020` (`Ajv2020`)\", and the zod section says \"In Zod you write schemas in TypeScript (`z.object({...})`) ... It does not compile or validate data against JSON Schema documents.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

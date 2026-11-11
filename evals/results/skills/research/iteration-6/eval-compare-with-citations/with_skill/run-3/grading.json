@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (note saved)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "Each claim about ajv and zod is attributed to a source or explicitly marked as not verified when the source could not be read here",
+      "passed": true,
+      "evidence": "The note says \"Every claim below is **inferred** from prior knowledge\", and each table row has a Status of \"inferred\" or \"**open**\" plus a \"Source to verify\" URL, such as https://ajv.js.org/json-schema.html."
+    },
+    {
+      "text": "The note distinguishes that ajv validates JSON Schema documents (with draft 2020-12 support via its 2020 build) while zod defines schemas in code rather than validating JSON Schema documents",
+      "passed": true,
+      "evidence": "The note says \"2020-12 needs the separate class `import Ajv2020 from \\\"ajv/dist/2020\\\"`\" and \"Zod validates data against **Zod schemas** defined in TS/JS, not against JSON Schema documents\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

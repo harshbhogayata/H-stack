@@ -1,0 +1,50 @@
+diff --git a/ui-review.json b/ui-review.json
+new file mode 100644
+index 0000000..712a9d6
+--- /dev/null
++++ b/ui-review.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 30,
++    "problem": "The email input has id=\"email\" but its label points to htmlFor=\"signup-email\", so the label isn't linked. The field has no accessible name, and clicking the label doesn't focus the input.",
++    "fix": "Make the id match the label: <input id=\"signup-email\" type=\"email\" ... />."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 18,
++    "problem": "The error returned by onSubmit is stored in state but never shown. The user gets no message saying what went wrong or how to fix it, and screen readers announce nothing.",
++    "fix": "Show the error next to the field it belongs to, e.g. {error && <p id=\"signup-error\" className=\"signup__error\" role=\"alert\">{error}</p>} under the field, and clear it with setError(null) at the start of handleSubmit."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 34,
++    "problem": "The invalid state is shown only by a red border (colour alone). It is also always put on the password field, whatever the error was about (for example a taken email), and there is no aria-invalid or aria-describedby.",
++    "fix": "Put the invalid state on the field that actually failed (have onSubmit return {field, message}). Add aria-invalid={true} and aria-describedby=\"signup-error\" to that input, and show the visible text message next to it."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 40,
++    "problem": "The terms checkbox is a clickable <div> with no role, no tabindex and no checked state. Keyboard users can't reach or toggle it, and screen readers can't tell it's a checkbox or whether it's checked.",
++    "fix": "Use a native checkbox: <label className=\"signup__check\"><input type=\"checkbox\" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} required /> I agree to the terms</label>, and style the native input (or a visually hidden input plus a sibling box) instead of the div."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 9,
++    "problem": "Focused inputs get outline: none, and the focus border-color is the same var(--color-border) as the resting state. Keyboard users get no visible focus indicator at all.",
++    "fix": "Give focus a visible style, e.g. .signup input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; } or border-color: var(--color-accent) with a box-shadow ring, and don't remove the outline without a replacement. Apply the same to the password toggle button and the checkbox."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 17,
++    "problem": "The custom checkbox shows its checked state only by filling the box with the accent colour. There's no checkmark, so the state relies on colour alone and may fail non-text contrast against the background.",
++    "fix": "Use the native checkbox (see the JSX fix) with accent-color: var(--color-accent). If you keep a custom box, add a checkmark icon or glyph when checked and make sure the border and fill meet 3:1 contrast."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 17,
++    "problem": "Submitting has no pending state. The button stays enabled while onSubmit is awaited, so users get no feedback and can submit twice. If onSubmit throws or rejects, the error is never caught and the user sees nothing.",
++    "fix": "Add const [submitting, setSubmitting] = useState(false). Wrap the call in try/catch/finally, setting a generic error message on catch. Render <Button type=\"submit\" disabled={submitting} aria-busy={submitting}>{submitting ? 'Creating account…' : 'Create account'}</Button>."
++  }
++]

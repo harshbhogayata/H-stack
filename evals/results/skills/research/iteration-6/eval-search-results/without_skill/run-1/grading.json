@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md says cpSync does not keep modification times by default and path.join returns dist/assets; scripts and the saved search page unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer does not rely on the top, highly voted search result; it says that result is wrong on both points and names the authoritative evidence (a run with the installed Node version, and the preserveTimestamps option, default false, in the Node docs)",
+      "passed": true,
+      "evidence": "answer.md says the featured result (devanswers.example, 2021) is \"**wrong on both points**\", reports a test run on \"the installed Node v22.23.4\", and quotes the docs: \"`preserveTimestamps` <boolean> ... **Default:** `false`.\""
+    },
+    {
+      "text": "Each conclusion is marked as measured (with the Node version used) or read, and sources carry dates or versions",
+      "passed": true,
+      "evidence": "The Sources line reads \"Node.js v22 docs for `fs.cpSync` and `path.join`/`path.resolve` (cited, not fetched in this session). Direct test on the installed Node v22.23.4 (measured)\"; both conclusions show results \"On Node v22.23.4\", and the search result is dated 2021."
+    },
+    {
+      "text": "The answer gives the consequence for incremental builds (pass preserveTimestamps: true, or compare content hashes)",
+      "passed": true,
+      "evidence": "answer.md says \"An incremental build that compares mtimes will see all of them as changed. To keep the source mtimes, add `preserveTimestamps: true`.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

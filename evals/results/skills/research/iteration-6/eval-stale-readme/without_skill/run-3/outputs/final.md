@@ -1,0 +1,6 @@
+I saved the answer to `/tmp/hs-bench-Kmjifj/answer.md`. The installed tinyretry is version 3.1.0, and the answer to both questions is no. Its README says yes to both, but that README is out of date. I worked this out by reading the code, not by running it.
+
+1. **It does not retry 429 by default.** The default list of statuses it retries, in `defaults.js`, is `[408, 502, 503, 504]`. The 3.0.0 changelog notes that this list changed, and 429 was dropped. `src/client.js` only sets `retries: 4`, so a 429 goes straight back to `pushOrders`, which then throws an error.
+2. **It does not wait for an HTTP-date `Retry-After`.** `parseRetryAfter` only understands a number of seconds. A date like `Wed, 11 Nov 2026 10:00:00 GMT` gets thrown away, and it falls back to a short random backoff. Date support was added in 2.4.0 and lost when 3.0.0 rewrote the code. Since 3.1.0, even a seconds value is capped at `maxDelay`, which is 10 seconds by default.
+
+Adding 429 to `retryOn` in `src/client.js` would make tinyretry retry it, but the retries would still come after short delays, not at the time the partner gives. To actually wait until that time, `src/client.js` would need to handle 429 itself and work out the wait from the date, for example with `Date.parse()`.

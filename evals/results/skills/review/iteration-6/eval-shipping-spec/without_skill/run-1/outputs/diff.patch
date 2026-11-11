@@ -1,0 +1,44 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..cbeb9ac
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,38 @@
++# Review: checkout.js against SPEC.md
++
++Verdict: **do not merge yet.** One spec violation (high severity) affects every discounted order whose subtotal is at least 5000 cents. The tests pass (`node test.js`) because no test combines a discount code with a subtotal at or above the free-shipping threshold.
++
++## 1. Free shipping is decided on the pre-discount subtotal: High
++
++- **Location:** `checkout.js:17`
++- **Spec:** Rule 3 says shipping is free "when the subtotal **after the discount** is at least 5000 cents."
++- **Code:** `const shipping = subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING;` compares the raw subtotal. It also runs before the discount is computed on line 18.
++- **Input:** `totals([{ price: 5000, qty: 1 }], 'SPRING10')`
++  - Expected: `{ subtotal: 5000, discount: 500, shipping: 495, total: 4995 }`. After the discount the subtotal is 4500, which is below 5000, so shipping is charged.
++  - Actual: `{ subtotal: 5000, discount: 500, shipping: 0, total: 4500 }`
++- **Second example:** `totals([{ price: 5500, qty: 1 }], 'staff25')`
++  - Expected: `shipping: 495, total: 4620`. After the discount the subtotal is 4125.
++  - Actual: `shipping: 0, total: 4125`
++- **Impact:** Any discounted cart with a subtotal in [5000, 5000 / (1 − pct)) gets free shipping it should not get. That is about 5000–5555 cents for SPRING10 and 5000–6666 cents for STAFF25. The store undercharges 495 cents on each of these orders.
++- **Fix:** Compute the discount first, then use `subtotal - discount >= FREE_SHIPPING_FROM`.
++
++## 2. Non-string `code` throws: Low (spec is silent)
++
++- **Location:** `checkout.js:10`
++- **Input:** `totals([{ price: 1000, qty: 1 }], 123)`
++  - Expected: Unclear. The spec only says "an unknown code is ignored," which suggests `{ subtotal: 1000, discount: 0, shipping: 495, total: 1495 }`.
++  - Actual: `TypeError: code.toUpperCase is not a function`
++- Falsy values such as `undefined`, `null` and `''` are handled correctly. This only matters if callers can pass non-string values. Please confirm the intended behaviour before deciding whether it needs a fix.
++
++## 3. Test gap: Medium
++
++- **Location:** `test.js`
++- None of the four cases applies a code to a cart at or above 5000 cents, so finding 1 goes undetected. Add the two inputs from finding 1 as regression tests. Also add a test where the discounted subtotal lands exactly on 5000. For example, `price: 6667, 'STAFF25'` gives a discount of 1667 (1666.75 rounded), leaving 5000, so shipping should be 0.
++
++## Checked and conforming
++
++- **Subtotal (rule 1):** sums `price × qty` correctly. An empty cart returns 0.
++- **Discount rounding (rule 2):** `Math.round` rounds half up for the non-negative amounts here. For example, `1005 × 10%` = 100.5 is rounded to 101. Both percentages (10 and 25) produce results that are exact in floating point, so there are no representation errors.
++- **Case-insensitivity:** `'spring10'` and `'staff25'` are accepted.
++- **Unknown codes are ignored:** `'NOPE'` and `' spring10'` (with a leading space) both give a discount of 0. Codes are not trimmed, but the spec does not ask for that.
++- **Total (rule 4):** computed as subtotal − discount + shipping.

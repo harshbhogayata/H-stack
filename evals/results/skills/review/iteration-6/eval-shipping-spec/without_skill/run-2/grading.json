@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (code unchanged; REVIEW.md cites the free-shipping decision at checkout.js:16-18)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "REVIEW.md reports that free shipping is decided on the subtotal before the discount, while SPEC.md rule 3 says after it, with a concrete input (e.g. subtotal 5200 with SPRING10 gives 4680 after discount, so shipping should be 495 but is 0)",
+      "passed": true,
+      "evidence": "REVIEW.md cites `checkout.js:17` and quotes SPEC.md rule 3 (free shipping when the subtotal \"after the discount\" is at least 5000). Its input is `totals([{ price: 5000, qty: 1 }], 'SPRING10')`, with expected shipping 495 and total 4995 against actual shipping 0 and total 4500."
+    },
+    {
+      "text": "The review does not report spec-conforming code as bugs (the >= 5000 boundary, Math.round half-up on positive cents, case-insensitive codes, unknown codes ignored)",
+      "passed": true,
+      "evidence": "The 'Checked and found compliant' section lists rounding half up, case-insensitive codes and unknown codes being ignored, and no finding reports the >= boundary as a bug. The only other finding is a Low test-coverage gap."
+    },
+    {
+      "text": "The finding is rated as a real defect (customers get free shipping below the threshold) and the fix is to compute the discount before the shipping check",
+      "passed": true,
+      "evidence": "The finding is rated 'High' because 'Customers who use a discount code are undercharged on shipping'. The suggested fix is 'calculate `discount` first, then compare `subtotal - discount` with `FREE_SHIPPING_FROM`.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

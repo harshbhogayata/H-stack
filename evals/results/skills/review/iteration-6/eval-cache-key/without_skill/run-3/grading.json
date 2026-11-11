@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+      "passed": true,
+      "evidence": "Finding 1 says \"`memoize` builds its cache key from the first argument only (the SKU)\" and shows `quote([{ sku: 'MUG-02' }], 'GBP'); // { subtotal: 1200, ... } expected 950` after a USD quote, a concrete example equivalent to the one in the expectation."
+    },
+    {
+      "text": "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+      "passed": true,
+      "evidence": "Finding 1 is headed \"**Critical**\" with \"Verdict: do not merge yet\", and the `var` and tax-rounding points sit under \"## 5. Minor / style — **Nit**\", where the rounding is called \"fine, but confirm\"."
+    },
+    {
+      "text": "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed",
+      "passed": false,
+      "evidence": "There is no section listing what was checked and found fine or what was out of scope; the only sign-off is one hedged line in a nit (\"tax is rounded once on the whole subtotal. That is fine, but confirm it matches the finance or VAT rule\"), and unknown SKU is raised as an issue (\"unclear errors\"), n"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

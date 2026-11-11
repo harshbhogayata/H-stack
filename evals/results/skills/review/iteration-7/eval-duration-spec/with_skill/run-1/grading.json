@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply states \"in the pattern `(h|m|s|ms)`, the regex tries `m` before `ms` and stops at the first match. For `\"500ms\"` it matches `\"500m\"`... and throws.\""
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": true,
+      "evidence": "The reply lists `\"1s2s\"` gives 3000, plus `\"1 h\"`, `\"1H\"` and `\".5s\"` throwing TypeError, under \"Checked and not a bug\", and it reports only the ms finding as a bug."
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply says \"Severity: major... any config using `ms` would fail to load\" and \"Fix: put `ms` first, `(ms|h|m|s)`. I haven't changed `duration.js`\", and the diff touches only cases.json."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

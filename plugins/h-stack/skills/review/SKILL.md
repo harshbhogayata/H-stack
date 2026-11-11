@@ -32,6 +32,7 @@ Two jobs: reviewing a change (yours before a push, or someone else's), and actin
 **Contract for any finding:**
 - It names a concrete failure: the input, state or sequence, and the wrong result. "Could be cleaner" is not a finding.
 - It cites `file:line` and the exact text there.
+- When a spec or doc defines the behaviour, check the claimed wrong result against that definition before reporting: behaviour the spec prescribes (rounding, floating-point results of the stated formula, edge cases it allows) is not a bug, however surprising.
 - It carries a verdict: `confirmed` (shown or traced with certainty), `plausible` (a specific path not fully verified) or `rejected` (checked and does not hold).
 - It carries a severity separate from the verdict: how likely the trigger is in this project's real use and how bad the result is. A confirmed edge case that real inputs rarely or never reach is `minor`, offered as optional, not called a bug. Verdict says how sure you are; severity says how much it matters.
 - Rules come from this repository: its REVIEW.md, CLAUDE.md, lint and test config, and the spec or rubric, not from a generic checklist.

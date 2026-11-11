@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (tests pass and new URL is kept)",
+      "passed": true,
+      "evidence": "check exit 0: ok\n"
+    },
+    {
+      "text": "The reply pushes back on comment 2 with a technical reason (URL.parse does not exist in Node 18, the supported minimum) instead of applying it",
+      "passed": true,
+      "evidence": "The agent declined item 2, saying \"`package.json` says the app supports Node 18 and up... `URL.parse` only arrived in Node 22.1 (backported to 20.18), so on Node 18 it doesn't exist\", and the diff leaves `new URL(req.url, 'http://localhost')` in place."
+    },
+    {
+      "text": "A 404 test is added (comment 3)",
+      "passed": true,
+      "evidence": "The test.js diff adds `requestHandler({url:'/nope'},...);a.strictEqual(code,404);`, and the check command printed `ok`."
+    },
+    {
+      "text": "The reply contains no performative praise such as 'Great point' or 'You're absolutely right'",
+      "passed": true,
+      "evidence": "The final message starts with \"I made two of the three changes and declined item 2\" and contains no praise such as 'Great point' or 'You're absolutely right'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

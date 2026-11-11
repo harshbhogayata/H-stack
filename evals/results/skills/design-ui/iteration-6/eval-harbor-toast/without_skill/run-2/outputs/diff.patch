@@ -1,0 +1,157 @@
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..7b419ac
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,70 @@
++.hb-toast-region {
++  position: fixed;
++  right: calc(var(--hb-space-4) + env(safe-area-inset-right, 0px));
++  bottom: calc(var(--hb-space-4) + env(safe-area-inset-bottom, 0px));
++  z-index: var(--hb-z-toast);
++  display: flex;
++  flex-direction: column;
++  align-items: flex-end;
++  gap: var(--hb-space-2);
++  max-width: calc(100vw - 2 * var(--hb-space-4));
++  /* Let clicks pass through empty space in the region to the page beneath. */
++  pointer-events: none;
++}
++
++.hb-toast {
++  pointer-events: auto;
++  display: flex;
++  align-items: center;
++  gap: var(--hb-space-2);
++  width: 360px;
++  max-width: 100%;
++  box-sizing: border-box;
++  padding: var(--hb-space-1) var(--hb-space-1) var(--hb-space-1) var(--hb-space-4);
++  background: var(--hb-color-surface);
++  color: var(--hb-color-ink);
++  border: 1px solid var(--hb-color-border);
++  border-left: 4px solid var(--hb-color-accent);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast--leaving {
++  animation: hb-toast-out var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast__message {
++  flex: 1;
++  margin: 0;
++  padding: var(--hb-space-2) 0;
++  font-size: var(--hb-text-sm);
++  overflow-wrap: anywhere;
++}
++
++.hb-toast .hb-icon-button {
++  flex-shrink: 0;
++  color: var(--hb-color-ink-muted);
++}
++
++@keyframes hb-toast-in {
++  from {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-4)));
++  }
++  to {
++    opacity: 1;
++    transform: translateX(0);
++  }
++}
++
++@keyframes hb-toast-out {
++  from {
++    opacity: 1;
++    transform: translateX(0);
++  }
++  to {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-4)));
++  }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..6e39318
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,75 @@
++import { useCallback, useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon } from './icons';
++import './Toast.css';
++
++const DEFAULT_DURATION = 5000;
++
++/**
++ * Fixed bottom-right stack that hosts toasts. Keep it mounted for the life of
++ * the page: screen readers only announce content added to a live region that
++ * already exists, so mounting the region together with the toast can be missed.
++ */
++export function ToastRegion({ children }) {
++  return (
++    <div className="hb-toast-region" role="status" aria-live="polite" aria-relevant="additions">
++      {children}
++    </div>
++  );
++}
++
++/**
++ * A single notification. Slides in, auto-dismisses after `duration` ms, and can
++ * be closed early with the close button. The timer pauses while the pointer is
++ * over the toast or focus is inside it, so it never vanishes mid-read.
++ * `onClose` fires once the exit animation has finished — remove the toast then.
++ */
++export function Toast({ message, onClose, duration = DEFAULT_DURATION }) {
++  const [leaving, setLeaving] = useState(false);
++  const timerRef = useRef(null);
++  const remainingRef = useRef(duration);
++  const startedAtRef = useRef(0);
++
++  const dismiss = useCallback(() => setLeaving(true), []);
++
++  const startTimer = useCallback(() => {
++    clearTimeout(timerRef.current);
++    startedAtRef.current = Date.now();
++    timerRef.current = setTimeout(dismiss, remainingRef.current);
++  }, [dismiss]);
++
++  const pauseTimer = useCallback(() => {
++    if (timerRef.current === null) return;
++    clearTimeout(timerRef.current);
++    timerRef.current = null;
++    remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startedAtRef.current));
++  }, []);
++
++  useEffect(() => {
++    remainingRef.current = duration;
++    startTimer();
++    return () => clearTimeout(timerRef.current);
++  }, [duration, startTimer]);
++
++  const handleBlur = (event) => {
++    if (!event.currentTarget.contains(event.relatedTarget)) startTimer();
++  };
++
++  const handleAnimationEnd = (event) => {
++    if (leaving && event.target === event.currentTarget) onClose?.();
++  };
++
++  return (
++    <div
++      className={`hb-toast${leaving ? ' hb-toast--leaving' : ''}`}
++      onMouseEnter={pauseTimer}
++      onMouseLeave={startTimer}
++      onFocus={pauseTimer}
++      onBlur={handleBlur}
++      onAnimationEnd={handleAnimationEnd}
++    >
++      <p className="hb-toast__message">{message}</p>
++      <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={dismiss} />
++    </div>
++  );
++}

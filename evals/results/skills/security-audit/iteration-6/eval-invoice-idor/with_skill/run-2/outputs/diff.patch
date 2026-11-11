@@ -1,0 +1,57 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..3bce74c
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,51 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 6,
++    "why": "The requireOwner middleware is mounted only on '/invoices/:id'. Router.compile anchors every pattern as ^...$ (src/router.js:13), so it never matches '/invoices/:id/pdf', and getInvoicePdf (src/invoices.js:25-29) looks up the invoice by id with no ownership check. Verified locally: Alice's token gets 200 with a base64 PDF that decodes to 'Invoice inv_1002 / Customer cust_bob / Consulting: 990.00 / Total 990.00', which is Bob's invoice. inv_1003 is exposed the same way. Fix: check ownership inside getInvoicePdf (or mount requireOwner on '/invoices/:id/pdf' too, or support prefix matching for use())."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 16,
++    "why": "getInvoice has no ownership check of its own, but requireOwner runs first on this exact path (it is registered before it, and the method is null so it matches any method) and returns 403. Verified: 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv%5F1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 34,
++    "why": "Percent-encoding the id doesn't help: the router decodes params before every layer, so requireOwner sees 'inv_1002' and returns 403. Verified."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 13,
++    "why": "A trailing slash skips requireOwner but also skips getInvoice, because both use the same anchored pattern. Result: 404. Verified."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002%2Fpdf", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 34,
++    "why": "An encoded slash matches the ':id' layers as one segment but decodes to 'inv_1002/pdf', which isn't an invoice id, so requireOwner returns 404. It doesn't reach the PDF handler. Verified."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "get", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 31,
++    "why": "With a lowercase method, the GET handlers no longer match, but the method-less requireOwner layer still runs and returns 403. Verified."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 12,
++    "why": "listInvoices filters by req.user.id before it applies the optional status filter, so query.status can only narrow the caller's own invoices. Verified with no filter and with status=open: only inv_1001, or nothing."
++  }
++]

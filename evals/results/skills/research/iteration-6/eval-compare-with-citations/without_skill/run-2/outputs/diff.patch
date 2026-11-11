@@ -1,0 +1,29 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..dc9195a
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,23 @@
++# ajv vs zod: draft 2020-12 JSON Schema validation
++
++**Short answer:** Use **ajv**. It validates data against draft 2020-12 JSON Schema documents. **zod** is not a JSON Schema validator. You define schemas in TypeScript code, and its JSON Schema support mainly goes the other way: it *generates* JSON Schema from Zod schemas.
++
++## ajv: yes, through a separate class
++- The ajv docs list support for draft-06, draft-07, 2019-09 and **2020-12** ("JSON Schema" page, https://ajv.js.org/json-schema.html; also the README at https://github.com/ajv-validator/ajv).
++- The default `Ajv` export targets **draft-07**. For 2020-12 you must import the dedicated class:
++  ```js
++  const Ajv2020 = require("ajv/dist/2020")   // or: import Ajv2020 from "ajv/dist/2020"
++  const ajv = new Ajv2020()
++  const validate = ajv.compile(schema)       // schema with "$schema": "https://json-schema.org/draft/2020-12/schema"
++  ```
++- Caveat from the docs: 2020-12 is not backward compatible with earlier drafts, so one ajv instance can't mix draft-07 and 2020-12 schemas. Use `ajv-formats` for `format` validation.
++
++## zod: no, it doesn't validate JSON Schema documents
++- Zod describes itself as a "TypeScript-first schema declaration and validation library" (https://zod.dev). Its schemas are built in code (`z.object(...)`), not loaded from JSON Schema documents.
++- Zod 4 adds `z.toJSONSchema()`, which *outputs* JSON Schema with **draft 2020-12 as the default target** (https://zod.dev/json-schema). This is export only: it doesn't validate data against an existing JSON Schema.
++- Recent Zod 4.x releases are reported to include an **experimental** `z.fromJSONSchema()` converter. I couldn't verify this (see the note below). Even if it exists, it is a best-effort conversion into a Zod schema, not a validator that passes the 2020-12 spec tests. Don't rely on it for that.
++
++## Verification note
++There is no `node_modules` in this repo, so I had no local package source to cite. Network fetches of the docs were also blocked in this session. The citations above point to each project's official docs, but they come from my knowledge and were not re-checked live. To confirm, run `npm i ajv zod` and check:
++- `node_modules/ajv/dist/2020.js` (it should exist and export `Ajv2020`)
++- `node_modules/zod/package.json` version, and whether `fromJSONSchema` appears under `node_modules/zod/`

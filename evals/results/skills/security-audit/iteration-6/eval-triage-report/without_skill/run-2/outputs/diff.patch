@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..5323b94
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "The user parameter is passed through encodeURIComponent and only ever lands in the path segment of a URL resolved against the fixed origin https://avatars.example-cdn.net. '//169.254.169.254/...' becomes '/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png' and '@internal.host' becomes '/u/%40internal.host.png', so the fetched host is always avatars.example-cdn.net. The user cannot change the host, scheme or authority."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 2,
++    "why": "isAllowedTarget only blocks localhost, 127.0.0.1, 0.0.0.0 and the 10. and 192.168. prefixes. It misses link-local 169.254.0.0/16 (the cloud metadata service), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback [::1], and hostnames that resolve to internal addresses. Any member can make the server POST to https://169.254.169.254/latest/meta-data/, and the endpoint returns the upstream status plus the first 500 characters of the response body, so the SSRF is non-blind."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "sort is used only as a lookup key into the fixed SORT_COLUMNS allowlist (name/created_at/email), and anything else falls back to 'created_at'. dir is reduced to the literal ASC or DESC. With sort='name;DROP TABLE users' the query is 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50', so no user input reaches the SQL."
++  }
++]

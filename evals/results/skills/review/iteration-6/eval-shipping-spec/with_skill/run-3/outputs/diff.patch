@@ -1,0 +1,45 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..7f51b3b
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,39 @@
++# Review: checkout.js against SPEC.md
++
++Scope: `checkout.js` (whole file, 22 lines) checked against the four rules in `SPEC.md`. `npm test` (`node test.js`) passes, but none of its four cases combines a discount code with a subtotal near the 5000-cent threshold.
++
++## Findings
++
++### 1. Free-shipping check uses the subtotal before the discount, not after it
++
++- **Location:** `checkout.js:17`: `const shipping = subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING;`
++- **Spec:** SPEC.md rule 3: "free when the subtotal **after the discount** is at least 5000 cents."
++- **Verdict:** confirmed (I ran these inputs against the current code)
++- **Severity:** major. Any discounted cart whose subtotal is 5000 or more but whose discounted amount is below 5000 gets free shipping it should not get, so the customer is undercharged 495 cents. This is a common case, not an edge case: any code used on a cart just over the threshold triggers it.
++- **Concrete inputs:**
++
++  | Input | Expected (per spec) | Actual |
++  |---|---|---|
++  | `totals([{price: 5200, qty: 1}], 'STAFF25')` | discount 1300 → 3900 after discount < 5000 → `shipping: 495, total: 4395` | `shipping: 0, total: 3900` |
++  | `totals([{price: 5000, qty: 1}], 'spring10')` | discount 500 → 4500 < 5000 → `shipping: 495, total: 4995` | `shipping: 0, total: 4500` |
++
++- **Cause:** shipping is computed on line 17, before the discount on line 18, and it compares the raw `subtotal`. The fix is to compute the discount first and compare `subtotal - discount` with `FREE_SHIPPING_FROM`. I did not change the code. A test for one of the inputs above should be added.
++
++## Checked and found correct
++
++- **Rule 1, subtotal** (`checkout.js:5-7`): sums `price * qty` over all lines, and an empty cart gives 0.
++- **Rule 2, discount rounding** (`checkout.js:12`): `Math.round` rounds .5 up for the non-negative amounts used here. `totals([{price:1005,qty:1}],'SPRING10')` gives discount 101 (100.5 rounded up), and the existing test for 1999 with `spring10` gives 200.
++- **Rule 2, case-insensitivity** (`checkout.js:10`): `code.toUpperCase()` makes `spring10` match `SPRING10`.
++- **Rule 2, unknown code is ignored** (`checkout.js:10-11`): `'NOPE'` and `'BOGUS'` give discount 0, and a missing code gives 0. I also tried a prototype key: `'constructor'` becomes `'CONSTRUCTOR'`, which is not found, so the discount is 0 with no crash.
++- **Rule 4, total formula** (`checkout.js:19`): `subtotal - discount + shipping` matches the spec. It is wrong only because `shipping` is wrong (finding 1).
++- **Shipping amount and threshold value** (`checkout.js:2-3`): 495 and 5000, compared with `>=` ("at least"), which matches the spec.
++
++## Rejected suspicions
++
++- Floating-point error in `(subtotal * percent) / 100`: inputs are integer cents and integer percents, so the product is an exact integer and the division gives exact .5 values where they matter. Not an issue.
++
++## Not reviewed
++
++- Input validation (negative, non-integer or missing `price`/`qty`): SPEC.md doesn't define this behaviour, so it isn't checked against the spec.
++
++**Recommendation:** don't merge until finding 1 is fixed and has a test.

@@ -1,0 +1,154 @@
+diff --git a/QA-REPORT.md b/QA-REPORT.md
+new file mode 100644
+index 0000000..8055e5d
+--- /dev/null
++++ b/QA-REPORT.md
+@@ -0,0 +1,53 @@
++# QA report: "You're subscribed" but no email arrives
++
++**Verdict:** Confirmed bug. The signup page shows a success message for addresses that the server rejects. Those people are never added to the subscriber list, so they never get an email.
++
++## Root cause
++
++`public/app.js` awaits `fetch('/api/subscribe')` but never looks at the response. Any HTTP response counts as success, including `422`. Only a network-level exception reaches the `catch` branch. The page then:
++
++- shows "You're subscribed. Check your inbox for the first issue."
++- clears the field (`form.reset()`), so the user can't see or correct what they typed.
++
++The server (`server.js` `validate()`) rejects with 422:
++
++- **local parts that contain `+`**, e.g. `jane+news@example.com`. This is a common, valid address style (Gmail/Fastmail sub-addressing). It is probably the main source of real-world reports.
++- **domains without a 2+ letter TLD**, e.g. `jane@localhost`. The browser's `type="email"` check accepts these, so the form submits.
++
++## Browser evidence (Chromium headless, Playwright, `node server.js` on a random port)
++
++| Email typed | API status / body | Status text shown to user | Field after submit |
++|---|---|---|---|
++| `jane@example.com` | 201 `{"ok":true}` | You're subscribed… | cleared |
++| `Jane@Example.COM` | 201 `{"ok":true}` | You're subscribed… | cleared |
++| `jane+news@example.com` | **422** `{"error":"Addresses with + are not supported."}` | **You're subscribed…** | cleared |
++| `jane@localhost` | **422** `{"error":"Enter a valid email address."}` | **You're subscribed…** | cleared |
++
++- Console: one `Failed to load resource: … 422 (Unprocessable Entity)` error for each rejected submit. Nothing else.
++- Failed network requests (`requestfailed`): none. The 422s are complete HTTP responses.
++
++## Regression test
++
++`e2e/subscribe.test.js` uses `node:test` with Playwright. It starts `node server.js` itself on `PORT=0` and shuts it down afterwards.
++
++```
++node --test e2e/subscribe.test.js
++```
++
++- `a valid address is accepted and the user is told so`: **passes**. It also asserts no console errors and no failed requests.
++- `a rejected address (jane+news@example.com) is not shown as subscribed`: **fails**. Message: "UI claimed success although the API returned 422".
++- `a rejected address (jane@localhost) is not shown as subscribed`: **fails**, same message.
++
++The rejected-address tests also expect the server's error text to appear in the status line and the typed address to stay in the field.
++
++**Does the test have teeth?** I copied the app to a scratch directory and patched `app.js` there to check `res.ok`, show `data.error` and skip `form.reset()` on failure. All 3 tests passed against that copy. The repo's app was not modified.
++
++## Suggested fix (not applied)
++
++1. In `app.js`, check `res.ok`. On failure, show the server's `error` message and don't reset the form.
++2. Product decision: reconsider rejecting `+` addresses. They are valid and widely used. Even with fix 1, those users are turned away instead of being subscribed.
++
++## Other observations (not verified as causes)
++
++- `subscribers` is an in-memory `Set` and the server never sends any email. Subscriptions are lost on restart. The "check your inbox" promise depends on whatever downstream process is meant to exist, and I couldn't see one in this repo.
++- The mutation check (`mutate.mjs`) was not run because it only mutates lines changed against `HEAD`, and no app code was changed.
+diff --git a/e2e/subscribe.test.js b/e2e/subscribe.test.js
+new file mode 100644
+index 0000000..521cdc9
+--- /dev/null
++++ b/e2e/subscribe.test.js
+@@ -0,0 +1,89 @@
++// E2E: newsletter signup in a real browser.
++// Run: node --test e2e/
++// Starts `node server.js` on a random port, drives the page with Playwright (Chromium headless).
++const { test, before, after } = require('node:test');
++const assert = require('node:assert/strict');
++const { spawn } = require('node:child_process');
++const path = require('node:path');
++const { chromium } = require('playwright');
++
++const SUCCESS = /you're subscribed/i;
++let server;
++let baseURL;
++let browser;
++
++before(async () => {
++  server = spawn(process.execPath, ['server.js'], {
++    cwd: path.join(__dirname, '..'),
++    env: { ...process.env, PORT: '0' },
++    stdio: ['ignore', 'pipe', 'inherit'],
++  });
++  baseURL = await new Promise((resolve, reject) => {
++    const timer = setTimeout(() => reject(new Error('server did not start within 10s')), 10_000);
++    server.once('exit', (code) => reject(new Error(`server exited early (code ${code})`)));
++    server.stdout.on('data', (chunk) => {
++      const m = /http:\/\/localhost:\d+/.exec(String(chunk));
++      if (m) { clearTimeout(timer); resolve(m[0]); }
++    });
++  });
++  browser = await chromium.launch();
++});
++
++after(async () => {
++  await browser?.close();
++  server?.kill();
++});
++
++// Fill the form, submit, and return what the user ends up seeing plus what the API said.
++async function subscribe(email) {
++  const page = await browser.newPage();
++  const consoleErrors = [];
++  const failedRequests = [];
++  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
++  page.on('pageerror', (e) => consoleErrors.push(String(e)));
++  page.on('requestfailed', (r) => failedRequests.push(r.url()));
++  try {
++    await page.goto(`${baseURL}/`, { waitUntil: 'networkidle' });
++    await page.getByLabel('Email').fill(email);
++    const [response] = await Promise.all([
++      page.waitForResponse((r) => r.url().endsWith('/api/subscribe') && r.request().method() === 'POST'),
++      page.getByRole('button', { name: 'Subscribe' }).click(),
++    ]);
++    const status = page.getByRole('status');
++    // Wait for the request to settle in the UI (leave the "Subscribing…" state).
++    await page.waitForFunction(() => {
++      const t = document.getElementById('status').textContent;
++      return t && !t.includes('Subscribing');
++    });
++    return {
++      httpStatus: response.status(),
++      body: await response.json(),
++      message: (await status.textContent()).trim(),
++      inputValue: await page.getByLabel('Email').inputValue(),
++      consoleErrors,
++      failedRequests,
++    };
++  } finally {
++    await page.close();
++  }
++}
++
++test('a valid address is accepted and the user is told so', async () => {
++  const r = await subscribe('jane@example.com');
++  assert.equal(r.httpStatus, 201);
++  assert.match(r.message, SUCCESS);
++  assert.deepEqual(r.consoleErrors, []);
++  assert.deepEqual(r.failedRequests, []);
++});
++
++// The bug: the browser accepts these (type=email passes), the server rejects them with 422,
++// but the page still says "You're subscribed" and clears the field. No email ever arrives.
++for (const email of ['jane+news@example.com', 'jane@localhost']) {
++  test(`a rejected address (${email}) is not shown as subscribed`, async () => {
++    const r = await subscribe(email);
++    assert.equal(r.httpStatus, 422, 'precondition: server rejects this address');
++    assert.doesNotMatch(r.message, SUCCESS, `UI claimed success although the API returned ${r.httpStatus}`);
++    assert.equal(r.message, r.body.error, 'UI should show the server\'s error message');
++    assert.equal(r.inputValue, email, 'the address should stay in the field so the user can correct it');
++  });
++}

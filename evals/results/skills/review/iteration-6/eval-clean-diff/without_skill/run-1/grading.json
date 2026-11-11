@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no code was changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+      "passed": true,
+      "evidence": "The review never calls anything high-severity; its headline item is a niche surrogate-pair case (\"capitalize(\\\"𐐨abc\\\") → \\\"𐐨abc\\\"\"). It lists what it checked: \"Empty strings are handled correctly\", \"Non-string input: null, 42... come back unchanged\", plus non-BMP characters, ß, titlecase, Turkish "
+    },
+    {
+      "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+      "passed": false,
+      "evidence": "The edge cases are labelled \"worth knowing, may be acceptable\" and \"minor\". However, the narrow non-BMP casing issue is presented as \"one real bug\" under the heading \"**Bug: it doesn't capitalize characters outside the Basic Multilingual Plane**\" rather than being labelled minor or optional."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

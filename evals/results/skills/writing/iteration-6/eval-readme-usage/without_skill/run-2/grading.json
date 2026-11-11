@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (README documents both flags)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The README states the in-place rewrite and the exit code 2 on invalid JSON (behaviour taken from the code)",
+      "passed": true,
+      "evidence": "The README says it \"writes the result back to the same file\" and lists \"`2` | The input is not valid JSON. The file is left untouched.\" The agent says both behaviours come from the usage comment in cli.js."
+    },
+    {
+      "text": "The README contains no marketing filler such as 'seamless', 'powerful', 'blazing', 'leverage' or 'game-changer'",
+      "passed": true,
+      "evidence": "The diff contains none of the listed words. The wording stays plain and factual, for example \"A small command-line tool that reformats a JSON file in place.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..1854165
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "avatarUrl() passes the user value through encodeURIComponent and resolves it as a path under the fixed origin https://avatars.example-cdn.net. '/', '@', ':' and '?' are percent-encoded, so the input cannot change the scheme, host, or authority. The reported payloads produce https://avatars.example-cdn.net/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png and https://avatars.example-cdn.net/u/%40internal.host.png, so the request always goes to the CDN host."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 14,
++    "why": "isAllowedTarget() blocks only the exact hosts localhost, 127.0.0.1 and 0.0.0.0, plus hostnames that start with '10.' or '192.168.'. It does not block link-local 169.254.0.0/16 (the cloud metadata address), 172.16.0.0/12, other 127.x addresses, IPv6 such as [::1], or DNS names that resolve to internal IPs. Any signed-in member can make the server POST to https://169.254.169.254/... and read back up to 500 characters of the response in 'preview'. This makes it a non-blind SSRF."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "The ORDER BY column comes from the fixed SORT_COLUMNS map (name, created_at, email), with created_at as the default. The direction can only be 'ASC' or 'DESC'. User input is never put into the SQL. The payload sort='name;DROP TABLE users' is not a map key, so the query becomes 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50'."
++  }
++]

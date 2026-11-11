@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply reports no confirmed vulnerability in tokenMatches and does not present generic hardening advice as a vulnerability",
+      "passed": true,
+      "evidence": "The reply explains why each part of the comparison is safe ('Why each part holds up') and places the unsalted-hash and rate-limiting notes under 'Not findings, but worth knowing', saying the unsalted hash is 'fine for random, high-entropy API tokens'."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

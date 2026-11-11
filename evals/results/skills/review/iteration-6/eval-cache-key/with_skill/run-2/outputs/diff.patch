@@ -1,0 +1,77 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..49f3487
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,71 @@
++# Review: `src/pricing.js`
++
++Scope: `src/pricing.js` and what it calls (`src/memoize.js`, `src/catalogue.js`), checked against `test/pricing.test.js`. The repo has a single commit and no base branch, so the whole file was reviewed rather than a diff. The repo has no REVIEW.md, CLAUDE.md or lint config, so the rules used here are the existing tests and the obvious contract of `quote()`: the right price for the currency asked for.
++
++`npm test` passes 3 of 3. Every finding below was reproduced with `node -e` against the unchanged code, each in a fresh process unless noted.
++
++**Recommendation: do not merge until finding 1 is fixed.** It returns wrong prices for ordinary input.
++
++---
++
++## 1. The price cache ignores currency, so the second currency gets the first currency's price (blocker)
++
++- **Where:** `src/pricing.js:6`, `const priceFor = memoize(basePrice);`. The cause is `src/memoize.js:4`, `const key = args[0];`
++- **Verdict:** confirmed. **Severity:** blocker. Any process that quotes the same SKU in two currencies hits this, and it charges the wrong amount.
++- **Failure:** `memoize` keys its cache on the first argument only, which is the SKU. Once a SKU is priced in one currency, every later call for that SKU in any currency returns the cached price. The cache lives for the whole module, so this carries across requests and customers.
++- **Repro (one process):**
++  ```js
++  quote([{ sku: 'MUG-02' }], 'USD') // { subtotal: 1200, tax: 0,   total: 1200 }  correct
++  quote([{ sku: 'MUG-02' }], 'EUR') // { subtotal: 1200, tax: 240, total: 1440 }  expected 1100 / 220 / 1320
++  ```
++  If EUR is quoted first, a later USD quote comes back as 1100 instead of 1200, which undercharges.
++- **Why tests miss it:** each test uses a different SKU, so no SKU is ever priced twice.
++- **Fix direction:** key the cache on both arguments (for example ``key = `${sku}|${currency}` ``), or drop the memoization. `basePrice` is a plain object lookup, so the cache saves nothing. Add a test that quotes one SKU in two currencies.
++
++## 2. `qty` is not validated: negative quantities lower the total, and non-numbers give `NaN` (major)
++
++- **Where:** `src/pricing.js:12`, `const qty = item.qty == null ? 1 : item.qty;`
++- **Verdict:** confirmed. **Severity:** major if carts come from the client (normal for a shop). A negative line takes money off the order. Otherwise it is minor.
++- **Repro:**
++  ```js
++  quote([{ sku: 'MUG-02', qty: 5 }, { sku: 'CAP-03', qty: -5 }], 'USD') // total: -1500
++  quote([{ sku: 'MUG-02', qty: -3 }], 'USD')                            // total: -3600
++  quote([{ sku: 'MUG-02', qty: 'two' }], 'USD')                         // subtotal/tax/total: NaN
++  quote([{ sku: 'MUG-02', qty: 0.5 }], 'EUR')                           // subtotal 550: half a mug
++  ```
++  `NaN` totals pass silently (`JSON.stringify` turns them into `null`) and are not rejected.
++- **Fix direction:** require `Number.isInteger(qty) && qty >= 1` (or `>= 0`) and throw otherwise, the same way an unknown SKU or currency already throws.
++
++## 3. Currency check accepts inherited keys such as `toString`, which gives `NaN` and also corrupts the cache (minor, major if currency comes from the user)
++
++- **Where:** `src/pricing.js:9`, `if (!(currency in TAX_RATE)) ...`. The same pattern is in `src/catalogue.js:10`, `if (!(currency in prices))`
++- **Verdict:** confirmed. **Severity:** minor if currency is only ever set by server code. If it comes from a request parameter, it is major, because of finding 1's cache: one bad request breaks pricing for that SKU for everyone until the process restarts.
++- **Failure:** `in` also matches keys inherited from `Object.prototype` (`toString`, `constructor`, `valueOf`, …). `'toString'` gets past both checks, `basePrice` returns a function, and the totals become `NaN`. Because the cache is keyed on SKU only, that function is stored as the price of the SKU, and every later quote for that SKU in any currency is `NaN`.
++- **Repro (one process):**
++  ```js
++  quote([{ sku: 'MUG-02' }], 'toString') // { currency: 'toString', subtotal: NaN, tax: NaN, total: NaN }
++  quote([{ sku: 'MUG-02' }], 'USD')      // { subtotal: NaN, tax: NaN, total: NaN }  poisoned
++  ```
++- **Fix direction:** use `Object.hasOwn(TAX_RATE, currency)` (and `Object.hasOwn(prices, currency)` in the catalogue), or use `Map`s. Fixing finding 1 limits the damage to the bad request itself.
++
++---
++
++## Rejected (checked, not a problem)
++
++- **Errors cached by memoize:** `basePrice` throws before `cache.set` runs, so an unknown SKU is not cached and the next call throws again. Verified: `quote([{sku:'NOPE'}])` throws `unknown sku: NOPE`.
++- **Tax rounding:** `Math.round` runs once on the whole-cart subtotal in integer minor units, so per-line rounding drift can't happen. Rounding half up for VAT is a policy choice, not a defect.
++- **`qty: 0` treated as 1:** no. `item.qty == null` is true only for `null` or `undefined`, so `0` stays `0`.
++- **`var subtotal`:** style only, no behaviour difference here.
++
++## Cleared
++
++- `pricing.js:9`, currency check: rejects `JPY` (tested). Only the inherited-key case is open (finding 3).
++- `pricing.js:11–14`, cart loop: an unknown SKU throws, and a missing `qty` defaults to 1.
++- `pricing.js:15–16`, tax and total arithmetic: correct for USD (0%) and EUR/GBP (20%) in integer minor units.
++- `catalogue.js`: price table and lookup are correct apart from the `in` check (finding 3).
++
++## Not reviewed
++
++- Callers of `quote()` and where `cart` and `currency` come from. This decides the severity of findings 2 and 3. Nothing in the repo calls `quote()` yet.
++- An empty cart (`quote([])` returns a zero quote): whether that should be allowed is a product question.
++- The skill's blind review lanes for payment code were not run, because the H-Stack lane subagent isn't available here. This was a single-reviewer pass, so treat it as one input to the merge decision, not the only check.

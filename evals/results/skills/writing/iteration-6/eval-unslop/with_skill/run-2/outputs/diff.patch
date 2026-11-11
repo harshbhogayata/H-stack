@@ -1,0 +1,12 @@
+diff --git a/draft.md b/draft.md
+index 29803ee..394b405 100644
+--- a/draft.md
++++ b/draft.md
+@@ -1,3 +1,5 @@
+-In today's fast-paced landscape, our innovative caching layer serves as a pivotal enhancement that not only boosts performance but also fosters a seamless developer experience. Leveraging cutting-edge techniques, it delves into the intricate interplay of memory and disk — ensuring robust, scalable, and vibrant results. Experts believe this is a game-changer. The future looks bright!
++# Page cache
+ 
+-Details: the cache stores rendered pages on disk for 10 minutes and serves them while the database is down. Hit rate in staging was 83%.
++The caching layer stores rendered pages and uses both memory and disk. Pages written to disk stay there for 10 minutes. While the database is down, the cache keeps serving those stored pages.
++
++In staging, the cache had an 83% hit rate.

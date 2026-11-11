@@ -1,0 +1,8 @@
+I couldn't check either library's docs or source, so the answer below is from what I already knew, not from cited sources. Fetching the docs and downloading the packages both needed your approval and didn't run, and the repo has no `node_modules`.
+
+**Short answer:** use Ajv. Zod can't validate draft 2020-12 JSON Schema documents.
+
+- **Ajv:** yes, through its separate 2020-12 class, `import Ajv2020 from "ajv/dist/2020"`. The default `import Ajv from "ajv"` handles draft-07, and one Ajv instance can't mix the two drafts.
+- **Zod:** no. It checks data against schemas you write in TypeScript with Zod's own API, not against JSON Schema files. Zod v4 can export a Zod schema as draft 2020-12 JSON Schema (`z.toJSONSchema`), but that only goes one way. Newer Zod versions may be able to turn JSON Schema into a Zod schema (`z.fromJSONSchema`); I'm not sure that exists or how much of 2020-12 it covers, so it's listed as an open question.
+
+The note is at `notes/json-schema-validators.md`. The repo had no existing place for notes, so I created `notes/`; I haven't committed it. Each claim is marked as unverified and links the official page to check it against. The note also lists the steps to confirm everything once network access is allowed: install both packages, read the two docs pages, and run a small test against a 2020-12 schema. Approve web access and I'll run those steps and update the note.

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (pricing.js unchanged, the suite passes, and it fails against each of five boundary mutants: >= 50 to > 50, >= 10 to > 10, < 1 to <= 1, 50 to 49, 10 to 9)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent showed the existing tests are weak by running them against a mutated pricing.js (e.g. mutate.mjs or a manual boundary flip) and reports which mutant survived",
+      "passed": true,
+      "evidence": "The agent says it \"made 15 small deliberate bugs in a scratch copy of `pricing.js`... 10 of the 15 still passed\" and lists which ones survived, such as \"changing `qty >= 10` or `qty >= 50` to `>`\" and changes to the `qty < 1` check."
+    },
+    {
+      "text": "The new tests assert the exact boundaries from the README (qty 1, 9, 10, 49, 50, and 0 rejected) rather than more mid-range values",
+      "passed": true,
+      "evidence": "The diff adds assertions for discountRate(1), (9), (10), (11), (49), (50) and (51), plus `assert.throws(() => discountRate(0), RangeError)`; the README wasn't shown, but these values match the boundaries the expectation lists."
+    },
+    {
+      "text": "The reply confirms the strengthened suite now fails against the mutants that survived before",
+      "passed": true,
+      "evidence": "The final message says \"now they catch all 15 deliberate bugs I tried\" and \"All 9 tests pass, and all 15 bugs are now caught.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

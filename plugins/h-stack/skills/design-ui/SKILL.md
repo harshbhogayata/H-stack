@@ -25,7 +25,7 @@ metadata:
 
 ## Gate
 
-For any UI work: new screens, components, visual changes, polish, accessibility fixes. Checking a flow in a running browser is `h-stack:qa`.
+For any UI work: new screens, components, visual changes, polish, accessibility fixes. Checking a flow in a running browser is `h-stack:qa`. When the project has no graphical UI (a CLI, a library, an API), a request for a "page" or "screen" means that project's own interface for the same job: a command, flags or a config file, following its conventions docs (output streams, error format, config paths, help text), not a web page.
 
 ## Contract: derive, don't template
 

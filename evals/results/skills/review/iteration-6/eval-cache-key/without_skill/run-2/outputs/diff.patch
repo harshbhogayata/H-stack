@@ -1,0 +1,72 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..a178711
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,66 @@
++# Review: `src/pricing.js`
++
++**Verdict: don't merge yet.** Finding 1 makes multi-currency quotes return wrong prices in normal use. The existing tests pass (3/3) only because each one quotes a SKU in a single currency.
++
++Each finding below was reproduced against the current code by calling `quote()` directly. Amounts are in minor units (cents/pence).
++
++---
++
++## 1. Price cache ignores currency, so quotes use the wrong currency's price. Severity: **Critical**
++
++- **Where:** `src/pricing.js:6` (`memoize(basePrice)`), caused by `src/memoize.js:4` (`const key = args[0]`)
++- **What:** `memoize` builds its cache key from the first argument only. `basePrice(sku, currency)` takes two, so the first currency quoted for a SKU gets cached and returned for every later currency. The cache lives at module level, so this persists across requests and customers for the life of the process.
++- **Input that shows it** (fresh process):
++  ```js
++  quote([{ sku: 'CAP-03' }], 'USD'); // { subtotal: 1500, tax: 0,   total: 1500 }  correct
++  quote([{ sku: 'CAP-03' }], 'EUR'); // { subtotal: 1500, tax: 300, total: 1800 }  expected 1400 / 280 / 1680
++  ```
++  It also goes the other way. After `quote([{ sku: 'CAP-03' }], 'EUR')`, a GBP quote returns subtotal 1400 (should be 1200) and a USD quote returns 1400 (should be 1500).
++- **Impact:** Customers are over- or under-charged depending on which currency happened to hit the cache first. Results depend on request order, so the bug is non-deterministic in production and hard to diagnose.
++- **Suggested fix:** key the cache on all arguments (e.g. `JSON.stringify(args)` or `` `${sku}|${currency}` ``), or drop memoization, since `basePrice` is a plain object lookup. Add a test that quotes the same SKU in two currencies.
++
++## 2. Currency check accepts inherited property names and returns `NaN` totals. Severity: **Medium**
++
++- **Where:** `src/pricing.js:9` (`currency in TAX_RATE`), with the same pattern at `src/catalogue.js:10`
++- **What:** The `in` operator also matches properties inherited from `Object.prototype`. Currencies such as `toString`, `constructor`, `hasOwnProperty` or `__proto__` get past the "unsupported currency" guard. `basePrice` then returns a function (again through `in`), and the arithmetic produces `NaN`.
++- **Input that shows it:**
++  ```js
++  quote([{ sku: 'MUG-02' }], 'toString');
++  // { currency: 'toString', subtotal: NaN, tax: NaN, total: NaN }  expected: throws "unsupported currency"
++  ```
++- **Impact:** If `currency` comes from a request parameter, a malformed value produces a `NaN` quote instead of a clean error, and that value can reach payment or order code downstream.
++- **Suggested fix:** `Object.hasOwn(TAX_RATE, currency)` (and `Object.hasOwn(prices, currency)` in the catalogue), or use a `Map` / `Object.create(null)`.
++
++## 3. `qty` is not validated. Negative, fractional and non-numeric quantities are priced. Severity: **High** if `cart` comes from the client, **Low** if it is always built server-side
++
++- **Where:** `src/pricing.js:12-13`
++- **What:** Any `qty` other than `null`/`undefined` is multiplied in as-is.
++- **Inputs that show it:**
++  ```js
++  // Negative line item discounts the rest of the cart:
++  quote([{ sku: 'TSHIRT-01', qty: 1 }, { sku: 'MUG-02', qty: -1 }], 'USD');
++  // { subtotal: 900, tax: 0, total: 900 }  (T-shirt alone is 2000)
++
++  quote([{ sku: 'MUG-02', qty: -3 }], 'EUR');   // { subtotal: -3300, tax: -660, total: -3960 }
++  quote([{ sku: 'MUG-02', qty: 1.5 }], 'EUR');  // { subtotal: 1650, ... }  half a mug
++  quote([{ sku: 'MUG-02', qty: 'abc' }], 'EUR'); // { subtotal: NaN, tax: NaN, total: NaN }
++  quote([{ sku: 'MUG-02', qty: Infinity }], 'EUR'); // NaN totals
++  ```
++- **Impact:** A client-controlled cart can lower its own total or produce a negative total (a refund). Non-numeric input gives `NaN` instead of an error.
++- **Suggested fix:** require `Number.isInteger(qty) && qty >= 1` (or `>= 0` if zero-qty lines are allowed), and throw otherwise.
++
++## 4. Minor / nits. Severity: **Low**
++
++- `src/pricing.js:11`: a non-array `cart` fails with unhelpful errors. `quote(null)` throws `cart is not iterable`, and `quote('MUG-02')` iterates characters and throws `unknown sku: undefined`. Consider `if (!Array.isArray(cart)) throw ...`.
++- `src/pricing.js:10`: `var subtotal` should be `let`, for consistency with the rest of the file.
++- `src/pricing.js:15`: tax is rounded once on the subtotal. That is a reasonable choice, but confirm it matches the accounting/VAT rules (some jurisdictions require per-line rounding). Not a bug as written, because all prices are integer minor units.
++- **Tests** (`test/pricing.test.js`): there is no coverage for the same SKU in multiple currencies (which would have caught #1), invalid quantities, or prototype-named currencies.
++
++---
++
++| # | Location | Severity | Summary |
++|---|----------|----------|---------|
++| 1 | `src/pricing.js:6` / `src/memoize.js:4` | Critical | Cache keyed by SKU only, so wrong-currency prices are returned |
++| 2 | `src/pricing.js:9`, `src/catalogue.js:10` | Medium | `in` accepts `toString` etc., giving `NaN` quotes |
++| 3 | `src/pricing.js:12-13` | High / Low | Negative, fractional and non-numeric `qty` accepted |
++| 4 | various | Low | Input type checks, `var`, rounding policy, test gaps |

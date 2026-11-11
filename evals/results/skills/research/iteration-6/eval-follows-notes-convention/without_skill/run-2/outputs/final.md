@@ -1,0 +1,8 @@
+No. In Node 22, global `fetch()` ignores `HTTPS_PROXY` unless you turn proxy support on. You do that by setting `NODE_USE_ENV_PROXY=1` or starting Node with `--use-env-proxy`. Both were added in v22.21.0 and are marked "Active Development". Node 22 releases before that have no built-in switch. There you'd install the `undici` package and call `setGlobalDispatcher(new EnvHttpProxyAgent())` at startup.
+
+I saved the findings to `docs/research/2026-11-11-node22-fetch-https-proxy.md`, with the quotes and the test result.
+
+- **Node's v22 docs:** the CLI page describes `--use-env-proxy` and `NODE_USE_ENV_PROXY=1` as "when enabled, Node.js parses the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables… and tunnels requests over the specified proxy." The HTTP page's "Built-in Proxy Support" section says the same: it's off unless one of those is set. Neither page mentions `fetch()` by name.
+- **Local test (Node v22.23.4):** I ran a fake proxy on this machine and pointed `HTTPS_PROXY` at it. With only that variable set, `fetch()` connected directly and nothing reached the proxy. With `NODE_USE_ENV_PROXY=1` or `--use-env-proxy` added, the request went through the proxy. This test is what shows the switch covers `fetch()` and not just the `http`/`https` modules.
+
+I didn't read Node's source code. Downloading the relevant file from GitHub needed an approval that wasn't given, so the answer rests on the docs and the test.

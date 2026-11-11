@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no code was changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+      "passed": true,
+      "evidence": "The review opens with \"I found no bugs that matter for normal use\", rates both findings \"Severity: minor (optional)\", and lists what it checked: \"Empty string\", \"`null`, `undefined` and numbers\" and \"Emoji first (`\\\"😀a\\\"`)\", along with how Unicode characters are split."
+    },
+    {
+      "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+      "passed": true,
+      "evidence": "Both observations (non-BMP letters and uppercase vs titlecase) are marked \"Severity: minor (optional)\", the second is called \"acceptable\", and the summary says there are no bugs that matter for normal use."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

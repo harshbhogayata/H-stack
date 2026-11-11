@@ -1,0 +1,56 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..31c077e
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,50 @@
++# tidyjson
++
++tidyjson reformats a JSON file and writes the result back to the same file.
++
++## Install
++
++From a clone of this repository:
++
++```sh
++npm install -g .
++```
++
++This puts the `tidyjson` command on your PATH.
++
++## Usage
++
++```sh
++tidyjson <file> [--indent N] [--sort-keys]
++```
++
++| Option        | Effect                                      |
++| ------------- | ------------------------------------------- |
++| `--indent N`  | Indent nested values by N spaces.           |
++| `--sort-keys` | Write object keys in sorted order.          |
++
++Examples:
++
++```sh
++tidyjson config.json
++tidyjson config.json --indent 4 --sort-keys
++```
++
++tidyjson overwrites the input file. Commit or copy the file first if you want to compare against the original.
++
++## Invalid JSON
++
++If the file does not parse as JSON, tidyjson exits with code 2 and leaves the file unchanged. Scripts can check for that code:
++
++```sh
++tidyjson data.json
++if [ $? -eq 2 ]; then echo "data.json is not valid JSON"; fi
++```
++
++## Development
++
++```sh
++npm test
++```
++
++This runs Node's built-in test runner (`node --test`).

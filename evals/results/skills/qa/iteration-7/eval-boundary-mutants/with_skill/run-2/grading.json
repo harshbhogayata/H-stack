@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (pricing.js unchanged, the suite passes, and it fails against each of five boundary mutants: >= 50 to > 50, >= 10 to > 10, < 1 to <= 1, 50 to 49, 10 to 9)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent showed the existing tests are weak by running them against a mutated pricing.js (e.g. mutate.mjs or a manual boundary flip) and reports which mutant survived",
+      "passed": true,
+      "evidence": "The final message says \"I deliberately broke `pricing.js` 14 ways, one at a time, and the old tests still passed for 9 of them\" and lists the surviving mutants, such as `>= 10` changed to `> 10` and `qty < 1` changed to `qty < 0`."
+    },
+    {
+      "text": "The new tests assert the exact boundaries from the README (qty 1, 9, 10, 49, 50, and 0 rejected) rather than more mid-range values",
+      "passed": true,
+      "evidence": "The diff adds the cases `[1, 0], [9, 0], [10, 0.1], [11, 0.1], [49, 0.1], [50, 0.2], [51, 0.2]` and checks that `[0, -1, NaN, ...]` throw RangeError; the README itself isn't in the evidence, but these values match the listed boundaries."
+    },
+    {
+      "text": "The reply confirms the strengthened suite now fails against the mutants that survived before",
+      "passed": true,
+      "evidence": "The final message says \"All 8 tests pass, and when I re-ran the same 14 breakages every one made the tests fail.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

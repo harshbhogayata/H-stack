@@ -1,0 +1,53 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..21c338d
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,47 @@
++# Answer: `fs.rmSync` options in Node 22
++
++**Question:** We call `fs.rmSync(dir)` to delete a folder and it throws on non-empty folders. What options does Node 22 document for `fs.rmSync`, and which one fixes this?
++
++## Short answer
++
++Use **`recursive: true`**:
++
++```js
++fs.rmSync(dir, { recursive: true });               // fixes the error
++fs.rmSync(dir, { recursive: true, force: true });  // also no error if dir is already gone (like `rm -rf`)
++```
++
++## Documented options (Node 22)
++
++Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options (Node v22.x docs, read 2026-11-11). Signature: `fs.rmSync(path[, options])`, added in v14.14.0. It "Synchronously removes files and directories (modeled on the standard POSIX `rm` utility). Returns `undefined`."
++
++| Option | Type | Default | Documented meaning |
++|---|---|---|---|
++| `force` | boolean | `false` | When `true`, exceptions are ignored if `path` does not exist. |
++| `maxRetries` | integer | `0` | Number of retries when `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY` or `EPERM` is hit, with linear backoff of `retryDelay` ms. **Ignored unless `recursive` is `true`.** |
++| `recursive` | boolean | `false` | If `true`, perform a recursive directory removal. In recursive mode, failed operations are retried. |
++| `retryDelay` | integer | `100` | Milliseconds to wait between retries. **Ignored unless `recursive` is `true`.** |
++
++`path` may be a `string`, `Buffer`, or `URL` (`file:` URL support added in v17.3.0 / v16.14.0).
++
++## Which one fixes it, and why
++
++- **`recursive: true`** is the fix *(read from the docs; confirmed by test)*. Without it, `rmSync` won't remove a directory.
++- **`force` does not fix it** *(read from the docs)*. It only stops the error when the path doesn't exist.
++- `maxRetries` and `retryDelay` only apply when `recursive` is on *(read from the docs)*. They help with transient errors such as `EBUSY` on Windows, not with this one.
++
++## Test run (Node v22.23.4, on this machine)
++
++| Call | Result |
++|---|---|
++| `fs.rmSync(nonEmptyDir)` | throws `ERR_FS_EISDIR` ("Path is a directory: rm returned EISDIR") |
++| `fs.rmSync(emptyDir)` | **also** throws `ERR_FS_EISDIR` |
++| `fs.rmSync(dir, { recursive: true })` | removes the directory and its contents |
++| `fs.rmSync(missingDir)` | throws `ENOENT` |
++| `fs.rmSync(missingDir, { force: true })` | no error |
++
++Note: the error isn't really about the folder being "non-empty". Without `recursive`, `fs.rmSync` refuses to remove *any* directory, even an empty one. To remove only empty directories, use `fs.rmdirSync(dir)` instead *(inferred; not tested here)*.
++
++## Open questions
++
++- None for the main question. I didn't check behaviour on other Node 22 patch releases or on Windows; the docs above cover the whole v22.x line.

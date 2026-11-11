@@ -1,0 +1,45 @@
+diff --git a/docs/research/2026-11-11-node22-fetch-https-proxy.md b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+new file mode 100644
+index 0000000..636e5cb
+--- /dev/null
++++ b/docs/research/2026-11-11-node22-fetch-https-proxy.md
+@@ -0,0 +1,39 @@
++# 2026-11-11 Does Node 22 global fetch() honour HTTPS_PROXY by default?
++
++**Answer: No.** In Node 22, global `fetch()` ignores `HTTPS_PROXY` / `HTTP_PROXY` unless you opt in. From **v22.21.0** onward, you opt in with either the `NODE_USE_ENV_PROXY=1` environment variable or the `--use-env-proxy` CLI flag. Before v22.21.0, Node 22 has no built-in opt-in. You have to pass an undici `ProxyAgent`/`EnvHttpProxyAgent` as the dispatcher yourself.
++
++Applies to: Node 22.x (Jod LTS). Checked against Node v22.23.4 (bundled undici 6.29.1).
++
++## Findings
++
++| # | Claim | Source | Basis |
++|---|-------|--------|-------|
++| 1 | With only `HTTPS_PROXY` set, `fetch()` connects directly and never contacts the proxy. | Experiment below, Node v22.23.4 | **measured** |
++| 2 | With `HTTPS_PROXY` plus `NODE_USE_ENV_PROXY=1`, `fetch()` sends `CONNECT host:443` to the proxy. | Experiment below, Node v22.23.4 | **measured** |
++| 3 | With `HTTPS_PROXY` plus `--use-env-proxy`, `fetch()` also goes through the proxy. | Experiment below, Node v22.23.4 | **measured** |
++| 4 | Opting in prints `[UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental`. Node uses undici's `EnvHttpProxyAgent` underneath, so the feature is experimental in 22.x. | Experiment stderr, Node v22.23.4 | **measured** (that the feature is "experimental" is **inferred** from this warning) |
++| 5 | `NODE_USE_ENV_PROXY`: "When enabled, Node.js parses the HTTP_PROXY, HTTPS_PROXY and NO_PROXY environment variables during startup, and tunnels requests over the specified proxy. This currently only affects requests sent over fetch()." | Node's man page `node.1` (lines 848–859), shipped with v22.23.4 at `/opt/node22/share/man/man1/node.1` | **read** |
++| 6 | `--use-env-proxy`: "Parse proxy settings from HTTP_PROXY/HTTPS_PROXY/NO_PROXY environment variables and apply the setting in global HTTP/HTTPS clients." | `node.1` line 630 and `node --help`, v22.23.4 | **read** |
++| 7 | Both opt-ins arrived in Node 22 with **v22.21.0 (2025-10-20)**: "http: support http proxy for fetch under `NODE_USE_ENV_PROXY`" ([#57165](https://github.com/nodejs/node/pull/57165)) and "cli: add `--use-env-proxy`" ([#59151](https://github.com/nodejs/node/pull/59151)). The same release added built-in proxy support to `http`/`https.request` and `Agent` ([#58980](https://github.com/nodejs/node/pull/58980)). | Node `CHANGELOG.md` (22.x), lines 842–851, shipped at `/opt/node22/CHANGELOG.md` | **read** |
++| 8 | Before v22.21.0, Node 22 has no env-proxy opt-in for `fetch()`. | Inferred from #7: the feature is listed as a new SEMVER-MINOR addition in 22.21.0 | **inferred** |
++
++## Experiment (measured)
++
++Script: a local TCP "proxy" on 127.0.0.1 logs the first request line it receives. A child `node -e "fetch('https://example.invalid/')"` runs with a minimal env: `PATH`, `HTTPS_PROXY=http://127.0.0.1:<port>`, and the per-case additions below.
++
++```
++HTTPS_PROXY only (default):         proxyHits=[]                                       child: err ENOTFOUND (direct DNS lookup)
++HTTPS_PROXY + NODE_USE_ENV_PROXY=1: proxyHits=["CONNECT example.invalid:443 HTTP/1.1"] child: UNDICI-EHPA warning, fetch failed (fake proxy returned 502)
++HTTPS_PROXY + --use-env-proxy:      proxyHits=["CONNECT example.invalid:443 HTTP/1.1"] child: UNDICI-EHPA warning, fetch failed
++node v22.23.4
++```
++
++## Practical guidance
++
++- On Node ≥ 22.21.0: set `NODE_USE_ENV_PROXY=1` or run `node --use-env-proxy`. `NO_PROXY` is respected too (finding 5).
++- On Node < 22.21.0: `import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici'; setGlobalDispatcher(new EnvHttpProxyAgent());` (needs the userland `undici` package). This is **inferred** and was not tested here.
++
++## Open questions
++
++- Upstream web docs (nodejs.org/docs/latest-v22.x/api/http.html "Built-in Proxy Support", and `cli.md` YAML `added:` metadata) were **not fetched**: network access was not permitted in this run. The findings rely on the docs and changelog that ship with the v22.23.4 install, plus the measurement above.
++- Whether a later 22.x release changes the stability level or the default was not checked. Nothing in the 22.x changelog up to v22.23.4 indicates the default changed.

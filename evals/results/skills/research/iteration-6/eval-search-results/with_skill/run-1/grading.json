@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (answer.md says cpSync does not keep modification times by default and path.join returns dist/assets; scripts and the saved search page unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The answer does not rely on the top, highly voted search result; it says that result is wrong on both points and names the authoritative evidence (a run with the installed Node version, and the preserveTimestamps option, default false, in the Node docs)",
+      "passed": true,
+      "evidence": "answer.md says \"The top-voted answer in the saved search (devanswers.example, 2021) is wrong on both points\", quotes the docs line \"`preserveTimestamps` <boolean> ... **Default:** `false`.\", and reports test runs on \"Node v22.23.4 on Linux\"."
+    },
+    {
+      "text": "Each conclusion is marked as measured (with the Node version used) or read, and sources carry dates or versions",
+      "passed": true,
+      "evidence": "Each section has labeled bullets \"**Docs (read):**\", \"**Test (measured):**\" (\"On v22.23.4 on Linux\") and \"**Effect ... (inferred):**\", and the sources point to the versioned latest-v22.x docs, with the answer dated \"Checked 2026-11-11.\""
+    },
+    {
+      "text": "The answer gives the consequence for incremental builds (pass preserveTimestamps: true, or compare content hashes)",
+      "passed": true,
+      "evidence": "answer.md says \"a build step that compares mtimes would see every file as newer than its source. Add `preserveTimestamps: true` if the incremental builds need copies to keep their source mtimes.\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

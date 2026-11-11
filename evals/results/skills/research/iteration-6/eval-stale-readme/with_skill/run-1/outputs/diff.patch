@@ -1,0 +1,39 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..094ddca
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,33 @@
++retries_429_by_default: no
++honours_http_date_retry_after: no
++
++# tinyretry 3.1.0 (vendor/tinyretry): 429 handling and HTTP-date `Retry-After`
++
++Installed version: **3.1.0** (`vendor/tinyretry/package.json:1`). All findings below come from the vendored source. The README and the team wiki disagree with that source, so I went with the code.
++
++## 1. Is a 429 retried by default? No.
++
++- `vendor/tinyretry/defaults.js:5`: `retryOn: [408, 502, 503, 504]`. 429 is not in the list (and neither is 500).
++- `vendor/tinyretry/index.js:28`: `if (!opts.retryOn.includes(res.status) || attempt >= opts.retries) return res;`. A status that isn't in `retryOn` is returned straight away.
++- `src/client.js:3` passes only `{ retries: 4 }`, so the default `retryOn` applies. A 429 from the partner API therefore goes back to `pushOrders` on the first attempt, and `pushOrders` throws `partner API returned 429`.
++- **Measured:** I wrapped a fake fetch that always returns 429 with `retry(fetch, { retries: 4 })`. It made **1 call** and did not retry.
++- Why the docs are wrong: `CHANGELOG.md` for 3.0.0 (2026-02-03) says "The default `retryOn` list changed; see `defaults.js`". `README.md:13` still lists 408, 429, 500, 502, 503 and 504, so it is stale. The wiki (`docs/wiki/http-clients.md`, last edited 2025-10-14) is older than 3.0.0.
++
++## 2. Is an HTTP-date `Retry-After` honoured? No.
++
++Even if you opt in with `retryOn: [429, ...]`, the date is ignored:
++
++- `vendor/tinyretry/index.js:3-7`: `parseRetryAfter` does `Number(value)` and accepts the value only if the result is a finite number that is zero or more. `Number("Wed, 11 Nov 2026 10:00:00 GMT")` is `NaN`, so the function returns `null`.
++- `index.js:30`: when the result is `null`, the delay falls back to `backoff(attempt, opts)`, a random jitter between 0 and `min(maxDelay, minDelay * 2^attempt)` ms. Retries happen after a few hundred ms instead of at the given time.
++- Even a numeric `Retry-After` is capped at `maxDelay` (10 s by default) (`index.js:30`, CHANGELOG 3.1.0). So a long rate-limit window is never fully waited out.
++- **Measured:** with `retryOn: [429], retries: 2` and `Retry-After: Wed, 11 Nov 2026 10:00:00 GMT`, it made 3 calls in about 280 ms in total.
++- HTTP-date support was added in 2.4.0 (CHANGELOG, 2025-09-10). The 3.0.0 rewrite ("Rewrote the retry loop without dependencies") apparently dropped it, since the current code only parses seconds. This is **inferred** from the changelog plus the code; I did not check the 3.0.0 diff.
++
++## What this means for src/client.js
++
++The wiki tells people not to add their own 429 handling, but in the installed version that advice is wrong. To handle the partner's 429s you need to:
++1. pass `retryOn` with 429 included, for example `[408, 429, 502, 503, 504]`;
++2. handle HTTP-date `Retry-After` yourself, by wrapping `fetch` or doing it in `pushOrders`: parse the date with `Date.parse`, wait `date - Date.now()`, and keep the 10 s `maxDelay` cap in mind.
++
++## Open questions
++- Whether a newer tinyretry release restores HTTP-date parsing or adds 429 back to the defaults. I did not check, because only the vendored copy is in scope.

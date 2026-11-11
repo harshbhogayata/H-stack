@@ -1,0 +1,123 @@
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..f15b4f7
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,58 @@
++.hb-toast-region {
++  position: fixed;
++  right: max(var(--hb-space-6), env(safe-area-inset-right));
++  bottom: max(var(--hb-space-6), env(safe-area-inset-bottom));
++  z-index: var(--hb-z-toast);
++  /* Never wider than the viewport, with a gutter on each side. */
++  max-width: min(400px, calc(100vw - 2 * var(--hb-space-4)));
++  pointer-events: none;
++}
++
++.hb-toast {
++  display: flex;
++  align-items: center;
++  gap: var(--hb-space-2);
++  padding: var(--hb-space-1) var(--hb-space-1) var(--hb-space-1) var(--hb-space-4);
++  background: var(--hb-color-surface);
++  color: var(--hb-color-ink);
++  border: 1px solid var(--hb-color-border);
++  border-left: 4px solid var(--hb-color-accent);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  pointer-events: auto;
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out);
++}
++
++.hb-toast__message {
++  flex: 1;
++  margin: 0;
++  padding-block: var(--hb-space-2);
++  font-size: var(--hb-text-sm);
++  overflow-wrap: anywhere;
++}
++
++.hb-toast .hb-icon-button {
++  flex-shrink: 0;
++  color: var(--hb-color-ink-muted);
++}
++
++@keyframes hb-toast-in {
++  from {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-6)));
++  }
++  to {
++    opacity: 1;
++    transform: none;
++  }
++}
++
++/* Phones / narrow tablets in portrait: span the bottom edge instead. */
++@media (max-width: 480px) {
++  .hb-toast-region {
++    left: var(--hb-space-4);
++    right: var(--hb-space-4);
++    bottom: max(var(--hb-space-4), env(safe-area-inset-bottom));
++    max-width: none;
++  }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..f4b8f6f
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,53 @@
++import { useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon } from './icons';
++import './Toast.css';
++
++/**
++ * Bottom-right notification, e.g. for shipment status changes.
++ *
++ * Keep it mounted and drive it with `message`: pass a string to show it,
++ * and set it back to null in `onClose`. The live region stays in the DOM
++ * between toasts so screen readers reliably announce each new message.
++ *
++ *   const [toast, setToast] = useState(null);
++ *   setToast(`Container ${s.container} is now ${STATUS_LABEL[s.status]}`);
++ *   <Toast message={toast} onClose={() => setToast(null)} />
++ *
++ * The 5s timer pauses while the toast is hovered or has focus, so people
++ * can finish reading or reach the close button, and restarts on leave.
++ */
++export function Toast({ message, onClose, duration = 5000 }) {
++  const [paused, setPaused] = useState(false);
++  const onCloseRef = useRef(onClose);
++  onCloseRef.current = onClose;
++
++  useEffect(() => {
++    if (!message || paused) return undefined;
++    const timer = setTimeout(() => onCloseRef.current?.(), duration);
++    return () => clearTimeout(timer);
++  }, [message, paused, duration]);
++
++  // A new message starts unpaused even if the pointer was over the old one.
++  useEffect(() => setPaused(false), [message]);
++
++  return (
++    <div className="hb-toast-region" role="status" aria-live="polite">
++      {message && (
++        <div
++          key={message}
++          className="hb-toast"
++          onMouseEnter={() => setPaused(true)}
++          onMouseLeave={() => setPaused(false)}
++          onFocus={() => setPaused(true)}
++          onBlur={(e) => {
++            if (!e.currentTarget.contains(e.relatedTarget)) setPaused(false);
++          }}
++        >
++          <p className="hb-toast__message">{message}</p>
++          <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={() => onClose?.()} />
++        </div>
++      )}
++    </div>
++  );
++}

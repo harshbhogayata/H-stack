@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (file unchanged)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+      "passed": true,
+      "evidence": "Item 2 says the search control is a `<div>` with `onClick` that keyboard users can't reach and that \"has no name\", and item 5 says \"the delete button has no accessible name\" because its only content is an SVG."
+    },
+    {
+      "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+      "passed": true,
+      "evidence": "Item 7 says \"paste is blocked in the filter box\" by `onPaste={(e) => e.preventDefault()}`, and the closing note says \"a single click on delete fires `onDelete` right away, with no confirmation or undo.\""
+    },
+    {
+      "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+      "passed": true,
+      "evidence": "Item 1 flags line 3 because it is \"`position: fixed` with `height: '100vh'`\", so it covers the whole screen. However, it says nothing about dvh or safe-area insets, so it only meets the \"fixed toolbar using 100vh\" part of the expectation."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

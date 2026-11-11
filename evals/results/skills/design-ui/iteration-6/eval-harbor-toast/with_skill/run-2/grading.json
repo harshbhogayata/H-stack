@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+      "passed": true,
+      "evidence": "Toast.jsx imports `IconButton` and `CloseIcon`, and Toast.css takes its colours, spacing, corner radius, shadow, layer and motion from existing tokens such as `var(--hb-z-toast)`, `var(--hb-shadow-raised)` and `var(--hb-motion-base) var(--hb-ease-out)`; the only fixed values are layout sizes like `m"
+    },
+    {
+      "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+      "passed": true,
+      "evidence": "The Toast root has `onMouseEnter={pause}`, `onMouseLeave={resume}`, `onFocus={pause}` and `onBlur={handleBlur}`, and the reply says 'the 5-second countdown pauses while the pointer is over the toast or keyboard focus is inside it, so people can finish reading or reach the close button.'"
+    },
+    {
+      "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+      "passed": true,
+      "evidence": "The reply has an 'Accessibility checks' list (reduced motion, safe-area insets, wrapping, click-through on the empty area) and a 'Not verified' section saying 'I couldn't render, parse or test the component in a browser, so the slide-in, the 5-second close, the pause on hover/focus and the screen-re"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

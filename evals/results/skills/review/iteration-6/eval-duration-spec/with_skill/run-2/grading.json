@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+      "passed": false,
+      "evidence": "check exit 1: current code already returns the expected value: {\"input\":\"1.1h\",\"expected\":3960000}\n"
+    },
+    {
+      "text": "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+      "passed": true,
+      "evidence": "The reply says \"The regex tries the units in order, so it matches `m` before it gets to `ms`... so `parseDuration(\"500ms\")` throws a `TypeError` instead of returning 500.\""
+    },
+    {
+      "text": "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+      "passed": false,
+      "evidence": "The reply correctly treats uppercase, \".5s\", \"1 h\" and repeated units as correct, but it reports \"1.1h\" as a bug (\"Some decimals come back slightly off\"), and the check found that \"current code already returns the expected value: {\\\"input\\\":\\\"1.1h\\\",\\\"expected\\\":3960000}\", so the reported bug is beh"
+    },
+    {
+      "text": "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file",
+      "passed": true,
+      "evidence": "The reply labels it \"confirmed, major\", notes \"this module reads timeouts, where `ms` is common\", proposes \"put `ms` before `m`: `(ms|h|m|s)`\", and the diff only adds cases.json."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  }
+}

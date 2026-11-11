@@ -1,0 +1,36 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..6027952
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": {"path": "/api/log", "params": {"branch": "main; id"}},
++    "file": "app/tasks.py",
++    "line": 24,
++    "why": "BRANCH_RE (tasks.py:7) is applied with re.match and has no end anchor, so it only checks the first character(s); 'main; id' (also 'main$(id)' or 'main\\nid') passes. The value is interpolated into a shell string and run by subprocess.run(..., shell=True) in _git (tasks.py:11), so any signed-in employee gets arbitrary command execution as the ops service in /srv/ops/repo (e.g. reading DEPLOY_TOKEN from the server environment/config). Fix: use re.fullmatch (or \\Z) and pass an argv list without shell=True, with '--' before the ref."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/commit", "params": {"sha": "abcdef0;id"}},
++    "file": "app/tasks.py",
++    "line": 18,
++    "why": "Same shell=True sink, but is_sha uses SHA_RE.fullmatch over [0-9a-f]{7,40} (validate.py:7), so only bare lowercase hex reaches the shell; metacharacters, whitespace, trailing newline and leading '-' are all rejected (checked locally)."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/report", "params": {"name": "../../config/deploy.env"}},
++    "file": "app/reports.py",
++    "line": 8,
++    "why": "read_report resolves realpath (following symlinks) and requires commonpath with the realpath'd reports dir; '../' traversal, absolute paths like '/etc/passwd', and sibling-prefix dirs like '../reports2/x' all raise PermissionError. Only files under app/reports/ are readable, which is the intended feature."
++  },
++  {
++    "verdict": "rejected",
++    "request": {"path": "/api/deploys", "params": {"filter": "__import__('os').system('id')"}},
++    "file": "app/search.py",
++    "line": 11,
++    "why": "ast.literal_eval only accepts literals, so calls/attribute access raise ValueError (returned as 400) with no code execution. The deploy list it filters is non-sensitive data every employee may already see. Deeply nested literals can raise an uncaught RecursionError/MemoryError for that one request, but that is a per-request error, not a demonstrated boundary crossing."
++  }
++]

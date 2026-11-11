@@ -1,0 +1,47 @@
+diff --git a/answer.md b/answer.md
+new file mode 100644
+index 0000000..9112ad8
+--- /dev/null
++++ b/answer.md
+@@ -0,0 +1,41 @@
++retries_429_by_default: no
++honours_http_date_retry_after: no
++
++## Summary
++
++The vendored tinyretry is version 3.1.0 (`vendor/tinyretry/package.json`), and `package.json` depends on it via `file:vendor/tinyretry`. Its README says it retries 429 and honours `Retry-After`, but the code does neither for this case. `src/client.js` only passes `{ retries: 4 }`, so it gets the library defaults.
++
++## 1. 429 is not retried by default
++
++`vendor/tinyretry/defaults.js`:
++
++```js
++retryOn: [408, 502, 503, 504],
++```
++
++429 (and 500) are not in the list. The retry loop in `index.js` returns the response straight away when the status is not in `opts.retryOn`:
++
++```js
++if (!opts.retryOn.includes(res.status) || attempt >= opts.retries) return res;
++```
++
++So a 429 goes back to `pushOrders` on the first attempt, and `pushOrders` throws `partner API returned 429`. The CHANGELOG for 3.0.0 says "The default `retryOn` list changed; see `defaults.js`". The README's list (408, 429, 500, 502, 503, 504) is out of date.
++
++## 2. An HTTP-date `Retry-After` is ignored
++
++`index.js` reads the header like this:
++
++```js
++function parseRetryAfter(value) {
++  if (value == null) return null;
++  const seconds = Number(value);
++  return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : null;
++}
++```
++
++`Number("Wed, 11 Nov 2026 10:00:00 GMT")` is `NaN`, so the function returns `null`. The code then falls back to exponential backoff with full jitter: a random delay between 0 and min(10000, 200·2^attempt) ms. It does not wait until the given time. Only a `Retry-After` in seconds is used, and even that is capped at `maxDelay` (10 s by default, since 3.1.0). The 2.4.0 changelog entry added HTTP-date support, but the 3.0.0 dependency-free rewrite dropped it.
++
++## Implications for `src/client.js`
++
++- To retry 429s you have to pass it yourself, e.g. `retryOn: [408, 429, 500, 502, 503, 504]`.
++- Even then, an HTTP-date `Retry-After` will be ignored and retries will come back within milliseconds to a few seconds, probably before the partner's window ends. To honour the date you need your own handling: parse it with `Date.parse(value) - Date.now()` and keep in mind the `maxDelay` cap. Alternatively, fix `parseRetryAfter` in the vendored copy or upstream.

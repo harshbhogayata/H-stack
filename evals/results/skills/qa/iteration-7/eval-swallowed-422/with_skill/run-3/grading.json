@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (app unchanged; QA-REPORT.md mentions the 422; e2e/subscribe.test.js fails on the current app and passes once app.js checks res.ok)",
+      "passed": false,
+      "evidence": "check exit 1: e2e test still fails once the app checks res.ok\n"
+    },
+    {
+      "text": "The agent captured the failed request in the browser flow (the POST /api/subscribe returning 422 for an address with +) rather than only reading the code",
+      "passed": true,
+      "evidence": "QA-REPORT.md has a 'Browser evidence (Chromium headless, Playwright...)' table that records `jane+news@example.com` | **422** `{\"error\":\"Addresses with + are not supported.\"}` and the console's 'Failed to load resource: … 422' error."
+    },
+    {
+      "text": "QA-REPORT.md names the cause: public/app.js shows the success message without checking the response status, so server validation errors are hidden",
+      "passed": true,
+      "evidence": "QA-REPORT.md says \"`public/app.js` awaits `fetch('/api/subscribe')` but never looks at the response. Any HTTP response counts as success, including `422`.\""
+    },
+    {
+      "text": "The e2e test starts and stops the server and browser itself and asserts on what the user sees (the status text) for a rejected address",
+      "passed": true,
+      "evidence": "The test spawns `node server.js` and calls `chromium.launch()` in before(), closes the browser and runs `server?.kill()` in after(), and asserts `assert.doesNotMatch(r.message, SUCCESS, ...)` on the role=status text for the rejected addresses. The check command shows the test is too strict once res."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  }
+}

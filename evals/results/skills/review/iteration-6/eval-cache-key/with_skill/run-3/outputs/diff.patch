@@ -1,0 +1,80 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..9a7a263
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,74 @@
++# Review: `src/pricing.js`
++
++Scope: `src/pricing.js` and the two modules it calls (`src/memoize.js`, `src/catalogue.js`) at commit `1c554bb`. No code was changed. The repo has no REVIEW.md, CLAUDE.md or lint config, so I took the rules from the existing tests and the obvious intent (each currency is priced from its own catalogue column).
++
++Every input below was run with `node -e` against the current code. `npm test` passes 3 of 3, but none of the tests catch finding 1.
++
++**Recommendation: do not merge until finding 1 is fixed.**
++
++---
++
++## 1. The cached price ignores currency, so a cart is billed in whichever currency the SKU was first quoted in. Blocker
++
++- **Where:** `src/pricing.js:6`, `const priceFor = memoize(basePrice);`, together with `src/memoize.js:4`, `const key = args[0];`
++- **Verdict:** confirmed (reproduced)
++- **Severity:** critical. Any process that quotes the same SKU in two currencies hits this, and it happens on every quote after the first one for that SKU. Customers get wrong prices and wrong tax.
++- **Cause:** `memoize` uses only the first argument (`sku`) as the cache key. `priceFor(sku, currency)` stores the price for whichever currency came first and returns that number for every currency after it.
++- **Input that shows it** (fresh process):
++  ```js
++  quote([{ sku: 'MUG-02' }], 'USD'); // { subtotal: 1200, tax: 0,   total: 1200 } correct
++  quote([{ sku: 'MUG-02' }], 'GBP'); // { subtotal: 1200, tax: 240, total: 1440 } wrong: should be 950 / 190 / 1140
++  ```
++  The other direction also fails: `quote([{sku:'CAP-03'}],'EUR')` and then `quote([{sku:'CAP-03'}],'USD')` gives a USD subtotal of 1400 when it should be 1500.
++- **Why the tests miss it:** each test quotes a different SKU first (`TSHIRT-01`/`MUG-02` in USD, `CAP-03` in EUR), so no SKU is ever looked up in two currencies. The EUR test passes only because of the order the tests run in.
++- **Suggested fix:** key the cache on both arguments, for example `memoize((sku, cur) => …)` with a key of `` `${sku}|${currency}` ``, or drop the memoization (`basePrice` is a plain object lookup, so the cache saves almost nothing). Add a test that quotes one SKU in two currencies.
++
++## 2. Quantity is never checked, so negative, fractional or non-numeric quantities produce bad totals. Major
++
++- **Where:** `src/pricing.js:12`, `const qty = item.qty == null ? 1 : item.qty;`
++- **Verdict:** confirmed (reproduced). Whether it is exploitable depends on whether callers validate `qty` first. I couldn't check that because no caller is in this repo.
++- **Severity:** major if `cart` comes from the client, minor if it is already validated upstream.
++- **Inputs that show it:**
++  ```js
++  quote([{ sku: 'MUG-02', qty: -3 }]);    // subtotal -3600, total -3600 (a negative charge, which can offset other items)
++  quote([{ sku: 'MUG-02', qty: 1.5 }]);   // subtotal 1800 (half a mug)
++  quote([{ sku: 'MUG-02', qty: 'abc' }]); // subtotal NaN, total NaN
++  quote([{ sku: 'MUG-02', qty: '2' }]);   // 2400, only works because the string is coerced to a number
++  ```
++- **Suggested fix:** reject any `qty` that is not a positive integer: `Number.isInteger(qty) && qty > 0`.
++
++## 3. The currency check accepts inherited object keys such as `toString`. Minor
++
++- **Where:** `src/pricing.js:9`, `if (!(currency in TAX_RATE)) …`. The same pattern appears in `src/catalogue.js:10`.
++- **Verdict:** confirmed (reproduced)
++- **Severity:** minor. It only triggers when the currency string comes from untrusted input. The result is a NaN quote rather than the intended "unsupported currency" error.
++- **Input that shows it:**
++  ```js
++  quote([{ sku: 'CAP-03' }], 'toString');    // { currency: 'toString', subtotal: NaN, tax: NaN, total: NaN }
++  quote([{ sku: 'CAP-03' }], 'constructor'); // same
++  ```
++  The `in` operator also finds keys inherited from `Object.prototype`, so the guard passes and the tax rate becomes a function.
++- **Suggested fix:** use `Object.hasOwn(TAX_RATE, currency)`, or build the tables with `Object.create(null)` or a `Map`.
++
++---
++
++## Rejected (checked; these do not hold)
++
++- **Tax rounding:** tax is rounded once per cart (`Math.round(subtotal * rate)`, line 15) on integer minor units, so it does not drift line by line. Fine.
++- **A failed price lookup gets cached:** if `basePrice` throws, `cache.set` never runs (`memoize.js:5`), so errors are not cached. Fine.
++- **The memo cache grows without limit:** the keys are SKUs from a fixed catalogue, so the cache stays small. Fine. The real problem with the cache is finding 1.
++- **A missing `qty` defaults to 1:** this is intended and covered by the first test.
++
++## Cleared
++
++- `pricing.js` currency guard: checked with known, unknown and prototype-key currencies (finding 3).
++- `pricing.js` subtotal loop: checked with a missing qty, an explicit qty and bad qty values (finding 2).
++- `pricing.js` tax and total: checked rounding, the zero rate for USD and the 20% rate for EUR/GBP.
++- `memoize.js`: checked the cache key, the cache-on-throw case and the `this` binding (finding 1).
++- `catalogue.js`: checked the unknown SKU and missing currency errors.
++
++## Not reviewed
++
++- Callers of `quote` and how `cart` and `currency` are validated before they reach it (not in this repo). This decides how serious finding 2 really is.
++- Whether the `TAX_RATE` values (USD 0, EUR/GBP 20%) are correct for the business. That is a product question, not a code one.
++- This is pricing code, so it counts as high-risk. Only this single review was run; there were no independent review lanes or second reviewer. Don't treat it as the only check before merge.

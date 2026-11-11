@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no code was changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
+      "passed": true,
+      "evidence": "The agent says it \"found no real bugs\" and covers the empty string (\"an empty string or a non-string is returned unchanged\"), non-string input (\"capitalize(42) returns 42\") and a Unicode first character (\"capitalize('𐐨abc')\")."
+    },
+    {
+      "text": "Any minor observation is labelled as minor or optional rather than presented as a bug",
+      "passed": true,
+      "evidence": "The agent never uses the words \"minor\" or \"optional\", but it presents the three items as \"edge cases worth knowing about\" after saying it \"found no real bugs\", and qualifies them with \"This only matters if you expect such text\" and \"That's fine if it's intended\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

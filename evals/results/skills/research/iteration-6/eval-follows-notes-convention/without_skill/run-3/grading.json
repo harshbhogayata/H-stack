@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (new note saved in docs/research, following the existing convention)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The note cites Node's own docs or source and states clearly whether fetch honours HTTPS_PROXY by default (it does not without extra configuration in Node 22), marking uncertainty if the source was not reachable",
+      "passed": true,
+      "evidence": "The note answers \"**No.** In Node 22, global `fetch()` ignores `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` unless you opt in\" and quotes the v22 CLI docs at https://nodejs.org/docs/latest-v22.x/api/cli.html and the bundled man page; the sources were reachable, so no uncertainty marking was needed."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

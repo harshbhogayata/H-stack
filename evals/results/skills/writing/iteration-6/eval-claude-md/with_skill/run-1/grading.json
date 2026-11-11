@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (short, includes money-as-cents and migration rules)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "CLAUDE.md captures the unwritten conventions (integer cents, never edit shipped migrations, legacy/ frozen) rather than restating every package.json script or describing the directory tree",
+      "passed": true,
+      "evidence": "The file has a section for each convention: \"Store and compute every amount as integer cents, typed `Cents`\", \"A migration that has shipped is permanent\" and \"`legacy/` is frozen\". It names only the scripts tied to a rule or a gotcha (test, lint, dev), has no directory tree, and the agent said it \"l"
+    },
+    {
+      "text": "CLAUDE.md does not use all-caps imperatives such as NEVER or MUST",
+      "passed": true,
+      "evidence": "The only all-caps words in the diff are names and acronyms (\"CLAUDE.md\", \"CONTRIBUTING\", \"CI\"), and the rules are phrased in normal case, e.g. \"Change it only for a security fix; build new behaviour outside it.\""
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

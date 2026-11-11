@@ -1,0 +1,101 @@
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..91e1057
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,38 @@
++.hb-toast-region {
++  position: fixed;
++  right: var(--hb-space-4);
++  bottom: var(--hb-space-4);
++  z-index: var(--hb-z-toast);
++  max-width: min(400px, calc(100vw - 2 * var(--hb-space-4)));
++}
++
++.hb-toast {
++  display: flex;
++  align-items: center;
++  gap: var(--hb-space-2);
++  padding: var(--hb-space-1) var(--hb-space-1) var(--hb-space-1) var(--hb-space-4);
++  background: var(--hb-color-surface);
++  color: var(--hb-color-ink);
++  border: 1px solid var(--hb-color-border);
++  border-left: 4px solid var(--hb-color-accent);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out);
++}
++
++.hb-toast__message {
++  flex: 1;
++  margin: 0;
++  font-size: var(--hb-text-sm);
++}
++
++@keyframes hb-toast-in {
++  from {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-4)));
++  }
++  to {
++    opacity: 1;
++    transform: translateX(0);
++  }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..5e1f190
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,51 @@
++import { useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon } from './icons';
++import './Toast.css';
++
++/**
++ * Bottom-right notification, e.g. for shipment status changes.
++ *
++ * The live region stays mounted even when there is no message, so screen
++ * readers reliably announce each new message when it's inserted.
++ *
++ *   const [toast, setToast] = useState(null);
++ *   // on status change:
++ *   setToast({ id: Date.now(), text: `${container} is now ${label}` });
++ *   <Toast message={toast?.text} messageKey={toast?.id} onClose={() => setToast(null)} />
++ *
++ * `messageKey` restarts the timer and the slide-in when the same text repeats.
++ * The 5s countdown pauses while the toast is hovered or focused.
++ */
++export function Toast({ message, messageKey, onClose, duration = 5000 }) {
++  const [paused, setPaused] = useState(false);
++  const onCloseRef = useRef(onClose);
++  onCloseRef.current = onClose;
++
++  useEffect(() => {
++    if (!message || paused) return undefined;
++    const timer = setTimeout(() => onCloseRef.current?.(), duration);
++    return () => clearTimeout(timer);
++  }, [message, messageKey, paused, duration]);
++
++  // A new message shouldn't inherit the paused state from the previous one.
++  useEffect(() => setPaused(false), [message, messageKey]);
++
++  return (
++    <div className="hb-toast-region" role="status" aria-live="polite">
++      {message && (
++        <div
++          key={messageKey ?? message}
++          className="hb-toast"
++          onMouseEnter={() => setPaused(true)}
++          onMouseLeave={() => setPaused(false)}
++          onFocus={() => setPaused(true)}
++          onBlur={() => setPaused(false)}
++        >
++          <p className="hb-toast__message">{message}</p>
++          <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={() => onClose?.()} />
++        </div>
++      )}
++    </div>
++  );
++}

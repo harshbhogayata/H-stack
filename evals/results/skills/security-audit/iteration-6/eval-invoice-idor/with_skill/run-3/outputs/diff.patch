@@ -1,0 +1,50 @@
+diff --git a/findings.json b/findings.json
+new file mode 100644
+index 0000000..74cbb1b
+--- /dev/null
++++ b/findings.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "verdict": "confirmed",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/pdf", "token": "tok_alice_7f3a" },
++    "file": "src/app.js",
++    "line": 6,
++    "why": "requireOwner is mounted with router.use('/invoices/:id'), which compile() in src/router.js:73 turns into the fully anchored regex ^/invoices/([^/]+)$. It runs only on the exact /invoices/:id path and never on /invoices/:id/pdf. getInvoicePdf (src/invoices.js:54-58) checks only that the invoice exists, not who owns it. Run locally, Alice's token returned 200 with Bob's inv_1002 PDF (Customer cust_bob, Consulting 990.00, Total 990.00). Fix: add the ownership check to getInvoicePdf, or make the guard cover the /pdf route too (for example, also register requireOwner on '/invoices/:id/pdf')."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 45,
++    "why": "getInvoice has no ownership check of its own, but the requireOwner layer (src/app.js:6) is registered before it with the same pattern, runs for every method, and returns 403 before getInvoice is reached. The local run returned 403 forbidden."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002/", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 73,
++    "why": "A trailing slash makes the path miss the guard, but it also misses the anchored /invoices/:id GET route, so the request falls through to 404. The local run returned 404."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices/inv_1002%2F", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 94,
++    "why": "A percent-encoded slash matches both patterns, and the guard and the handler see the same decoded id ('inv_1002/'). No invoice has that id, so requireOwner returns 404. The local run returned 404."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "get", "path": "/invoices/inv_1002", "token": "tok_alice_7f3a" },
++    "file": "src/router.js",
++    "line": 91,
++    "why": "The middleware layer has method null, so it runs for any method string and returns 403 first. A lowercase method also never matches the 'GET' route layers. The local run returned 403."
++  },
++  {
++    "verdict": "rejected",
++    "request": { "method": "GET", "path": "/invoices?status=open", "token": "tok_alice_7f3a" },
++    "file": "src/invoices.js",
++    "line": 41,
++    "why": "listInvoices filters by req.user.id before applying the caller-controlled status filter, so the query cannot widen the result to other customers. A local call with query {status:'open'} as Alice returned an empty list, not Bob's open inv_1002."
++  }
++]

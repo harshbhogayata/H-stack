@@ -1,0 +1,31 @@
+diff --git a/docs/research/2026-11-11-quickcache-ttl-unit.md b/docs/research/2026-11-11-quickcache-ttl-unit.md
+new file mode 100644
+index 0000000..8bb96b0
+--- /dev/null
++++ b/docs/research/2026-11-11-quickcache-ttl-unit.md
+@@ -0,0 +1,25 @@
++Answer: ttl is in seconds
++
++# 2026-11-11 quickcache `ttl` unit
++
++**Question.** `src/cache.js` creates `new QuickCache({ ttl: 5000, max: 500 })` so product entries expire after 5 seconds. Is that what happens with the quickcache version installed in this repo?
++
++**Answer.** No. The installed quickcache is 2.0.1, and in that version `ttl` is in **seconds**. `ttl: 5000` means entries live for 5000 s (about 83 minutes), not 5 s. To get 5 seconds with this version, use `ttl: 5`.
++
++**Findings.**
++- The installed version is 2.0.1. `package.json` depends on `"quickcache": "file:vendor/quickcache"`, and `vendor/quickcache/package.json` declares `"version":"2.0.1"`. *(read)*
++- In 2.0.1, `ttl` is multiplied by 1000 to get milliseconds. `vendor/quickcache/index.js` constructor: `this.ttlMs = ttl * 1000;`, and `set()` uses `expires: Date.now() + this.ttlMs`. *(read)*
++- Running the vendored module with `new QuickCache({ ttl: 5000, max: 500 })` gave `ttlMs = 5000000`. With `Date.now` stubbed, an entry was still returned 6 s after `set()` and was gone only after 5000 s. Run with Node on 2026-11-11. *(measured)*
++- The saved docs describe the older 1.x API. `docs/vendor/quickcache-docs.html` is titled "quickcache 1.4 documentation" ("Version 1.4.2 · Last updated April 2024", saved 2024-05-02) and says `ttl` is "in milliseconds". That applies to 1.4.x, not to the installed 2.0.1. *(read)*
++- The 2.0.1 README (`vendor/quickcache/README.md`) says only "time to live" and gives no unit. The source is the authority for the unit. *(read)*
++- Likely cause: `src/cache.js` was written against the 1.x docs (milliseconds), and the unit changed in the 2.0 major release. This was not checked against a changelog, because none is vendored. *(inferred)*
++
++**Sources.**
++- `package.json` (commit 2cfd294), read 2026-11-11.
++- `vendor/quickcache/package.json`, `vendor/quickcache/index.js`, `vendor/quickcache/README.md` (quickcache 2.0.1), read 2026-11-11.
++- `docs/vendor/quickcache-docs.html` (quickcache 1.4.2 docs, saved 2024-05-02), read 2026-11-11.
++- `src/cache.js` (commit 2cfd294), read 2026-11-11.
++
++**Open questions.**
++- No 2.0 changelog or migration guide is available locally, so it is unconfirmed whether the seconds unit is intended or a regression. The online docs (https://quickcache.example/docs) were not checked.
++- Other `QuickCache` call sites written against the 1.x docs would have the same problem. Only `src/cache.js` exists in `src/` at this commit.

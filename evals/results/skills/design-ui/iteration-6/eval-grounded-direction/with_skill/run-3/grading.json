@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files written)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+      "passed": true,
+      "evidence": "The proposal builds on 'children aged 6–8 reading aloud, parents setting a daily goal, and a garden as the reward' and makes 'The garden is the home screen' its main idea, with a main button that is 'at least 72px tall and nearly full width, within easy reach of a child's thumb.'"
+    },
+    {
+      "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+      "passed": true,
+      "evidence": "It gives hex colours with a role for each (for example Sunflower `#FFC93C`) and WCAG contrast ratios, and picks Andika because 'It was designed for literacy learners' and 'b/d/p/q and I/l/1 are clearly different', with 'no text under 18px on kid screens.'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

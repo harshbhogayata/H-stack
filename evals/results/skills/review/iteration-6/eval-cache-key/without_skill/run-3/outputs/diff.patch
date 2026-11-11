@@ -1,0 +1,79 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..2cbb89d
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,73 @@
++# Review: `src/pricing.js`
++
++**Verdict: do not merge yet.** Finding 1 means customers can be charged the wrong price in the wrong currency. The existing tests pass (`npm test`: 3/3), but none of them covers the problem.
++
++Each repro below was run with `node -e` in a fresh process unless the step says otherwise. Prices are in minor units (cents/pence).
++
++---
++
++## 1. Cached price ignores currency, so the wrong currency's amount is charged — **Critical**
++
++- `src/pricing.js:6`: `const priceFor = memoize(basePrice);`
++- Root cause, `src/memoize.js:4`: `const key = args[0];`
++
++`memoize` builds its cache key from the first argument only (the SKU). `basePrice(sku, currency)` depends on both arguments. After the first lookup of a SKU in a process, every later quote for that SKU gets the first currency's price. The cache lives at module level, so the error carries across requests and customers until the process restarts.
++
++**Repro (one process):**
++```js
++quote([{ sku: 'MUG-02' }], 'USD'); // { subtotal: 1200, tax: 0,   total: 1200 } correct
++quote([{ sku: 'MUG-02' }], 'GBP'); // { subtotal: 1200, tax: 240, total: 1440 } expected 950 / 190 / 1140
++```
++In the other order, a USD customer is charged the GBP figure: `quote(...,'GBP')` then `quote(...,'USD')` gives `subtotal: 950` where 1200 is expected.
++
++**Why the tests miss it:** each test uses a different SKU, so no SKU is ever looked up in two currencies.
++
++**Fix:** key the cache on both arguments, e.g. `` `${sku}|${currency}` ``. Alternatively, drop the memoize here, since `basePrice` is only an object lookup. If `memoize` stays generic, it should key on all arguments. Add a test that quotes the same SKU in two currencies in one process.
++
++## 2. Inherited property names pass the currency check and poison the cache — **High**
++
++- `src/pricing.js:9`: `if (!(currency in TAX_RATE))`
++- Same pattern in `src/catalogue.js:20`: `if (!(currency in prices))`
++
++The `in` operator also matches properties inherited from `Object.prototype`, such as `toString`, `constructor`, `valueOf` and `hasOwnProperty`. So the check accepts `currency = 'toString'`. `basePrice` then returns a function, and the quote becomes `NaN`, which `JSON.stringify` turns into `null`. Because of finding 1, that function is also cached under the SKU, so **later valid quotes for that SKU in the same process also break**.
++
++**Repro:**
++```js
++quote([{ sku: 'MUG-02' }], 'constructor');
++// { currency: 'constructor', subtotal: NaN, tax: NaN, total: NaN }
++
++// same process:
++quote([{ sku: 'MUG-02' }], 'toString');
++quote([{ sku: 'MUG-02' }], 'USD');
++// { subtotal: NaN, tax: NaN, total: NaN }   expected 1200 / 0 / 1200
++```
++If `currency` comes from a request parameter, one bad request can break pricing for a SKU until the process restarts.
++
++**Fix:** use `Object.hasOwn(TAX_RATE, currency)` (and the same in `catalogue.js`), or store the tables in a `Map` or `Object.create(null)`.
++
++## 3. Quantity is never validated — **High**
++
++- `src/pricing.js:12-13`
++
++The only check on `qty` is for `null`/`undefined`. Negative, non-numeric and fractional values all go straight into the arithmetic.
++
++| Input | Result |
++|---|---|
++| `quote([{ sku: 'MUG-02', qty: -3 }])` | `subtotal: -3600, total: -3600`: a negative charge (refund). A negative line can also hide the cost of other lines. |
++| `quote([{ sku: 'MUG-02', qty: 'abc' }])` | `subtotal/tax/total: NaN` |
++| `quote([{ sku: 'MUG-02', qty: '2' }])` | `2400`. A numeric string is quietly converted. This works here, but `+` would concatenate strings if the code ever changes. |
++| `quote([{ sku: 'MUG-02', qty: 1/3 }], 'EUR')` | `subtotal: 366.666…`: fractional minor units. `tax` is rounded but `subtotal`/`total` are not. |
++
++**Fix:** require `Number.isInteger(qty) && qty > 0` (or `>= 0` if zero should be allowed) and throw otherwise.
++
++## 4. `cart` is not validated — **Low**
++
++- `src/pricing.js:11`
++
++`quote(null)` or `quote({})` throws a generic `TypeError: cart is not iterable`, and an item without `sku` throws `unknown sku: undefined`. Neither causes a wrong price, but the errors are unclear for callers. An empty cart `[]` returns zero totals, which may or may not be intended. Consider an explicit `Array.isArray(cart)` check.
++
++## 5. Minor / style — **Nit**
++
++- `src/pricing.js:10`: `var subtotal` should be `let`, to match the rest of the file.
++- `src/pricing.js:15`: tax is rounded once on the whole subtotal. That is fine, but confirm it matches the finance or VAT rule; some jurisdictions require per-line rounding.
++- Test gaps (`test/pricing.test.js`): no tests for the same SKU in several currencies, GBP, unknown SKU, bad quantities, or prototype-key currencies. Findings 1–3 would each have been caught by a one-line test.

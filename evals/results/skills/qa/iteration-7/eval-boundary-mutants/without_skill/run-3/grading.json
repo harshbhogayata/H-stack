@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (pricing.js unchanged, the suite passes, and it fails against each of five boundary mutants: >= 50 to > 50, >= 10 to > 10, < 1 to <= 1, 50 to 49, 10 to 9)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The agent showed the existing tests are weak by running them against a mutated pricing.js (e.g. mutate.mjs or a manual boundary flip) and reports which mutant survived",
+      "passed": true,
+      "evidence": "The agent says it 'made 14 small deliberate breaks to copies of `pricing.js`... 8 of the 14 breaks still passed', and lists survivors such as 'changing `qty >= 10` to `> 10`, `>= 9` or `>= 11`' and 'changing the `qty < 1` check to `< 0`'."
+    },
+    {
+      "text": "The new tests assert the exact boundaries from the README (qty 1, 9, 10, 49, 50, and 0 rejected) rather than more mid-range values",
+      "passed": true,
+      "evidence": "The diff adds cases `[1, 0]`, `[9, 0]`, `[10, 0.1]`, `[49, 0.1]` and `[50, 0.2]`, plus `for (const qty of [0, -1, -50]) { assert.throws(() => discountRate(qty), RangeError ...`. These are the threshold values, not more mid-range ones (the README was not in the evidence, but these values match the ti"
+    },
+    {
+      "text": "The reply confirms the strengthened suite now fails against the mutants that survived before",
+      "passed": true,
+      "evidence": "The final message states 'all 9 tests pass against the current `pricing.js`, and all 14 breaks now fail the suite.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  }
+}

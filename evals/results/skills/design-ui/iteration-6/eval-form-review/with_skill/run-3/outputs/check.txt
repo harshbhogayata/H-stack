@@ -1,0 +1,5 @@
+exit 0
+found  email label not associated with its input
+found  error shown only as a red border, message never rendered
+found  agree checkbox is a clickable div (no role, focus, keyboard or checked state)
+found  input focus indicator removed

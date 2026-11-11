@@ -1,0 +1,79 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..6cb282f
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,73 @@
++# Review: `src/pricing.js`
++
++Scope: `src/pricing.js` (new), plus the two modules it depends on (`src/memoize.js`, `src/catalogue.js`) and `test/pricing.test.js`. Rules taken from the repo: there is no CLAUDE.md, lint config or spec, so the expected behaviour comes from `catalogue.js` (prices per SKU per currency, in minor units) and the existing tests. `npm test` passes (3/3). No code was changed.
++
++Every repro below was run with `node -e` against the unmodified tree, each in a fresh process unless the note says otherwise.
++
++## Findings
++
++### 1. The price cache ignores currency, so a SKU is charged in whichever currency was quoted first. **Blocker. Confirmed.**
++
++- `src/pricing.js:6`: `const priceFor = memoize(basePrice);`
++- `src/memoize.js:4`: `const key = args[0];`
++
++`memoize` keys only on the first argument (the SKU). `priceFor(sku, currency)` therefore caches the first currency's price for each SKU and returns it for every later currency, for the life of the process.
++
++Input (one process):
++```js
++quote([{ sku: 'CAP-03' }], 'USD') // { subtotal: 1500, tax: 0,   total: 1500 }  correct
++quote([{ sku: 'CAP-03' }], 'EUR') // { subtotal: 1500, tax: 300, total: 1800 }  wrong: EUR price is 1400, expected 1400/280/1680
++quote([{ sku: 'MUG-02' }], 'GBP') // { subtotal: 950,  tax: 190, total: 1140 }  correct
++quote([{ sku: 'MUG-02' }], 'USD') // { subtotal: 950,  tax: 0,   total: 950 }   wrong: USD price is 1200
++```
++Any server that serves more than one currency will misprice customers in both directions, depending on request order. The tests miss it because each test uses a different SKU (`TSHIRT-01`/`MUG-02` in USD, `CAP-03` in EUR). Add a test that quotes the same SKU in two currencies.
++
++Fix direction: key the cache on `(sku, currency)`, e.g. `` `${sku}|${currency}` ``, or fix `memoize` to key on all arguments. Changing `memoize` affects any other callers, but none exist in this repo yet.
++
++### 2. Inherited property names pass the currency check and poison the cache for every later request. **Major. Confirmed.**
++
++- `src/pricing.js:9`: `if (!(currency in TAX_RATE)) throw ...`
++- `src/catalogue.js:10`: `if (!(currency in prices)) throw ...`
++
++`in` also matches inherited `Object.prototype` members. So `currency = 'constructor'` (or `'toString'`, `'valueOf'`, …) passes both guards. `basePrice` then returns a function (`prices.constructor`), and quote returns `NaN` totals instead of rejecting the currency. Because of finding 1, that function is cached against the SKU, so every later quote for that SKU in any valid currency also returns `NaN`.
++
++Input (one process):
++```js
++quote([{ sku: 'MUG-02' }], 'constructor') // { currency: 'constructor', subtotal: NaN, tax: NaN, total: NaN }  no error thrown
++quote([{ sku: 'MUG-02' }], 'USD')         // { currency: 'USD', subtotal: NaN, tax: NaN, total: NaN }        poisoned
++```
++If `currency` comes from a request (a query param or header), one request can break pricing for a SKU until the process restarts. Fix: use `Object.hasOwn(TAX_RATE, currency)` (and the same in `catalogue.js`), or use a `Map` or null-prototype objects.
++
++### 3. `qty` is not validated: negative quantities produce negative totals, and invalid ones produce `NaN`. **Moderate (depends on upstream validation). Confirmed.**
++
++- `src/pricing.js:12`: `const qty = item.qty == null ? 1 : item.qty;`
++
++Only `null`/`undefined` are handled. Nothing rejects negative, zero, fractional or non-numeric values.
++
++Input:
++```js
++quote([{ sku: 'TSHIRT-01', qty: -3 }], 'USD') // { subtotal: -6000, tax: -0, total: -6000 }
++quote([{ sku: 'TSHIRT-01', qty: 'two' }], 'USD') // { subtotal: NaN, tax: NaN, total: NaN }
++quote([{ sku: 'MUG-02', qty: 1.5 }], 'GBP')   // { subtotal: 1425, ... }  fractional item accepted
++```
++A negative line can cancel out other lines (e.g. `[{TSHIRT-01, qty: 2}, {MUG-02, qty: -3}]` in USD gives 400). If the cart reaches `quote` without checks elsewhere, that is a discount exploit. How serious this is depends on whether callers validate the cart; nothing in this repo does. Fix: require `Number.isInteger(qty) && qty > 0` (or `>= 0`) and throw otherwise. A numeric string such as `"2"` happens to work through coercion, so decide whether to accept it explicitly.
++
++### 4. Zero-tax carts return `tax: -0`. **Minor, optional. Confirmed.**
++
++- `src/pricing.js:15`: `const tax = Math.round(subtotal * TAX_RATE[currency]);`
++
++With a negative subtotal and rate 0 (USD), `tax` is `-0` (see the first repro in finding 3). This only happens once finding 3 lets a negative subtotal through, and `assert.deepEqual`/`Object.is` treat `-0` differently from `0`. Fixing finding 3 removes it.
++
++## Cleared
++
++- **Tax rounding** (`pricing.js:15`): prices are integer minor units and tax is rounded once on the subtotal, not per line, so there is no per-line drift. EUR/GBP at 20% give exact values for the catalogue prices.
++- **Unsupported currency** (`pricing.js:9`): the error is thrown before any pricing for real unsupported codes such as `'JPY'` (covered by a test). Inherited names are the exception (finding 2).
++- **Unknown SKU**: `basePrice` throws, and `memoize` does not cache a throw (`cache.set` never runs), so an unknown SKU does not poison the cache.
++- **Default currency/qty**: `currency = 'USD'` and `qty ?? 1` behave as the tests expect.
++- **`var subtotal`**: function-scoped but used only inside `quote`. Style only, not a finding.
++
++## Not reviewed
++
++- Callers of `quote`, and where `cart`/`currency` come from. The severity of findings 2 and 3 depends on that. None exist in this repo.
++- Concurrency or memory growth of the process-wide cache. It is bounded by SKU count (or SKU × currency once fixed), so it is not a concern at the catalogue's current size.
++- No blind second-lane review was run. Pricing touches payments, so a second reviewer before merge is advisable; the decision is yours.

@@ -1,0 +1,1344 @@
+{
+  "metadata": {
+    "skill_name": "design-ui",
+    "skill_path": "plugins/h-stack/skills/design-ui",
+    "executor_model": "session default",
+    "effort": "session default",
+    "judge_model": "session default",
+    "timestamp": "2026-11-11T21:52:43.803Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "runs_per_configuration": 3,
+    "grader": "fresh claude -p per run, not told the arm; skill mentions redacted from the evidence"
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 45.671,
+        "tokens": 256024,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\"` and renders `<Button type=\"submit\" ...>`, and settings.css uses only variables such as `background: var(--color-surface)`, `accent-color: var(--color-accent)` and `font-family: var(--font-ui)`; the new colours (e.g. `--color-danger: #f87171`) "
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs have matching labels, `<label htmlFor={nameId}>Display name</label>` and `<label htmlFor={notifyId}>Email notifications</label>`, and the toggle is a native `<input ... type=\"checkbox\" role=\"switch\">` with a `.settings-switch:focus-visible` outline, so it works from the keyboard."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 44.43,
+        "tokens": 210754,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx does `import { Button } from \"./Button.jsx\"`, and settings.css uses only theme variables such as `var(--color-surface)`, `var(--color-accent)` and `var(--font-ui)` with no raw colour or font values; the new colours (e.g. `--color-border: #334155`) were added as tokens in theme.css r"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs have labels, `<label ... htmlFor={nameId}>Display name</label>` and `<label ... htmlFor={notifyId}>Email notifications</label>`, and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so Space and Tab work normally."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 51.822,
+        "tokens": 302914,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\"` and renders `<Button type=\"submit\" ...>`; settings.css takes every colour and font from variables such as `var(--color-surface)`, `var(--color-accent)` and `var(--font-ui)` and contains no raw hex values or font names. The three new colours (`"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both controls have a linked label (`<label htmlFor={`${id}-name`}>Display name</label>` and `<label htmlFor={`${id}-email`}>Email notifications</label>`), and the toggle is a native `<input type=\"checkbox\" role=\"switch\">` with a `:focus-visible` outline, so it works from the keyboard by default."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.636,
+        "tokens": 156310,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx imports `{ Button } from \"./Button.jsx\"` and renders `<Button type=\"submit\">Save</Button>`, and every colour and font in settings.css comes from theme variables (e.g. `background: var(--color-surface)`, `border: 1px solid var(--color-accent)`, `font-family: var(--font-ui)`), with no"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs are wrapped in `<label>` elements (`<label className=\"settings__field\">…Display name…<input …/>` and `<label className=\"settings__toggle\"><input type=\"checkbox\" …/><span>Email notifications</span>`), and the toggle is a native checkbox input, which the keyboard can reach and operate by d"
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 15.583,
+        "tokens": 156243,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "The diff has `import { Button } from \"./Button.jsx\"` and `<Button type=\"submit\">Save</Button>`, and settings.css takes every colour and font from variables such as `var(--color-surface)`, `var(--color-text)`, `var(--color-accent)`, `var(--color-bg)` and `var(--font-ui)`, with no hex or rgb values an"
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs sit inside `<label>` elements (`<label className=\"settings__field\">…Display name…<input …/>` and `<label className=\"settings__toggle\"><input type=\"checkbox\" …/><span>Email notifications</span>`), and the toggle is a native `<input type=\"checkbox\">`, which can be focused and switched with"
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "uses-project-tokens",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 14.164,
+        "tokens": 156191,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (SettingsPage.jsx created)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The page reuses the existing Button component and the CSS variables from theme.css (e.g. var(--color-accent), var(--color-surface)) instead of introducing new hard-coded colours or fonts",
+          "passed": true,
+          "evidence": "SettingsPage.jsx has `import { Button } from \"./Button\";` and renders `<Button type=\"submit\">Save</Button>`, and every colour and font in settings.css comes from a variable (e.g. `background: var(--color-surface)`, `border: 1px solid var(--color-accent)`, `font-family: var(--font-ui)`), with no hex "
+        },
+        {
+          "text": "Form inputs have associated labels (label elements or aria-label) and the toggle is keyboard-accessible",
+          "passed": true,
+          "evidence": "Both inputs are wrapped in `<label className=\"settings__field\">` elements with visible text (\"Display name\", \"Email notifications\"), which links each label to its input, and the toggle is a native `<input type=\"checkbox\">`, which the keyboard can reach and operate by default."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 47.862,
+        "tokens": 165428,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The agent bases the direction on 'a reading-practice app for children aged 6–8' and on 'a child reading aloud to make a garden grow', with 'the plant is the progress bar' as the main idea, and asks for 'Touch targets are at least 64px... larger than the 44px minimum because of the age group'; it als"
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives six named hex colours (for example `#FFC93C` Sun and `#2F9E44` Leaf) with stated roles and contrast ratios, and picks Andika because 'It was designed for beginning readers: its \"a\" and \"g\" are drawn the simple way children learn to write them', alongside a full accessibility list (WCAG AA c"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 48.252,
+        "tokens": 166256,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The agent based the proposal on 'children aged 6–8 reading aloud, parents set a daily goal, kids grow a garden', made the plant stages (seed → sprout → bud → bloom) the progress bar, and set 'Touch targets are at least 64px, larger than adult guidelines because younger children are less precise'."
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It lists hex colours such as Leaf `#2E8540` ('white text ≈ 4.6:1, passes AA') and picks Andika because it 'was designed for beginning readers, with single-storey \"a\" and \"g\" like the letters children learn to write at school', with a smallest text size of 20."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 46.645,
+        "tokens": 209720,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The proposal builds on 'children aged 6–8 reading aloud, parents setting a daily goal, and a garden as the reward' and makes 'The garden is the home screen' its main idea, with a main button that is 'at least 72px tall and nearly full width, within easy reach of a child's thumb.'"
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex colours with a role for each (for example Sunflower `#FFC93C`) and WCAG contrast ratios, and picks Andika because 'It was designed for literacy learners' and 'b/d/p/q and I/l/1 are clearly different', with 'no text under 18px on kid screens.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 27.196,
+        "tokens": 78661,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The agent says the app is 'a reading-aloud app for kids aged 6–8' and frames the screen as 'the child's garden' with 'one plant per reading day'. It also requires 'at least 64pt for everything' and a '~88pt tall' read button."
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "The palette lists named colours with hex codes, such as Warm cream `#FFF8EC`, Sprout green `#4CAF50` and Marigold `#FFB938`. It picks 'Andika or Lexend' because they use 'the single-storey \"a\" and \"g\" that kids learn to write', and it covers readability: 'well above 7:1 contrast on cream', 'some kid"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 29.974,
+        "tokens": 78965,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The final message says \"The home screen *is* the child's garden. The kid isn't looking at a dashboard,\" and it specifies \"one huge primary button (≥ 88pt tall...)\" and \"Every tap target is at least 64pt and spaced so small hands don't mis-tap.\""
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It gives hex values such as \"Sprout green | `#3FA34D`\" and picks \"Andika. It was designed for beginning readers... clear *b/d/p/q*\". It also requires \"4.5:1 contrast or better\" and says \"Don't use all-caps or italics for meaning. Early readers struggle with both.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "grounded-direction",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1,
+        "time_seconds": 23.686,
+        "tokens": 78116,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (no files written)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The direction is grounded in the product's subject and audience (children aged 6–8 reading aloud, garden/plant metaphor, big touch targets) rather than a generic SaaS look",
+          "passed": true,
+          "evidence": "The proposal is titled \"Morning Garden\" and says \"the garden is the progress bar\" for a \"read-aloud practice app for children aged 6–8\"; it also specifies a \"large pill button, at least 80pt tall\" and \"Touch targets of 64pt or more ... spaced generously for imprecise taps.\""
+        },
+        {
+          "text": "The proposal names concrete colours and typefaces with reasons tied to the audience, and mentions accessibility or readability for young readers",
+          "passed": true,
+          "evidence": "It names hex colours such as \"Sprout green `#3FA34D`\" and the typefaces \"Lexend (or Andika). Both were made for early readers, with clear letter shapes and a single-storey 'a' and 'g'\", and it notes that \"Body text must meet AA contrast.\""
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 20.057,
+        "tokens": 121362,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Row 3 says 'Search is a clickable `<div>`... can't be reached with Tab... screen readers don't announce it as a control', and row 4 says 'Icon-only controls have no accessible name' and recommends adding `aria-label=\"Delete\"`."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Row 8 flags `onPaste={(e) => e.preventDefault()}` as 'Blocking paste', and row 5 says 'Delete runs `onDelete` straight away... with no confirmation'."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Row 1 flags `height: '100vh'` and suggests `100dvh`, and row 2 flags 'Fixed to the bottom with no safe-area padding' and suggests `env(safe-area-inset-bottom)`."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 25.263,
+        "tokens": 121442,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Row 4 says the search is a `<div onClick>` that \"You can't Tab to it or trigger it with Enter or Space, and screen readers don't announce it as a button\"; row 5 says \"Icon-only controls have no accessible name\" and recommends adding `aria-label=\"Delete\"`."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Row 9 says \"Paste is blocked: `onPaste={e => e.preventDefault()}`\" and row 7 says \"Delete runs immediately with no confirmation.\""
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Row 1 flags `height: '100vh'` and suggests `100dvh`; row 2 flags \"Fixed to `bottom: 0` with no safe-area padding\" and recommends `env(safe-area-inset-bottom)`."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 19.88,
+        "tokens": 121238,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "The review says \"Line 4: search is a clickable `<div>`... Keyboard users can't tab to it\" and \"Line 5: icon-only delete button has no accessible name.\""
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "The review says \"Line 6: paste is blocked... Remove the `onPaste` handler\" and \"Line 5: delete runs at once with no confirmation.\""
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "The review flags \"Line 3: `height: '100vh'` on a fixed bottom bar\" with a fix to use `100dvh`, and also \"no safe-area inset on a fixed bottom element\" with `env(safe-area-inset-bottom)`."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75,
+        "time_seconds": 19.227,
+        "tokens": 116549,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "The review says of line 4 that 'search is a clickable `<div>`... Keyboard users can't tab to it... Screen readers don't announce it as a button and give it no name', and of line 5 that 'the delete button has no name... add `aria-label=\"Delete\"`'."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": false,
+          "evidence": "The review flags 'Line 6: pasting is blocked', but it never says the delete action lacks a confirmation or undo step."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "The review says 'position: fixed; bottom: 0; height: '100vh' makes the toolbar as tall as the viewport', and its fix adds `paddingBottom: 'env(safe-area-inset-bottom)'`."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 18.001,
+        "tokens": 116452,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "Item 2 says the search control is a `<div>` with `onClick` that keyboard users can't reach and that \"has no name\", and item 5 says \"the delete button has no accessible name\" because its only content is an SVG."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "Item 7 says \"paste is blocked in the filter box\" by `onPaste={(e) => e.preventDefault()}`, and the closing note says \"a single click on delete fires `onDelete` right away, with no confirmation or undo.\""
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "Item 1 flags line 3 because it is \"`position: fixed` with `height: '100vh'`\", so it covers the whole screen. However, it says nothing about dvh or safe-area insets, so it only meets the \"fixed toolbar using 100vh\" part of the expectation."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "a11y-review",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 18.498,
+        "tokens": 116595,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (file unchanged)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The review flags the clickable div for search (not keyboard accessible, no role or name) and the icon-only delete button without an accessible name",
+          "passed": true,
+          "evidence": "The review says of line 4: \"Keyboard users can't tab to it or trigger it with Enter or Space. It has no role and no name.\" Of line 5 it says: \"It contains only an icon, so screen readers just announce 'button'\", and the fix is aria-label=\"Delete\"."
+        },
+        {
+          "text": "The review flags blocked paste on the input and the destructive delete action without confirmation",
+          "passed": true,
+          "evidence": "The review says \"Line 6: pasting into the filter is blocked\", and also \"Delete also runs straight away with no confirmation or undo\", with the fix of putting a confirmation step or undo in front of onDelete."
+        },
+        {
+          "text": "The review flags the fixed toolbar using 100vh (dvh) and/or missing safe-area handling",
+          "passed": true,
+          "evidence": "The review flags \"position: 'fixed', bottom: 0, height: '100vh'\" and notes that \"On mobile, `100vh` is also taller than the visible area\". It suggests `height: '100dvh'`, though it does not mention safe-area handling."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 85.638,
+        "tokens": 518647,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` and `CloseIcon, TruckIcon` from the project, and Toast.css uses `var(--hb-z-toast)`, `var(--hb-shadow-raised)`, `var(--hb-space-*)`, `var(--hb-color-*)` and `var(--hb-motion-base) var(--hb-ease-out)`; the two new values were added as tokens in tokens.css, leaving only "
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code sets `onMouseEnter={() => setPaused(true)}` and `onFocus={() => setPaused(true)}`, and the timer effect returns early `if (paused || leaving)`; the reply says the timer 'pauses while the pointer is over the toast or keyboard focus is on its close button'."
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply has an 'Accessibility checks' section (44px close button with a screen-reader label, a polite live region, reduced motion, WCAG AA contrast) and a 'Not verified' section saying 'there's no browser available, so I couldn't build it, render it, or watch the animation.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 54.072,
+        "tokens": 312320,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` and `CloseIcon`, and Toast.css takes its colours, spacing, corner radius, shadow, layer and motion from existing tokens such as `var(--hb-z-toast)`, `var(--hb-shadow-raised)` and `var(--hb-motion-base) var(--hb-ease-out)`; the only fixed values are layout sizes like `m"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The Toast root has `onMouseEnter={pause}`, `onMouseLeave={resume}`, `onFocus={pause}` and `onBlur={handleBlur}`, and the reply says 'the 5-second countdown pauses while the pointer is over the toast or keyboard focus is inside it, so people can finish reading or reach the close button.'"
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply has an 'Accessibility checks' list (reduced motion, safe-area insets, wrapping, click-through on the empty area) and a 'Not verified' section saying 'I couldn't render, parse or test the component in a browser, so the slide-in, the 5-second close, the pause on hover/focus and the screen-re"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 51.352,
+        "tokens": 307601,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` and `CloseIcon`, and Toast.css uses `--hb-color-*`, `--hb-space-*`, `--hb-radius`, `--hb-shadow-raised`, `--hb-z-toast`, `--hb-motion-base` and `--hb-ease-out`; the only literal values are a `360px` maximum width and a `1px` border."
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code sets `paused` on `onMouseEnter` and `onFocus`, keeps the remaining time in `remaining.current`, and the reply says the timer 'pauses while the mouse is over it or focus is inside it.'"
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply lists 'Accessibility checks applied' (label, 44px target, focus, reduced motion, safe-area) and ends with 'Not verified: rendering, the slide animation, screen-reader announcements and the close-after-reduced-motion behaviour in a real browser.' However, its reduced-motion claim has no `pr"
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 33.036,
+        "tokens": 202130,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` and `CloseIcon`. Toast.css takes its colour, spacing, radius, shadow, z-index, text size and motion values from tokens (`var(--hb-color-surface)`, `var(--hb-space-4)`, `var(--hb-shadow-raised)`, `var(--hb-z-toast)`, `var(--hb-motion-base)`). The only literal values are"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code sets paused state from `onMouseEnter`/`onFocus` and skips the timer `if (!message || paused)`, and `duration` is a prop. The reply says \"The 5-second countdown pauses while the toast is hovered or focused, so someone who is reading it or tabbing to the close button doesn't lose it.\""
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply says \"I couldn't run or render it: the repo has no build setup or tests\" and that nothing uses the Toast yet, which states plainly that it was not verified. It lists no UI checks, which fits with none having been possible."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 39.818,
+        "tokens": 204253,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` from './IconButton' and `CloseIcon` from './icons'. The CSS gets its colours, spacing, shadow, z-index and motion from tokens such as `var(--hb-color-surface)`, `var(--hb-space-4)`, `var(--hb-shadow-raised)`, `var(--hb-z-toast)` and `var(--hb-motion-base)`; the only fi"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The toast pauses on `onMouseEnter={pauseTimer}` and `onFocus={pauseTimer}`, and accepts a `duration` prop. The reply says the timer \"pauses while the mouse is over the toast or focus is inside it, and picks up where it left off afterwards.\""
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply says \"I haven't run or rendered it: the repo has no build setup or installed packages, and nothing in it tracks shipment status changes yet.\" That makes clear no UI checks were done and why."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "harbor-toast",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 34.347,
+        "tokens": 202932,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (Toast.jsx exists; no raw colour values; announced via role=status/alert or aria-live; close button has an accessible name; motion uses the project's --hb-motion tokens or a reduced-motion query; only non-layout properties animate; z-index comes from the --hb-z scale)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the project's own pieces (IconButton and CloseIcon, --hb-* colour, space, shadow, z-index and motion tokens) instead of introducing new hard-coded values or a different look",
+          "passed": true,
+          "evidence": "Toast.jsx imports `IconButton` from './IconButton' and `CloseIcon` from './icons'. The CSS uses `--hb-color-*`, `--hb-space-*`, `--hb-shadow-raised`, `--hb-z-toast`, `--hb-motion-base` and `--hb-ease-out`. The only hard-coded values are layout sizes (400px, 480px, 4px border), not colour, space, sha"
+        },
+        {
+          "text": "The 5-second auto-dismiss can be paused or extended (e.g. pauses while hovered or focused), or the reply explicitly addresses the timing for users who need longer",
+          "passed": true,
+          "evidence": "The code has `onMouseEnter={() => setPaused(true)}` and `onFocus={() => setPaused(true)}`, and the reply says \"the timer pauses while the pointer is over the toast or it has keyboard focus... That gives people time to finish reading or reach the close button.\""
+        },
+        {
+          "text": "The reply states which UI checks were made and what was not verified (e.g. could not render it in a browser)",
+          "passed": true,
+          "evidence": "The reply says \"I haven't run or rendered it: the repo has no build setup, tests or app entry point, so it's untested.\" It also says \"I haven't connected it to anything that changes shipment status,\" which makes clear that no UI checks were made."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 34.849,
+        "tokens": 213354,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "ui-review.json line 30 entry: \"The email input has id=\\\"email\\\" but its label points to htmlFor=\\\"signup-email\\\", so the label isn't linked. The field has no accessible name\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "SignupForm.css line 9 entry: \"Focused inputs get outline: none, and the focus border-color is the same var(--color-border) as the resting state. Keyboard users get no visible focus indicator at all.\""
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "Entries say \"The error returned by onSubmit is stored in state but never shown\", \"shown only by a red border... always put on the password field... there is no aria-invalid or aria-describedby\", and \"The terms checkbox is a clickable <div> with no role, no tabindex and no checked state. Keyboard use"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 31.37,
+        "tokens": 169952,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "ui-review.json line 30 entry: \"The email input has id=\\\"email\\\" but its label points to htmlFor=\\\"signup-email\\\"... screen readers announce an unlabelled field\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "SignupForm.css line 10 entry: \"`.signup input:focus` removes the outline and sets border-color to the same --color-border the field already has, so a focused input looks no different from an unfocused one.\""
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "Line 18 entry says the error \"is stored in state but never shown. The only sign of failure is a red border on the password field\" and its fix adds aria-invalid and aria-describedby; the line 40 entry says the <div onClick> \"can't be reached with the keyboard, has no checkbox role and no checked stat"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 34.516,
+        "tokens": 170544,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "ui-review.json entry at line 30: \"The email label points at htmlFor=\\\"signup-email\\\" but the input's id is \\\"email\\\"... Screen readers announce the input with no name\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "CSS line 9 entry: \"The focus style removes the outline and sets border-color to var(--color-border), the same colour as the unfocused border. Keyboard users get no visible focus on the inputs.\""
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "Entries at lines 18/34 say the error \"is stored in state but never shown\", the red border \"always goes on the password field\" and the fix adds aria-invalid and aria-describedby. Line 40 says the checkbox \"is a <div onClick>... You can't focus it or toggle it with the keyboard, it has no checkbox rol"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 34.654,
+        "tokens": 164242,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "The SignupForm.jsx:30 entry says \"The email label points to htmlFor=\\\"signup-email\\\" but the input's id is \\\"email\\\"... Screen readers announce the input with no name.\""
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "The SignupForm.css:10 entry says \"The focus style removes the outline and sets border-color to var(--color-border), the same colour as the unfocused border. Focused inputs therefore look identical to unfocused ones.\""
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "The line 18 entry says \"the error is stored in state but never shown... The only sign of failure is a red border on the password input\", the line 34 entry says \"there is no aria-invalid and no aria-describedby\", and the line 40 entry says the checkbox \"is a <div> with an onClick... can't be reached "
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 33.214,
+        "tokens": 247082,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "Entry at SignupForm.jsx:30 says: \"The email label points to htmlFor=\\\"signup-email\\\" but the input's id is \\\"email\\\"... so the input has no accessible name\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "Entry at SignupForm.css:10 says: \"On focus the outline is removed and border-color is set to var(--color-border), which is the same as the unfocused border. Keyboard users get no visible focus indicator\"."
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "The review says the error is \"saved to state but never rendered... only shows up as a red border on the password field\" and that \"There is no aria-invalid\" (the fix suggests aria-describedby). It also says the terms control is \"a div with an onClick. It can't be reached with Tab or toggled with Spac"
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "form-review",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 32.274,
+        "tokens": 163984,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (sources unchanged; ui-review.json cites at least 3 of the 4 seeded problems at their lines and does not flag the correct patterns at SignupForm.jsx:24 or :36)",
+          "passed": true,
+          "evidence": "check exit 0: ith its input\nfound  error shown only as a red border, message never rendered\nfound  agree checkbox is a clickable div (no role, focus, keyboard or checked state)\nfound  input focus indicator removed\n"
+        },
+        {
+          "text": "The review catches that the email label's htmlFor (signup-email) does not match the input id (email), so the input has no accessible name even though a label is visible",
+          "passed": true,
+          "evidence": "ui-review.json entry at SignupForm.jsx:30 says \"The email input has id=\\\"email\\\" but its label points to htmlFor=\\\"signup-email\\\"... Screen readers announce the input with no name\"."
+        },
+        {
+          "text": "The review catches that the focus style removes the outline and sets the border to the unfocused colour, leaving no visible focus indicator",
+          "passed": true,
+          "evidence": "Entry at SignupForm.css:10 says \"`.signup input:focus` removes the outline and sets border-color to the same --color-border as the unfocused state. Keyboard users get no visible focus indicator\"."
+        },
+        {
+          "text": "The review catches that the error is never rendered as text (only a red border on the password input, no aria-invalid or aria-describedby) and that the terms checkbox is a clickable div with no role, focusability, keyboard support or checked state",
+          "passed": true,
+          "evidence": "Entries say \"The error is saved with setError but never shown\", \"The invalid state is shown only by a red border... only on the password field... Nothing sets aria-invalid or points to an error message\", and the terms checkbox \"is a clickable <div>... has no checkbox role or checked state, cannot re"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 30.775,
+        "tokens": 209310,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "The diff imports `import { Button } from './Button.jsx';` and the CSS uses `background: var(--surface); color: var(--text); border: 1px solid var(--border);` plus `border-color: var(--highlight)`, and the reply says price is a formatted string 'the same way `InvoiceSummary` takes `amount`'."
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The JSX renders `<p className=\"plan-card__badge\">Your current plan</p>` and a `<Button variant=\"secondary\" disabled>Current plan</Button>`, and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply says 'dark mode and the in-app light/dark setting work without extra code' and 'Text contrast meets the WCAG AA standard in both light and dark mode', then 'Not verified: I haven't seen how it looks or checked the contrast and layout in a running app.' It is somewhat self-contradictory, si"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 36.701,
+        "tokens": 255141,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "PlanCard.jsx has `import { Button } from './Button.jsx'`, and PlanCard.css uses `var(--surface)`, `var(--text)`, `var(--border)`, `var(--accent)` and `var(--highlight)`; the reply says the layout 'copies `InvoiceSummary`: same background, border and padding'."
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The JSX renders `<p className=\"plan-card__badge\">Your current plan</p>` and `<Button variant=\"secondary\" disabled>Current plan</Button>` when isCurrent is true, and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; font-size: 1.5rem; }`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply says the tokens mean 'dark mode and the user's own `data-theme` setting work without extra code', and adds 'Not verified: I couldn't render it, so the light and dark looks and the keyboard focus outline haven't been checked visually.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 30.33,
+        "tokens": 209174,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "PlanCard.jsx has `import { Button } from './Button.jsx'`, and PlanCard.css uses `var(--surface)`, `var(--text)`, `var(--border)` and `var(--highlight)`; the reply says the digits line up 'the same way as in `InvoiceSummary`' (InvoiceSummary itself is not in the evidence)."
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The JSX renders `<span className=\"plan-card__badge\">Current plan</span>` and a disabled button reading \"You're on this plan\", and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply says the highlight's 'dark-mode version comes from the theme automatically' and that 'the dark-mode amber has more contrast', and it states 'how it actually looks in light and dark mode hasn't been checked.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 23.262,
+        "tokens": 199145,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "PlanCard.jsx has `import { Button } from './Button';`, and PlanCard.css uses `background: var(--surface); color: var(--text); border: 1px solid var(--border);` with `border-color: var(--accent)`; the reply also says the price is passed in already formatted, 'like `InvoiceSummary`'s `amount` does'."
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The JSX renders `{isCurrent && <span className=\"plan-card__badge\">Current plan</span>}` and a disabled button labelled `'Your plan'`, and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ...}`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply says 'Light and dark: the styles only use the existing theme colours, so the card follows the system light/dark setting and the profile override' and 'I haven't rendered it: the project has no build, dev server or tests set up'."
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 23.155,
+        "tokens": 199358,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "PlanCard.jsx imports and uses `Button` from './Button.jsx'; PlanCard.css uses `var(--surface)`, `var(--text)`, `var(--border)` and `var(--highlight)`; and the reply says `price` takes a pre-formatted string, the same way `InvoiceSummary`'s `amount` does."
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The JSX renders a `<span className=\"plan-card__badge\">Current plan</span>` and a disabled button labelled 'Your plan' when `isCurrent` is true, and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply has a 'Light and dark mode' bullet saying the card 'follows both the system setting and the `data-theme` override', and says 'Nothing has been run: the repo has no build or test setup, so I haven't rendered it.'"
+        }
+      ]
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "dark-plan-card",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1,
+        "time_seconds": 21.079,
+        "tokens": 198920,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The check command exits 0 (PlanCard files exist; no raw or named colours; every colour comes from a semantic token that has a dark-mode value in theme.css, not from the light-only --palette-* scale, unless the file handles both prefers-color-scheme and data-theme itself)",
+          "passed": true,
+          "evidence": "check exit 0: "
+        },
+        {
+          "text": "The component reuses the existing Button and the semantic tokens (--surface, --text, --border, --accent/--highlight) following InvoiceSummary's pattern",
+          "passed": true,
+          "evidence": "PlanCard.jsx has `import { Button } from './Button'`, and PlanCard.css uses `var(--surface)`, `var(--text)`, `var(--border)` and `var(--accent)`. The reply says it 'only uses the colour and spacing tokens from `theme.css`' and that `price` is formatted 'the same way `InvoiceSummary` takes its `amoun"
+        },
+        {
+          "text": "The current-plan state is shown by more than colour alone (e.g. a 'Current plan' label or a disabled, renamed button) and the price uses tabular figures or matches InvoiceSummary's amount style",
+          "passed": true,
+          "evidence": "The current plan gets `{isCurrent && <span className=\"plan-card__badge\">Current plan</span>}` and a disabled button labelled 'Your plan', and the CSS sets `.plan-card__amount { font-variant-numeric: tabular-nums; ... }`."
+        },
+        {
+          "text": "The reply states that light and dark themes were considered and what was not verified (e.g. not rendered in either theme)",
+          "passed": true,
+          "evidence": "The reply says the card 'follows the system light/dark setting and the `data-theme` override without any extra CSS' and also 'I haven't run or rendered it: the project has no build or test setup'."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 41.083,
+        "stddev": 15.082,
+        "min": 19.88,
+        "max": 85.638
+      },
+      "tokens": {
+        "mean": 224510.056,
+        "stddev": 92768.909,
+        "min": 121238,
+        "max": 518647
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.986,
+        "stddev": 0.057,
+        "min": 0.75,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 25.322,
+        "stddev": 7.726,
+        "min": 14.164,
+        "max": 39.818
+      },
+      "tokens": {
+        "mean": 157562.667,
+        "stddev": 49035.773,
+        "min": 78116,
+        "max": 247082
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.01",
+      "time_seconds": "+15.8",
+      "tokens": "+66947"
+    }
+  },
+  "notes": [
+    "3 runs per configuration per eval."
+  ]
+}

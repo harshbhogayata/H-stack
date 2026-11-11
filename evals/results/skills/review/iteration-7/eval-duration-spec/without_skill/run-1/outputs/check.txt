@@ -1,0 +1,3 @@
+exit 1
+current code already returns the expected value: {"input":"1.1h","expected":3960000}
+current code already returns the expected value: {"input":"1.005s","expected":1005}

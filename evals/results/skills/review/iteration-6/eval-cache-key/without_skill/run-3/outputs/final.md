@@ -1,0 +1,9 @@
+I wrote the review to `REVIEW.md` and didn't change any code. My recommendation is not to merge yet: in some cases the module charges the wrong price. The 3 existing tests pass, but none of them exercises the problems below. I ran each repro in Node.
+
+1. **Critical: the price cache ignores currency (`src/pricing.js:6`, cause in `src/memoize.js:4`).** The cache is keyed on the SKU alone. After a SKU is quoted in one currency, every later quote for it gets that first currency's price. For example, quoting `MUG-02` in USD and then in GBP gives a GBP subtotal of 1200 instead of 950. The cache is shared for the life of the process, so this carries across customers. The tests miss it because each one uses a different SKU.
+2. **High: the currency check accepts built-in names like `'toString'` or `'constructor'` (`src/pricing.js:9`, `src/catalogue.js:20`).** The check counts names every JavaScript object has, so these pass as currencies and the quote comes back as `NaN`. Because of the first bug, that bad result is also cached under the SKU. One request with `'toString'` breaks later valid USD quotes for that SKU until the process restarts.
+3. **High: quantity is never checked (`src/pricing.js:12-13`).** `qty: -3` gives a negative total of -3600, `qty: 'abc'` gives `NaN`, and fractional quantities give fractional cents.
+4. **Low:** a missing or malformed `cart` produces unclear errors.
+5. **Nits:** `var` should be `let`, the tax-rounding rule needs confirming with finance, and the tests don't cover the cases above.
+
+Each finding in the file has its `file:line`, the input that shows it, and a suggested fix.

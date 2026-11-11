@@ -1,0 +1,54 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..8766c2e
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,48 @@
++# Answer: `fs.rmSync` options in Node 22
++
++**Question** ([QUESTION.md](QUESTION.md)): We call `fs.rmSync(dir)` to delete a folder and it throws on non-empty folders. What options does Node 22 document for `fs.rmSync`, and which one fixes this?
++
++## Short answer
++
++Use **`recursive: true`**. Add `force: true` too if the folder might not exist:
++
++```js
++fs.rmSync(dir, { recursive: true, force: true });
++```
++
++## Documented options (Node 22)
++
++Source: https://nodejs.org/docs/latest-v22.x/api/fs.html#fsrmsyncpath-options (page header: Node.js v22.23.5 documentation, read 2026-11-11). Signature: `fs.rmSync(path[, options])`. Added in v14.14.0. Since v17.3.0/v16.14.0, `path` can be a `file:` URL. *(read)*
++
++| Option | Type | Default | Documented behaviour |
++|---|---|---|---|
++| `force` | boolean | `false` | When `true`, exceptions are ignored if `path` does not exist. |
++| `maxRetries` | integer | `0` | Number of retries, with a linear backoff, on `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY` or `EPERM`. Ignored unless `recursive` is `true`. |
++| `recursive` | boolean | `false` | If `true`, performs a recursive directory removal. In recursive mode, operations are retried on failure. |
++| `retryDelay` | integer | `100` | Milliseconds to wait between retries. Ignored unless `recursive` is `true`. |
++
++The docs describe it as "Synchronously removes files and directories (modeled on the standard POSIX `rm` utility). Returns `undefined`." *(read)*
++
++## Which option fixes it
++
++- **`recursive`** is the fix. It is the only option that makes `rmSync` remove a directory and its contents. *(read and measured)*
++- **`force`** does **not** fix it. It only suppresses the error when the path does not exist. *(read and measured)*
++- **`maxRetries`** and **`retryDelay`** only take effect when `recursive` is `true`. They help with transient errors such as `EBUSY` or `EPERM` (for example, Windows file locks). They do not fix this problem on their own. *(read)*
++
++## Measured on Node v22.23.4 (this machine)
++
++I ran a `node -e` script against a temporary directory `x/y/f`:
++
++```
++no opts: ERR_FS_EISDIR Path is a directory: rm returned EISDIR (is a directory) /tmp/rm-…/x
++exists after recursive: false
++missing no force: ENOENT
++missing with force: ok
++```
++
++Correction to the premise: without `recursive`, `rmSync` fails for **any** directory, empty or not. The error is `ERR_FS_EISDIR`, not `ENOTEMPTY`. *(measured: an empty temp dir also throws `ERR_FS_EISDIR`)*
++
++## Notes / open questions
++
++- This repo has no `rmSync` call in it (the repo holds only `QUESTION.md`), so I couldn't check the call site itself.
++- Be careful with `{ recursive: true, force: true }`: it deletes everything under `dir` and never complains. Make sure `dir` can't be empty or point at the wrong place (for example, `''` or `/`).

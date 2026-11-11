@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..351e659
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "The user parameter is passed through encodeURIComponent and placed after a fixed '/u/' path on the constant origin https://avatars.example-cdn.net. '/', '@', ':' and '?' are percent-encoded, so '//169.254.169.254/...' becomes https://avatars.example-cdn.net/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png and '@internal.host' becomes .../u/%40internal.host.png. The host never changes, so there is no SSRF."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 14,
++    "why": "isAllowedTarget only blocks localhost, 127.0.0.1, 0.0.0.0 and the 10. and 192.168. prefixes. Link-local 169.254.0.0/16 (cloud metadata), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback [::1], and DNS names that resolve to internal IPs all pass. testWebhook then POSTs to the target and returns upstreamStatus plus the first 500 bytes of the response body, so any signed-in member can reach internal hosts and read their responses (non-blind SSRF). Verified locally with a stub http: handle() returned 200 and called http.post('https://169.254.169.254/latest/meta-data/')."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "sort is looked up in the fixed SORT_COLUMNS allowlist (name/created/email), and any other value falls back to 'created_at'. dir is reduced to ASC or DESC. No user text reaches the SQL: sort='name;DROP TABLE users' produces 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50'."
++  }
++]

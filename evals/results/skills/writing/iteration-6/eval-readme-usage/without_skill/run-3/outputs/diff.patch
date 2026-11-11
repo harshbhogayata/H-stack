@@ -1,0 +1,83 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..62bb80b
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,77 @@
++# tidyjson
++
++A small command-line tool that reformats a JSON file in place.
++
++## What it does
++
++`tidyjson` reads a JSON file, pretty-prints it, and writes the result back to the same file. You can set the indentation width and sort object keys.
++
++If the file is not valid JSON, `tidyjson` leaves it unchanged and exits with status code `2`.
++
++## Installation
++
++From a checkout of this repository:
++
++```sh
++npm install -g .
++```
++
++This puts the `tidyjson` command on your `PATH`. You can also run it without installing:
++
++```sh
++node cli.js <file> [options]
++```
++
++## Usage
++
++```sh
++tidyjson <file> [--indent N] [--sort-keys]
++```
++
++| Argument / option | Description |
++| --- | --- |
++| `<file>` | Path to the JSON file to reformat. The file is overwritten. |
++| `--indent N` | Indent nested levels by `N` spaces. |
++| `--sort-keys` | Sort object keys alphabetically. |
++
++### Examples
++
++Reformat a file:
++
++```sh
++tidyjson config.json
++```
++
++Use 4-space indentation and sorted keys:
++
++```sh
++tidyjson config.json --indent 4 --sort-keys
++```
++
++Use it in a script and catch invalid JSON:
++
++```sh
++tidyjson data.json
++if [ $? -eq 2 ]; then
++  echo "data.json is not valid JSON; left unchanged" >&2
++fi
++```
++
++## Exit codes
++
++| Code | Meaning |
++| --- | --- |
++| `0` | Success. The file was reformatted. |
++| `2` | Invalid JSON. The file was not modified. |
++
++## Notes
++
++- `tidyjson` changes the file **in place** and makes no backup. Commit your work or copy the file first if you may want the original formatting back.
++
++## Development
++
++Run the tests with Node's built-in test runner:
++
++```sh
++npm test
++```

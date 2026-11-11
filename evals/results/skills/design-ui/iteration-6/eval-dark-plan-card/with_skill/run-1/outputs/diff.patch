@@ -1,0 +1,104 @@
+diff --git a/src/components/PlanCard.css b/src/components/PlanCard.css
+new file mode 100644
+index 0000000..6fae8fe
+--- /dev/null
++++ b/src/components/PlanCard.css
+@@ -0,0 +1,50 @@
++.plan-card {
++  display: flex;
++  flex-direction: column;
++  gap: var(--space-3);
++  background: var(--surface);
++  color: var(--text);
++  border: 1px solid var(--border);
++  border-radius: var(--radius);
++  padding: var(--space-4);
++}
++
++/* Ring via box-shadow so the highlighted card doesn't shift layout. */
++.plan-card--current {
++  border-color: var(--highlight);
++  box-shadow: 0 0 0 1px var(--highlight);
++}
++
++.plan-card__header {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: var(--space-2);
++}
++
++.plan-card__name,
++.plan-card__badge,
++.plan-card__price { margin: 0; }
++
++.plan-card__name {
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++  min-width: 0;
++}
++
++.plan-card__badge { color: var(--highlight); font-weight: 600; }
++
++.plan-card__amount { font-variant-numeric: tabular-nums; font-size: 1.5rem; }
++.plan-card__period { color: var(--text-muted); }
++
++.plan-card__features {
++  margin: 0;
++  padding-left: var(--space-4);
++  display: grid;
++  gap: var(--space-2);
++}
++
++.plan-card .button { margin-top: auto; }
++.plan-card .button:disabled { cursor: default; color: var(--text-muted); }
+diff --git a/src/components/PlanCard.jsx b/src/components/PlanCard.jsx
+new file mode 100644
+index 0000000..86dc4a9
+--- /dev/null
++++ b/src/components/PlanCard.jsx
+@@ -0,0 +1,42 @@
++import { useId } from 'react';
++import { Button } from './Button.jsx';
++import './PlanCard.css';
++
++export function PlanCard({ name, price, features = [], isCurrent = false, onChoose }) {
++  const titleId = useId();
++
++  return (
++    <section
++      className={`plan-card${isCurrent ? ' plan-card--current' : ''}`}
++      aria-labelledby={titleId}
++    >
++      <header className="plan-card__header">
++        <h3 id={titleId} className="plan-card__name">{name}</h3>
++        {isCurrent && <p className="plan-card__badge">Your current plan</p>}
++      </header>
++
++      <p className="plan-card__price">
++        <span className="plan-card__amount">{price}</span>
++        <span className="plan-card__period"> per month</span>
++      </p>
++
++      {features.length > 0 && (
++        <ul className="plan-card__features">
++          {features.map((feature) => (
++            <li key={feature}>{feature}</li>
++          ))}
++        </ul>
++      )}
++
++      {isCurrent ? (
++        <Button variant="secondary" disabled>
++          Current plan
++        </Button>
++      ) : (
++        <Button onClick={onChoose} aria-label={`Choose ${name}`}>
++          Choose
++        </Button>
++      )}
++    </section>
++  );
++}

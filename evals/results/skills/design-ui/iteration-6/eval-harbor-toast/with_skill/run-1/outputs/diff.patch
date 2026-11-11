@@ -1,0 +1,247 @@
+diff --git a/src/components/ShipmentRow.jsx b/src/components/ShipmentRow.jsx
+index 37642d9..39051ae 100644
+--- a/src/components/ShipmentRow.jsx
++++ b/src/components/ShipmentRow.jsx
+@@ -1,7 +1,7 @@
+ import { TruckIcon } from './icons';
+ import './ShipmentRow.css';
+ 
+-const STATUS_LABEL = { booked: 'Booked', in_transit: 'In transit', delayed: 'Delayed', delivered: 'Delivered' };
++export const STATUS_LABEL = { booked: 'Booked', in_transit: 'In transit', delayed: 'Delayed', delivered: 'Delivered' };
+ 
+ export function ShipmentRow({ shipment }) {
+   return (
+diff --git a/src/components/Toast.css b/src/components/Toast.css
+new file mode 100644
+index 0000000..0b51958
+--- /dev/null
++++ b/src/components/Toast.css
+@@ -0,0 +1,83 @@
++.hb-toast-region {
++  position: fixed;
++  z-index: var(--hb-z-toast);
++  right: max(var(--hb-space-6), env(safe-area-inset-right));
++  bottom: max(var(--hb-space-6), env(safe-area-inset-bottom));
++  width: min(var(--hb-toast-width), calc(100vw - 2 * var(--hb-space-4)));
++  /* The empty region must not swallow clicks on the page beneath it. */
++  pointer-events: none;
++}
++
++.hb-toast-region__list {
++  display: flex;
++  flex-direction: column;
++  gap: var(--hb-space-2);
++}
++
++.hb-toast {
++  --hb-toast-tone: var(--hb-color-accent);
++
++  display: grid;
++  grid-template-columns: auto 1fr auto;
++  align-items: start;
++  gap: var(--hb-space-2);
++  padding: var(--hb-space-1) var(--hb-space-1) var(--hb-space-1) var(--hb-space-3);
++  color: var(--hb-color-ink);
++  background: var(--hb-color-surface);
++  border: 1px solid var(--hb-color-border);
++  border-inline-start: var(--hb-toast-stripe) solid var(--hb-toast-tone);
++  border-radius: var(--hb-radius);
++  box-shadow: var(--hb-shadow-raised);
++  pointer-events: auto;
++  animation: hb-toast-in var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast--leaving {
++  animation: hb-toast-out var(--hb-motion-base) var(--hb-ease-out) both;
++}
++
++.hb-toast--delayed { --hb-toast-tone: var(--hb-color-warning); }
++.hb-toast--delivered { --hb-toast-tone: var(--hb-color-success); }
++
++.hb-toast__icon {
++  display: inline-grid;
++  place-items: center;
++  /* Line up with the first text line, which sits beside a 44px close button. */
++  min-height: 44px;
++  color: var(--hb-toast-tone);
++}
++
++.hb-toast__body {
++  min-width: 0;
++  padding-block: var(--hb-space-3);
++  overflow-wrap: anywhere;
++}
++
++.hb-toast__title,
++.hb-toast__message {
++  margin: 0;
++}
++
++.hb-toast__title {
++  font-weight: 700;
++  font-variant-numeric: tabular-nums;
++}
++
++.hb-toast__message {
++  font-size: var(--hb-text-sm);
++  color: var(--hb-color-ink-muted);
++}
++
++@keyframes hb-toast-in {
++  from {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-6)));
++  }
++}
++
++@keyframes hb-toast-out {
++  to {
++    opacity: 0;
++    transform: translateX(calc(100% + var(--hb-space-6)));
++  }
++}
+diff --git a/src/components/Toast.jsx b/src/components/Toast.jsx
+new file mode 100644
+index 0000000..225c9e6
+--- /dev/null
++++ b/src/components/Toast.jsx
+@@ -0,0 +1,125 @@
++import { useCallback, useEffect, useRef, useState } from 'react';
++import { IconButton } from './IconButton';
++import { CloseIcon, TruckIcon } from './icons';
++import { STATUS_LABEL } from './ShipmentRow';
++import './Toast.css';
++
++const AUTO_DISMISS_MS = 5000;
++// Upper bound for the exit animation, in case `animationend` never fires
++// (animations disabled, element hidden, test environments).
++const EXIT_FALLBACK_MS = 400;
++
++/**
++ * One notification. Slides in, dismisses itself after 5 seconds, and pauses
++ * that countdown while the pointer is over it or focus is inside it so
++ * nobody loses a message they are reading or about to close.
++ */
++export function Toast({ title, message, status, onDismiss }) {
++  const [leaving, setLeaving] = useState(false);
++  const [paused, setPaused] = useState(false);
++  const dismissed = useRef(false);
++
++  const finish = useCallback(() => {
++    if (dismissed.current) return;
++    dismissed.current = true;
++    onDismiss();
++  }, [onDismiss]);
++
++  useEffect(() => {
++    if (paused || leaving) return undefined;
++    const timer = setTimeout(() => setLeaving(true), AUTO_DISMISS_MS);
++    return () => clearTimeout(timer);
++  }, [paused, leaving]);
++
++  useEffect(() => {
++    if (!leaving) return undefined;
++    const timer = setTimeout(finish, EXIT_FALLBACK_MS);
++    return () => clearTimeout(timer);
++  }, [leaving, finish]);
++
++  return (
++    <div
++      className={`hb-toast hb-toast--${status ?? 'info'}${leaving ? ' hb-toast--leaving' : ''}`}
++      onAnimationEnd={leaving ? finish : undefined}
++      onMouseEnter={() => setPaused(true)}
++      onMouseLeave={() => setPaused(false)}
++      onFocus={() => setPaused(true)}
++      onBlur={() => setPaused(false)}
++    >
++      <span className="hb-toast__icon">
++        <TruckIcon />
++      </span>
++      <div className="hb-toast__body">
++        {title && <p className="hb-toast__title">{title}</p>}
++        <p className="hb-toast__message">{message}</p>
++      </div>
++      <IconButton label="Dismiss notification" icon={<CloseIcon />} onClick={() => setLeaving(true)} />
++    </div>
++  );
++}
++
++/**
++ * Fixed bottom-right stack. Keep it mounted (even when empty) so screen
++ * readers already know about the live region when the first toast arrives.
++ */
++export function ToastRegion({ toasts, onDismiss }) {
++  return (
++    <section className="hb-toast-region" aria-label="Notifications">
++      <div className="hb-toast-region__list" role="status" aria-live="polite">
++        {toasts.map((toast) => (
++          <Toast
++            key={toast.id}
++            title={toast.title}
++            message={toast.message}
++            status={toast.status}
++            onDismiss={() => onDismiss(toast.id)}
++          />
++        ))}
++      </div>
++    </section>
++  );
++}
++
++const shipmentKey = (shipment) => shipment.id ?? shipment.container;
++
++/**
++ * Watches a shipment list and queues a toast for each shipment whose status
++ * differs from the previous render. Shipments that are new to the list do
++ * not trigger a toast.
++ *
++ *   const { toasts, dismiss } = useShipmentStatusToasts(shipments);
++ *   <ToastRegion toasts={toasts} onDismiss={dismiss} />
++ */
++export function useShipmentStatusToasts(shipments) {
++  const [toasts, setToasts] = useState([]);
++  const previous = useRef(null);
++  const nextId = useRef(0);
++
++  useEffect(() => {
++    const before = previous.current;
++    previous.current = new Map(shipments.map((s) => [shipmentKey(s), s.status]));
++    if (!before) return;
++
++    const changed = shipments.filter((s) => {
++      const old = before.get(shipmentKey(s));
++      return old !== undefined && old !== s.status;
++    });
++    if (changed.length === 0) return;
++
++    setToasts((current) => [
++      ...current,
++      ...changed.map((s) => ({
++        id: nextId.current++,
++        status: s.status,
++        title: s.container,
++        message: `Now ${STATUS_LABEL[s.status] ?? s.status} (was ${STATUS_LABEL[before.get(shipmentKey(s))] ?? 'unknown'})`,
++      })),
++    ]);
++  }, [shipments]);
++
++  const dismiss = useCallback((id) => {
++    setToasts((current) => current.filter((toast) => toast.id !== id));
++  }, []);
++
++  return { toasts, dismiss };
++}
+diff --git a/src/styles/tokens.css b/src/styles/tokens.css
+index b193f14..672f222 100644
+--- a/src/styles/tokens.css
++++ b/src/styles/tokens.css
+@@ -23,6 +23,9 @@
+   --hb-radius: 4px;
+   --hb-shadow-raised: 0 2px 8px rgb(11 34 57 / 0.16);
+ 
++  --hb-toast-width: 22rem;
++  --hb-toast-stripe: 4px;
++
+   --hb-z-header: 100;
+   --hb-z-dropdown: 200;
+   --hb-z-modal: 300;

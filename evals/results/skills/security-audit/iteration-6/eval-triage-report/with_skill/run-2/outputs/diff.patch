@@ -1,0 +1,36 @@
+diff --git a/triage.json b/triage.json
+new file mode 100644
+index 0000000..b528da1
+--- /dev/null
++++ b/triage.json
+@@ -0,0 +1,30 @@
++[
++  {
++    "report": "R1",
++    "verdict": "rejected",
++    "file": "src/avatar.js",
++    "line": 4,
++    "why": "avatarUrl() passes the user parameter through encodeURIComponent and joins it to a fixed path under the constant AVATAR_ORIGIN. So '//169.254.169.254/...' becomes '/u/%2F%2F169.254.169.254%2Flatest%2Fmeta-data.png' and '@internal.host' becomes '/u/%40internal.host.png'. Both requests still go to avatars.example-cdn.net, and an attacker cannot change the host, scheme or path segment."
++  },
++  {
++    "report": "R2",
++    "verdict": "confirmed",
++    "request": {
++      "method": "POST",
++      "path": "/webhooks/test",
++      "query": {},
++      "body": { "url": "https://169.254.169.254/latest/meta-data/" },
++      "session": "sess_dana_4410"
++    },
++    "file": "src/webhooks.js",
++    "line": 14,
++    "why": "isAllowedTarget() blocks only localhost, 127.0.0.1 and 0.0.0.0 by exact name, plus the 10. and 192.168. prefixes. Link-local 169.254.0.0/16 (cloud metadata), 172.16.0.0/12, the rest of 127.0.0.0/8, IPv6 loopback ([::1]) and internal DNS names all pass. Any signed-in member can make the server POST to https://169.254.169.254/..., and testWebhook (line 21) returns the first 500 bytes of the upstream body in 'preview'. That makes it a full-read SSRF against internal services."
++  },
++  {
++    "report": "R3",
++    "verdict": "rejected",
++    "file": "src/users.js",
++    "line": 4,
++    "why": "The ORDER BY column comes from the fixed SORT_COLUMNS map. An unknown value such as 'name;DROP TABLE users' falls back to 'created_at', and direction can only be 'ASC' or 'DESC'. No user input reaches the SQL string. The payload produces 'SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT 50'."
++  }
++]

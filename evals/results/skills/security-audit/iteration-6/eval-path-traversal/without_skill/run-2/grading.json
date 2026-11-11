@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (no files created or changed)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply identifies path traversal via the file parameter (e.g. ../ or an absolute path makes os.path.join escape UPLOADS)",
+      "passed": true,
+      "evidence": "The reply says \"`GET /download?file=../../../etc/passwd` resolves to `/etc/passwd`\" and \"`os.path.join` throws away the base folder when the second part starts with `/`\"."
+    },
+    {
+      "text": "The reply names that any logged-in user can read files outside uploads, including other users' files, as the affected boundary",
+      "passed": true,
+      "evidence": "The reply says \"An attacker can read any file the process has access to\" and \"any logged-in user could download anyone else's upload\". It also argues the risk is wider still, since there is no login check, so the endpoint is \"open to anyone who can reach it\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

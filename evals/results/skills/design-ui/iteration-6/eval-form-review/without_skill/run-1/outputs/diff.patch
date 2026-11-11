@@ -1,0 +1,50 @@
+diff --git a/ui-review.json b/ui-review.json
+new file mode 100644
+index 0000000..1910f7f
+--- /dev/null
++++ b/ui-review.json
+@@ -0,0 +1,44 @@
++[
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 30,
++    "problem": "The email label points to htmlFor=\"signup-email\" but the input's id is \"email\", so the label isn't linked to the field. Screen readers announce the input with no name, and clicking the label doesn't focus it.",
++    "fix": "Change the input to id=\"signup-email\" so it matches the label's htmlFor."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 40,
++    "problem": "The terms checkbox is a <div> with an onClick and a decorative <span>. It can't be reached or toggled with the keyboard, and it has no role, no checked state and no accessible name, so screen-reader users can't tell it's a checkbox or whether it's checked.",
++    "fix": "Use a native control: <label className=\"signup__check\"><input type=\"checkbox\" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /> I agree to the terms</label>. Style the native input, or hide it visually and style a sibling box, with :checked and :focus-visible."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 18,
++    "problem": "When submission fails, the error is stored in state but never shown or announced. The only sign of failure is a red border on the password input, which tells users nothing about what went wrong and relies on colour alone. It is also applied to the password field even when the error is about the email or the terms.",
++    "fix": "Render the message in the form, e.g. <p id=\"signup-error\" role=\"alert\">{error}</p>. Set aria-invalid=\"true\" and aria-describedby=\"signup-error\" on the field the error is about, and move focus to that field or the message."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 34,
++    "problem": "The invalid state is shown only through the is-invalid class (a red border). Assistive tech isn't told the field is invalid, because there is no aria-invalid and no aria-describedby pointing to an error message.",
++    "fix": "Add aria-invalid={Boolean(error)} and aria-describedby pointing at the rendered error message whenever error is set."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 10,
++    "problem": "The focus style removes the outline and sets border-color to var(--color-border), the same colour as the unfocused border. Focused inputs therefore look identical to unfocused ones, so keyboard users can't see which field has focus (WCAG 2.4.7).",
++    "fix": "Remove 'outline: none' or replace it with a visible indicator, e.g. .signup input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-color: var(--color-accent); }."
++  },
++  {
++    "file": "src/components/SignupForm.css",
++    "line": 4,
++    "problem": "Input borders (and the checkbox box on line 16) use --color-border #a8a29e, which has about a 2.5:1 contrast against the white surface. That is below the 3:1 minimum for the visual boundaries that identify UI components (WCAG 1.4.11), so the fields and the checkbox are hard to see.",
++    "fix": "Use a darker border colour for form controls with at least 3:1 contrast against white, e.g. #78716c (about 4.8:1), as a dedicated --color-border-control token or by darkening --color-border."
++  },
++  {
++    "file": "src/components/SignupForm.jsx",
++    "line": 17,
++    "problem": "There is no pending state while onSubmit runs. The submit button stays enabled, so users can submit twice (creating duplicate requests or accounts) and get no feedback that anything is happening. A previous error also stays on screen during a retry, and if onSubmit rejects the promise is left unhandled.",
++    "fix": "Track a submitting state: set it before the await and clear it in a finally block. While it is true, disable the button or set aria-disabled and show 'Creating account…'. Call setError(null) at the start of the handler and catch exceptions into the error state."
++  }
++]

@@ -1,0 +1,40 @@
+diff --git a/notes/json-schema-validators.md b/notes/json-schema-validators.md
+new file mode 100644
+index 0000000..417c70c
+--- /dev/null
++++ b/notes/json-schema-validators.md
+@@ -0,0 +1,34 @@
++# Ajv vs Zod: validating draft 2020-12 JSON Schema in Node
++
++Question: see `QUESTION.md`. Written 2026-11-11.
++
++> **Status: nothing below has been checked against a source in this session.**
++> The repo has no `node_modules`. Fetching the docs (WebFetch) and the packages (`npm pack`) both needed approval and did not run.
++> Every claim is marked **inferred (prior knowledge)** and gives the primary source to check it against. Run the checks under "To verify" before relying on this.
++
++## Answer
++
++| | Validates a draft 2020-12 JSON Schema document? | How |
++|---|---|---|
++| **Ajv** (v8) | **Yes** | Use the separate `Ajv2020` class: `import Ajv2020 from "ajv/dist/2020"` |
++| **Zod** (v4) | **No.** It is not a JSON Schema validator | It validates data against *Zod* schemas. It can *emit* JSON Schema (`z.toJSONSchema`), and it may be able to convert JSON Schema into Zod (see open questions) |
++
++**Recommendation:** use **Ajv** (`ajv/dist/2020`) if the inputs are JSON Schema documents. Use Zod only if you are writing the schemas in TypeScript yourself.
++
++## Ajv: inferred (prior knowledge)
++
++- Ajv v8 supports JSON Schema drafts 06, 07, 2019-09 and 2020-12. Draft-04 needs the separate `ajv-draft-04` package. Source to check: https://ajv.js.org/json-schema.html and the README at https://github.com/ajv-validator/ajv
++- The default export `import Ajv from "ajv"` targets **draft-07**. For 2020-12 you need `import Ajv2020 from "ajv/dist/2020"`. Source to check: https://ajv.js.org/json-schema.html#draft-2020-12 and `node_modules/ajv/dist/2020.js` once installed.
++- Ajv's docs say draft 2020-12 is not backwards compatible with draft-07, so one Ajv instance cannot mix schemas from both drafts. 2020-12 features such as `prefixItems`, `$dynamicRef` and `unevaluatedProperties` are supported in the 2020 class. Source to check: same page.
++
++## Zod: inferred (prior knowledge)
++
++- Zod is a TypeScript-first library. You define schemas in code (`z.object(...)`) and validate data with `.parse` / `.safeParse`. It does not read JSON Schema documents for validation. Source to check: https://zod.dev
++- Zod v4 added `z.toJSONSchema(schema)`. Its default output target is **draft-2020-12**, with a `target` option for `draft-7` and others. This means Zod can *produce* 2020-12 schemas but cannot validate data against them. Source to check: https://zod.dev/json-schema
++- **Open:** newer Zod 4.x may include `z.fromJSONSchema()`, which converts JSON Schema into a Zod schema. I can't confirm whether it exists, which release added it, whether it is experimental, or how much of 2020-12 it covers (for example `$dynamicRef` or `unevaluated*`). Source to check: https://zod.dev/json-schema and the Zod changelog / GitHub releases.
++
++## To verify (when network access is approved)
++
++1. `npm i ajv zod`, then confirm `node_modules/ajv/dist/2020.js` exists, and check `version` in each package's `package.json`.
++2. Read https://ajv.js.org/json-schema.html (draft 2020-12 section) and https://zod.dev/json-schema. Change the labels above from *inferred* to *read*.
++3. Optional measurement: compile a schema containing `"$schema": "https://json-schema.org/draft/2020-12/schema"` and `prefixItems` with `Ajv2020`. Check that invalid data is rejected. With default `Ajv`, the same schema should throw at compile time.

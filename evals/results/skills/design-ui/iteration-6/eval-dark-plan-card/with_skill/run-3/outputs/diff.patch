@@ -1,0 +1,109 @@
+diff --git a/src/components/PlanCard.css b/src/components/PlanCard.css
+new file mode 100644
+index 0000000..8df8128
+--- /dev/null
++++ b/src/components/PlanCard.css
+@@ -0,0 +1,47 @@
++.plan-card {
++  display: flex;
++  flex-direction: column;
++  gap: var(--space-3);
++  background: var(--surface);
++  color: var(--text);
++  border: 1px solid var(--border);
++  border-radius: var(--radius);
++  padding: var(--space-4);
++}
++
++/* Inset ring on top of the 1px border so the highlight doesn't shift layout. */
++.plan-card--current {
++  border-color: var(--highlight);
++  box-shadow: inset 0 0 0 1px var(--highlight);
++}
++
++.plan-card__header {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: var(--space-2);
++}
++
++.plan-card__name { margin: 0; }
++
++.plan-card__badge {
++  color: var(--highlight);
++  font-size: 0.875rem;
++  font-weight: 600;
++}
++
++.plan-card__price { margin: 0; }
++.plan-card__amount { font-variant-numeric: tabular-nums; font-size: 1.5rem; }
++.plan-card__period { color: var(--text-muted); }
++
++.plan-card__features {
++  margin: 0;
++  padding-left: var(--space-4);
++  display: flex;
++  flex-direction: column;
++  gap: var(--space-2);
++}
++
++.plan-card .button { margin-top: auto; }
++.plan-card .button:disabled { cursor: default; }
+diff --git a/src/components/PlanCard.jsx b/src/components/PlanCard.jsx
+new file mode 100644
+index 0000000..6f8c3cd
+--- /dev/null
++++ b/src/components/PlanCard.jsx
+@@ -0,0 +1,50 @@
++import { Button } from './Button.jsx';
++import './PlanCard.css';
++
++export function PlanCard({
++  name,
++  monthlyPrice,
++  currency = 'USD',
++  features = [],
++  isCurrent = false,
++  onChoose,
++}) {
++  const price = new Intl.NumberFormat(undefined, {
++    style: 'currency',
++    currency,
++    minimumFractionDigits: Number.isInteger(monthlyPrice) ? 0 : 2,
++  }).format(monthlyPrice);
++
++  return (
++    <section
++      className={`plan-card${isCurrent ? ' plan-card--current' : ''}`}
++      aria-current={isCurrent ? 'true' : undefined}
++    >
++      <header className="plan-card__header">
++        <h3 className="plan-card__name">{name}</h3>
++        {isCurrent && <span className="plan-card__badge">Current plan</span>}
++      </header>
++
++      <p className="plan-card__price">
++        <span className="plan-card__amount">{price}</span>
++        <span className="plan-card__period"> / month</span>
++      </p>
++
++      {features.length > 0 && (
++        <ul className="plan-card__features">
++          {features.map((feature) => (
++            <li key={feature}>{feature}</li>
++          ))}
++        </ul>
++      )}
++
++      <Button
++        variant={isCurrent ? 'secondary' : 'primary'}
++        onClick={onChoose}
++        disabled={isCurrent}
++      >
++        {isCurrent ? "You're on this plan" : `Choose ${name}`}
++      </Button>
++    </section>
++  );
++}

@@ -1,0 +1,38 @@
+diff --git a/ANSWER.md b/ANSWER.md
+new file mode 100644
+index 0000000..01cb06e
+--- /dev/null
++++ b/ANSWER.md
+@@ -0,0 +1,32 @@
++# ajv vs zod: validating draft 2020-12 JSON Schema
++
++**Recommendation: use ajv** with the `Ajv2020` class. Zod is a different kind of tool. It does not take JSON Schema documents as its input.
++
++> **Unverified:** the question asked for citations from each library's docs or from `node_modules`. I couldn't provide them. There is no `node_modules` in this repo, and fetching the web docs (ajv.js.org, zod.dev) was not permitted in this session. The points below are from my own knowledge of ajv v8 and zod v4. Check them against the URLs listed before relying on them.
++
++## ajv: yes, through a separate entry point
++
++- Ajv v8 supports draft 2020-12, but **not from its default export**. The default `Ajv` class targets draft-07 (with 2019-09 and 2020-12 kept separate). For 2020-12 you import the dedicated class:
++  ```js
++  const Ajv2020 = require("ajv/dist/2020");   // ESM: import Ajv2020 from "ajv/dist/2020.js"
++  const ajv = new Ajv2020();
++  const validate = ajv.compile(schema);       // schema with "$schema": "https://json-schema.org/draft/2020-12/schema"
++  validate(data);                             // errors in validate.errors
++  ```
++- This gives you 2020-12 keywords such as `prefixItems`, `$dynamicRef`/`$dynamicAnchor` and `unevaluatedProperties`/`unevaluatedItems`.
++- One known gotcha: a 2020-12 schema compiled with the default `Ajv` class fails or behaves wrongly, for example with an unknown `$schema` meta-schema or ignored `prefixItems`.
++- Sources to check: https://ajv.js.org/json-schema.html ("draft-2020-12" section) and `node_modules/ajv/dist/2020.js` after `npm i ajv`.
++
++## zod: no, not as a validator of JSON Schema documents
++
++- In Zod you write schemas in TypeScript (`z.object({...})`) and validate data with `.parse()` / `.safeParse()`. It does not compile or validate data against JSON Schema documents.
++- Zod v4 adds `z.toJSONSchema(schema)`, which goes the **other direction**: it turns a Zod schema into JSON Schema. Its default output is draft 2020-12, and other targets such as draft-7 are selectable. That helps if you want to publish schemas, but it does nothing for validating against them.
++- Newer v4 releases may include an experimental JSON Schema → Zod converter. Even then it is a conversion step with partial keyword coverage, not a full 2020-12 validator. Check this at https://zod.dev/json-schema.
++- The older package `zod-to-json-schema` also only converts Zod → JSON Schema.
++
++## Summary
++
++| | Validates data against a draft 2020-12 JSON Schema document? | Notes |
++|---|---|---|
++| ajv | **Yes**, via `ajv/dist/2020` (`Ajv2020`) | The default `Ajv` export targets draft-07 |
++| zod | **No** | Uses its own TS schema system; `z.toJSONSchema()` only *emits* 2020-12 |
