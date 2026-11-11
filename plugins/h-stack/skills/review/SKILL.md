@@ -1,7 +1,7 @@
 ---
 name: review
-description: Review diffs for real defects with evidence; verify feedback before acting.
-when_to_use: Code review, PR comments to address.
+description: "Code review of a branch, diff or PR for real defects; verifies feedback before acting."
+when_to_use: "Review my branch/PR before merging; address PR comments"
 user-invocable: false
 metadata:
   hstack:

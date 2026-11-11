@@ -1,0 +1,19 @@
+.hb-button {
+  font: inherit;
+  border-radius: var(--hb-radius);
+  padding: var(--hb-space-2) var(--hb-space-4);
+  border: 1px solid transparent;
+  transition: background-color var(--hb-motion-fast) var(--hb-ease-out);
+  cursor: pointer;
+}
+
+.hb-button--primary {
+  background: var(--hb-color-accent);
+  color: var(--hb-color-on-accent);
+}
+
+.hb-button--quiet {
+  background: transparent;
+  color: var(--hb-color-ink);
+  border-color: var(--hb-color-border);
+}

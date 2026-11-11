@@ -1,14 +1,14 @@
 ---
 name: qa
-description: Verify behaviour in a real browser and check that tests can fail.
-when_to_use: E2E, screenshots, console errors, weak tests.
+description: "Writing and running E2E browser tests, and checking tests can fail."
+when_to_use: "Playwright/Cypress flow tests, screenshots, console errors, weak tests."
 user-invocable: false
 metadata:
   hstack:
     category: "08"
     short: real-browser checks; tests that can fail
     intents: [qa, e2e, browser, ui-test, mutation]
-    keywords: ["\\b(e2e|end[- ]to[- ]end)\\b", "\\bplaywright\\b", "\\bcypress\\b", "\\b(in|with) (a|the) browser\\b", "\\bscreenshot\\b", "\\bconsole (errors?|logs?)\\b", "\\bclick through\\b", "\\bmutation (test|check)\\b", "\\btests? (actually )?catch\\b"]
+    keywords: ["\\b(e2e|end[- ]to[- ]end)\\b", "\\bplaywright\\b", "\\bcypress\\b", "\\b(in|with|using) (a |the )?(real |headless )?browser\\b", "\\bscreenshot\\b", "\\bconsole (errors?|logs?)\\b", "\\bclick through\\b", "\\bmutation (test|check)\\b", "\\btests? (actually )?catch\\b"]
     not_for: []
     events: []
     sizes: [light, full]

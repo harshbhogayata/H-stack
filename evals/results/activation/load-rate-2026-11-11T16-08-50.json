@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "pointer": {
+      "loaded": 3,
+      "runs": 3,
+      "rate": 1
+    }
+  },
+  "runs": [
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.hb-shipment-row td {
+  padding: var(--hb-space-2) var(--hb-space-3);
+  border-bottom: 1px solid var(--hb-color-border);
+}
+
+.hb-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hb-space-1);
+  font-size: var(--hb-text-sm);
+}
+
+.hb-status--delayed { color: var(--hb-color-warning); }
+.hb-status--delivered { color: var(--hb-color-success); }
+
+.hb-num { font-variant-numeric: tabular-nums; }

@@ -1,0 +1,14 @@
+@import './tokens.css';
+
+body {
+  margin: 0;
+  font-family: var(--hb-font-ui);
+  font-size: var(--hb-text-md);
+  color: var(--hb-color-ink);
+  background: var(--hb-color-surface);
+}
+
+:focus-visible {
+  outline: 2px solid var(--hb-color-accent);
+  outline-offset: 2px;
+}

@@ -8,7 +8,7 @@ metadata:
     category: "04"
     short: spec to checkable plan with interfaces, then execute
     intents: [plan, spec, feature, breakdown]
-    keywords: ["\\bimplement (a |an |the )?(new )?(feature|endpoint|service|integration|page|screen)\\b", "\\bnew feature\\b", "\\b(write|make|draft|create) (a |an |the )?(implementation )?plan\\b", "\\bbreak (this|it) down\\b", "\\bspec\\b", "\\bimplement(ation)? plan\\b", "\\bstep[- ]by[- ]step plan\\b", "\\bexecute the plan\\b", "\\brubric\\b"]
+    keywords: ["\\bimplement (a |an |the )?(new )?(feature|endpoint|service|integration|page|screen)\\b", "\\bnew feature\\b", "\\b(write|make|draft|create) (a |an |the )?(implementation )?plan\\b", "\\bbreak (this|it|the|that)( [a-z-]+){0,2} down\\b", "\\bspec\\b", "\\bimplement(ation)? plan\\b", "\\bstep[- ]by[- ]step plan\\b", "\\bexecute the plan\\b", "\\brubric\\b"]
     not_for: []
     events: []
     sizes: [light, full]

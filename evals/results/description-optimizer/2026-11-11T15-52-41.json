@@ -1,0 +1,38 @@
+{
+  "method": "skill-creator description optimisation (60/40 split, hooks disabled, native triggering)",
+  "runs_per_query": 1,
+  "iterations": 1,
+  "skills": {
+    "review": {
+      "baseline": {
+        "train": 0.75,
+        "held": 0.67,
+        "fails": [
+          {
+            "q": "Go through the feedback on my pull request and draft replies",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Code review of diffs/PRs for real defects with evidence; handling PR review feedback by verifying comments before fixing or replying.",
+          "when_to_use": "Review this diff or PR; triage or reply to PR review comments; draft responses to reviewers.",
+          "train": 1,
+          "held": 0.67,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 0.67,
+        "changed": true,
+        "description": "Code review of diffs/PRs for real defects with evidence; handling PR review feedback by verifying comments before fixing or replying.",
+        "when_to_use": "Review this diff or PR; triage or reply to PR review comments; draft responses to reviewers."
+      }
+    }
+  },
+  "seconds": 27
+}

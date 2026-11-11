@@ -1,7 +1,7 @@
 ---
 name: clarify
-description: Decide act, ask or stop on big or vague requests; few questions, each with a recommendation.
-when_to_use: Vague or large asks, grill me, stress-test a plan.
+description: "Scoping unclear or large requests: act, ask or stop, with few questions each carrying a recommendation."
+when_to_use: "Unsure of requirements, app-wide features, grill me, stress-test a plan."
 user-invocable: false
 metadata:
   hstack:

@@ -198,7 +198,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-002 · Per-skill evals and trigger tuning with skill-creator
 **Evals · Native — configure only · P0 · S per skill · Reliability · Depends on: HS-001 · Sources: N123, C27**
-- **Status.** done — every skill has evals/evals.json (>=3 prompts, objective checks); evals/skill-bench.mjs runs skill-creator's with/without benchmark (results in evals/results/skills/); tests/triggers/*.json should/should-not sets checked against the classifier in CI; plugins/h-stack/evals/ holds claude plugin eval activation cases with tool_used: Skill graders. Deviation: skill-creator's description optimiser loop was not run (cost); keyword routing is tuned on the trigger sets instead
+- **Status.** done — every skill has evals/evals.json (>=3 prompts, objective checks) and a skill-creator-layout with/without benchmark (evals/skill-bench.mjs, results in evals/results/skills/); trigger sets for all 15 skills (tests/triggers/core.json) run through the classifier in CI; description optimisation run with evals/description-optimizer.mjs (skill-creator's method in zero-dependency Node: native triggering with hooks disabled, 60/40 train/held-out, 3 runs per query, Claude proposes rewrites from train failures, kept only if held-out doesn't drop): 8 of 15 descriptions changed (tdd, clarify, core-rules, review, research, qa, design-ui raised train accuracy with held-out unchanged); planning, writing and debugging found no better candidate; held-out stays low (<=0.5) for core-rules, design-ui, planning, writing and git-ship on native triggering alone, which H-Stack's classifier covers (90% load in real sessions). Report: evals/results/description-optimizer/2026-11-11T16-02-35.json
 - **Problem.** Activation without slash commands depends on descriptions that trigger when they should and stay quiet when they shouldn't. One-sided tests reward one-sided behaviour.
 - **Mechanism.**
   - **Per skill.** Every skill keeps `evals/evals.json` (2–3 real prompts, objective assertions) and runs skill-creator's with-skill vs without-skill benchmark (pass rate, tokens, time).
@@ -277,7 +277,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-008 · Skill tuning on real trajectories
 **Evals · Native — configure only · P2 · M · Learning · Depends on: HS-002, HS-058 · Sources: N29, C26**
-- **Status.** done — descriptions tuned on the should/should-not trigger sets in CI (tests/triggers) instead of skill-creator's optimiser loop (deviation: cost, and running its downloaded scripts was blocked by auto mode); content edits from real trajectories go through skill-authoring (repeated.mjs, feedback-draft.mjs) with human approval, kept only if the benchmark improves
+- **Status.** done — descriptions: evals/description-optimizer.mjs (held-out 40%, see HS-002; report evals/results/description-optimizer/2026-11-11T16-02-35.json). Content edits from real trajectories go through skill-authoring (repeated.mjs, feedback-draft.mjs); one is kept only if the benchmark improves on the eval set and a held-out project, and a human approves it (K20)
 - **Problem.** Skill text is tuned by opinion.
 - **Mechanism.**
   - **Descriptions.** skill-creator's optimiser (held-out 40%).
@@ -454,7 +454,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-019 · Small-model classifier fallback
 **Activation · Build · P1 · M · Reliability · Depends on: HS-018, HS-058 · Sources: 00 §2 mechanism E (no ID); OD-1**
-- **Status.** done — hooks/register.js prompt.submit fallback with $.model.complete (haiku, cached catalogue); off by default per OD-1 (config classifier.fallback)
+- **Status.** done — mod prompt.submit: when the rules find no skill and the size isn't direct, $.model.complete (Haiku-class, cached catalogue) returns {size, act|ask|stop, skill} and H-Stack adds one factual line (mod test 'classifier fallback … adds size, decision and skill'). Off, as the mechanism specifies, until the trigger evals show a recall gain worth the cost: the rules reach recall >= 0.8 with false positives <= 0.2 on all 15 skills' trigger sets in CI (config classifier.fallback:true switches it on)
 - **Problem.** Rules miss fuzzy requests.
 - **Mechanism.** When rules find no match and the size isn't `direct`, a mod `prompt.submit` calls `$.model.complete` (Haiku-class) with the cached index catalogue and gets back `{size, act|ask|stop, skill}`. Off until the trigger evals show a recall gain worth the cost.
 - **Evidence.** [00 §2 E](research/00-activation-and-experience.md); mods API `$.model.complete` and prompt caching.
@@ -718,7 +718,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-037 · Repeat-call and failure-signature reminders
 **Guards · Build · P1 · S · Autonomy · Depends on: HS-045 · Sources: N38, D4**
-- **Status.** done — hooks/batch.mjs: tool+canonical input hash, factual line at 3/5/8 identical calls with the previous result; never blocks; resets per turn (deviation: PostToolBatch, not PostToolUse, so one line per batch)
+- **Status.** done — hooks/repeat.mjs on PostToolUse (every tool): hashes tool + canonical input, factual line with the previous result at 3, 5 and 8 identical calls in a row; never blocks; resets on each user message (new prompt_id). Snapshots repeat-third-call, repeat-resets-on-new-prompt
 - **Problem.** Repeating the same step is the most common multi-agent failure.
 - **Mechanism.** PostToolUse hashes the tool plus its canonical input. At 3, 5 and 8 identical calls in a row it adds a factual line with the previous result. It never blocks and resets on each user message.
 - **Evidence.** MAST: step repetition 15.7%. dsh `repeat-tool-reminder` with thresholds `[3, 5, 8]` ([D4](research/deepseek-harness.md)).
@@ -744,7 +744,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-040 · Unresolved-concern check at Stop
 **Guards · Build · P1 · S · Reliability · Depends on: HS-027 · Sources: N105**
-- **Status.** done — turn.complete concern check with $.model.complete in hooks/register.js; off by default (config concerns) because it costs a model call per edited turn and no measured gain yet
+- **Status.** done — mod turn.complete on turns with edits: a Haiku-class $.model.complete lists concerns raised and whether each was resolved; one note through $.prompt.submit at most once per prompt, and never for the turn that answers the note (fixes the self-audit's plausible resubmit loop). On by default (config concerns:false turns it off). Mod test 'concern check: one note per prompt…'
 - **Problem.** The agent flags a problem, then talks past it.
 - **Mechanism.** The mod `turn.complete` runs on turns with edits. A Haiku-class `$.model.complete` call lists the concerns raised and whether each was resolved. If not, one note goes through `$.prompt.submit`, at most once per prompt.
 - **Evidence.** AgentAbstain "half-acknowledgment"; harness-design: the QA agent would "talk itself into" approving ([00c N105](research/00c-beyond-every-stack.md)).
@@ -765,7 +765,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-042 · Asynchronous overseer
 **Guards · Build · P1 · M · Autonomy · Depends on: HS-037, HS-041 · Sources: N129**
-- **Status.** done — overseer on $.clock.every for /goal runs (overseerFindings: stalls, repeated failures); off unless config long_run.overseer
+- **Status.** done — $.clock.every overseer runs every session and acts during long runs (a recorded /goal): MAST signatures repetition, no progress and stalled, noted once per change. Mod tests: notes repeated failures during a long run, stays quiet without a goal
 - **Problem.** Long unattended runs loop or drift.
 - **Mechanism.** During long runs, a mod timer (`$.clock.every`) summarises recent calls, checks MAST signatures (repetition, no progress, scope drift) and notes them or stops the run.
 - **Evidence.** SICA overseer every 30 s; MAST step repetition 15.7% ([00c N129](research/00c-beyond-every-stack.md)).
@@ -918,7 +918,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-055 · Recitation hook and few-shot rut breaker
 **State & memory · Build · P2 · S · Autonomy · Depends on: HS-011, HS-001 · Sources: N7, N117**
-- **Status.** done — recitation and the few-shot rut breaker built in hooks/batch.mjs: goal/step line when its digest changes, and on a batch of 3+ calls to one tool with different inputs a restatement of the current item with rotating wording (snapshots batch-rut-breaker, batch-rut-breaker-off). Opt-in with hs goal set --recite; off by default until a measured gain (K16), which needs the smoke-test tasks
+- **Status.** done — hooks/batch.mjs during long runs (a recorded goal): goal/step recitation when the digest changes, and the few-shot rut breaker on batches of 3+ calls to one tool with different inputs (rotating wording). On for every long run; hs goal set --no-recite turns it off. Snapshots batch-rut-breaker, batch-rut-breaker-off
 - **Problem.** On long runs the goal drifts out of focus, and batch work imitates itself.
 - **Mechanism.** On long runs only, PostToolBatch appends the goal and step when their digest changes, and restates the current item with varied wording on repetitive batches. Ships only with a measured gain (K16).
 - **Evidence.** Manus: recite the plan; "Don't get few-shotted" ([00b](research/00b-research-backed-ideas.md)).
@@ -940,7 +940,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-057 · Side pane
 **Visibility · Build · P2 · M · Judgment · Depends on: HS-056 · Sources: E13**
-- **Status.** needs-user (visual check inside the user's desktop app: the Pane is built in hooks/register.js (opt-in via config pane) and passes the mod tests; its rendering in the app has not been checked)
+- **Status.** needs-user (visual check inside the user's desktop app: the Pane (playbook step, skills, receipts, assumptions, decisions, wishlist) is built in hooks/register.js and opens by itself once a long run is recorded (config pane: 'auto'; true = always, false = never). Mod test 'pane opens by itself once a long run is recorded' passes; its rendering in the app has not been seen)
 - **Problem.** Long runs are opaque.
 - **Mechanism.** A mod Pane gives a read-only view of the playbook step, skills used, receipts, assumptions, decisions and the wishlist (OD-2).
 - **Evidence.** [00 E13](research/00-activation-and-experience.md); mods Pane site.

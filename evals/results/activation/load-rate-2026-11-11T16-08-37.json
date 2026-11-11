@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "pointer": {
+      "loaded": 0,
+      "runs": 3,
+      "rate": 0
+    }
+  },
+  "runs": [
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    }
+  ]
+}

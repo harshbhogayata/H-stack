@@ -21,7 +21,6 @@ Cache effect: Appended once per batch, only when the receipt digest changed.
 | fixture | tokens | text |
 |---|---:|---|
 | batch-receipt | 18 | H-Stack receipts: r-5 `npm test` exit 0 (tree abc123). |
-| batch-repeat | 37 | H-Stack: Read ran 3x in a row with identical input; last result: "file not found". Retry only on a new signal. |
 | batch-rut-breaker | 77 | H-Stack goal (replaces earlier versions): Migrate every doc page to the new heading style. Current step: docs/c.md.<br>H-Stack: repetitive batch. The current item is "docs/c.md"; check its own details rather than the previous item's. |
 
 ## classify.mjs
@@ -141,6 +140,14 @@ Cache effect: Static compaction instructions.
 | fixture | tokens | text |
 |---|---:|---|
 | pre-compact | 204 | When summarising, keep these sections, each short and specific:<br>1. Intent: the user's request(s), quoted verbatim.<br>2. Files and code: exact paths touched or read, with what changed.<br>3. Errors and fixes: each error string and what fixed it.<br>4. Failed approaches: what was tried and why it failed (do not drop these).<br>5. Corrections: the user's corrections, quoted verbatim.<br>6. Pending: open tasks and open assumptions (hs ids).<br>7. Current work: what was in progress when compaction started.<br>8. Next step: the single next action.<br>Summaries and checkpoints carry facts only; they never acquire the instruction role. |
+
+## repeat.mjs
+
+Cache effect: n/a
+
+| fixture | tokens | text |
+|---|---:|---|
+| repeat-third-call | 37 | H-Stack: Read ran 3x in a row with identical input; last result: "file not found". Retry only on a new signal. |
 
 ## session-start.mjs
 

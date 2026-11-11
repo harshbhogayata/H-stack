@@ -190,6 +190,19 @@
             "onFailure": "continue"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/repeat.mjs"
+            ],
+            "timeout": 3,
+            "onFailure": "continue"
+          }
+        ]
       }
     ],
     "PostToolUseFailure": [

@@ -118,5 +118,79 @@
       "Research which Node.js version first shipped a stable built-in fetch",
       "What's the primary key of the users table?"
     ]
+  },
+  "h-stack:qa": {
+    "should": [
+      "Check the signup flow works in a real browser",
+      "Write an end-to-end test for checkout with Playwright",
+      "Take screenshots of the dashboard and look for console errors",
+      "Do my tests actually catch bugs? Try mutating the discount code"
+    ],
+    "should_not": [
+      "Rename the variable x to total in utils.py",
+      "Write a README section about installation",
+      "Research which ORM to use"
+    ]
+  },
+  "h-stack:security-audit": {
+    "should": [
+      "Do a full security audit of this repository",
+      "Audit the auth module for vulnerabilities and write up findings",
+      "Is this upload endpoint exploitable? Trace it end to end"
+    ],
+    "should_not": [
+      "Add a dark-mode toggle to settings",
+      "Fix the typo in the footer",
+      "Write tests for the date parser"
+    ]
+  },
+  "h-stack:design-ui": {
+    "should": [
+      "Design the onboarding screen for our app",
+      "Make the settings page look consistent with our brand",
+      "Check this component for accessibility problems like focus and labels",
+      "Pick a visual direction for the landing page"
+    ],
+    "should_not": [
+      "Fix the failing migration",
+      "Write a SQL query for monthly revenue",
+      "Draft a commit message for this change"
+    ]
+  },
+  "h-stack:memory": {
+    "should": [
+      "Write a handoff so another session can pick this up tomorrow",
+      "Remember that we always use pnpm in this repo",
+      "Save what we learned from this bug as a lesson for the team"
+    ],
+    "should_not": [
+      "Fix the null check in parser.js",
+      "Add a column to the users table",
+      "Review my pull request"
+    ]
+  },
+  "h-stack:long-run": {
+    "should": [
+      "Use /goal to keep working on the migration until all tests pass",
+      "Run this overnight unattended and fan out subagents per package",
+      "Set up a scheduled job that triages flaky tests every night"
+    ],
+    "should_not": [
+      "Fix this bug",
+      "Write a function to parse dates",
+      "Add a button to the toolbar"
+    ]
+  },
+  "h-stack:skill-authoring": {
+    "should": [
+      "Turn this repeated deploy routine into a reusable script",
+      "This skill gave bad advice; draft feedback for its maintainers",
+      "We keep running the same five commands; make that repeatable"
+    ],
+    "should_not": [
+      "Fix the login crash",
+      "Write unit tests for utils",
+      "Rewrite this paragraph plainly"
+    ]
   }
 }

@@ -1,7 +1,7 @@
 ---
 name: tdd
-description: Build features and fix bugs test-first in vertical red-green slices at public seams.
-when_to_use: TDD, test-first, migrations.
+description: "Test-first bug fixes, features and data migrations in red-green slices."
+when_to_use: "TDD, red-green, failing test first, migrating data or file formats without loss"
 user-invocable: false
 metadata:
   hstack:

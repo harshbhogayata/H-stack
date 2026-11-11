@@ -55,14 +55,22 @@ function workspace(skillDir, ev) {
   return dir;
 }
 
+function skillCopy(skillDir) {
+  const dir = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'hs-skill-')), path.basename(skillDir));
+  fs.cpSync(skillDir, dir, { recursive: true, filter: (src) => !src.startsWith(path.join(skillDir, 'evals')) });
+  return dir;
+}
+
 async function agentRun(skill, ev, arm) {
   const skillDir = path.join(SKILLS, skill);
   const ws = workspace(skillDir, ev);
+  // The with-skill arm sees a copy of the skill without evals/, so it cannot read the expectations.
+  const shown = arm === 'with_skill' ? skillCopy(skillDir) : null;
   const prompt = arm === 'with_skill'
-    ? `Before you start, read the skill file ${path.join(skillDir, 'SKILL.md')} and follow it (it may point to files in the same folder). H-Stack's helper commands it mentions (hs, receipts) are not installed in this run; skip those steps.\n\nTask: ${ev.prompt}`
+    ? `Before you start, read the skill file ${path.join(shown, 'SKILL.md')} and follow it (it may point to files in the same folder). H-Stack's helper commands it mentions (hs, receipts) are not installed in this run; skip those steps.\n\nTask: ${ev.prompt}`
     : ev.prompt;
   const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(MAX_TURNS), '--permission-mode', 'acceptEdits', ...(EFFORT ? ['--effort', EFFORT] : []), '--allowedTools', ...TOOLS];
-  if (arm === 'with_skill') argv.push('--add-dir', skillDir);
+  if (arm === 'with_skill') argv.push('--add-dir', shown);
   if (MODEL) argv.push('--model', MODEL);
   const r = await run('claude', argv, { cwd: ws });
   let j = {};

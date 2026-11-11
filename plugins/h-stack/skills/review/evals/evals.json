@@ -38,6 +38,32 @@
         "The review does not report any high-severity defect in capitalize(), and lists what it checked (e.g. empty string, non-string input, unicode first character)",
         "Any minor observation is labelled as minor or optional rather than presented as a bug"
       ]
+    },
+    {
+      "id": 4,
+      "eval_name": "cache-key",
+      "prompt": "Review the new pricing module (src/pricing.js) before we merge. Write the review to REVIEW.md: each finding with file:line, how serious it is, and a concrete input that shows it. Don't change the code.",
+      "files": ["evals/files/cache-key/"],
+      "check": "test -z \"$(git status --porcelain -- src test package.json)\" && test -s REVIEW.md && grep -qi 'memoiz' REVIEW.md && grep -Eq '(memoize\\.js[^0-9]{0,12}[3-5]|pricing\\.js[^0-9]{0,12}(6|13))([^0-9]|$)' REVIEW.md",
+      "expectations": [
+        "The check command exits 0 (code unchanged; REVIEW.md cites the memoize cache key at memoize.js:3-5 or its use at pricing.js:6 or :13)",
+        "REVIEW.md reports that memoize keys the cache on the first argument only, so priceFor(sku, currency) returns the first-seen currency's price when the same SKU is later quoted in another currency, with a concrete example (e.g. TSHIRT-01 quoted in USD then EUR gives subtotal 2000 instead of 1850)",
+        "That finding is rated blocking or high severity, while style points such as var, item.qty == null or Math.round are absent or explicitly labelled minor or optional, not presented as bugs",
+        "The review lists what was checked and found fine (e.g. tax rounding, missing qty, unknown SKU or currency) or states what was not reviewed"
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "duration-spec",
+      "prompt": "Review duration.js against the spec in README.md before we merge. Report findings in your reply. For every behaviour bug you report, add a case to cases.json (a JSON array of {\"input\": <value>, \"expected\": <milliseconds> or \"TypeError\"}) that the current code gets wrong. Don't change duration.js.",
+      "files": ["evals/files/duration-spec/"],
+      "check": "git diff --quiet HEAD -- duration.js && node -e \"const fs=require('fs');const {parseDuration}=require('./duration');const U={h:3600000,m:60000,s:1000,ms:1};const ref=(x)=>{if(typeof x!=='string'||!/^\\s*(?:\\d+(?:\\.\\d+)?(?:ms|h|m|s)\\s*)+$/.test(x))return 'TypeError';let t=0;for(const [,n,u] of x.matchAll(/(\\d+(?:\\.\\d+)?)(ms|h|m|s)/g))t+=Number(n)*U[u];return t};const cur=(x)=>{try{return parseDuration(x)}catch(e){return e instanceof TypeError?'TypeError':'threw '+e.name}};const eq=(a,b)=>typeof a==='number'&&typeof b==='number'?Math.abs(a-b)<=1e-9*Math.max(1,Math.abs(a)):a===b;const cases=JSON.parse(fs.readFileSync('cases.json','utf8'));if(!Array.isArray(cases)||!cases.length){console.log('cases.json has no cases');process.exit(1)}let bad=0;for(const c of cases){const r=ref(c.input);const a=cur(c.input);if(!eq(r,c.expected)){console.log('expected value contradicts the spec:',JSON.stringify(c),'spec gives',r);bad++}else if(eq(a,c.expected)){console.log('current code already returns the expected value:',JSON.stringify(c));bad++}}process.exit(bad?1:0)\"",
+      "expectations": [
+        "The check command exits 0 (duration.js unchanged; cases.json is non-empty, every expected value agrees with the spec, and the current code gets every case wrong)",
+        "The reply identifies the cause: the unit alternation (h|m|s|ms) tries m before ms, so any part using the ms unit (e.g. \"250ms\") throws TypeError instead of returning milliseconds",
+        "The reply does not report spec-conforming behaviour as bugs (e.g. uppercase units, \".5s\", a space between number and unit, or repeated units being rejected or summed as the grammar says)",
+        "The reply gives a fitting severity (millisecond timeouts in config files cannot be loaded) and a minimal fix (e.g. try ms before m) without editing the file"
+      ]
     }
   ]
 }

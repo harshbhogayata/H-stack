@@ -13,13 +13,21 @@ const opt = (k, d) => { const i = a.indexOf(`--${k}`); return i >= 0 ? a[i + 1] 
 const STYLES = opt('styles', 'pointer,check,inline').split(',');
 const RUNS = Number(opt('runs', 2));
 const PAR = Number(opt('parallel', 6));
-const CASES = JSON.parse(fs.readFileSync(path.join(REPO, 'evals', 'activation-cases.json'), 'utf8'));
+const ONLY = a.flatMap((x, i) => (x === '--case' ? [a[i + 1]] : []));
+// Stale THIRD_PARTY digests make SessionStart call the edited skills unverified, and Claude then
+// avoids them: a measured confound (planning 0/3 vs 3/3). Refuse to measure in that state.
+{
+  const pdir = opt('plugin-dir', path.join(REPO, 'plugins', 'h-stack'));
+  const chk = (await import('node:child_process')).spawnSync('node', [path.join(pdir, 'scripts', 'third-party.mjs')], { encoding: 'utf8' });
+  if (chk.status !== 0) { console.error(`THIRD_PARTY digests are stale in ${pdir}; run scripts/third-party.mjs --write first.\n${chk.stdout}`); process.exit(2); }
+}
+const CASES = JSON.parse(fs.readFileSync(path.join(REPO, 'evals', 'activation-cases.json'), 'utf8')).filter((c) => !ONLY.length || ONLY.includes(c.name));
 
 function run(style, c) {
   return new Promise((resolve) => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-act-'));
     for (const [f, body] of Object.entries(c.files || {})) { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), body); }
-    const argv = ['-p', c.prompt, '--plugin-dir', path.join(REPO, 'plugins', 'h-stack'), '--output-format', 'stream-json', '--verbose', '--max-turns', '6', '--permission-mode', 'acceptEdits', '--allowedTools', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill'];
+    const argv = ['-p', c.prompt, '--plugin-dir', opt('plugin-dir', path.join(REPO, 'plugins', 'h-stack')), '--output-format', 'stream-json', '--verbose', '--max-turns', '6', '--permission-mode', 'acceptEdits', '--allowedTools', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill'];
     const p = spawn('claude', argv, { cwd: dir, env: { ...process.env, HSTACK_LINE_STYLE: style, CLAUDE_PROJECT_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     p.stdout.on('data', (d) => { out += d; });

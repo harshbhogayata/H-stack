@@ -41,3 +41,92 @@ test('spinner shows the routed skill only when a skill is active', async ($, on)
   const view = await $.ui.mount({ plugin: 'h-stack', surface: 'terminal', component: 'Spinner', props: { word: 'Thinking', message: null, suffix: '', mode: 'normal' }, viewport: { columns: 100, rows: 30 } })
   expect(view).toBeDefined()
 })
+
+import { mock } from 'claude-code/testing'
+
+// Shared stubs: a session with a route (and optionally a recorded /goal) on the mod's file reads.
+function files(on, { goal = false, prompt = 'p1' } = {}) {
+  const fsMap = {
+    'active-session': 's1',
+    'config.json': '{}',
+    'route.json': JSON.stringify({ prompt_id: prompt, size: 'light', skills: [], rules: [] }),
+    'goal.json': goal ? JSON.stringify({ goal: 'migrate all pages', step: 'docs/c.md' }) : null,
+    'ledger.jsonl': [1, 2, 3, 4, 5, 6].map((i) => JSON.stringify({ kind: 'receipt', id: `R${i}`, cmd: 'npm test', exit: 1, ts: 0 })).join('\n'),
+  }
+  on('fs.read', ($, e) => { const k = Object.keys(fsMap).find((n) => e.path.endsWith(n)); const v = k ? fsMap[k] : null; return v === null || v === undefined ? { deny: 'not found' } : { value: v } })
+  on('fs.write', () => ({ value: undefined }))
+  on('session.start', ($, e) => ({ cwd: e.cwd || '/proj' }))
+  on('turn.start', ($, e) => ({ turnId: e.turnId }))
+}
+
+test('concern check: one note per prompt, and none for the turn that answers it', async ($, on) => {
+  files(on)
+  mock.clock(on)
+  let calls = 0; const submitted = []
+  on('model.complete', () => { calls++; return { value: { isAnswered: true, text: '{"unresolved": ["the migration is not reversible"]}' } } })
+  on('prompt.submit', ($, e) => { submitted.push(e.text); return { text: e.text } })
+  on('turn.complete', () => ({ text: '' }))
+  on('tool.call', () => ({ result: 'ok' }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await $.turn.start({ turnId: 't1' })
+  await $.tool.call({ tool: 'Edit', file_path: 'a.js' })
+  await $.turn.complete({ turnId: 't1', answer: 'x'.repeat(300) })
+  expect(submitted.length).toBe(1)
+  expect(submitted[0]).toContain('concern check')
+  // The resubmitted turn edits again but must not trigger a second note.
+  await $.turn.start({ turnId: 't2' })
+  await $.tool.call({ tool: 'Edit', file_path: 'a.js' })
+  await $.turn.complete({ turnId: 't2', answer: 'y'.repeat(300) })
+  expect(submitted.length).toBe(1)
+  expect(calls).toBe(1)
+})
+
+test('overseer notes repeated failures only during a long run', async ($, on) => {
+  files(on, { goal: true })
+  const clock = mock.clock(on)
+  const notices = []
+  on('ui.notice', ($, e) => { notices.push(JSON.stringify(e)); return { value: undefined } })
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await clock.advance(31000)
+  await clock.settle()
+  expect(notices.some((n) => n.includes('overseer'))).toBe(true)
+})
+
+test('overseer stays quiet without a recorded goal', async ($, on) => {
+  files(on, { goal: false })
+  const clock = mock.clock(on)
+  const notices = []
+  on('ui.notice', ($, e) => { notices.push(JSON.stringify(e)); return { value: undefined } })
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await clock.advance(31000)
+  expect(notices.length).toBe(0)
+})
+
+test('pane opens by itself once a long run is recorded', async ($, on) => {
+  files(on, { goal: true })
+  mock.clock(on)
+  const opened = []
+  on('ui.open', ($, e) => { opened.push(e.id); return { value: { isPlaced: true } } })
+  on('ui.notice', () => ({ value: undefined }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await $.turn.start({ turnId: 't1' })
+  expect(opened).toContain('h-stack')
+})
+
+test('classifier fallback (when switched on) adds size, decision and skill for prompts the rules miss', async ($, on) => {
+  const fsMap = { 'active-session': 's1', 'config.json': '{"classifier":{"fallback":true}}', 'route.json': '{}', 'index.json': JSON.stringify({ skills: [{ name: 'planning', qualified: 'h-stack:planning', purpose: 'plans', intents: [], keywords: [] }] }) }
+  on('fs.read', ($, e) => { const k = Object.keys(fsMap).find((n) => e.path.endsWith(n)); return k ? { value: fsMap[k] } : { deny: 'not found' } })
+  on('fs.write', () => ({ value: undefined }))
+  on('session.start', ($, e) => ({ cwd: e.cwd || '/proj' }))
+  on('model.complete', () => ({ value: { isAnswered: true, text: '{"size":"full","decision":"ask","skill":"h-stack:planning","why":"multi-part feature"}' } }))
+  on('prompt.submit', ($, e) => ({ text: e.text, context: e.context }))
+  mock.clock(on)
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  const r = await $.prompt.submit({ text: 'the invoicing module needs some kind of currency support, not sure where to begin' })
+  const ctx = (r.context || []).join(' ')
+  expect(ctx).toContain('size=full')
+  expect(ctx).toContain('h-stack:planning')
+  expect(ctx).toContain('clarify')
+})

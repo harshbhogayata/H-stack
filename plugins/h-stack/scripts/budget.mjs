@@ -41,7 +41,7 @@ export function measure() {
   rows.push({ item: 'always-on total (listing + SessionStart + one classifier line)', tokens: listing + ssMax + clMax, budget: BUDGET.alwaysOn });
   const sa = render((c) => c.hook === 'subagent-start.mjs');
   rows.push({ item: 'SubagentStart output', tokens: Math.max(0, ...sa.map((x) => tokens(x.text))), budget: BUDGET.subagentStart });
-  const notes = render((c) => ['batch.mjs', 'taint.mjs', 'failure.mjs'].includes(c.hook) || (c.hook === 'ledger.mjs'));
+  const notes = render((c) => ['batch.mjs', 'taint.mjs', 'failure.mjs', 'repeat.mjs'].includes(c.hook) || (c.hook === 'ledger.mjs'));
   for (const n of notes) for (const line of n.text.split('\n').filter(Boolean)) rows.push({ item: `event note ${n.name}`, tokens: tokens(line), budget: BUDGET.eventNote });
   const direct = render((c) => c.name === 'classify-direct');
   rows.push({ item: 'direct prompt adds', tokens: Math.max(0, ...direct.map((x) => tokens(x.text))), budget: 0 });

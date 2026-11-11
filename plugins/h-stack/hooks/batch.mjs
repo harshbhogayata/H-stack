@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-// PostToolBatch: one receipt line per batch, digest-gated (HS-027); repeat-call reminders at
-// 3/5/8 identical calls (HS-037); long-run recitation when goal/step digest changes (HS-055).
+// PostToolBatch: one receipt line per batch, digest-gated (HS-027); long-run recitation when the
+// goal/step digest changes and the few-shot rut breaker (HS-055). Repeat calls: hooks/repeat.mjs (HS-037).
 // Single writer of sessions/<id>/batch.json. FAILURE_MODE=open
 import path from 'node:path';
 import { runHook, projectDir, sessionDir, readJsonl, readJson, writeJsonAtomic, stableStringify, sha, context } from '../lib/core.mjs';
 
-const THRESHOLDS = [3, 5, 8];
 
 await runHook('batch', 'open', async (input) => {
   const proj = projectDir(input);
@@ -28,26 +27,16 @@ await runHook('batch', 'open', async (input) => {
     if (d !== st.receipt_digest) { lines.push(`H-Stack receipts: ${txt} (tree ${receipts[receipts.length - 1].tree}).`); st.receipt_digest = d; }
   }
 
-  // Repeat-call detection across consecutive identical calls (never blocks).
-  for (const c of calls) {
-    const h = sha(`${c.tool_name}:${stableStringify(c.tool_input || {})}`, 16);
-    if (h === st.last_hash) st.repeat += 1; else { st.last_hash = h; st.repeat = 1; }
-    if (THRESHOLDS.includes(st.repeat)) {
-      const prevResult = typeof c.tool_response === 'string' ? c.tool_response : JSON.stringify(c.tool_response ?? '');
-      lines.push(`H-Stack: ${c.tool_name} ran ${st.repeat}x in a row with identical input; last result: "${prevResult.slice(0, 50).replace(/\s+/g, ' ')}". Retry only on a new signal.`);
-    }
-  }
-
-  // HS-055 recitation (long runs only, opt-in via config long_run.recite).
+  // HS-055 recitation: long runs only (a recorded goal); on unless hs goal set --no-recite.
   const goal = readJson(path.join(dir, 'goal.json'), null);
-  if (goal && goal.recite) {
+  if (goal && goal.recite !== false) {
     const d = sha(`${goal.goal}|${goal.step}`, 12);
     if (d !== st.recite_digest) { lines.push(`H-Stack goal (replaces earlier versions): ${String(goal.goal).slice(0, 160)}. Current step: ${String(goal.step || '').slice(0, 120)}.`); st.recite_digest = d; }
   }
-  // HS-055 few-shot rut breaker (same opt-in): a batch of 3+ calls to one tool with different inputs
+  // HS-055 few-shot rut breaker (same long-run condition): a batch of 3+ calls to one tool with different inputs
   // is repetitive item work, which tends to copy the previous item's pattern. Restate the current
   // item, rotating the wording so the reminder itself doesn't become a pattern.
-  if (goal && goal.recite && goal.step) {
+  if (goal && goal.recite !== false && goal.step) {
     const byTool = {};
     for (const c of calls) (byTool[c.tool_name] ||= new Set()).add(sha(stableStringify(c.tool_input || {}), 12));
     if (Object.values(byTool).some((set) => set.size >= 3)) {

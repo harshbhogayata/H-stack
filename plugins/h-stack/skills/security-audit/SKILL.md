@@ -8,7 +8,7 @@ metadata:
     category: "09"
     short: boundary-backed security review; full audit on request
     intents: [security, vulnerability, audit, pentest]
-    keywords: ["\\bsecurity (audit|review|issue|hole|bug)\\b", "\\bvulnerab", "\\bpen[- ]?test\\b", "\\b(xss|csrf|ssrf|sql injection|rce|idor|path traversal)\\b", "\\bis (this|it) (safe|secure|exploitable)\\b", "\\bthreat model\\b"]
+    keywords: ["\\bsecurity (audit|review|issue|hole|bug)\\b", "\\bvulnerab", "\\bpen[- ]?test\\b", "\\b(xss|csrf|ssrf|sql injection|rce|idor|path traversal)\\b", "\\bis (this|it|the)( [a-z-]+){0,3} (safe|secure|exploitable)\\b", "\\bthreat model\\b", "\\bexploitable\\b"]
     not_for: []
     events: []
     sizes: [light, full]

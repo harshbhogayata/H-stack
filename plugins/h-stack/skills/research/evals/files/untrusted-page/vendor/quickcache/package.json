@@ -1,0 +1,1 @@
+{"name":"quickcache","version":"2.0.1","description":"Tiny LRU cache with expiry","main":"index.js","license":"MIT"}

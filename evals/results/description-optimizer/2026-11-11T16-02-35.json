@@ -1,0 +1,458 @@
+{
+  "method": "skill-creator description optimisation (60/40 split, hooks disabled, native triggering)",
+  "runs_per_query": 3,
+  "iterations": 2,
+  "skills": {
+    "debugging": {
+      "baseline": {
+        "train": 0.75,
+        "held": 0.6,
+        "fails": [
+          {
+            "q": "This query got 10x slower after the upgrade",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Getting a segfault when I load big files",
+            "expect": true,
+            "rate": 0.33
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Root-causing crashes, errors, slowdowns, flakiness before fixing, then proving the fix.",
+          "when_to_use": "Segfaults, exceptions, failing tests, code slow or broken after a change.",
+          "train": 0.75,
+          "held": 0.6,
+          "kept": false
+        },
+        {
+          "iteration": 2,
+          "description": "Root-causing bugs, crashes and slowdowns, then proving the fix.",
+          "when_to_use": "Errors, failing or flaky tests, segfaults, crashes on large input, code that got slower.",
+          "train": 0.75,
+          "held": 0.6,
+          "kept": false
+        }
+      ],
+      "final": {
+        "train": 0.75,
+        "held": 0.6,
+        "changed": false
+      }
+    },
+    "tdd": {
+      "baseline": {
+        "train": 0.4,
+        "held": 1,
+        "fails": [
+          {
+            "q": "Write a failing test first, then fix the bug",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Do red-green on this feature",
+            "expect": true,
+            "rate": 0.33
+          },
+          {
+            "q": "Migrate users.json to the v2 format without losing records",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Test-first bug fixes, features and data migrations in red-green slices.",
+          "when_to_use": "TDD, red-green, failing test first, migrating data or file formats without loss",
+          "train": 1,
+          "held": 1,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": true,
+        "description": "Test-first bug fixes, features and data migrations in red-green slices.",
+        "when_to_use": "TDD, red-green, failing test first, migrating data or file formats without loss"
+      }
+    },
+    "planning": {
+      "baseline": {
+        "train": 0.6,
+        "held": 0.33,
+        "fails": [
+          {
+            "q": "Break this feature down into steps",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Implement a new feature: CSV export for invoices across the API",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Plans and implements multi-step features via small checkable tasks with exact interfaces.",
+          "when_to_use": "Break work into steps, new feature across modules, plan a spec",
+          "train": 0.6,
+          "held": 0.33,
+          "kept": false
+        },
+        {
+          "iteration": 2,
+          "description": "Plans and implements multi-step features as small checkable tasks with exact interfaces.",
+          "when_to_use": "Building a new feature across layers, breaking work into steps, specs",
+          "train": 0.6,
+          "held": 0.33,
+          "kept": false
+        }
+      ],
+      "final": {
+        "train": 0.6,
+        "held": 0.33,
+        "changed": false
+      }
+    },
+    "clarify": {
+      "baseline": {
+        "train": 0.5,
+        "held": 1,
+        "fails": [
+          {
+            "q": "I'm not sure what the requirements are for the export",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Implement a new feature: user roles across the app",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Scoping unclear or large requests: act, ask or stop, with few questions each carrying a recommendation.",
+          "when_to_use": "Unsure of requirements, app-wide features, grill me, stress-test a plan.",
+          "train": 0.75,
+          "held": 1,
+          "kept": true
+        },
+        {
+          "iteration": 2,
+          "description": "Scoping vague requests or features with unclear requirements: act, ask or stop, few questions each with a recommendation.",
+          "when_to_use": "Not sure what a feature needs, app-wide features, grill me, stress-test a plan.",
+          "train": 0.75,
+          "held": 1,
+          "kept": false
+        }
+      ],
+      "final": {
+        "train": 0.75,
+        "held": 1,
+        "changed": true,
+        "description": "Scoping unclear or large requests: act, ask or stop, with few questions each carrying a recommendation.",
+        "when_to_use": "Unsure of requirements, app-wide features, grill me, stress-test a plan."
+      }
+    },
+    "core-rules": {
+      "baseline": {
+        "train": 0.67,
+        "held": 0.33,
+        "fails": [
+          {
+            "q": "Is it done? Make sure it works before you say so",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Verifying work with a fresh run before saying it's done, fixed or passing; surgical edits.",
+          "when_to_use": "Asked if it's done or works, to confirm or test it; before commits.",
+          "train": 1,
+          "held": 0.33,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 0.33,
+        "changed": true,
+        "description": "Verifying work with a fresh run before saying it's done, fixed or passing; surgical edits.",
+        "when_to_use": "Asked if it's done or works, to confirm or test it; before commits."
+      }
+    },
+    "review": {
+      "baseline": {
+        "train": 0.75,
+        "held": 1,
+        "fails": [
+          {
+            "q": "Do a code review of my branch before I merge",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Code review of a branch, diff or PR for real defects; verifies feedback before acting.",
+          "when_to_use": "Review my branch/PR before merging; address PR comments",
+          "train": 1,
+          "held": 1,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": true,
+        "description": "Code review of a branch, diff or PR for real defects; verifies feedback before acting.",
+        "when_to_use": "Review my branch/PR before merging; address PR comments"
+      }
+    },
+    "writing": {
+      "baseline": {
+        "train": 0.5,
+        "held": 0.33,
+        "fails": [
+          {
+            "q": "This intro sounds like AI, make it plain",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Rewrite this paragraph for our README so it has no AI tells",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Writing or rewriting READMEs, docs and CLAUDE.md in plain prose",
+          "when_to_use": "Text that sounds AI-generated, stripping AI tells, de-fluffing intros or paragraphs",
+          "train": 0.5,
+          "held": 0.33,
+          "kept": false
+        },
+        {
+          "iteration": 2,
+          "description": "Rewriting docs and prose so they read plain, specific and human, not AI-written",
+          "when_to_use": "READMEs, CLAUDE.md, intros; de-AI or humanize robotic, generic text",
+          "train": 0.5,
+          "held": 0.33,
+          "kept": false
+        }
+      ],
+      "final": {
+        "train": 0.5,
+        "held": 0.33,
+        "changed": false
+      }
+    },
+    "research": {
+      "baseline": {
+        "train": 0.33,
+        "held": 1,
+        "fails": [
+          {
+            "q": "Find out whether Postgres 16 supports MERGE ... RETURNING",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Compare libraries for PDF generation in Python",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Technical research from official docs, saving cited findings.",
+          "when_to_use": "Does version X support a feature, comparing libraries, how an API works.",
+          "train": 0.67,
+          "held": 1,
+          "kept": true
+        },
+        {
+          "iteration": 2,
+          "description": "Library comparisons and API/version questions answered from cited official docs.",
+          "when_to_use": "Which library suits a task, A vs B, does version X support a feature, how an API works.",
+          "train": 1,
+          "held": 1,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": true,
+        "description": "Library comparisons and API/version questions answered from cited official docs.",
+        "when_to_use": "Which library suits a task, A vs B, does version X support a feature, how an API works."
+      }
+    },
+    "git-ship": {
+      "baseline": {
+        "train": 1,
+        "held": 0.5,
+        "fails": []
+      },
+      "candidates": [],
+      "final": {
+        "train": 1,
+        "held": 0.5,
+        "changed": false
+      }
+    },
+    "qa": {
+      "baseline": {
+        "train": 0.75,
+        "held": 1,
+        "fails": [
+          {
+            "q": "Write an end-to-end test for checkout with Playwright",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "Writing and running E2E browser tests, and checking tests can fail.",
+          "when_to_use": "Playwright/Cypress flow tests, screenshots, console errors, weak tests.",
+          "train": 1,
+          "held": 1,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": true,
+        "description": "Writing and running E2E browser tests, and checking tests can fail.",
+        "when_to_use": "Playwright/Cypress flow tests, screenshots, console errors, weak tests."
+      }
+    },
+    "security-audit": {
+      "baseline": {
+        "train": 1,
+        "held": 1,
+        "fails": []
+      },
+      "candidates": [],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": false
+      }
+    },
+    "design-ui": {
+      "baseline": {
+        "train": 0.5,
+        "held": 0.33,
+        "fails": [
+          {
+            "q": "Pick a visual direction for the landing page",
+            "expect": true,
+            "rate": 0
+          },
+          {
+            "q": "Check this component for accessibility problems like focus and labels",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "description": "UI design and a11y review from project's design system.",
+          "when_to_use": "Visual direction for a page, new screens/components, UI polish, a11y checks (focus, labels).",
+          "train": 1,
+          "held": 0.33,
+          "kept": true
+        }
+      ],
+      "final": {
+        "train": 1,
+        "held": 0.33,
+        "changed": true,
+        "description": "UI design and a11y review from project's design system.",
+        "when_to_use": "Visual direction for a page, new screens/components, UI polish, a11y checks (focus, labels)."
+      }
+    },
+    "memory": {
+      "baseline": {
+        "train": 0.75,
+        "held": 1,
+        "fails": [
+          {
+            "q": "Remember that we always use pnpm in this repo",
+            "expect": true,
+            "rate": 0
+          }
+        ]
+      },
+      "candidates": [
+        {
+          "iteration": 1,
+          "error": "no valid proposal"
+        }
+      ],
+      "final": {
+        "train": 0.75,
+        "held": 1,
+        "changed": false
+      }
+    },
+    "long-run": {
+      "baseline": {
+        "train": 1,
+        "held": 1,
+        "fails": []
+      },
+      "candidates": [],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": false
+      }
+    },
+    "skill-authoring": {
+      "baseline": {
+        "train": 1,
+        "held": 1,
+        "fails": []
+      },
+      "candidates": [],
+      "final": {
+        "train": 1,
+        "held": 1,
+        "changed": false
+      }
+    }
+  },
+  "seconds": 573
+}

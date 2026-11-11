@@ -1,0 +1,15 @@
+.hb-icon-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--hb-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.hb-icon-button:hover {
+  background: var(--hb-color-surface-raised);
+}

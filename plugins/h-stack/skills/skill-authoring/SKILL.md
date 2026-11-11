@@ -8,7 +8,7 @@ metadata:
     category: "15"
     short: repeated procedures into tested scripts; skill feedback
     intents: [skill, automate, script, feedback]
-    keywords: ["\\b(make|turn) (this|it) (into )?(a )?(reusable )?(script|skill)\\b", "\\bwe keep doing this\\b", "\\bautomate (this|it)\\b", "\\bimprove (the|this) skill\\b", "\\bskill (misfired|is wrong|broke)\\b", "\\breport (this|the) skill\\b"]
+    keywords: ["\\b(make|turn) (this|it) (into )?(a )?(reusable )?(script|skill)\\b", "\\bwe keep doing this\\b", "\\b(make|turn) (this|it|that)( [a-z-]+){0,3} into (a )?(reusable )?(script|skill)\\b", "\\bmake (that|this|it) repeatable\\b", "\\bkeep (running|doing|typing) the same\\b", "\\bautomate (this|it)\\b", "\\bimprove (the|this) skill\\b", "\\bskill (misfired|is wrong|broke)\\b", "\\breport (this|the) skill\\b"]
     not_for: []
     events: []
     sizes: [light, full]

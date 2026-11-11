@@ -137,9 +137,9 @@ switch (cmd) {
   case 'goal': {
     const file = F('goal.json');
     const cur = readJson(file, {});
-    if (pos[0] === 'set') { writeJsonAtomic(file, { goal: pos.slice(1).join(' '), step: '', recite: Boolean(f.recite) }); out('ok', 'goal recorded'); }
+    if (pos[0] === 'set') { writeJsonAtomic(file, { goal: pos.slice(1).join(' '), step: '', recite: !f['no-recite'] }); out('ok', 'goal recorded'); }
     if (pos[0] === 'step') { writeJsonAtomic(file, { ...cur, step: pos.slice(1).join(' ') }); out('ok', 'step recorded'); }
-    out('error', 'usage: hs goal set "<goal>" [--recite] | hs goal step "<current step>"');
+    out('error', 'usage: hs goal set "<goal>" [--no-recite] | hs goal step "<current step>"');
     break;
   }
   case 'lesson': {

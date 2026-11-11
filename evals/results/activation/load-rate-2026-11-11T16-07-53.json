@@ -1,0 +1,65 @@
+{
+  "summary": {
+    "pointer": {
+      "loaded": 6,
+      "runs": 6,
+      "rate": 1
+    }
+  },
+  "runs": [
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    }
+  ]
+}

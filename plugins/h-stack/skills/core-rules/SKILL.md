@@ -1,7 +1,7 @@
 ---
 name: core-rules
-description: Prove done/fixed/passing claims with a fresh command; keep changes small and surgical.
-when_to_use: Before claiming success or committing.
+description: "Verifying work with a fresh run before saying it's done, fixed or passing; surgical edits."
+when_to_use: "Asked if it's done or works, to confirm or test it; before commits."
 user-invocable: false
 metadata:
   hstack:

@@ -36,6 +36,32 @@
         "The final message reports a measured baseline and an after number (e.g. from bench.js)",
         "The final message says JSON.stringify is not the bottleneck and names the quadratic customer lookup or filter as the cause"
       ]
+    },
+    {
+      "id": 4,
+      "eval_name": "shared-defaults",
+      "prompt": "The refund test in test/billing.test.js fails: refunds come out in USD instead of EUR. Fix it so it can't come back.",
+      "files": ["evals/files/shared-defaults/"],
+      "check": "node --test >/dev/null 2>&1 && node -e \"const a=require('assert');const {createCustomer}=require('./lib/customers');const {getDefaults}=require('./lib/settings');const {formatTotal,refundTotal}=require('./lib/money');const x=createCustomer({id:'x',name:'X',prefs:{currency:'USD',precision:0}});const y=createCustomer({id:'y',name:'Y'});a.equal(x.prefs.currency,'USD');a.equal(x.prefs.precision,0);a.equal(y.prefs.currency,'EUR');a.equal(y.prefs.precision,2);a.equal(getDefaults().currency,'EUR');a.equal(formatTotal(100),'1.00 EUR');a.equal(refundTotal([{cents:100}]),'-1.00 EUR')\" && T=$(mktemp -d) && cp -r . \"$T/a\" && cp -r . \"$T/b\" && (cd \"$T/a\" && git checkout -q HEAD -- test/billing.test.js && node --test test/billing.test.js >/dev/null 2>&1) && (cd \"$T/b\" && git checkout -q HEAD -- lib config && F=$(git status --porcelain --untracked-files=all | awk '{print $NF}' | grep -E '(^|/)test/|\\.test\\.[cm]?js$') && node --test --test-reporter=tap $F 2>/dev/null | grep -E '^ *not ok ' | grep -vE ' - formats a refund$' | grep -q .)",
+      "expectations": [
+        "The check command exits 0 (full suite and the original, unedited billing tests pass; creating a customer no longer changes the defaults; a new or extended test fails when run against the original lib/ code)",
+        "The fix is at the root cause: createCustomer no longer mutates the shared defaults object (require caches config/defaults.json, so getDefaults returns the same object to every caller), rather than special-casing refunds, passing a currency explicitly, or reordering or resetting tests",
+        "The final message shows how the cause was located (e.g. the refund test passes alone or before the customer test and fails after createCustomer runs), not only the fix",
+        "The final message reports that the new test was run against the unfixed code and failed (e.g. via git stash), and passes with the fix"
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "tz-due-dates",
+      "prompt": "Customers in California say the due dates on their invoices are one day early. Our tests pass. Fix it so it can't come back.",
+      "files": ["evals/files/due-dates/"],
+      "check": "node --test >/dev/null 2>&1 && for tz in UTC America/Los_Angeles Pacific/Pago_Pago Pacific/Kiritimati Asia/Kolkata America/St_Johns Europe/London; do TZ=$tz node -e \"const a=require('assert');const {dueDate}=require('./lib/invoice');for(const [i,t,w] of [['2026-03-01','net30','2026-03-31'],['2026-02-14','net15','2026-03-01'],['2026-12-17','net15','2027-01-01'],['2026-02-21','net15','2026-03-08'],['2026-10-17','net15','2026-11-01'],['2026-03-14','net15','2026-03-29'],['2024-02-14','net15','2024-02-29'],['2026-07-04','due_on_receipt','2026-07-04']])a.equal(dueDate({issued:i,terms:t}),w,process.env.TZ+' '+i+' '+t)\" || exit 1; done && T=$(mktemp -d) && cp -r . \"$T/a\" && cp -r . \"$T/b\" && (cd \"$T/a\" && git checkout -q HEAD -- test && TZ=America/Los_Angeles node --test >/dev/null 2>&1) && (cd \"$T/b\" && git checkout -q HEAD -- lib && F=$(git status --porcelain --untracked-files=all | awk '{print $NF}' | grep -E '(^|/)test/|\\.test\\.[cm]?js$') && [ -n \"$F\" ] && ! TZ=UTC node --test $F >/dev/null 2>&1)",
+      "expectations": [
+        "The check command exits 0 (suite passes; dueDate is correct in seven time zones from UTC-11 to UTC+14 across month, year, leap-day and DST boundaries; a new test fails against the original lib/ code even on a machine running in UTC)",
+        "Before fixing, the agent reproduced the symptom by running the code or tests under a US Pacific time zone (TZ or process.env.TZ) and shows the failing result",
+        "The final message names the root cause: the date-only string is parsed as UTC midnight while setDate/getDate and the formatting use local time, so zones behind UTC land on the previous day",
+        "The fix uses one consistent frame for parsing, arithmetic and formatting (all UTC or all local) rather than adding a day conditionally or special-casing particular zones"
+      ]
     }
   ]
 }

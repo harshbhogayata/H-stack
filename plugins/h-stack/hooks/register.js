@@ -10,7 +10,7 @@ import { classify } from '../lib/pure/classify-rules.mjs'
 import { overseerFindings, offerFor, spawnBudget } from '../lib/pure/mod-rules.mjs'
 
 const state = {
-  config: { classifier: { fallback: false }, budgets: { spawn: { direct: 0, light: 1, full: 5 } }, models: {}, concerns: false, offers: true, pane: false, long_run: { overseer: false } },
+  config: { classifier: { fallback: false }, budgets: { spawn: { direct: 0, light: 1, full: 5 } }, models: {}, concerns: true, offers: true, pane: 'auto', long_run: { overseer: true } },
   index: { skills: [] },
   route: {},
   session: '',
@@ -24,6 +24,8 @@ const state = {
   calls: [],
   tools: {},
   concernAsked: '',
+  concernPending: false,
+  paneOpen: false,
   pane: { receipts: [], assumptions: [], decisions: [], wishes: [] },
   overseerNoted: '',
 }
@@ -94,8 +96,9 @@ export function register(on) {
   on('session.start', async ($, e, next) => {
     await loadState($)
     state.index = await readJson($, new URL('../index.json', import.meta.url).pathname, { skills: [] })
-    if (state.config.long_run && state.config.long_run.overseer) $.clock.every(30000, async () => { await overseerTick($) })
-    if (state.config.pane) await $.ui.open({ id: 'h-stack', title: 'H-Stack' })
+    // HS-042: the timer runs every session but acts only during a long run (a recorded /goal).
+    if (!state.config.long_run || state.config.long_run.overseer !== false) $.clock.every(30000, async () => { await overseerTick($) })
+    if (state.config.pane === true) { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true }
     return next(e)
   })
 
@@ -130,7 +133,7 @@ export function register(on) {
     const catalogue = state.index.skills.map((s) => `${s.qualified}: ${s.purpose}`).join('\n')
     const r = await $.model.complete({
       model: 'haiku',
-      system: [{ text: `Pick at most one skill for the user's request from this catalogue, or none.\n${catalogue}\nReply with JSON only: {"skill": "<qualified name or none>", "why": "<short reason>"}`, cache: true }],
+      system: [{ text: `Classify the user's request. size: direct (trivial, no process), light, or full (multi-step or ambiguous). decision: act, ask (needs answers first) or stop. skill: at most one from this catalogue, or none.\n${catalogue}\nReply with JSON only: {"size": "direct|light|full", "decision": "act|ask|stop", "skill": "<qualified name or none>", "why": "<short reason>"}`, cache: true }],
       prompt: e.text.slice(0, 4000),
       maxTokens: 80,
       timeoutMs: 8000,
@@ -138,8 +141,16 @@ export function register(on) {
     if (!r.isAnswered) return next(e)
     let pick = null
     try { pick = JSON.parse(String(r.text).match(/\{[\s\S]*\}/)[0]) } catch { return next(e) }
-    if (!pick || !pick.skill || pick.skill === 'none' || !state.index.skills.some((s) => s.qualified === pick.skill)) return next(e)
-    return next({ ...e, context: [...(e.context || []), `H-Stack: Relevant skill: ${pick.skill} because ${String(pick.why).slice(0, 80)} (model fallback).`] })
+    if (!pick) return next(e)
+    const size = ['direct', 'light', 'full'].includes(pick.size) ? pick.size : 'light'
+    if (size === 'direct') return next(e)
+    const skill = pick.skill && pick.skill !== 'none' && state.index.skills.some((s) => s.qualified === pick.skill) ? pick.skill : null
+    const decision = ['act', 'ask', 'stop'].includes(pick.decision) ? pick.decision : 'act'
+    if (!skill && decision === 'act') return next(e)
+    const parts = [`H-Stack: size=${size} (model fallback).`]
+    if (skill) parts.push(`Relevant skill: ${skill} (load with the Skill tool) because ${String(pick.why || '').slice(0, 80)}.`)
+    if (decision !== 'act') parts.push(`The request reads as ${decision === 'ask' ? 'needing answers before acting' : 'one to stop on'}; h-stack:clarify covers act/ask/stop.`)
+    return next({ ...e, context: [...(e.context || []), parts.join(' ')] })
   })
 
   on('turn.start', async ($, e, next) => {
@@ -152,6 +163,10 @@ export function register(on) {
     state.edits = 0
     state.calls = []
     state.tools = {}
+    // HS-057: the pane opens by itself once a long run (a recorded /goal) is in progress (pane: 'auto').
+    if (state.config.pane === 'auto' && !state.paneOpen && state.session && await readJson($, `.h-stack/sessions/${state.session}/goal.json`, null)) {
+      try { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true } catch { /* no pane support */ }
+    }
     return next(e)
   })
 
@@ -183,9 +198,13 @@ export function register(on) {
     await refreshPane($)
     $.ui.invalidate('ui.render')
     if (e.isAborted) return next(e)
-    if (state.config.concerns && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
+    // HS-040: once per prompt, and never on the turn that answers H-Stack's own note (no resubmit loop:
+    // the resubmitted turn gets a new prompt_id, so the pending flag is what stops a second note).
+    if (state.concernPending) state.concernPending = false
+    else if (state.config.concerns !== false && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
       state.concernAsked = state.route.prompt_id
       const open = await concernCheck($, e.answer)
+      if (open.length) state.concernPending = true
       if (open.length) $.prompt.submit({ text: `H-Stack concern check: the last reply raised ${open.length} point(s) it did not resolve: ${open.slice(0, 3).join('; ')}. Resolve them or say why they don't apply.` })
     }
     const lines = []

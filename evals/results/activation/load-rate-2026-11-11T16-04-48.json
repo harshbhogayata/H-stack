@@ -1,0 +1,157 @@
+{
+  "summary": {
+    "pointer": {
+      "loaded": 10,
+      "runs": 18,
+      "rate": 0.56
+    }
+  },
+  "runs": [
+    {
+      "style": "pointer",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [
+        "h-stack:writing"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    }
+  ]
+}

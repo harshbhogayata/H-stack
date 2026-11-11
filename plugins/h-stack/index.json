@@ -69,7 +69,7 @@
       "name": "clarify",
       "not_for": [],
       "paths": [],
-      "purpose": "Decide act, ask or stop on big or vague requests; few questions, each with a recommendation.",
+      "purpose": "Scoping unclear or large requests: act, ask or stop, with few questions each carrying a recommendation.",
       "qualified": "h-stack:clarify",
       "short": "act, ask or stop; few questions, each with a recommendation",
       "sizes": [
@@ -106,7 +106,7 @@
       "name": "core-rules",
       "not_for": [],
       "paths": [],
-      "purpose": "Prove done/fixed/passing claims with a fresh command; keep changes small and surgical.",
+      "purpose": "Verifying work with a fresh run before saying it's done, fixed or passing; surgical edits.",
       "qualified": "h-stack:core-rules",
       "short": "evidence before claims; small surgical changes",
       "sizes": [
@@ -191,7 +191,9 @@
         "\\bresponsive\\b",
         "\\bdark mode\\b",
         "\\bpolish\\b",
-        "\\bstyl(e|ing)\\b"
+        "\\bstyl(e|ing)\\b",
+        "\\b(onboarding|signup|sign-up|login|checkout|profile|dashboard|home|empty-state) (screen|page|view|flow)\\b",
+        "\\bdesign (the|a|an|our) [a-z -]{0,30}(screen|page|view)\\b"
       ],
       "modes": {
         "default": "guidance",
@@ -206,7 +208,7 @@
         "**/theme.*",
         "**/tokens.*"
       ],
-      "purpose": "Build UI from the project's own design system and pass a11y checks.",
+      "purpose": "UI design and a11y review from project's design system.",
       "qualified": "h-stack:design-ui",
       "short": "UI from the project's own design system, checked for a11y",
       "sizes": [
@@ -368,7 +370,7 @@
         "\\bimplement (a |an |the )?(new )?(feature|endpoint|service|integration|page|screen)\\b",
         "\\bnew feature\\b",
         "\\b(write|make|draft|create) (a |an |the )?(implementation )?plan\\b",
-        "\\bbreak (this|it) down\\b",
+        "\\bbreak (this|it|the|that)( [a-z-]+){0,2} down\\b",
         "\\bspec\\b",
         "\\bimplement(ation)? plan\\b",
         "\\bstep[- ]by[- ]step plan\\b",
@@ -412,7 +414,7 @@
         "\\b(e2e|end[- ]to[- ]end)\\b",
         "\\bplaywright\\b",
         "\\bcypress\\b",
-        "\\b(in|with) (a|the) browser\\b",
+        "\\b(in|with|using) (a |the )?(real |headless )?browser\\b",
         "\\bscreenshot\\b",
         "\\bconsole (errors?|logs?)\\b",
         "\\bclick through\\b",
@@ -426,7 +428,7 @@
       "name": "qa",
       "not_for": [],
       "paths": [],
-      "purpose": "Verify behaviour in a real browser and check that tests can fail.",
+      "purpose": "Writing and running E2E browser tests, and checking tests can fail.",
       "qualified": "h-stack:qa",
       "short": "real-browser checks; tests that can fail",
       "sizes": [
@@ -463,7 +465,7 @@
       "name": "research",
       "not_for": [],
       "paths": [],
-      "purpose": "Answer questions from primary sources and save cited findings.",
+      "purpose": "Library comparisons and API/version questions answered from cited official docs.",
       "qualified": "h-stack:research",
       "short": "primary sources, cited findings",
       "sizes": [
@@ -507,7 +509,7 @@
       "name": "review",
       "not_for": [],
       "paths": [],
-      "purpose": "Review diffs for real defects with evidence; verify feedback before acting.",
+      "purpose": "Code review of a branch, diff or PR for real defects; verifies feedback before acting.",
       "qualified": "h-stack:review",
       "short": "evidence-backed review; verify feedback before acting",
       "sizes": [
@@ -534,8 +536,9 @@
         "\\bvulnerab",
         "\\bpen[- ]?test\\b",
         "\\b(xss|csrf|ssrf|sql injection|rce|idor|path traversal)\\b",
-        "\\bis (this|it) (safe|secure|exploitable)\\b",
-        "\\bthreat model\\b"
+        "\\bis (this|it|the)( [a-z-]+){0,3} (safe|secure|exploitable)\\b",
+        "\\bthreat model\\b",
+        "\\bexploitable\\b"
       ],
       "modes": {
         "default": "guidance",
@@ -573,6 +576,9 @@
       "keywords": [
         "\\b(make|turn) (this|it) (into )?(a )?(reusable )?(script|skill)\\b",
         "\\bwe keep doing this\\b",
+        "\\b(make|turn) (this|it|that)( [a-z-]+){0,3} into (a )?(reusable )?(script|skill)\\b",
+        "\\bmake (that|this|it) repeatable\\b",
+        "\\bkeep (running|doing|typing) the same\\b",
         "\\bautomate (this|it)\\b",
         "\\bimprove (the|this) skill\\b",
         "\\bskill (misfired|is wrong|broke)\\b",
@@ -622,7 +628,7 @@
       "name": "tdd",
       "not_for": [],
       "paths": [],
-      "purpose": "Build features and fix bugs test-first in vertical red-green slices at public seams.",
+      "purpose": "Test-first bug fixes, features and data migrations in red-green slices.",
       "qualified": "h-stack:tdd",
       "short": "test-first in vertical red-green slices",
       "sizes": [

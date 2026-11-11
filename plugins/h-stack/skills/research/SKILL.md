@@ -1,7 +1,7 @@
 ---
 name: research
-description: Answer questions from primary sources and save cited findings.
-when_to_use: Research, how an API works, comparisons.
+description: "Library comparisons and API/version questions answered from cited official docs."
+when_to_use: "Which library suits a task, A vs B, does version X support a feature, how an API works."
 user-invocable: false
 metadata:
   hstack:

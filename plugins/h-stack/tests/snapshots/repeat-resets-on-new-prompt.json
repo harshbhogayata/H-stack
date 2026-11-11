@@ -1,0 +1,30 @@
+{
+  "hook": "repeat.mjs",
+  "input": {
+    "session_id": "s1",
+    "prompt_id": "p1",
+    "cwd": "$PROJ",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/x/a.txt"
+    },
+    "tool_use_id": "r3",
+    "tool_response": "file not found"
+  },
+  "setup": {
+    "state": {
+      "sessions/s1/route.json": {
+        "prompt_id": "p1",
+        "size": "light",
+        "skills": [],
+        "rules": []
+      },
+      "sessions/s1/repeat.json": {
+        "turn": "p0",
+        "last_hash": "941fd0ec46eb5d03",
+        "count": 7
+      }
+    }
+  }
+}

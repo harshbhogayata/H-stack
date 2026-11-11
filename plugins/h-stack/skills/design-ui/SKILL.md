@@ -1,7 +1,7 @@
 ---
 name: design-ui
-description: Build UI from the project's own design system and pass a11y checks.
-when_to_use: New screens, components, UI polish, a11y.
+description: "UI design and a11y review from project's design system."
+when_to_use: "Visual direction for a page, new screens/components, UI polish, a11y checks (focus, labels)."
 user-invocable: false
 paths: ["**/*.{tsx,jsx,vue,svelte,astro,css,scss,sass,less}", "**/*.html", "**/tailwind.config.*", "**/theme.*", "**/tokens.*"]
 metadata:
@@ -9,7 +9,7 @@ metadata:
     category: "10"
     short: UI from the project's own design system, checked for a11y
     intents: [ui, design, frontend, component, accessibility, layout]
-    keywords: ["\\b(landing|home|settings|pricing) page\\b", "\\b(ui|ux)\\b", "\\bredesign\\b", "\\b(component|button|modal|dialog|form|navbar|sidebar|layout)\\b", "\\baccessib(le|ility)\\b", "\\ba11y\\b", "\\bresponsive\\b", "\\bdark mode\\b", "\\bpolish\\b", "\\bstyl(e|ing)\\b"]
+    keywords: ["\\b(landing|home|settings|pricing) page\\b", "\\b(ui|ux)\\b", "\\bredesign\\b", "\\b(component|button|modal|dialog|form|navbar|sidebar|layout)\\b", "\\baccessib(le|ility)\\b", "\\ba11y\\b", "\\bresponsive\\b", "\\bdark mode\\b", "\\bpolish\\b", "\\bstyl(e|ing)\\b", "\\b(onboarding|signup|sign-up|login|checkout|profile|dashboard|home|empty-state) (screen|page|view|flow)\\b", "\\bdesign (the|a|an|our) [a-z -]{0,30}(screen|page|view)\\b"]
     not_for: []
     events: [path_edit]
     sizes: [light, full]
