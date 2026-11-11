@@ -1,0 +1,809 @@
+[
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fbin%2Fhs%23manifest::plugins%2Fh-stack%2Flib%2Feffects.mjs%23declared::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23Tool%20and%20action%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/bin/hs#manifest",
+      "boundary": "plugins/h-stack/lib/effects.mjs#declared",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#Tool and action attack classes"
+    },
+    "surface": "hs state CLI",
+    "boundary": "Declared-effects manifest (HS-044)",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Agent disarming a binding control",
+    "starting_paths": [
+      "plugins/h-stack/bin/hs",
+      "plugins/h-stack/lib/effects.mjs",
+      "plugins/h-stack/scripts/setup.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Tool and action attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/bin/hs",
+      "plugins/h-stack/lib/effects.mjs",
+      "plugins/h-stack/scripts/setup.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/bin/hs",
+          "plugins/h-stack/lib/effects.mjs",
+          "plugins/h-stack/scripts/setup.mjs"
+        ],
+        "invariant": "Only the user disarms an armed manifest.",
+        "method": "local",
+        "result": "hs manifest stop is agent-callable and pre-allowed.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-hs-manifest-stop-agent-disarm"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fclassify.mjs%23UserPromptSubmit::plugins%2Fh-stack%2Flib%2Fretrieve.mjs%23retrieveLessons::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23Context%2C%20retrieval%2C%20and%20memory%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/classify.mjs#UserPromptSubmit",
+      "boundary": "plugins/h-stack/lib/retrieve.mjs#retrieveLessons",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#Context, retrieval, and memory attack classes"
+    },
+    "surface": "Prompt classifier lesson retrieval",
+    "boundary": "Lesson provenance validation",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Persistent memory poisoning",
+    "starting_paths": [
+      "plugins/h-stack/hooks/classify.mjs",
+      "plugins/h-stack/lib/retrieve.mjs",
+      "plugins/h-stack/lib/memory.mjs",
+      "plugins/h-stack/lib/lessons.mjs",
+      "plugins/h-stack/hooks/memory-shadow.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Context, retrieval, and memory attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/classify.mjs",
+      "plugins/h-stack/lib/retrieve.mjs",
+      "plugins/h-stack/lib/memory.mjs",
+      "plugins/h-stack/lib/lessons.mjs",
+      "plugins/h-stack/hooks/memory-shadow.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/classify.mjs",
+          "plugins/h-stack/lib/retrieve.mjs",
+          "plugins/h-stack/lib/memory.mjs",
+          "plugins/h-stack/lib/lessons.mjs",
+          "plugins/h-stack/hooks/memory-shadow.mjs"
+        ],
+        "invariant": "Only validated user/executed lessons reach prompt context.",
+        "method": "local",
+        "result": "Unvalidated lesson files are injected; writes to them are not gated.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-lessons-retrieval-unvalidated"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-bash.mjs%23decide::plugins%2Fh-stack%2Flib%2Fdeps.mjs%23installTargets::profile%2Fquick%2Fall-in-scope-subsystems::SUPPLY-CHAIN-AND-RELEASE.md%23Dependency%20and%20build-input%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-bash.mjs#decide",
+      "boundary": "plugins/h-stack/lib/deps.mjs#installTargets",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "SUPPLY-CHAIN-AND-RELEASE.md#Dependency and build-input attack classes"
+    },
+    "surface": "PreToolUse(Bash) gate",
+    "boundary": "Dependency gate install parsing",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Typosquat / unvetted dependency install",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/deps.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Dependency and build-input attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/deps.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/lib/deps.mjs"
+        ],
+        "invariant": "Every package named by an install command is checked.",
+        "method": "local",
+        "result": "Global flags before install/add hide the packages.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-deps-install-positional-subcommand"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-bash.mjs%23decide::plugins%2Fh-stack%2Flib%2Firreversible.mjs%23classifyBash::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23Tool%20and%20action%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-bash.mjs#decide",
+      "boundary": "plugins/h-stack/lib/irreversible.mjs#classifyBash",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#Tool and action attack classes"
+    },
+    "surface": "PreToolUse(Bash) gate",
+    "boundary": "Irreversible-action and secret-to-network classifier",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Action-confirmation binding for shell commands",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/irreversible.mjs",
+      "plugins/h-stack/lib/shell.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Tool and action attack classes"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "The plugin exposes no HTTP server, sessions or web auth; hooks read JSON on stdin from Claude Code."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/irreversible.mjs",
+      "plugins/h-stack/lib/shell.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/lib/irreversible.mjs",
+          "plugins/h-stack/lib/shell.mjs"
+        ],
+        "invariant": "Every irreversible or secret-to-network command yields ask/deny regardless of shell form.",
+        "method": "local",
+        "result": "Global-flag forms and quoted secret paths avoid the gate; approvals/receipts are not a grant.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-approvals-receipt-forgery",
+      "hs-exfil-guard-raw-text-match",
+      "hs-gate-bash-irreversible-positional-subcommand"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-edit.mjs%23decide::plugins%2Fh-stack%2Flib%2Fprotected.mjs%23protectedKind::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-edit.mjs#decide",
+      "boundary": "plugins/h-stack/lib/protected.mjs#protectedKind",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "PreToolUse(Edit/Write) and Bash write targets",
+    "boundary": "Protected state and checker paths",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Agent modifying gate policy and state",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-edit.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/protected.mjs",
+      "plugins/h-stack/lib/core.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Tool and action attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-edit.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/protected.mjs",
+      "plugins/h-stack/lib/core.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-edit.mjs",
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/lib/protected.mjs",
+          "plugins/h-stack/lib/core.mjs"
+        ],
+        "invariant": "The agent cannot change H-Stack policy or state except through hs.",
+        "method": "local",
+        "result": "config.json is unprotected; Bash state writes outside a short writer list pass.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-config-json-agent-writable",
+      "hs-gate-bash-protected-state-writer-list"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-fetch.mjs%23decide::plugins%2Fh-stack%2Flib%2Ftaint.mjs%23privateDestination::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-fetch.mjs#decide",
+      "boundary": "plugins/h-stack/lib/taint.mjs#privateDestination",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "PreToolUse(WebFetch) and curl/wget in Bash",
+    "boundary": "Private and metadata destination check",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "SSRF to loopback/metadata while tainted",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-fetch.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/taint.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Tool and action attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-fetch.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/taint.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-fetch.mjs",
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/lib/taint.mjs"
+        ],
+        "invariant": "Private destinations ask while taint is present.",
+        "method": "local",
+        "result": "Scheme-less curl and IPv4-mapped IPv6 skip the check.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-taint-private-destination-parse"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-mcp.mjs%23decide::plugins%2Fh-stack%2Fhooks%2Fgate-mcp.mjs%23SEND::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23MCP%20and%20sub-agent%20trust%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-mcp.mjs#decide",
+      "boundary": "plugins/h-stack/hooks/gate-mcp.mjs#SEND",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#MCP and sub-agent trust classes"
+    },
+    "surface": "PreToolUse(mcp__*) gate",
+    "boundary": "MCP write-tool classification",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "MCP side effects without approval",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-mcp.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#MCP and sub-agent trust classes",
+      "AI-AND-LLM.md#Tool and action attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-mcp.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-mcp.mjs"
+        ],
+        "invariant": "Every MCP write tool asks with its arguments.",
+        "method": "local",
+        "result": "Hyphenated, camelCase and *_write names default to read.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-gate-mcp-write-name-regex"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fgate-skill.mjs%23decide::plugins%2Fh-stack%2Fhooks%2Fclassify.mjs%23route.explicit::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/gate-skill.mjs#decide",
+      "boundary": "plugins/h-stack/hooks/classify.mjs#route.explicit",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "PreToolUse(Skill) explicit-only gate",
+    "boundary": "Explicit-only skill authorisation",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Explicit-only skill bypass",
+    "starting_paths": [
+      "plugins/h-stack/hooks/gate-skill.mjs",
+      "plugins/h-stack/hooks/classify.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/gate-skill.mjs",
+      "plugins/h-stack/hooks/classify.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/gate-skill.mjs",
+          "plugins/h-stack/hooks/classify.mjs"
+        ],
+        "invariant": "Explicit-only skills run only when the user asked this turn.",
+        "method": "source",
+        "result": "route.json written only by classify from the user prompt; tampering reduces to the state-writer finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fregister.js%23tool.describe::plugins%2Fh-stack%2Flib%2Fpure%2Ffirewall.mjs%23scanDescription::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23MCP%20and%20sub-agent%20trust%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/register.js#tool.describe",
+      "boundary": "plugins/h-stack/lib/pure/firewall.mjs#scanDescription",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#MCP and sub-agent trust classes"
+    },
+    "surface": "Mods tool-description firewall",
+    "boundary": "MCP metadata scan",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "MCP metadata as policy",
+    "starting_paths": [
+      "plugins/h-stack/hooks/register.js",
+      "plugins/h-stack/lib/pure/firewall.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#MCP and sub-agent trust classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/register.js",
+      "plugins/h-stack/lib/pure/firewall.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/register.js",
+          "plugins/h-stack/lib/pure/firewall.mjs"
+        ],
+        "invariant": "All model-visible MCP metadata is scanned before use.",
+        "method": "source",
+        "result": "Only description scanned; event shape needs runtime check.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "hs-mod-tool-describe-description-only"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fregister.js%23turn.complete::plugins%2Fh-stack%2Flib%2Fpure%2Fmod-rules.mjs%23spawnBudget::profile%2Fquick%2Fall-in-scope-subsystems::RESOURCE-EXHAUSTION-AND-AVAILABILITY.md%23Quota%20and%20scheduling%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/register.js#turn.complete",
+      "boundary": "plugins/h-stack/lib/pure/mod-rules.mjs#spawnBudget",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Quota and scheduling attack classes"
+    },
+    "surface": "Mods turn hooks and spawn governor",
+    "boundary": "Step, spawn and concern-check budgets",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Unbounded loops and budgets",
+    "starting_paths": [
+      "plugins/h-stack/hooks/register.js",
+      "plugins/h-stack/lib/pure/mod-rules.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Quota and scheduling attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/register.js",
+      "plugins/h-stack/lib/pure/mod-rules.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/register.js",
+          "plugins/h-stack/lib/pure/mod-rules.mjs"
+        ],
+        "invariant": "Self-submitted turns and spawns are bounded.",
+        "method": "source",
+        "result": "Concern resubmission bound depends on runtime prompt_id behaviour; budgets read from agent-writable config (see config finding).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "hs-mod-concern-check-resubmit-loop"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fstop.mjs%23evaluate::plugins%2Fh-stack%2Flib%2Fledger.mjs%23claimKinds::profile%2Fquick%2Fall-in-scope-subsystems::RESOURCE-EXHAUSTION-AND-AVAILABILITY.md%23Failure%20and%20recovery%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/stop.mjs#evaluate",
+      "boundary": "plugins/h-stack/lib/ledger.mjs#claimKinds",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Failure and recovery attack classes"
+    },
+    "surface": "Stop gate",
+    "boundary": "Receipt-backed claim verification",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Stop loop and false-done",
+    "starting_paths": [
+      "plugins/h-stack/hooks/stop.mjs",
+      "plugins/h-stack/lib/ledger.mjs",
+      "plugins/h-stack/hooks/ledger.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Failure and recovery attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/stop.mjs",
+      "plugins/h-stack/lib/ledger.mjs",
+      "plugins/h-stack/hooks/ledger.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/stop.mjs",
+          "plugins/h-stack/lib/ledger.mjs",
+          "plugins/h-stack/hooks/ledger.mjs"
+        ],
+        "invariant": "Stop blocks at most once per stop and claims need a real check.",
+        "method": "local",
+        "result": "Loop bounded; claim kind derived from command text.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-stop-block-unbounded-loop",
+      "hs-stop-gate-claim-kind-from-command-text"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Fsubagent-start.mjs%23SubagentStart::plugins%2Fh-stack%2Fhooks%2Fgate-edit.mjs%23READ_ONLY_AGENTS::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23MCP%20and%20sub-agent%20trust%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/subagent-start.mjs#SubagentStart",
+      "boundary": "plugins/h-stack/hooks/gate-edit.mjs#READ_ONLY_AGENTS",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#MCP and sub-agent trust classes"
+    },
+    "surface": "Subagent brief and write isolation",
+    "boundary": "Read-only subagent scratch isolation (HS-023)",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Sub-agent trust inheritance",
+    "starting_paths": [
+      "plugins/h-stack/hooks/subagent-start.mjs",
+      "plugins/h-stack/hooks/gate-edit.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/agents/review-lane.md"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#MCP and sub-agent trust classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/subagent-start.mjs",
+      "plugins/h-stack/hooks/gate-edit.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/agents/review-lane.md"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/subagent-start.mjs",
+          "plugins/h-stack/hooks/gate-edit.mjs",
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/agents/review-lane.md"
+        ],
+        "invariant": "Read-only subagents write only to their scratch dir.",
+        "method": "local",
+        "result": "Bash writes from read-only subagents are not checked.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-subagent-isolation-bash-gap"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fhooks%2Ftaint.mjs%23PostToolUse::plugins%2Fh-stack%2Flib%2Ftaint.mjs%23taintedIn::profile%2Fquick%2Fall-in-scope-subsystems::AI-AND-LLM.md%23Context%2C%20retrieval%2C%20and%20memory%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/hooks/taint.mjs#PostToolUse",
+      "boundary": "plugins/h-stack/lib/taint.mjs#taintedIn",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "AI-AND-LLM.md#Context, retrieval, and memory attack classes"
+    },
+    "surface": "Taint capture and argument-taint ask",
+    "boundary": "Provenance of values in outbound writes",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Provenance confusion for untrusted values",
+    "starting_paths": [
+      "plugins/h-stack/hooks/taint.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/taint.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules",
+      "AI-AND-LLM.md#Context, retrieval, and memory attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/hooks/taint.mjs",
+      "plugins/h-stack/hooks/gate-bash.mjs",
+      "plugins/h-stack/lib/taint.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/hooks/taint.mjs",
+          "plugins/h-stack/hooks/gate-bash.mjs",
+          "plugins/h-stack/lib/taint.mjs"
+        ],
+        "invariant": "Outbound writes using values seen only in untrusted output ask.",
+        "method": "local",
+        "result": "Attached -d and wget POST flags are not seen as writes.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-taint-argument-write-detection"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Flib%2Fcore.mjs%23appendLine::plugins%2Fh-stack%2Flib%2Fcore.mjs%23sessionDir::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/lib/core.mjs#appendLine",
+      "boundary": "plugins/h-stack/lib/core.mjs#sessionDir",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+    },
+    "surface": "State writes keyed by hook session_id",
+    "boundary": "Session path sanitiser",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Path traversal in state writes",
+    "starting_paths": [
+      "plugins/h-stack/lib/core.mjs",
+      "plugins/h-stack/hooks/classify.mjs",
+      "plugins/h-stack/bin/hs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/lib/core.mjs",
+      "plugins/h-stack/hooks/classify.mjs",
+      "plugins/h-stack/bin/hs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/lib/core.mjs",
+          "plugins/h-stack/hooks/classify.mjs",
+          "plugins/h-stack/bin/hs"
+        ],
+        "invariant": "State writes stay under .h-stack.",
+        "method": "local",
+        "result": "Contained; session_id is harness-supplied.",
+        "artifact": "agents/parent/artifacts/repro.sh"
+      }
+    ],
+    "result_fingerprints": [
+      "hs-sessiondir-session-id-traversal"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "plugins%2Fh-stack%2Fscripts%2Fsetup.mjs%23apply::plugins%2Fh-stack%2Fscripts%2Fsetup.mjs%23proposedPermissionRules::profile%2Fquick%2Fall-in-scope-subsystems::SUPPLY-CHAIN-AND-RELEASE.md%23Release%20and%20update%20attack%20classes",
+    "canonical_refs": {
+      "surface": "plugins/h-stack/scripts/setup.mjs#apply",
+      "boundary": "plugins/h-stack/scripts/setup.mjs#proposedPermissionRules",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "SUPPLY-CHAIN-AND-RELEASE.md#Release and update attack classes"
+    },
+    "surface": "Opt-in project setup",
+    "boundary": "Install-time writes",
+    "subsystem": "All in-scope plugin code (quick profile)",
+    "attack_class": "Mutable install inputs and install hooks",
+    "starting_paths": [
+      "plugins/h-stack/scripts/setup.mjs",
+      "plugins/h-stack/lib/protected.mjs"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Release and update attack classes"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "parent",
+    "reviewed_paths": [
+      "plugins/h-stack/scripts/setup.mjs",
+      "plugins/h-stack/lib/protected.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "parent",
+        "reviewed_paths": [
+          "plugins/h-stack/scripts/setup.mjs",
+          "plugins/h-stack/lib/protected.mjs"
+        ],
+        "invariant": "Nothing runs or is written at install without --apply.",
+        "method": "source",
+        "result": "No install hooks or network; writes only with --apply.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "hs-setup-install-hooks"
+    ],
+    "unresolved": []
+  }
+]

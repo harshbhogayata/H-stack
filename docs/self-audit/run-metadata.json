@@ -1,0 +1,26 @@
+{
+  "run_id": "hs-014-self-audit-1",
+  "repo": "h-stack",
+  "target": "plugins/h-stack",
+  "source_ref": "e0f31acfaa5df04f7ea90e72a92c69ec24a7e16e (worktree dirty: bin/hs, hooks/classify.mjs, hooks/register.js, hooks/session-end.mjs, scripts/ci.mjs and several SKILL.md files modified; audited as on disk 2026-11-11)",
+  "profile": "quick",
+  "scope_paths": [
+    "plugins/h-stack/hooks/*.mjs",
+    "plugins/h-stack/hooks/register.js",
+    "plugins/h-stack/hooks/hooks.json",
+    "plugins/h-stack/lib/**/*.mjs",
+    "plugins/h-stack/bin/hs",
+    "plugins/h-stack/scripts/setup.mjs"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companions": [
+    "AI-AND-LLM.md",
+    "SUPPLY-CHAIN-AND-RELEASE.md",
+    "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md"
+  ],
+  "prior_runs": [],
+  "shared_file_owner": "parent",
+  "run_status": "complete",
+  "execution_note": "User-authorised local execution of the plugin's own hooks with crafted stdin against a throwaway git fixture under /tmp; no OS-enforced sandbox, but no network installs and no inputs that reach registry lookups or gh were used. Single agent: no separate hunter, critic or verifier agents."
+}
