@@ -97,5 +97,19 @@ Researched 2026-11-11 with WebSearch (primary) and Context.dev. Numbers come fro
 - **N43 Activation telemetry (local).** Which skill was picked, used, and whether the user corrected course; feeds N3 and N29.
 - **N44 Invest where skills help most.** SkillsBench shows small gains for generic coding advice and large gains for specialised procedure; H-Stack skills encode project- and domain-specific procedure, not general best practice.
 
+### J. From Cloudflare's security work ([deep dive](09-security.md#cloudflare-deep-dive))
+- **N45 Light by default, heavy on request.** Every heavy skill has a guidance mode (answer, no files, no fan-out) and a full mode that runs only when explicitly asked; ambiguous → one question.
+- **N46 Three-verdict findings everywhere.** Reviews, audits and investigations report `confirmed` / `needs_validation` (with the exact missing fact) / `rejected`. Only confirmed items get a severity.
+- **N47 Claim schema + deterministic validator.** Structured outputs (findings, review results, plans) are checked by plain code: cited files exist, lines match, patches parse, tests run. The model never grades its own format.
+- **N48 Coverage ledger.** Reviews and audits track what was checked (area × concern) and what wasn't; "not covered" is said out loud; later runs fill gaps and re-check changed code instead of re-reading everything.
+- **N49 Reserve verification budget first.** Before spending on exploration, reserve the tokens/agents needed to verify what will be found.
+- **N50 Wishlist instead of guessing.** When blocked on something only the user can provide (credentials, a config, a running service), Claude files a short request and parks the task; it resumes when supplied. Replaces both guessing and giving up.
+- **N51 Shallow-result detector.** A review/hunt/investigation that finds nothing is flagged as possibly shallow and re-run with a different angle, not reported as "all clear".
+- **N52 Evidence-driven tooling.** Log which tools agents actually call; don't add tools or MCP servers until usage shows a need (Cloudflare's agents never called Semgrep).
+- **N53 Error-as-success guard.** Treat API/tool errors that arrive as normal text as failures; never count an empty result after an error as success.
+- **N54 Execution sandbox for untrusted code.** Running target code from untrusted sources (PRs, dependencies, downloaded repos) happens with no network, allowlisted env, read-only source, resource limits.
+- **N55 Self-audit H-Stack with the AI/LLM attack classes.** Before release, audit H-Stack's hooks, memory and skills for memory poisoning, confused-deputy tools, approval binding, unbounded loops and MCP trust inheritance.
+- **N56 Router-to-docs skills.** Platform skills route to the right upstream docs/skills rather than copying them (cloudflare/skills pattern).
+
 ## H-Stack decision
 _Not decided yet._
