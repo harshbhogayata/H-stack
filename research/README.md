@@ -13,6 +13,7 @@ Top 10 existing skills/plugins for each H-Stack category. Reference only: H-Stac
 | # | Category | File |
 |---|---|---|
 | 00 | Activation & experience | [00-activation-and-experience.md](00-activation-and-experience.md) |
+| 00b | Research-backed ideas (papers, 2025–2026) | [00b-research-backed-ideas.md](00b-research-backed-ideas.md) |
 | 01 | Core rules & principles | [01-core-rules.md](01-core-rules.md) |
 | 02 | Workflow orchestration | [02-workflow-orchestration.md](02-workflow-orchestration.md) |
 | 03 | Ideation & product thinking | [03-ideation-product.md](03-ideation-product.md) |

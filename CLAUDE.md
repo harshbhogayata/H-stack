@@ -29,7 +29,7 @@ In cloud sessions `github.com` and `api.github.com` are blocked for repos not at
 plugins/h-stack/                  the plugin (skills/, agents/, hooks/)
 research/                         top-10 per category + decisions
 ```
-Skills are invoked as `/h-stack:<skill>`. Entry name and manifest name must both be `h-stack`.
+Skills are namespaced `h-stack:<skill>` but never shown in the `/` menu. Entry name and manifest name must both be `h-stack`.
 
 ## Validate
 ```bash
