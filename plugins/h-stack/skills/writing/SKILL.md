@@ -8,7 +8,7 @@ metadata:
     category: "12"
     short: plain, specific prose; documents agents can follow
     intents: [docs, writing, readme, claude-md, prose]
-    keywords: ["\\b(write|update|edit|rewrite) (the |a |our )?(readme|docs?|documentation|changelog|release notes|claude\\.md|agents\\.md)\\b", "\\bcleaner prose\\b", "\\b(sounds|reads) (like )?(ai|robotic|generated)\\b", "\\bunslop\\b", "\\bproofread\\b", "\\b(docx|pptx|xlsx|pdf)\\b"]
+    keywords: ["\\b(write|update|edit|rewrite) (the |a |our )?(readme|docs?|documentation|changelog|release notes|claude\\.md|agents\\.md)\\b", "\\bcleaner prose\\b", "\\b(sounds|reads) (like )?(ai|robotic|generated)\\b", "\\bunslop\\b", "\\bproofread\\b", "\\bai tells?\\b", "\\b(rewrite|reword|tighten|edit) (this|the|that|our) (paragraph|sentence|text|copy|section|intro|blurb)\\b", "\\breads? (more )?plainly\\b", "\\b(docx|pptx|xlsx|pdf)\\b"]
     not_for: []
     events: []
     sizes: [light, full]

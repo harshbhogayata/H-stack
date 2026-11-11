@@ -18,7 +18,7 @@ export const NATIVE = [
 
 const CONTINUATION = /^\s*(continue|next|go on|keep going|carry on|proceed|fix that|do that|do it|yes|yep|ok(ay)?|sounds good|go ahead|resume)\b[\s.!]*$/i;
 const CODE_NOUNS = /(`|\b(function|class|method|file|test|tests|bug|error|exception|stack ?trace|api|endpoint|component|module|repo|build|deploy|commit|pr|branch|query|schema|migration|css|html|script|config|lint|type ?check|refactor|crash|regression|dependency|package)\b|\w\.(js|ts|tsx|jsx|py|go|rs|rb|java|kt|cs|php|md|json|ya?ml|toml|sql|sh)\b|\w\/\w)/i;
-const FULL_CUES = /\b(implement|build (a|an|the|out)|add (a |an |the )?(new )?(feature|endpoint|page|screen|service|integration|command)|new feature|from scratch|refactor|migrat(e|ion)|redesign|rewrite|architecture|across (the )?(code ?base|files|modules|services)|multiple files|end[- ]to[- ]end|overhaul|port (it |this )?to)\b/i;
+const FULL_CUES = /\b(implement|build (a|an|the|out)|add (a |an |the )?(new )?(feature|endpoint|page|screen|service|integration|command)|new feature|from scratch|refactor|migrat(e|ion)|redesign|rewrite (it |the |our |this |a )?([a-z-]+ ){0,2}(app|application|service|module|system|code ?base|backend|frontend|api|server|engine|library|cli)|rewrite (it )?in [a-z]+|architecture|across (the )?(code ?base|files|modules|services)|multiple files|end[- ]to[- ]end|overhaul|port (it |this )?to)\b/i;
 const QUESTION = /^\s*(what|why|how|where|when|who|which|is|are|does|do|can|could|should|explain)\b.*\?\s*$/is;
 
 export function sizeOf(prompt, matched) {
@@ -40,7 +40,7 @@ function scoreSkill(skill, prompt) {
   }
   for (const intent of skill.intents || []) {
     const word = String(intent).replace(/-/g, '[ -]?');
-    if (new RegExp(`\\b${word}`, 'i').test(prompt)) { score += 1; if (!rule) rule = `intent ${intent}`; }
+    if (new RegExp(`\\b${word}s?\\b`, 'i').test(prompt)) { score += 1; if (!rule) rule = `intent ${intent}`; }
   }
   return { score, rule };
 }
@@ -135,8 +135,22 @@ export function classify(prompt, index, state = {}, opts = {}) {
 
   const parts = [`H-Stack: size=${size}.`];
   if (route.no_questions) parts.push('User said to proceed without questions; log assumptions with hs assume.');
-  if (route.skills.length === 1) parts.push(`Relevant skill: ${route.skills[0]} (load with the Skill tool) because ${route.rules[0]}.`);
-  else if (route.skills.length === 2) parts.push(`Relevant skills (load with the Skill tool): ${route.skills[0]} (${route.rules[0]}), ${route.skills[1]} (${route.rules[1]}).`);
+  // Line wording measured with evals/activation-bench.mjs (6 prompts x 2 runs, real claude -p):
+  // pointer 11/12 loaded, check 10/12, inline 10/12. pointer stays the default; the others remain
+  // selectable through HSTACK_LINE_STYLE for re-measurement on new models.
+  const style = (typeof process !== 'undefined' && process.env && process.env.HSTACK_LINE_STYLE) || 'pointer';
+  const shortOf = (q) => (skills.find((s) => s.qualified === q) || {}).short || '';
+  if (style === 'pointer') {
+    if (route.skills.length === 1) parts.push(`Relevant skill: ${route.skills[0]} (load with the Skill tool) because ${route.rules[0]}.`);
+    else if (route.skills.length === 2) parts.push(`Relevant skills (load with the Skill tool): ${route.skills[0]} (${route.rules[0]}), ${route.skills[1]} (${route.rules[1]}).`);
+  } else {
+    for (let i = 0; i < route.skills.length; i++) {
+      const q = route.skills[i];
+      const isPlugin = q.startsWith('h-stack:');
+      if (style === 'check') parts.push(`Skill check: ${q} matches this prompt (${route.rules[i]})${isPlugin ? `; its procedure is not in context until loaded with Skill(skill: "${q}")` : ''}. If it doesn't fit, one line saying why is enough.`);
+      else parts.push(`Relevant skill: ${q} (${route.rules[i]})${isPlugin && shortOf(q) ? `: ${shortOf(q)}` : ''}. Full procedure: Skill(skill: "${q}").`);
+    }
+  }
   if (opts.secretKind) parts.push(`The prompt appears to contain a ${opts.secretKind}; H-Stack did not store it. Rotating it is safer.`);
   const line = route.skills.length || route.no_questions || opts.secretKind ? parts.join(' ') : '';
   return { route, line };

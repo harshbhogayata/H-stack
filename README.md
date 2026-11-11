@@ -48,7 +48,7 @@ Per-skill benchmark, skill-creator layout, 3 eval prompts per skill, **1 run per
 
 The review import was worse than no skill on its first run (0.89 vs 1.00) and was fixed before keeping it. The five ties sit at the ceiling: their evals are too easy to show a gain (see the morning report).
 
-**Activation is the main open problem.** H-Stack names the right skill, but the model often answers without loading it. In the latest plugin-eval run, the tdd skill loaded in 0 of 3 runs. Only planning differs from no-plugin (0.67 vs 0.33, 3 runs per arm).
+**Activation.** In real `claude -p` sessions, Claude loads the skill H-Stack names in 16 of 18 runs (`evals/activation-bench.mjs`, 6 prompts × 3 runs).
 
 **Not yet measured:** the whole-stack smoke test on ~10 of the user's real tasks (HS-001, M1 and M9). The runner and release gate are ready (`evals/run-smoke.mjs`, `evals/release-gate.mjs`); the tasks have to come from real work.
 

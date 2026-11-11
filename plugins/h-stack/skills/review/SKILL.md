@@ -8,7 +8,7 @@ metadata:
     category: "07"
     short: evidence-backed review; verify feedback before acting
     intents: [review, feedback, pr-comments]
-    keywords: ["\\breview (this|my|the) (diff|change|changes|pr|pull request|code|branch)\\b", "\\bcode review\\b", "\\b(review|pr) (comments?|feedback)\\b", "\\breviewer (said|says|asked|wants)\\b", "\\baddress (the )?(review|comments|feedback)\\b", "\\bbefore (I |we )?merge\\b"]
+    keywords: ["\\breview (this|my|the) (diff|change|changes|pr|pull request|code|branch)\\b", "\\bcode review\\b", "\\b(review|pr) (comments?|feedback)\\b", "\\breviewer (said|says|asked|wants)\\b", "\\baddress (the )?(review|comments|feedback)\\b", "\\bbefore (I |we )?merge\\b", "\\breviewer (left|wrote|gave|posted)\\b", "\\b(comments|feedback|suggestions) (on|from|for) (my|the|a|our) (pr|pull request|review|reviewer)\\b", "\\bwhich (comments|suggestions) to accept\\b"]
     not_for: []
     events: [pre_push]
     sizes: [light, full]

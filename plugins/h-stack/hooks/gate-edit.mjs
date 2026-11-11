@@ -4,7 +4,7 @@
 // HS-034 .env must be git-ignored, HS-023 subagent scratch isolation. Returns deny or ask only.
 import fs from 'node:fs';
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJson, loadConfig, refusal, preDecision, relToProject, git } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, relToProject, git } from '../lib/core.mjs';
 import { isTestPath } from '../lib/tests.mjs';
 import { protectedKind } from '../lib/protected.mjs';
 import { manifestAdds, importAdds, checkPackages } from '../lib/deps.mjs';
@@ -53,7 +53,14 @@ export async function decide(input, proj) {
     else if (kind === 'checker') asks.push(refusal('protected-checker', `${rel} is a CI, agent or test-runner config`, 'the user approves edits to checkers'));
 
     const exists = fs.existsSync(abs);
-    if (isTestPath(rel, proj, config) && exists && !testPhaseActive(dir, input.prompt_id || route.prompt_id, proj, config)) {
+    // Test files Claude created in this session are its own new tests, not existing ones: red-green
+    // adds to them slice by slice. Measured: the tdd activation eval regressed (0.50 vs 1.00)
+    // because the second slice into a just-created test file was blocked.
+    const createdFile = path.join(dir, 'created-tests.jsonl');
+    const isTest = isTestPath(rel, proj, config);
+    if (isTest && !exists) appendLine(createdFile, { path: rel, ts: Date.now() }, proj);
+    const createdHere = isTest && exists && readJsonl(createdFile).some((r) => r.path === rel);
+    if (isTest && exists && !createdHere && !testPhaseActive(dir, input.prompt_id || route.prompt_id, proj, config)) {
       const t = input.tool_input || {};
       const diff = input.tool_name === 'Write' ? 'full rewrite of an existing test file' : miniDiff(t.old_string ?? (t.edits || []).map((e) => e.old_string).join('\n'), t.new_string ?? (t.edits || []).map((e) => e.new_string).join('\n'));
       asks.push(refusal('read-only-tests', `editing the existing test file ${rel} outside a declared test-writing step (${diff.slice(0, 400)})`, 'declare the step with hs phase test before implementation edits, or the user approves this diff'));

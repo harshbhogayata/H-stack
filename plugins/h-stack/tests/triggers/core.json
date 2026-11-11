@@ -1,22 +1,122 @@
 {
   "h-stack:debugging": {
-    "should": ["The tests fail with a traceback after my change", "Why does the login endpoint crash with a 500?", "CI is red since yesterday, find out why", "This query got 10x slower after the upgrade", "The checkout test is flaky on CI", "npm test fails with ENOENT for config.json", "There's a regression in the date parser", "Getting a segfault when I load big files"],
-    "should_not": ["Rename the variable x to total in utils.py", "Write a README section about installation", "What's the difference between merge and rebase?", "Add a dark-mode toggle to settings", "Draft a commit message for this change"]
+    "should": [
+      "The tests fail with a traceback after my change",
+      "Why does the login endpoint crash with a 500?",
+      "CI is red since yesterday, find out why",
+      "This query got 10x slower after the upgrade",
+      "The checkout test is flaky on CI",
+      "npm test fails with ENOENT for config.json",
+      "There's a regression in the date parser",
+      "Getting a segfault when I load big files"
+    ],
+    "should_not": [
+      "Rename the variable x to total in utils.py",
+      "Write a README section about installation",
+      "What's the difference between merge and rebase?",
+      "Add a dark-mode toggle to settings",
+      "Draft a commit message for this change"
+    ]
   },
   "h-stack:tdd": {
-    "should": ["Add is_leap_year using TDD", "Work test-first on the new discount function", "Do red-green on this feature", "Write a failing test first, then fix the bug", "Migrate users.json to the v2 format without losing records"],
-    "should_not": ["Explain what this regex does", "The tests fail with a traceback", "Plan the multi-currency feature"]
+    "should": [
+      "Add is_leap_year using TDD",
+      "Work test-first on the new discount function",
+      "Do red-green on this feature",
+      "Write a failing test first, then fix the bug",
+      "Migrate users.json to the v2 format without losing records"
+    ],
+    "should_not": [
+      "Explain what this regex does",
+      "The tests fail with a traceback",
+      "Plan the multi-currency feature"
+    ]
   },
   "h-stack:planning": {
-    "should": ["Write an implementation plan for SPEC.md", "Break this feature down into steps", "Implement a new feature: CSV export for invoices across the API", "Execute the plan in docs/plan.md", "Create a step-by-step plan for the migration"],
-    "should_not": ["Fix the typo in the footer", "Why does this test fail?", "What time zone does the server use?"]
+    "should": [
+      "Write an implementation plan for SPEC.md",
+      "Break this feature down into steps",
+      "Implement a new feature: CSV export for invoices across the API",
+      "Execute the plan in docs/plan.md",
+      "Create a step-by-step plan for the migration"
+    ],
+    "should_not": [
+      "Fix the typo in the footer",
+      "Why does this test fail?",
+      "What time zone does the server use?"
+    ]
   },
   "h-stack:clarify": {
-    "should": ["Grill me on this design", "Stress-test my plan for the billing rewrite", "I'm not sure what the requirements are for the export", "Implement a new feature: user roles across the app"],
-    "should_not": ["Fix the typo in the footer, just do it", "Run the tests", "thanks!"]
+    "should": [
+      "Grill me on this design",
+      "Stress-test my plan for the billing rewrite",
+      "I'm not sure what the requirements are for the export",
+      "Implement a new feature: user roles across the app"
+    ],
+    "should_not": [
+      "Fix the typo in the footer, just do it",
+      "Run the tests",
+      "thanks!"
+    ]
   },
   "h-stack:core-rules": {
-    "should": ["Is it done? Make sure it works before you say so", "Verify the fix before we commit", "It's slow because of the cache, remove it", "Ready to commit?"],
-    "should_not": ["What's a monad?", "Write a haiku about deploys"]
+    "should": [
+      "Is it done? Make sure it works before you say so",
+      "Verify the fix before we commit",
+      "It's slow because of the cache, remove it",
+      "Ready to commit?"
+    ],
+    "should_not": [
+      "What's a monad?",
+      "Write a haiku about deploys"
+    ]
+  },
+  "h-stack:review": {
+    "should": [
+      "A reviewer left comments on my PR; which ones should I accept?",
+      "Address the review comments on PR 12",
+      "Do a code review of my branch before I merge",
+      "Go through the feedback on my pull request and draft replies"
+    ],
+    "should_not": [
+      "Rewrite this paragraph so it reads plainly",
+      "Research which Node version shipped fetch",
+      "Add a dark-mode toggle to settings"
+    ]
+  },
+  "h-stack:writing": {
+    "should": [
+      "Rewrite this paragraph for our README so it has no AI tells",
+      "Update the README installation section",
+      "Proofread the release notes",
+      "This intro sounds like AI, make it plain"
+    ],
+    "should_not": [
+      "A reviewer left comments on my PR; which ones should I accept?",
+      "Rewrite our auth service to use sessions",
+      "Why does the login endpoint crash with a 500?"
+    ]
+  },
+  "h-stack:research": {
+    "should": [
+      "Research which Node.js version first shipped a stable built-in fetch, with primary sources",
+      "Compare libraries for PDF generation in Python",
+      "Find out whether Postgres 16 supports MERGE ... RETURNING"
+    ],
+    "should_not": [
+      "Rename the variable x to total in utils.py",
+      "Open a PR for this branch"
+    ]
+  },
+  "h-stack:git-ship": {
+    "should": [
+      "Open a PR for this branch with a good description",
+      "Resolve the merge conflicts in package.json",
+      "Set up a worktree for the hotfix"
+    ],
+    "should_not": [
+      "Research which Node.js version first shipped a stable built-in fetch",
+      "What's the primary key of the users table?"
+    ]
   }
 }

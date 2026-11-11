@@ -1,0 +1,335 @@
+{
+  "summary": {
+    "pointer": {
+      "loaded": 11,
+      "runs": 12,
+      "rate": 0.92
+    },
+    "check": {
+      "loaded": 10,
+      "runs": 12,
+      "rate": 0.83
+    },
+    "inline": {
+      "loaded": 10,
+      "runs": 12,
+      "rate": 0.83
+    }
+  },
+  "runs": [
+    {
+      "style": "pointer",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [
+        "h-stack:writing"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "pointer",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "pointer",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "check",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "check",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "debug-typeerror",
+      "expect": "debugging",
+      "skills": [
+        "h-stack:debugging"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "tdd-leap",
+      "expect": "tdd",
+      "skills": [
+        "h-stack:tdd"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "check",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "inline",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "review-feedback",
+      "expect": "review",
+      "skills": [
+        "h-stack:review"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "writing-skill-doc",
+      "expect": "writing",
+      "skills": [],
+      "loaded": false
+    },
+    {
+      "style": "inline",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "plan-feature",
+      "expect": "planning",
+      "skills": [
+        "h-stack:planning"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    },
+    {
+      "style": "inline",
+      "case": "research-cited",
+      "expect": "research",
+      "skills": [
+        "h-stack:research"
+      ],
+      "loaded": true
+    }
+  ]
+}

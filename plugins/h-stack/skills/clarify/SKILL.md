@@ -30,7 +30,7 @@ Runs before the first edit on `full`-size or ambiguous requests (H-Stack's class
 One of three outcomes, decided before editing:
 
 - **Act**: the request is clear enough, or the remaining gaps are low-stakes. Proceed; record the assumptions you made with `hs assume "<a>" --check "<how>"` and list them in the reply.
-- **Ask**: 1–3 questions whose answers would change the outcome. Each has your recommended answer and one line on why it matters.
+- **Ask**: 1–3 questions whose answers would change the outcome. Each has your recommended answer and one line on why it matters. Count every question in the reply, blocking facts included; other decisions go under "Assumed unless you say otherwise" with your default, not as more questions.
 - **Stop**: the request can't be done as asked (contradictory, unsafe, or blocked on something only the user has). Explain and record `hs stop "<reason>"`, or park the need with `hs wish "<need>" --resume "<task>"`.
 
 For a fresh, independent read of a large request, dispatch the `h-stack:intent-check` subagent (read-only) with the request; it returns `{decision, questions, assumptions}` as JSON.

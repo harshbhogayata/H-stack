@@ -492,7 +492,10 @@
         "\\b(review|pr) (comments?|feedback)\\b",
         "\\breviewer (said|says|asked|wants)\\b",
         "\\baddress (the )?(review|comments|feedback)\\b",
-        "\\bbefore (I |we )?merge\\b"
+        "\\bbefore (I |we )?merge\\b",
+        "\\breviewer (left|wrote|gave|posted)\\b",
+        "\\b(comments|feedback|suggestions) (on|from|for) (my|the|a|our) (pr|pull request|review|reviewer)\\b",
+        "\\bwhich (comments|suggestions) to accept\\b"
       ],
       "modes": {
         "default": "guidance",
@@ -648,6 +651,9 @@
         "\\b(sounds|reads) (like )?(ai|robotic|generated)\\b",
         "\\bunslop\\b",
         "\\bproofread\\b",
+        "\\bai tells?\\b",
+        "\\b(rewrite|reword|tighten|edit) (this|the|that|our) (paragraph|sentence|text|copy|section|intro|blurb)\\b",
+        "\\breads? (more )?plainly\\b",
         "\\b(docx|pptx|xlsx|pdf)\\b"
       ],
       "modes": {
