@@ -1,0 +1,2 @@
+exit 0
+report test passed

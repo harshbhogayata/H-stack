@@ -1,0 +1,44 @@
+diff --git a/lib/settings.js b/lib/settings.js
+index db4b0af..0a18468 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,7 +1,14 @@
+ const path = require('path');
+ 
++// Loaded once and frozen: require() caches this object process-wide, so it
++// must never be handed out directly or callers can mutate global defaults.
++const DEFAULTS = Object.freeze(
++  require(path.join(__dirname, '..', 'config', 'defaults.json'))
++);
++
++// Returns a fresh copy on every call; callers may mutate it freely.
+ function getDefaults() {
+-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));
++  return structuredClone(DEFAULTS);
+ }
+ 
+ module.exports = { getDefaults };
+diff --git a/test/settings.test.js b/test/settings.test.js
+new file mode 100644
+index 0000000..be25cc3
+--- /dev/null
++++ b/test/settings.test.js
+@@ -0,0 +1,18 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { getDefaults } = require('../lib/settings');
++const { createCustomer } = require('../lib/customers');
++const { refundTotal } = require('../lib/money');
++
++test('getDefaults returns an independent copy each call', () => {
++  const a = getDefaults();
++  a.currency = 'XXX';
++  assert.notEqual(getDefaults(), a);
++  assert.equal(getDefaults().currency, 'EUR');
++});
++
++test('customer preferences do not leak into global defaults', () => {
++  createCustomer({ id: 'c-leak', name: 'Leak', prefs: { currency: 'USD' } });
++  assert.equal(getDefaults().currency, 'EUR');
++  assert.equal(refundTotal([{ cents: 100 }]), '-1.00 EUR');
++});

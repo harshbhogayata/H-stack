@@ -1,0 +1,11 @@
+diff --git a/math.js b/math.js
+index ba8d10b..af242f9 100644
+--- a/math.js
++++ b/math.js
+@@ -1,6 +1,5 @@
+ // Small math helpers used by the billing report.
+ function add(a, b) {
+-  if (a < 0 || b < 0) return Math.abs(a) + Math.abs(b);
+   return a + b;
+ }
+ 

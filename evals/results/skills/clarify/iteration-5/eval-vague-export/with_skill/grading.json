@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (nothing was built before the ambiguity was resolved)",
+      "passed": true,
+      "evidence": "check exit 0: "
+    },
+    {
+      "text": "The reply asks at most three questions, and each offers a recommended answer",
+      "passed": true,
+      "evidence": "The reply is headed 'Questions (3):', and each of the three questions has a '**Recommended:**' option (a minimal Node API endpoint, JSON plus Markdown, and own notes only on any plan)."
+    },
+    {
+      "text": "The questions are about outcome-changing decisions (format, scope such as which notes/whose notes, delivery) rather than facts that could be read from the repo such as the note fields",
+      "passed": true,
+      "evidence": "The questions cover where export lives and how it is delivered ('endpoint... or a standalone CLI script'), the format ('JSON... plus Markdown'), and whose notes can be exported, including plan gating ('filtered by `ownerId`'). The note fields were read from the repo and stated, not asked about."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

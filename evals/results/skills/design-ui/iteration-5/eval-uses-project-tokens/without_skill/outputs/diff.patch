@@ -1,0 +1,66 @@
+diff --git a/SettingsPage.jsx b/SettingsPage.jsx
+new file mode 100644
+index 0000000..dcdd9d9
+--- /dev/null
++++ b/SettingsPage.jsx
+@@ -0,0 +1,46 @@
++import { useState } from "react";
++import { Button } from "./Button";
++import "./settings.css";
++
++export function SettingsPage({ initialSettings = {}, onSave }) {
++  const [displayName, setDisplayName] = useState(initialSettings.displayName ?? "");
++  const [emailNotifications, setEmailNotifications] = useState(
++    initialSettings.emailNotifications ?? true
++  );
++
++  function handleSubmit(event) {
++    event.preventDefault();
++    onSave?.({ displayName: displayName.trim(), emailNotifications });
++  }
++
++  return (
++    <form className="settings" onSubmit={handleSubmit}>
++      <h1 className="settings__title">Settings</h1>
++
++      <label className="settings__field">
++        <span className="settings__label">Display name</span>
++        <input
++          className="settings__input"
++          type="text"
++          name="displayName"
++          value={displayName}
++          onChange={(e) => setDisplayName(e.target.value)}
++          autoComplete="nickname"
++        />
++      </label>
++
++      <label className="settings__toggle">
++        <input
++          type="checkbox"
++          role="switch"
++          name="emailNotifications"
++          checked={emailNotifications}
++          onChange={(e) => setEmailNotifications(e.target.checked)}
++        />
++        <span className="settings__label">Email notifications</span>
++      </label>
++
++      <Button type="submit">Save</Button>
++    </form>
++  );
++}
+diff --git a/settings.css b/settings.css
+new file mode 100644
+index 0000000..7c5f1a4
+--- /dev/null
++++ b/settings.css
+@@ -0,0 +1,8 @@
++.settings { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; max-width: 420px; padding: 24px; background: var(--color-surface); color: var(--color-text); border-radius: var(--radius); font-family: var(--font-ui); }
++.settings__title { margin: 0; font-size: 1.25rem; }
++.settings__field { display: flex; flex-direction: column; gap: 6px; width: 100%; }
++.settings__label { font-size: 0.875rem; }
++.settings__input { padding: 6px 10px; background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-bg); border-radius: var(--radius); font-family: var(--font-ui); }
++.settings__input:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
++.settings__toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
++.settings__toggle input { accent-color: var(--color-accent); }

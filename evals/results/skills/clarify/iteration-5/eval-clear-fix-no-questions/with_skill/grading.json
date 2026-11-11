@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (fixed)",
+      "passed": true,
+      "evidence": "check exit 0: ok\n"
+    },
+    {
+      "text": "The agent made the fix without asking the user any clarifying question",
+      "passed": true,
+      "evidence": "The final message says \"The request was small and clear, so I made the change without asking anything first,\" and the diff shows '!!' changed to '!' in greet.js."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

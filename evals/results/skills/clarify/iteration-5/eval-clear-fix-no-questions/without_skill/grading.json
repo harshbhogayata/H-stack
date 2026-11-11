@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (fixed)",
+      "passed": true,
+      "evidence": "check exit 0: ok\n"
+    },
+    {
+      "text": "The agent made the fix without asking the user any clarifying question",
+      "passed": true,
+      "evidence": "The diff changes `'!!'` to `'!'` in greet.js. The final message (\"`greet()` now adds one exclamation mark instead of two... `node test.js` passes\") reports the finished fix and asks no question; only the final message was provided, but nothing in it shows a clarifying question."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

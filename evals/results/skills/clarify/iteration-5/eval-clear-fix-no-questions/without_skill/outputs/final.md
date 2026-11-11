@@ -1,0 +1,1 @@
+`greet()` now adds one exclamation mark instead of two, so `greet('Bo')` returns `'Hello, Bo!'`. The fix is at `greet.js:2`, and `node test.js` passes.

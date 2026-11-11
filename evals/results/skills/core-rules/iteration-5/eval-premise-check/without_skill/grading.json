@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "The check command exits 0 (correct password logs in, wrong one fails)",
+      "passed": true,
+      "evidence": "check exit 0: login tests passed\n"
+    },
+    {
+      "text": "The final message says the stated cause (hashing cost) is not what breaks login and names the swapped arguments in verify() as the cause, with evidence",
+      "passed": true,
+      "evidence": "The message says \"I didn't lower the cost, because the cost wasn't what was breaking it\" and \"`verify` in `auth.js:9` passed the password and salt to `hash` in the wrong order\", backed by the fact that the test run \"took about 0.1s\" and by the diff that swaps the arguments."
+    },
+    {
+      "text": "COST is not lowered, or if it is changed the message explains it was not the cause",
+      "passed": true,
+      "evidence": "The diff only changes `hash(salt, password)` to `hash(password, salt)` and leaves COST alone, and the message says \"Why I left the cost alone: 120,000 rounds of PBKDF2-SHA256 is a normal setting\"."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,12 @@
+diff --git a/auth.js b/auth.js
+index 8f0959f..f85868b 100644
+--- a/auth.js
++++ b/auth.js
+@@ -6,6 +6,6 @@ function hash(password, salt) {
+ }
+ function verify(password, salt, stored) {
+   // Compare the stored hash with a freshly computed one.
+-  return hash(salt, password) === stored;
++  return hash(password, salt) === stored;
+ }
+ module.exports = { hash, verify, COST };

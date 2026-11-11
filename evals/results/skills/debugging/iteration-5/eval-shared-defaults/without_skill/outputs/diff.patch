@@ -1,0 +1,62 @@
+diff --git a/lib/customers.js b/lib/customers.js
+index b3815fc..c41fbd3 100644
+--- a/lib/customers.js
++++ b/lib/customers.js
+@@ -2,7 +2,7 @@ const { getDefaults } = require('./settings');
+ 
+ function createCustomer({ id, name, prefs = {} }) {
+   if (!id) throw new Error('customer id is required');
+-  return { id, name, prefs: Object.assign(getDefaults(), prefs) };
++  return { id, name, prefs: { ...getDefaults(), ...prefs } };
+ }
+ 
+ module.exports = { createCustomer };
+diff --git a/lib/settings.js b/lib/settings.js
+index db4b0af..a75af63 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,7 +1,22 @@
+ const path = require('path');
+ 
++// require() caches the parsed JSON, so the object it returns is shared by every
++// caller. Deep-freeze it so no one can mutate the global defaults, and hand out
++// copies from getDefaults().
++const DEFAULTS = deepFreeze(
++  require(path.join(__dirname, '..', 'config', 'defaults.json'))
++);
++
++function deepFreeze(obj) {
++  for (const value of Object.values(obj)) {
++    if (value && typeof value === 'object') deepFreeze(value);
++  }
++  return Object.freeze(obj);
++}
++
++// Returns a fresh, mutable copy on every call.
+ function getDefaults() {
+-  return require(path.join(__dirname, '..', 'config', 'defaults.json'));
++  return structuredClone(DEFAULTS);
+ }
+ 
+ module.exports = { getDefaults };
+diff --git a/test/billing.test.js b/test/billing.test.js
+index 091559a..a9b1ef3 100644
+--- a/test/billing.test.js
++++ b/test/billing.test.js
+@@ -20,3 +20,16 @@ test('creates a customer with their own preferences', () => {
+ test('formats a refund', () => {
+   assert.equal(refundTotal([{ cents: 500 }, { cents: 250 }]), '-7.50 EUR');
+ });
++
++test('customer preferences do not leak into global defaults', () => {
++  createCustomer({ id: 'c2', name: 'Bob', prefs: { currency: 'USD', precision: 0 } });
++  assert.equal(formatTotal(1230), '12.30 EUR');
++  assert.equal(refundTotal([{ cents: 100 }]), '-1.00 EUR');
++});
++
++test('getDefaults returns an independent copy each call', () => {
++  const { getDefaults } = require('../lib/settings');
++  const a = getDefaults();
++  a.currency = 'JPY';
++  assert.equal(getDefaults().currency, 'EUR');
++});
