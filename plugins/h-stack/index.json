@@ -146,7 +146,10 @@
         "\\b(too )?slow(er)?\\b",
         "\\bbug\\b",
         "\\bdoesn'?t work\\b",
-        "\\berror\\b",
+        "\\berrors? (message|when|on|in|at|after|while|saying|says)\\b",
+        "\\berror:",
+        "\\b(throws?|threw|raises?|raised|getting|got|gives?|see|seeing) (an? |this |that |the )?\\w*error\\b",
+        "\\b[A-Z][a-z]+Error\\b",
         "\\b(returns?|gives?|comes? out( as| in)?|shows?|prints?) .{1,40} instead of\\b",
         "\\b[\\w./-]+\\.(test|spec)\\.[jt]sx? fails?\\b",
         "\\btests? in [\\w./-]+ fails?\\b"

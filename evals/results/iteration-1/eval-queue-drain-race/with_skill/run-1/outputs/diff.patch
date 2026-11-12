@@ -1,0 +1,22 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/lib/queue.js b/lib/queue.js
+index 2967b11..db03151 100644
+--- a/lib/queue.js
++++ b/lib/queue.js
+@@ -2,7 +2,7 @@ function createQueue(worker) {
+   const pending = [];
+   return {
+     push(job) { pending.push(worker(job)); },
+-    async drain() { const p = pending.splice(0); p.forEach((x) => x.catch(() => {})); return p.length; },
++    async drain() { const p = pending.splice(0); await Promise.allSettled(p); return p.length; },
+   };
+ }
+ module.exports = { createQueue };

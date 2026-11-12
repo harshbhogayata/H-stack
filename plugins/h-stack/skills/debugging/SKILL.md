@@ -8,7 +8,7 @@ metadata:
     category: "06"
     short: root cause before any fix, then prove it
     intents: [bug, debug, regression, crash, flaky, slow, performance]
-    keywords: ["\\btraceback\\b", "\\bstack ?trace\\b", "\\b(tests?|build|ci|it) (is |are )?(fail(s|ing|ed)?|broken|red)\\b", "\\bfail(s|ing|ed)? (with|on)\\b", "\\bwhy (does|is|did) .{0,40}(break|fail|crash|wrong|slow)", "\\bregression\\b", "\\bflaky\\b", "\\b(exception|segfault|panic|crash(es|ed)?)\\b", "\\b(too )?slow(er)?\\b", "\\bbug\\b", "\\bdoesn'?t work\\b", "\\berror\\b", "\\b(returns?|gives?|comes? out( as| in)?|shows?|prints?) .{1,40} instead of\\b", "\\b[\\w./-]+\\.(test|spec)\\.[jt]sx? fails?\\b", "\\btests? in [\\w./-]+ fails?\\b"]
+    keywords: ["\\btraceback\\b", "\\bstack ?trace\\b", "\\b(tests?|build|ci|it) (is |are )?(fail(s|ing|ed)?|broken|red)\\b", "\\bfail(s|ing|ed)? (with|on)\\b", "\\bwhy (does|is|did) .{0,40}(break|fail|crash|wrong|slow)", "\\bregression\\b", "\\bflaky\\b", "\\b(exception|segfault|panic|crash(es|ed)?)\\b", "\\b(too )?slow(er)?\\b", "\\bbug\\b", "\\bdoesn'?t work\\b", "\\berrors? (message|when|on|in|at|after|while|saying|says)\\b", "\\berror:", "\\b(throws?|threw|raises?|raised|getting|got|gives?|see|seeing) (an? |this |that |the )?\\w*error\\b", "\\b[A-Z][a-z]+Error\\b", "\\b(returns?|gives?|comes? out( as| in)?|shows?|prints?) .{1,40} instead of\\b", "\\b[\\w./-]+\\.(test|spec)\\.[jt]sx? fails?\\b", "\\btests? in [\\w./-]+ fails?\\b"]
     not_for: []
     events: [test_failed, build_failed]
     sizes: [light, full]

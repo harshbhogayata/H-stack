@@ -1,0 +1,88 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..b5f848b
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,73 @@
++# Review: pricing.js against SPEC.md
++
++SPEC.md: "Bulk lines (qty >= 10) get 10% off that line. Coupons apply after bulk discounts. Tax is 20% on the discounted subtotal, rounded to cents."
++
++Every output below came from running the current `pricing.js` with `node`. Expected values come from the spec, with ordinary half-up rounding to cents.
++
++## 1. Bulk discount is applied twice, and spreads to lines that aren't bulk (High)
++
++`pricing.js:9-10`
++
++`lineTotal` already takes 10% off each bulk line (`pricing.js:4`). Then `orderTotal` takes another 10% off the **whole subtotal** whenever any line is bulk. That breaks the spec in two ways:
++
++- A bulk line gets 19% off instead of 10%.
++- Lines that aren't bulk also get 10% off when they share an order with a bulk line. The spec says the discount is for "that line" only.
++
++| Input | Expected | Actual |
++|---|---|---|
++| `orderTotal([{unit:10, qty:10}])` | 100 × 0.9 = 90 → ×1.2 = **108.00** | **97.20** |
++| `orderTotal([{unit:10, qty:10}, {unit:5, qty:1}])` | (90 + 5) × 1.2 = **114.00** | **102.60** |
++
++Fix: delete lines 9-10. The per-line discount in `lineTotal` is what the spec describes. (The variable name `bulkUnits` is also wrong: it counts lines, not units.)
++
++## 2. Rounding to cents gives the wrong result on exact half-cent values (Medium)
++
++`pricing.js:12`
++
++`Math.round(x * 100) / 100` works on binary floating-point numbers. When the true total ends in exactly half a cent, `x * 100` can come out as `…49999` and round down. This can happen with ordinary cent prices once a coupon is applied:
++
++| Input | Exact value | Expected | Actual |
++|---|---|---|---|
++| `orderTotal([{unit:0.25, qty:1}], {percent:5})` | 0.25 × 0.95 × 1.2 = 0.285 | **0.29** | **0.28** |
++| `orderTotal([{unit:0.15, qty:1}], {percent:25})` | 0.1125 × 1.2 = 0.135 | **0.14** | **0.13** |
++| `orderTotal([{unit:1.3375, qty:1}])` | 1.605 | **1.61** | **1.60** |
++
++Fix: do the arithmetic in integer cents, or use a decimal library, and round once with a stated rule (for example half-up).
++
++## 3. The code rounds the total, but the spec says to round the tax (Low, needs a decision)
++
++`pricing.js:12`
++
++The spec says "Tax is 20% … rounded to cents", so the tax amount is what gets rounded. The code instead rounds `subtotal * 1.2`, the total. The two only differ when the discounted subtotal has fractions of a cent, which coupons cause (see finding 2). In that case the spec doesn't say whether the subtotal itself is rounded either.
++
++- Input: `orderTotal([{unit:0.25, qty:1}], {percent:5})`. The subtotal is 0.2375. Taken literally, the spec rounds the tax to 0.05 and leaves the total at 0.2875, which isn't a cent amount. The code returns 0.28.
++
++Recommendation: change the spec to say "round the discounted subtotal to cents, compute tax and round it to cents, total = subtotal + tax", or whatever rule is actually intended, and make the code match.
++
++## 4. Coupon percent is not checked, so totals can go negative or rise (Low)
++
++`pricing.js:11`
++
++The spec doesn't give a range for coupons, and the code accepts any value of `percent`:
++
++| Input | Actual |
++|---|---|
++| `orderTotal([{unit:10, qty:1}], {percent:150})` | **-6** (a negative order total) |
++| `orderTotal([{unit:10, qty:1}], {percent:-50})` | **18** (the "coupon" raises the price by 50%) |
++
++Recommendation: reject or clamp values outside 0-100.
++
++## 5. Coupons that aren't percentages are silently ignored (Low, needs a decision)
++
++`pricing.js:11`
++
++The spec says "Coupons", with no type. The code only reads `coupon.percent`. Any other kind of coupon is dropped without an error:
++
++- Input: `orderTotal([{unit:10, qty:1}], {amount:5})` returns **12**, the same as having no coupon.
++
++If percentage coupons are the only kind, the spec should say so and the code should reject other shapes. Otherwise it needs to handle the other kinds.
++
++## Notes
++
++- There are no tests. `npm test` runs `node --test`, but the repo has no test files. The inputs above would make good regression cases.
++- I didn't change any code.

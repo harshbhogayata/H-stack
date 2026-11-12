@@ -1,0 +1,39 @@
+diff --git a/src/formatGreeting.js b/src/formatGreeting.js
+new file mode 100644
+index 0000000..17657c0
+--- /dev/null
++++ b/src/formatGreeting.js
+@@ -0,0 +1,10 @@
++/**
++ * Formats a greeting for a user's display name.
++ * Falls back to a generic greeting when the name is empty or whitespace.
++ * @param {string} [displayName]
++ * @returns {string}
++ */
++export function formatGreeting(displayName) {
++  const name = typeof displayName === 'string' ? displayName.trim() : '';
++  return name ? `Hello, ${name}!` : 'Hello!';
++}
+diff --git a/src/formatGreeting.test.js b/src/formatGreeting.test.js
+new file mode 100644
+index 0000000..7b6a75b
+--- /dev/null
++++ b/src/formatGreeting.test.js
+@@ -0,0 +1,17 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { formatGreeting } from './formatGreeting.js';
++
++test('greets by display name', () => {
++  assert.equal(formatGreeting('Ada Lovelace'), 'Hello, Ada Lovelace!');
++});
++
++test('trims surrounding whitespace', () => {
++  assert.equal(formatGreeting('  Ada  '), 'Hello, Ada!');
++});
++
++test('falls back when name is missing or blank', () => {
++  assert.equal(formatGreeting(), 'Hello!');
++  assert.equal(formatGreeting(''), 'Hello!');
++  assert.equal(formatGreeting('   '), 'Hello!');
++});

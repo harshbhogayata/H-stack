@@ -21,6 +21,9 @@ const CODE_NOUNS = /(`|\b(function|class|method|file|test|tests|bug|error|except
 const FULL_CUES = /\b(implement|build (a|an|the|out)|add (a |an |the )?(new )?(feature|endpoint|page|screen|service|integration|command)|new feature|from scratch|refactor|migrat(e|ion)|redesign|rewrite (it |the |our |this |a )?([a-z-]+ ){0,2}(app|application|service|module|system|code ?base|backend|frontend|api|server|engine|library|cli)|rewrite (it )?in [a-z]+|architecture|across (the )?(code ?base|files|modules|services)|multiple files|end[- ]to[- ]end|overhaul|port (it |this )?to)\b/i;
 const QUESTION = /^\s*(what|why|how|where|when|who|which|is|are|does|do|can|could|should|explain)\b.*\?\s*$/is;
 
+// Up to four words: a verb that asks for new behaviour plus a bare noun, nothing else.
+const VAGUE_ASK = /^\s*(add|build|implement|create|make|support|enable)\s+(an? |the |some )?[a-z][a-z-]*( [a-z][a-z-]*)?\s*[.!]?\s*$/i;
+
 export function sizeOf(prompt, matched) {
   const p = String(prompt || '');
   if (FULL_CUES.test(p) || p.length > 900) return 'full';
@@ -104,7 +107,10 @@ export function classify(prompt, index, state = {}, opts = {}) {
   const names = new Set(scored.map((x) => x.s.qualified));
   let kept = scored.filter((x) => !(x.s.not_for || []).some((n) => names.has(n)));
   const nativeHits = NATIVE.filter((n) => n.re.test(text) && !route.excluded.includes(n.name));
-  const size = route.size || sizeOf(text, kept.length + nativeHits.length);
+  // A bare feature request with no detail ("Add export.") goes to the act/ask/stop check (user decision
+  // 2026-11-12; the smoke test showed both arms guessing a format instead of asking).
+  const vague = VAGUE_ASK.test(text) && !CODE_NOUNS.test(text.trim().split(/\s+/).slice(1).join(' '));
+  const size = route.size || (vague ? 'light' : sizeOf(text, kept.length + nativeHits.length));
   route.size = size;
   if (size === 'direct' && !route.override) {
     route.playbook = null;
@@ -120,6 +126,11 @@ export function classify(prompt, index, state = {}, opts = {}) {
 
   // Act/ask/stop (HS-020): full prompts get the intent check unless the user said "just do it".
   const clarify = skills.find((s) => s.name === 'clarify');
+  if (vague && !route.no_questions && clarify && !route.excluded.includes(clarify.qualified) && !route.skills.includes(clarify.qualified)) {
+    route.skills = [clarify.qualified, ...route.skills].slice(0, 2);
+    route.rules = ['short request with no detail: act/ask/stop check first', ...route.rules].slice(0, 2);
+    route.playbook = route.skills[0];
+  }
   if (size === 'full' && !route.no_questions && clarify && !route.excluded.includes(clarify.qualified) && !route.skills.includes(clarify.qualified)) {
     if (route.skills.length >= 2) route.skills.pop(), route.rules.pop();
     route.skills.push(clarify.qualified);

@@ -1,0 +1,34 @@
+diff --git a/lib/queue.js b/lib/queue.js
+index 2967b11..1c39062 100644
+--- a/lib/queue.js
++++ b/lib/queue.js
+@@ -2,7 +2,16 @@ function createQueue(worker) {
+   const pending = [];
+   return {
+     push(job) { pending.push(worker(job)); },
+-    async drain() { const p = pending.splice(0); p.forEach((x) => x.catch(() => {})); return p.length; },
++    async drain() {
++      let count = 0;
++      // Loop so jobs pushed while draining are also awaited.
++      while (pending.length) {
++        const batch = pending.splice(0);
++        count += batch.length;
++        await Promise.allSettled(batch);
++      }
++      return count;
++    },
+   };
+ }
+ module.exports = { createQueue };
+diff --git a/test/queue.test.js b/test/queue.test.js
+index 6692c26..74bf87e 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -4,7 +4,6 @@ test('drain waits for every job', async () => {
+   const done = [];
+   const q = createQueue((n) => new Promise((r) => setTimeout(() => { done.push(n); r(); }, Math.random() * 30)));
+   for (let i = 0; i < 5; i++) q.push(i);
+-  await new Promise((r) => setTimeout(r, 15));
+   await q.drain();
+   assert.strictEqual(done.length, 5);
+ });

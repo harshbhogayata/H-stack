@@ -1,0 +1,40 @@
+diff --git a/lib/cart.js b/lib/cart.js
+index beecedd..1540831 100644
+--- a/lib/cart.js
++++ b/lib/cart.js
+@@ -1,6 +1,6 @@
+ const { getDefaults } = require('./settings');
+ function createCart(customer) {
+-  const opts = Object.assign(getDefaults(), customer.prefs || {});
++  const opts = { ...getDefaults(), ...(customer.prefs || {}) };
+   return { customer: customer.name, currency: opts.currency, taxRate: opts.taxRate, items: [] };
+ }
+ function total(cart) {
+diff --git a/lib/settings.js b/lib/settings.js
+index cd82365..cdcba4a 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,3 +1,5 @@
+-const defaults = require('../config/defaults.json');
++// Shared, process-wide defaults. Frozen so callers can't mutate them in place
++// (that leaked one customer's prefs into every later caller). Copy before merging.
++const defaults = Object.freeze({ ...require('../config/defaults.json') });
+ function getDefaults() { return defaults; }
+ module.exports = { getDefaults };
+diff --git a/test/settings.test.js b/test/settings.test.js
+new file mode 100644
+index 0000000..f50df99
+--- /dev/null
++++ b/test/settings.test.js
+@@ -0,0 +1,11 @@
++const test = require('node:test'); const assert = require('node:assert');
++const { getDefaults } = require('../lib/settings');
++const { createCart } = require('../lib/cart');
++test('creating a cart with prefs does not change shop defaults', () => {
++  const before = { ...getDefaults() };
++  createCart({ name: 'ann', prefs: { currency: 'USD', taxRate: 0 } });
++  assert.deepStrictEqual(getDefaults(), before);
++});
++test('defaults cannot be mutated in place', () => {
++  assert.throws(() => Object.assign(getDefaults(), { currency: 'USD' }), TypeError);
++});

@@ -1,0 +1,31 @@
+diff --git a/limiter.js b/limiter.js
+index 9f51833..181aeee 100644
+--- a/limiter.js
++++ b/limiter.js
+@@ -1,5 +1,24 @@
+ function createLimiter({ capacity, refillPerSec }) {
+-  // TODO: implement as described in README.md
+-  return function allow(key, nowMs) { return true; };
++  const buckets = new Map(); // key -> { tokens, last }
++
++  return function allow(key, nowMs) {
++    let b = buckets.get(key);
++    if (!b) {
++      b = { tokens: capacity, last: nowMs };
++      buckets.set(key, b);
++    } else if (nowMs > b.last) {
++      const elapsedSec = (nowMs - b.last) / 1000;
++      b.tokens = Math.min(capacity, b.tokens + elapsedSec * refillPerSec);
++      b.last = nowMs;
++    }
++    // If nowMs < b.last, treat as no time passing and keep b.last unchanged,
++    // so the interval isn't credited twice when time moves forward again.
++
++    if (b.tokens >= 1) {
++      b.tokens -= 1;
++      return true;
++    }
++    return false;
++  };
+ }
+ module.exports = { createLimiter };

@@ -1,0 +1,51 @@
+diff --git a/bin/stats.js b/bin/stats.js
+index c1815d1..70be9e7 100644
+--- a/bin/stats.js
++++ b/bin/stats.js
+@@ -1,9 +1,18 @@
+ #!/usr/bin/env node
+ const fs = require('fs');
+-const file = process.argv[2];
++
++const args = process.argv.slice(2);
++const json = args.includes('--json');
++const file = args.filter((a) => a !== '--json')[0];
++
+ let nums;
+ try { nums = fs.readFileSync(file, 'utf8').split(/\s+/).filter(Boolean).map(Number); }
+ catch (e) { console.error(`stats: cannot read ${file}: ${e.code}`); process.exit(2); }
+ const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+-console.log(`count: ${nums.length}`);
+-console.log(`mean: ${mean}`);
++
++if (json) {
++  console.log(JSON.stringify({ count: nums.length, mean }));
++} else {
++  console.log(`count: ${nums.length}`);
++  console.log(`mean: ${mean}`);
++}
+diff --git a/test/stats.test.js b/test/stats.test.js
+index 9ce650d..f2df476 100644
+--- a/test/stats.test.js
++++ b/test/stats.test.js
+@@ -1,6 +1,19 @@
+-const test = require('node:test'); const assert = require('node:assert'); const { execFileSync } = require('child_process');
++const test = require('node:test'); const assert = require('node:assert'); const { execFileSync, spawnSync } = require('child_process');
+ const fs = require('fs'); const os = require('os'); const path = require('path');
+ test('text output', () => {
+   const f = path.join(os.tmpdir(), 'nums.txt'); fs.writeFileSync(f, '1 2 3');
+   assert.match(execFileSync('node', ['bin/stats.js', f], { encoding: 'utf8' }), /count: 3\nmean: 2/);
+ });
++test('--json output, flag after or before the file', () => {
++  const f = path.join(os.tmpdir(), 'nums.txt'); fs.writeFileSync(f, '1 2 3');
++  for (const args of [[f, '--json'], ['--json', f]]) {
++    const out = execFileSync('node', ['bin/stats.js', ...args], { encoding: 'utf8' });
++    assert.deepStrictEqual(JSON.parse(out), { count: 3, mean: 2 });
++  }
++});
++test('--json error writes nothing to stdout and exits 2', () => {
++  const r = spawnSync('node', ['bin/stats.js', '--json', path.join(os.tmpdir(), 'does-not-exist.txt')], { encoding: 'utf8' });
++  assert.strictEqual(r.status, 2);
++  assert.strictEqual(r.stdout, '');
++  assert.match(r.stderr, /^stats: cannot read .*: ENOENT/);
++});

@@ -10,14 +10,17 @@
       "There's a regression in the date parser",
       "Getting a segfault when I load big files",
       "parse_duration('1h30m') returns 30 instead of 90. Fix it.",
-      "The refund test in test/billing.test.js fails: refunds come out in USD instead of EUR."
+      "The refund test in test/billing.test.js fails: refunds come out in USD instead of EUR.",
+      "I'm getting an error when I save a draft",
+      "It throws a TypeError on startup"
     ],
     "should_not": [
       "Rename the variable x to total in utils.py",
       "Write a README section about installation",
       "What's the difference between merge and rebase?",
       "Add a dark-mode toggle to settings",
-      "Draft a commit message for this change"
+      "Draft a commit message for this change",
+      "Add a StatusBadge component for the statuses ok, warn and error."
     ]
   },
   "h-stack:tdd": {
@@ -53,12 +56,18 @@
       "Grill me on this design",
       "Stress-test my plan for the billing rewrite",
       "I'm not sure what the requirements are for the export",
-      "Implement a new feature: user roles across the app"
+      "Implement a new feature: user roles across the app",
+      "Add export.",
+      "Add search",
+      "Build notifications."
     ],
     "should_not": [
       "Fix the typo in the footer, just do it",
       "Run the tests",
-      "thanks!"
+      "thanks!",
+      "Add a --json flag to the stats CLI.",
+      "Add a StatusBadge component for the statuses ok, warn and error.",
+      "Make it faster?"
     ]
   },
   "h-stack:core-rules": {

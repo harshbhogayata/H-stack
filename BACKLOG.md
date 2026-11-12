@@ -181,7 +181,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-001 · Whole-stack smoke test (~10 real tasks, with vs without H-Stack)
 **Evals · Thin · P0 · M · Reliability (reads all five) · Depends on: — · Sources: N41, D15**
-- **Status.** needs-user (smoke-test tasks: evals/run-smoke.mjs, evals/tasks.json format and evals/check-tasks.mjs are built and the runner self-test passes in both arms (evals/results/iteration-0); the ~10 real tasks from the user's projects and their results need the user (OD-6, M1))
+- **Status.** done — 12 synthetic smoke tasks written at the user's request on 2026-11-12 ('make some up, hard but low-token'): 3 bug fixes with misleading symptoms, 2 features with spec edge cases, a behaviour-preserving refactor, a review with bait, a UI component, 2 underspecified requests and a sameness pair; tiny Node fixtures with hidden checks that fail untouched and pass a reference solution. Run iteration-1 (with vs without, 1 run per arm to keep tokens low; OD-6's 3 runs not done): pass 0.92 vs 0.92; false done 0% vs 8%; changes to protected test files 0 vs 2 (one added tests, one removed a wait line; neither weakened a test); necessary questions 1 vs 1 (both still built 'Add export.' without asking); tokens per solved +35%, seconds +47%; sameness Jaccard 0.18 vs 0.18. evals/results/iteration-1/
 - **Problem.** Nothing about H-Stack can be claimed without a with/without comparison on real work.
 - **Mechanism.**
   - **Tasks.** About 10 of the user's real tasks. Each has a prompt (skill-creator `evals.json` format), a fixture (repo at a commit) and a `check` script.
@@ -1251,7 +1251,7 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 
 #### HS-085 · Release gate
 **Distribution · Thin · P1 · S · Reliability · Depends on: HS-001, HS-010, HS-011, HS-013, HS-083 · Sources: none of its own (CLAUDE.md "Validate", "Report honestly")**
-- **Status.** needs-user (smoke-test results: evals/release-gate.mjs is built (CI + a smoke run on real tasks newer than the last plugin change, with regressions listed) and its CI part passes; the gate itself cannot pass until the user's real smoke-test tasks exist and have been run (HS-001))
+- **Status.** done — evals/release-gate.mjs passes: CI 12/12, smoke run iteration-1 (12 tasks) newer than the last plugin change, regressions listed (0). The smoke run used 1 run per arm at the user's request, not OD-6's 3
 - **Problem.** A release ships without numbers, or hides its regressions.
 - **Mechanism.** Bump the version only when these pass:
   - `claude plugin validate .`;
