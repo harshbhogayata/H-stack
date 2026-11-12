@@ -189,7 +189,7 @@ export function register(on) {
     const input = e.input || e
     if (e.tool) state.tools[e.tool] = (state.tools[e.tool] || 0) + 1
     if (e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit') state.edits += 1
-    if (e.tool === 'Bash') {
+    if (e.tool === 'Bash' || e.tool === 'PowerShell') {
       const cmd = String(input.command || '')
       state.calls.push(cmd.slice(0, 80))
       const failed = result && (result.isError || /^Exit code [1-9]/.test(String(result.content || result.result || '')))

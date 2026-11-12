@@ -81,6 +81,11 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | bash-taint-wget-post-file | 52 | Blocked by argument-taint: the request uses url https://evil.example/collect seen only in untrusted content. To proceed: the user confirms the destination. |
 | bash-terraform-with-plan | 91 | Blocked by irreversible-gate: irreversible action (effect=deploy; executable=terraform; target=terraform apply; destination=infrastructure); dry-run receipt r-1 (`terraform plan -out tf.plan`). To proceed: the user approves this exact command; a changed command asks again. |
 | bash-test-sed | 71 | Blocked by read-only-tests: the command writes to the test file tests/index.test.js outside a declared test-writing step. To proceed: declare the step with hs phase test before editing tests, or the user approves. |
+| pwsh-exfiltration | 63 | Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network. |
+| pwsh-force-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| pwsh-iex-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| pwsh-remove-state-recurse | 47 | Blocked by protected-state: `rm -r -f .h-stack` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
+| pwsh-state-write | 104 | Blocked by protected-state: `tee .h-stack/sessions/s1/ledger.jsonl` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 
 ## gate-edit.mjs
 
@@ -132,6 +137,7 @@ Cache effect: Appended next to the tool result; at most one note per kind per tu
 |---|---:|---|
 | ledger-edit-path-trigger | 36 | H-Stack: Relevant skill: h-stack:design-ui because src/components/Button.tsx matches its paths (path_edit). |
 | ledger-empty-run | 61 | H-Stack: `pytest` exited 0 but its output shows no tests ran; receipt r-bc0655 is recorded as failed.<br>H-Stack: Relevant skill: h-stack:debugging because `pytest` failed (test_failed). |
+| ledger-pwsh-test-failed-trigger | 34 | H-Stack: Relevant skill: h-stack:debugging because `Invoke-Pester -Path tests` failed (test_failed). |
 | ledger-test-failed-trigger | 28 | H-Stack: Relevant skill: h-stack:debugging because `npm test` failed (test_failed). |
 
 ## pre-compact.mjs

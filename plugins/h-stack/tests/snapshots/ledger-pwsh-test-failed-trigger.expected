@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PostToolUseFailure","additionalContext":"H-Stack: Relevant skill: h-stack:debugging because `Invoke-Pester -Path tests` failed (test_failed)."}}

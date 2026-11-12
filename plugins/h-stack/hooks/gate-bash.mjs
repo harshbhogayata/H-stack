@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PreToolUse(Bash) gate. FAILURE_MODE=closed (onFailure: block).
+// PreToolUse(Bash|PowerShell) gate; PowerShell commands are read by lib/pwsh.mjs. FAILURE_MODE=closed (onFailure: block).
 // HS-030 irreversible + dry-run receipt + binding, HS-031 dependency gate, HS-029 protected redirects,
 // HS-028a test-file redirects, HS-034 credential exec, HS-035 scope lock, HS-032 fetch destination + taint,
 // HS-038 step budget, HS-083 install asks, HS-022 pre_push trigger. Returns deny or ask only.
@@ -7,7 +7,8 @@ import path from 'node:path';
 import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, context, git, sha, relToProject, isMain } from '../lib/core.mjs';
 import { classifyBash, credentialExec, ghTargetNumbers, isDryRunLike, manifest } from '../lib/irreversible.mjs';
 import { installTargets, checkPackages } from '../lib/deps.mjs';
-import { parseCommands, exe } from '../lib/shell.mjs';
+import { exe } from '../lib/shell.mjs';
+import { parseShell, shellOf } from '../lib/pwsh.mjs';
 import { protectedKind, namedInPrompt } from '../lib/protected.mjs';
 import { isTestPath } from '../lib/tests.mjs';
 import { taintedIn, privateDestination } from '../lib/taint.mjs';
@@ -39,7 +40,8 @@ export async function decide(input, proj) {
   const dir = sessionDir(proj, sid);
   const config = loadConfig(proj);
   const cmd = String(input.tool_input?.command || '');
-  const cmds = parseCommands(cmd);
+  const shell = shellOf(input);
+  const cmds = parseShell(cmd, shell);
   const route = readJson(path.join(dir, 'route.json'), {});
   const asks = [];
   const denies = [];
@@ -55,7 +57,7 @@ export async function decide(input, proj) {
   // HS-030 irreversible actions.
   const defaultBranch = ((git(proj, ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']) || '').trim().split('/').pop()) || 'main';
   const currentBranch = (git(proj, ['branch', '--show-current']) || '').trim();
-  const findings = classifyBash(cmd, { defaultBranch, currentBranch });
+  const findings = classifyBash(cmd, { defaultBranch, currentBranch, shell });
   const allow = (config.irreversible?.allowlist || []);
   const cmdSha = sha(cmd, 16);
   for (const f of findings) {
@@ -88,15 +90,15 @@ export async function decide(input, proj) {
   }
 
   // HS-035 scope lock.
-  const nums = ghTargetNumbers(cmd);
+  const nums = ghTargetNumbers(cmd, shell);
   const scope = route.scope_numbers || [];
   for (const n of nums) if (scope.length && !scope.includes(n)) asks.push(refusal('scope-lock', `this writes to #${n}, but the request named ${scope.map((s) => '#' + s).join(', ')}`, 'confirm the target number with the user'));
 
   // HS-034 credential commands through project-controlled executables.
-  for (const c of credentialExec(cmd)) asks.push(refusal('trusted-executable', `\`${c}\` runs a credential-bearing step through a project-controlled executable`, 'run the globally installed tool, or the user confirms this one'));
+  for (const c of credentialExec(cmd, shell)) asks.push(refusal('trusted-executable', `\`${c}\` runs a credential-bearing step through a project-controlled executable`, 'run the globally installed tool, or the user confirms this one'));
 
   // HS-031 dependency gate + HS-083 install asks.
-  const pkgs = installTargets(cmd);
+  const pkgs = installTargets(cmd, shell);
   if (pkgs.length) {
     const problems = await checkPackages(proj, pkgs, config);
     if (problems.length) asks.push(refusal('dependency-gate', problems.slice(0, 3).map((p) => `${p.eco}:${p.name} ${p.reason}`).join('; '), 'check the package name and source with the user'));
@@ -166,8 +168,9 @@ export async function decide(input, proj) {
     if (ev && ev.length) ctx.push(`H-Stack: Relevant skill: ${ev[0]} because a push or PR is about to be created (pre_push).`);
   }
 
-  for (const d of denies) logTool(proj, { tool: 'Bash', rule: d.split(':')[0], decision: 'deny' });
-  for (const a of asks) logTool(proj, { tool: 'Bash', rule: a.split(':')[0], decision: 'ask' });
+  const tool = shell === 'powershell' ? 'PowerShell' : 'Bash';
+  for (const d of denies) logTool(proj, { tool, rule: d.split(':')[0], decision: 'deny' });
+  for (const a of asks) logTool(proj, { tool, rule: a.split(':')[0], decision: 'ask' });
   if (denies.length) return preDecision('deny', denies.join(' '), ctx.join('\n') || undefined);
   if (asks.length) return preDecision('ask', [...new Set(asks)].join(' '), ctx.join('\n') || undefined);
   return ctx.length ? context('PreToolUse', ctx.join('\n')) : null;

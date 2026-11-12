@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PostToolUse(WebFetch|WebSearch|mcp__.*) and Bash gh reads: provenance note + taint capture (HS-032).
+// PostToolUse(WebFetch|WebSearch|mcp__.*) and Bash / PowerShell gh reads: provenance note + taint capture (HS-032).
 // Single writer of sessions/<id>/taint.jsonl. FAILURE_MODE=open
 import path from 'node:path';
 import { runHook, projectDir, sessionDir, appendLine, readJsonl, readJson, sha, context } from '../lib/core.mjs';
@@ -9,7 +9,7 @@ const GH_READ = /^\s*gh\s+(issue|pr|api|release|run|search)\s+(view|list|diff|ch
 
 await runHook('taint', 'open', async (input) => {
   const tool = input.tool_name || '';
-  if (tool === 'Bash' && !GH_READ.test(String(input.tool_input?.command || ''))) return null;
+  if ((tool === 'Bash' || tool === 'PowerShell') && !GH_READ.test(String(input.tool_input?.command || ''))) return null;
   const proj = projectDir(input);
   const sid = input.session_id || 'no-session';
   const dir = sessionDir(proj, sid);

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-// PostToolUse(Bash|Edit|Write|MultiEdit|NotebookEdit) and PostToolUseFailure(Bash):
+// PostToolUse(Bash|PowerShell|Edit|Write|MultiEdit|NotebookEdit) and PostToolUseFailure(Bash|PowerShell):
 // receipts and edit entries (HS-027), error-as-success (HS-036), event triggers (HS-022).
 // Single writer of sessions/<id>/ledger.jsonl and notes.jsonl.
 // FAILURE_MODE=open
 import path from 'node:path';
 import { runHook, projectDir, sessionDir, appendLine, readJsonl, readJson, treeHash, sha, context, relToProject, loadConfig } from '../lib/core.mjs';
 import { claimKinds } from '../lib/ledger.mjs';
+import { shellOf } from '../lib/pwsh.mjs';
 import { loadIndex } from '../lib/index.mjs';
 import { matchesAny } from '../lib/core.mjs';
 
@@ -54,14 +55,14 @@ await runHook('ledger', 'open', async (input) => {
   const noted = new Set(readJsonl(notesFile).filter((n) => n.turn === turn).map((n) => n.key));
   const note = (key, text) => { if (noted.has(key)) return; noted.add(key); appendLine(notesFile, { key, turn, ts: Date.now() }, proj); notes.push(text); };
 
-  if (input.tool_name === 'Bash') {
+  if (input.tool_name === 'Bash' || input.tool_name === 'PowerShell') {
     const cmd = String(input.tool_input?.command || '');
     const out = responseText(input);
     const exit = exitOf(input);
     let failed = null;
     if (exit === 0) for (const [re, label] of FAIL_PATTERNS) if (re.test(out)) { failed = label; break; }
     const id = input.tool_use_id ? `r-${sha(input.tool_use_id, 6)}` : `r-${rows.filter((r) => r.kind === 'receipt').length + 1}`;
-    const kinds = claimKinds(cmd, config);
+    const kinds = claimKinds(cmd, config, shellOf(input));
     appendLine(file, {
       id, kind: 'receipt', cmd: cmd.slice(0, 500), exit, out_sha: sha(out, 16), tree: treeHash(proj), ts: Date.now(),
       tool_use_id: input.tool_use_id || null, turn, kinds, failed_pattern: failed, agent: input.agent_id || null,
