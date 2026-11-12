@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { bashPath } from '../plugins/h-stack/lib/core.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// --help prints the header comment; without this guard any unknown flag starts model runs.
+if (process.argv.includes('--help') || process.argv.includes('-h')) { const h = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1); console.log(h.slice(0, h.findIndex((l) => !l.startsWith('//'))).map((l) => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
 const TASKS = path.resolve(opt('tasks', path.join(REPO, 'evals', 'tasks.json')));

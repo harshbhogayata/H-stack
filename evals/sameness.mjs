@@ -13,6 +13,8 @@ import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// --help prints the header comment; without this guard any unknown flag starts model runs.
+if (process.argv.includes('--help') || process.argv.includes('-h')) { const h = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1); console.log(h.slice(0, h.findIndex((l) => !l.startsWith('//'))).map((l) => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const DIR = path.join(REPO, 'evals', 'sameness');
 const SKILLS = path.join(REPO, 'plugins', 'h-stack', 'skills');
 const a = process.argv.slice(2);
