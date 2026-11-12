@@ -2,7 +2,7 @@
 
 Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and version 0.1.0. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **105 done, 6 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Five needs-user items have an allowed reason: credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. On 2026-11-12 you decided to leave HS-006 open until you add an API key and that permission. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The smoke test ran on 12 synthetic tasks you asked me to make up. Both arms pass 0.92. H-Stack made no false "done" claims in three runs (8% without in two of them), at 17–35% more tokens. The release gate passes, and the plugin is now 0.1.0.
+**Short version.** All 85 HS items and 26 IM rows have a status: **106 done, 5 needs-user, 0 dropped items** (two HS-006 test arms dropped inside a done item, and resolving-merge-conflicts dropped inside a done IM row) All five needs-user items have an allowed reason: credentials or accounts, or desktop visual checks. On 2026-11-12 you decided to drop HS-006's safety-gate and bare-agent arms, because Claude Code's auto mode refused them (I did not work around it), so HS-006 is done. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The smoke test ran on 12 synthetic tasks you asked me to make up. Both arms pass 0.92. H-Stack made no false "done" claims in three runs (8% without in two of them), at 17–35% more tokens. The release gate passes, and the plugin is now 0.1.0.
 
 ## Needs you
 
@@ -16,21 +16,16 @@ Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and ver
    - the side pane (HS-057), which opens by itself during a long run with a recorded goal (`"pane": "auto"`; `true` always, `false` never).
 
    Both are built and pass the mod tests (10/10); HS-056 and HS-057 are needs-user only for this check.
-5. **HS-006: two things only you can give.** You decided on 2026-11-12 to leave this open until you add them.
-   - **Credentials.** The bare-agent arm uses `claude --bare`, which authenticates only with `ANTHROPIC_API_KEY`. This environment has none.
-   - **A permission decision (outside the goal's allowed reasons, stated plainly).** Claude Code's auto mode refused to start sessions with H-Stack's safety gates switched off (`ablate:stop`, `ablate:all`: "Create Unsafe Agents"). It also refused a bare agent built from ordinary flags ("Auto-Mode Bypass"). I did not work around either refusal, so the safety-gate ablation is unmeasured.
-   - **What did run:** the ablation of non-safety components (classifier off, session-start map off). Everything is built, and `--dry-run` shows each arm's exact command.
-   - **To finish:** set an API key, add a permission rule for `node evals/run-smoke.mjs`, then run `node evals/run-smoke.mjs --arms with,without,bare,ablate:stop` alongside the smoke test.
-6. **Run H-Stack's setup in each project** (`node plugins/h-stack/scripts/setup.mjs --apply`).
+5. **Run H-Stack's setup in each project** (`node plugins/h-stack/scripts/setup.mjs --apply`).
    - Its allow rule for `hs` is what lets an agent declare a test-writing step.
    - Without it, in a headless or unattended run, the read-only-tests gate blocks new regression tests in existing test files. Measured: the bugfix case stalled until `hs` was allowed.
-7. **Model-call features to watch in the smoke test.**
+6. **Model-call features to watch in the smoke test.**
    - The concern check (HS-040) is on by default. It costs one Haiku-class call per edited turn, and when it finds an open point it adds a follow-up turn. That follow-up then becomes the last message a headless caller receives.
    - The classifier model fallback (HS-019) stays off: its spec keeps it off until trigger evals show a recall gain, and the rules already reach recall ≥ 0.8 on all 15 skills.
 
    Switch either with `concerns` or `classifier.fallback` in `.h-stack/config.json`.
-8. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
-9. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
+7. **Self-audit leftovers.** All 12 confirmed findings are fixed. Two plausible ones need a live session to check (REPORT.md §4).
+8. **New asks you will see.** Because of the self-audit fixes, H-Stack now asks before:
    - edits to `CLAUDE.md`, `.claude/rules/**` and `.h-stack/config.json`;
    - MCP tools whose names carry no recognisable verb.
 
@@ -55,7 +50,7 @@ Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and ver
 | Priority | done | needs-user | dropped |
 |---|---:|---:|---:|
 | P0 (26) | 26 | 0 | 0 |
-| P1 (36) | 34 | 2 (HS-006 API key and a permission decision; HS-056 visual check) | 0 |
+| P1 (36) | 35 | 1 (HS-056 visual check) | 0 |
 | P2 (23) | 19 | 4 (HS-009, 076, 077 accounts; HS-057 visual check) | 0 |
 | IM rows (26) | 26 | 0 | 0 (resolving-merge-conflicts dropped inside the IM-13 row: upstream archived) |
 
@@ -123,11 +118,12 @@ Earlier full runs (iterations 1 and 2) gave the same pass rates. False "done" wa
 
 | Topic | Decision |
 |---|---|
-| HS-006 bare/safety-gate arms | Leave open until you add an API key and a permission rule |
+| HS-006 bare/safety-gate arms | First left open; then dropped (Claude Code refused them; ablation of non-safety components ran) |
 | Concern check (HS-040) | Interactive sessions only; skipped in headless runs (implemented, mod test) |
 | Classifier fallback (HS-019) | Keep off |
 | tdd/planning effort | Leave unset |
 | Nine skills at 1 run per arm | Leave at 1 run |
+| Smoke test runs per arm (OD-6 says 3) | Accept 1 run |
 | Protected files named in the prompt | Approved for that turn, for all protected files |
 | MCP tools with unknown verbs | Keep asking |
 | Smoke tasks | Synthetic, written by me (done) |
@@ -382,7 +378,7 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 
 ## Deviations from ARCHITECTURE.md
 
-1. **M1 baseline skipped** (per the goal); the smoke test later ran on 12 synthetic tasks, 1 run per arm. As a result:
+1. **M1 baseline skipped** (per the goal); the smoke test later ran on 12 synthetic tasks, 1 run per arm instead of OD-6's 3 (your decision, 2026-11-12). As a result:
    - no with/without smoke numbers exist for any milestone;
    - the "Ends with (measured)" column of §11 holds per-skill benchmarks and activation evals instead.
 2. **Per-skill benchmarks:** 1 run per arm (the goal's "light benchmark") for the nine skills that clearly beat no-skill; 3 runs per arm for the six that got harder evals. OD-6's 3 runs apply to the smoke test.
@@ -399,7 +395,7 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 11. **Solo-boundary pass signal (HS-025)** is "the next prompt is not a correction". That is a proxy until smoke-test data exists; cold start is `medium` as specified.
 12. **Activation is measured in real `claude -p` sessions, not plugin eval** (HS-018). Plugin eval doesn't run UserPromptSubmit hooks (0 classifier events in its traces), so it can't measure H-Stack's classifier.
 
-13. **HS-006 is not complete.** The ablation of the classifier and the session-start map ran. The bare-agent arm needs an `ANTHROPIC_API_KEY`. The safety-gate ablation and the flag-built bare agent were refused by auto mode, which is a permission decision outside the goal's allowed reasons for leaving work undone. See Needs you, item 5.
+13. **HS-006's safety-gate ablation and bare-agent arm were dropped** (your decision, 2026-11-12). Claude Code's auto mode refused sessions with H-Stack's safety gates off and a flag-built bare agent, and `--bare` needs an `ANTHROPIC_API_KEY`. The ablation of non-safety components ran. Both arms can still run later.
 
 ## Next steps
 
