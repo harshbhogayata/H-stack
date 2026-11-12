@@ -31,6 +31,7 @@ test('findings validator: truth checks and hostile inputs', () => {
   assert.ok(validateFindings({ findings: [], cleared: ['one'] }, dir).shallow);
   assert.ok(!validateFindings({ findings: [], cleared: ['a', 'b', 'c'] }, dir).shallow);
   assert.deepEqual(extractJson('noise ```json\n{"a":1}\n``` more'), { a: 1 });
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 test('yaml subset', () => {
   assert.deepEqual(parseYaml('a: [1, "b"]\nc:\n  d: true\n  e:\n    - x\n    - y: 2\n'), { a: [1, 'b'], c: { d: true, e: ['x', { y: 2 }] } });
