@@ -4,7 +4,7 @@
 // HS-028a test-file redirects, HS-034 credential exec, HS-035 scope lock, HS-032 fetch destination + taint,
 // HS-038 step budget, HS-083 install asks, HS-022 pre_push trigger. Returns deny or ask only.
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, context, git, sha, relToProject } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, context, git, sha, relToProject, isMain } from '../lib/core.mjs';
 import { classifyBash, credentialExec, ghTargetNumbers, isDryRunLike, manifest } from '../lib/irreversible.mjs';
 import { installTargets, checkPackages } from '../lib/deps.mjs';
 import { parseCommands, exe } from '../lib/shell.mjs';
@@ -173,6 +173,6 @@ export async function decide(input, proj) {
   return ctx.length ? context('PreToolUse', ctx.join('\n')) : null;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   await runHook('gate-bash', 'closed', async (input) => decide(input, projectDir(input)));
 }

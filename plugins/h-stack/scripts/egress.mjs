@@ -4,7 +4,8 @@
 // appears that is not in the inventory below (add it here, with its trigger, to accept it).
 import fs from 'node:fs';
 import path from 'node:path';
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { fileURLToPath } from 'node:url';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const INVENTORY = {
   'registry.npmjs.org': 'dependency gate (HS-031): package name only, only when the agent adds a dependency; 7-day cache',
   'api.npmjs.org': 'dependency gate: weekly downloads for the same package',

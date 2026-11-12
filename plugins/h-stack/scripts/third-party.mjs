@@ -5,8 +5,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ALLOWED = new Set(['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC']);
 const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 
@@ -42,7 +44,7 @@ export function check(data) {
   return errs;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'third-party.json'), 'utf8'));
   if (process.argv.includes('--write')) { fs.writeFileSync(path.join(ROOT, 'THIRD_PARTY.md'), render(data)); console.log(JSON.stringify({ status: 'ok', reason: `wrote THIRD_PARTY.md (${data.imports.length} imports)` })); process.exit(0); }
   const errs = check(data);

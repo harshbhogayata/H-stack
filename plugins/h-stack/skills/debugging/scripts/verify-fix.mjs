@@ -10,9 +10,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 
-const here = path.dirname(new URL(import.meta.url).pathname);
-const { isTestPath } = await import(path.join(here, '..', '..', '..', 'lib', 'tests.mjs'));
-const { loadConfig } = await import(path.join(here, '..', '..', '..', 'lib', 'core.mjs'));
+const { isTestPath } = await import(new URL('../../../lib/tests.mjs', import.meta.url));
+const { loadConfig } = await import(new URL('../../../lib/core.mjs', import.meta.url));
 
 const argv = process.argv.slice(2);
 const dd = argv.indexOf('--');

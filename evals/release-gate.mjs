@@ -8,7 +8,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync, execFileSync } from 'node:child_process';
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { fileURLToPath } from 'node:url';
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const results = [];
 const check = (name, ok, reason) => { results.push({ name, ok }); console.log(JSON.stringify({ status: ok ? 'ok' : 'fail', check: name, reason })); };
 

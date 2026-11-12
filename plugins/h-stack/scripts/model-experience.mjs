@@ -3,9 +3,11 @@
 // rendered from the snapshot expectations into hooks/README.md. --check fails when stale.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { allCases } from './snapshot.mjs';
+import { isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tokens = (s) => Math.ceil(Buffer.byteLength(String(s || '')) / 3);
 const CACHE = {
   'session-start.mjs': 'Once per session start; static map first and byte-stable, facts sorted. Part of the cached prefix after the first turn.',
@@ -40,7 +42,7 @@ export function render() {
   }
   return out.join('\n');
 }
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const file = path.join(ROOT, 'hooks', 'README.md');
   const md = render();
   if (process.argv.includes('--check')) {

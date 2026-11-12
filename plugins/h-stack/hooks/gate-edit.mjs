@@ -4,7 +4,7 @@
 // HS-034 .env must be git-ignored, HS-023 subagent scratch isolation. Returns deny or ask only.
 import fs from 'node:fs';
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, relToProject, git } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, readJsonl, appendLine, loadConfig, refusal, preDecision, relToProject, git, isMain } from '../lib/core.mjs';
 import { isTestPath } from '../lib/tests.mjs';
 import { protectedKind, namedInPrompt } from '../lib/protected.mjs';
 import { manifestAdds, importAdds, checkPackages } from '../lib/deps.mjs';
@@ -89,6 +89,6 @@ export async function decide(input, proj) {
   return null;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   await runHook('gate-edit', 'closed', async (input) => decide(input, projectDir(input)));
 }

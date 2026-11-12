@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PreToolUse(WebFetch): loopback / RFC1918 / metadata destinations ask while untrusted
 // content is in play (HS-032). FAILURE_MODE=closed
-import { runHook, projectDir, refusal, preDecision } from '../lib/core.mjs';
+import { runHook, projectDir, refusal, preDecision, isMain } from '../lib/core.mjs';
 import { taintedIn, privateDestination } from '../lib/taint.mjs';
 import { logTool } from '../lib/telemetry.mjs';
 
@@ -14,4 +14,4 @@ export function decide(input, proj) {
   logTool(proj, { tool: 'WebFetch', rule: 'fetch-destination', decision: 'ask' });
   return preDecision('ask', refusal('fetch-destination', `WebFetch targets ${priv} while untrusted content is in play`, 'the user confirms this request'));
 }
-if (import.meta.url === `file://${process.argv[1]}`) await runHook('gate-fetch', 'closed', async (i) => decide(i, projectDir(i)));
+if (isMain(import.meta.url)) await runHook('gate-fetch', 'closed', async (i) => decide(i, projectDir(i)));

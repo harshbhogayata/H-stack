@@ -5,8 +5,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CASES = path.join(ROOT, 'tests', 'snapshots');
 const REFUSAL = /^Blocked by [\w:-]+: .+?\. To proceed: .+?\.$/;
 
@@ -74,7 +76,7 @@ export function allCases() {
   return out;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const update = process.argv.includes('--update');
   const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7);
   let fail = 0; let n = 0;

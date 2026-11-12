@@ -2,7 +2,7 @@
 // PreToolUse(Skill): explicit-only skills run only when the classifier recorded an explicit
 // request this turn (HS-016). FAILURE_MODE=closed
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJson, refusal, preDecision } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, refusal, preDecision, isMain } from '../lib/core.mjs';
 import { loadIndex } from '../lib/index.mjs';
 import { logTool } from '../lib/telemetry.mjs';
 
@@ -16,4 +16,4 @@ export function decide(input, proj) {
   logTool(proj, { tool: 'Skill', rule: 'explicit-only', decision: 'deny' });
   return preDecision('deny', refusal('explicit-only', `${q} runs only when the user asks for it in this turn`, 'ask the user, or continue without it'));
 }
-if (import.meta.url === `file://${process.argv[1]}`) await runHook('gate-skill', 'closed', async (i) => decide(i, projectDir(i)));
+if (isMain(import.meta.url)) await runHook('gate-skill', 'closed', async (i) => decide(i, projectDir(i)));

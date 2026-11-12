@@ -3,10 +3,11 @@
 // Byte-stable: sorted by name, keys sorted, no timestamps. --check fails on any diff.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { splitFrontmatter } from '../lib/yaml.mjs';
-import { stable } from '../lib/core.mjs';
+import { stable, isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export function buildIndex(root = ROOT) {
   const dir = path.join(root, 'skills');
@@ -51,7 +52,7 @@ export function serialise(idx) {
   return JSON.stringify(idx, null, 2) + '\n';
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const out = serialise(buildIndex());
   const target = path.join(ROOT, 'index.json');
   if (process.argv.includes('--check')) {

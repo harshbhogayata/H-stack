@@ -6,7 +6,8 @@
 // Exit 0 always; this reports, the release notes record the decision.
 import fs from 'node:fs';
 import path from 'node:path';
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { fileURLToPath } from 'node:url';
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = path.join(REPO, 'evals', 'results', 'skills');
 const args = process.argv.slice(2);
 const th = Number(args[args.indexOf('--threshold') + 1] || 1.0) || 1.0;

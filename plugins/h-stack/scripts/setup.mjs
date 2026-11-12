@@ -6,9 +6,10 @@
 //   node ${CLAUDE_PLUGIN_ROOT}/scripts/setup.mjs --apply [--no-rules] [--no-permissions] [--retention 90]
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { proposedPermissionRules } from '../lib/protected.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const proj = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const args = process.argv.slice(2);
 const apply = args.includes('--apply');

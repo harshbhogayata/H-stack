@@ -1,6 +1,7 @@
 // Regression tests for the HS-014 self-audit findings (docs/self-audit/REPORT.md).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { classifyBash } from '../../lib/irreversible.mjs';
 import { installTargets } from '../../lib/deps.mjs';
 import { privateDestination } from '../../lib/taint.mjs';
@@ -53,7 +54,7 @@ test('F10 lessons that fail validation are never loaded', () => {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-lessons-'));
   const L = path.join(d, '.claude', 'rules', 'lessons');
   fs.mkdirSync(L, { recursive: true });
-  const fx = new URL('../fixtures/lessons/', import.meta.url).pathname;
+  const fx = fileURLToPath(new URL('../fixtures/lessons/', import.meta.url));
   for (const f of ['good-payments.md', 'bad-provenance.md']) fs.copyFileSync(path.join(fx, f), path.join(L, f));
   assert.deepEqual(loadLessons(d).map((l) => l.file), ['.claude/rules/lessons/good-payments.md']);
   fs.rmSync(d, { recursive: true, force: true });

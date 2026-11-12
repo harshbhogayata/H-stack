@@ -2,9 +2,11 @@
 // HS-013 skill and import linter (complements `claude plugin validate .`).
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { splitFrontmatter } from '../lib/yaml.mjs';
+import { isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EVENTS = new Set(['test_failed', 'build_failed', 'path_edit', 'pre_push']);
 const SIZES = new Set(['direct', 'light', 'full']);
 const CAPS = /\b(YOU MUST|MUST NOT|MUST|NEVER|ALWAYS|DO NOT)\b|\b(CRITICAL|IMPORTANT|REQUIRED)\s*[:!]/;
@@ -86,7 +88,7 @@ export function lintAgent(file) {
   return errs;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const tp = JSON.parse(fs.existsSync(path.join(ROOT, 'third-party.json')) ? fs.readFileSync(path.join(ROOT, 'third-party.json'), 'utf8') : '{"imports":[]}').imports;
   const errs = [];
   const sk = path.join(ROOT, 'skills');

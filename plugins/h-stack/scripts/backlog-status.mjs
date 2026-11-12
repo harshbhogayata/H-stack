@@ -3,8 +3,9 @@
 // lists anything without a status, and checks needs-user reasons against the allowed list.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const text = fs.readFileSync(path.join(REPO, 'BACKLOG.md'), 'utf8');
 const ALLOWED = /(smoke[- ]test (tasks?|results?|numbers?|benchmark)|real tasks|credentials?|accounts?|desktop app|visual check|judgement call)/i;
 const STATUS = /^- \*\*Status\.\*\*\s*(done|needs-user|dropped)\b(.*)$/m;

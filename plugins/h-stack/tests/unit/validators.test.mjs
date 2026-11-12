@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { validateLessonText } from '../../lib/lessons.mjs';
 import { validateFindings, extractJson } from '../../lib/findings.mjs';
 import { parseYaml } from '../../lib/yaml.mjs';
 
-const FIX = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'fixtures', 'lessons');
+const FIX = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'lessons');
 test('lesson fixtures: good pass, bad fail with the expected reason', () => {
   for (const f of fs.readdirSync(FIX)) {
     const res = validateLessonText(fs.readFileSync(path.join(FIX, f), 'utf8'));

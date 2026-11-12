@@ -3,10 +3,12 @@
 // fixed conservative estimator, ceil(bytes / 3), so CI needs no network.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { splitFrontmatter } from '../lib/yaml.mjs';
 import { allCases, setupProject, runCase } from './snapshot.mjs';
+import { isMain } from '../lib/core.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const tokens = (s) => Math.ceil(Buffer.byteLength(String(s || '')) / 3);
 export const BUDGET = { listing: 900, sessionStart: 400, classifierLine: 60, alwaysOn: 1500, subagentStart: 150, eventNote: 40, perSkillListing: 512 };
 
@@ -48,7 +50,7 @@ export function measure() {
   return rows;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const rows = measure();
   const over = rows.filter((r) => r.tokens > r.budget);
   const total = rows.find((r) => r.item.startsWith('always-on'));

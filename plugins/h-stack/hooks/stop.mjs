@@ -3,7 +3,7 @@
 // One script, fixed order, one combined note, at most one block per stop, never on turns without edits.
 // FAILURE_MODE=open (quality gate)
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJsonl, readJson, latestById, treeHash, loadConfig } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJsonl, readJson, latestById, treeHash, loadConfig, isMain } from '../lib/core.mjs';
 import { claimsIn, NOT_VERIFIED, freshReceipts } from '../lib/ledger.mjs';
 import { scanWorktree } from '../lib/tamper.mjs';
 import { logTurn } from '../lib/telemetry.mjs';
@@ -41,7 +41,7 @@ export function evaluate({ input, rows, route, stops, assumptions, rubric, tree,
   };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   await runHook('stop', 'open', async (input) => {
     const proj = projectDir(input);
     const sid = input.session_id || 'no-session';

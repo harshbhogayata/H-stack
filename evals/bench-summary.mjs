@@ -2,7 +2,8 @@
 // Summarises the latest iteration of every per-skill benchmark into evals/results/skills/SUMMARY.md.
 import fs from 'node:fs';
 import path from 'node:path';
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { fileURLToPath } from 'node:url';
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = path.join(REPO, 'evals', 'results', 'skills');
 const rows = [];
 for (const skill of fs.existsSync(dir) ? fs.readdirSync(dir).filter((d) => fs.statSync(path.join(dir, d)).isDirectory()).sort() : []) {

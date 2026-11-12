@@ -4,9 +4,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { classify } from '../../lib/pure/classify-rules.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'index.json'), 'utf8'));
 const sets = {};
 for (const f of fs.readdirSync(path.join(ROOT, 'tests', 'triggers'))) Object.assign(sets, JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'triggers', f), 'utf8')));

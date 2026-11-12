@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 // HS-084: draft a skill-feedback issue with a privacy blocklist. Prints the draft; never posts.
 import path from 'node:path';
-const here = path.dirname(new URL(import.meta.url).pathname);
-const { redact } = await import(path.join(here, '..', '..', '..', 'lib', 'core.mjs'));
+const { redact } = await import(new URL('../../../lib/core.mjs', import.meta.url));
 const a = process.argv.slice(2);
 const get = (k) => { const i = a.indexOf(`--${k}`); return i >= 0 ? a[i + 1] : ''; };
 const scrub = (s) => redact(String(s))

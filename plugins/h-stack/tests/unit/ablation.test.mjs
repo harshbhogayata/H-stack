@@ -5,8 +5,9 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const HOOK = new URL('../../hooks/gate-bash.mjs', import.meta.url).pathname;
+const HOOK = fileURLToPath(new URL('../../hooks/gate-bash.mjs', import.meta.url));
 const run = (env) => {
   const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-abl-'));
   const r = spawnSync('node', [HOOK], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', session_id: 's1', cwd: proj, tool_input: { command: 'git push --force origin main' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: proj, ...env }, encoding: 'utf8' });

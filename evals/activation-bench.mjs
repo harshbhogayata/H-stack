@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 // Files the agent created or changed (fixtures are tiny): name + content, for the grader.
 function listNew(dir, seeded) {
   const out = [];
@@ -27,7 +28,7 @@ async function gradeOutcome(c, r) {
   }
   return null;
 }
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const a = process.argv.slice(2);
 const opt = (k, d) => { const i = a.indexOf(`--${k}`); return i >= 0 ? a[i + 1] : d; };
 const OUTCOME = a.includes('--outcome');

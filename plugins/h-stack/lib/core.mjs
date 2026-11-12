@@ -4,8 +4,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-export const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+export const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// True when the module at `url` is the script node was started with. Works on Windows, where
+// import.meta.url is file:///C:/... and argv[1] is C:\..., and through symlinks (node realpaths the main module).
+export function isMain(url) {
+  if (!process.argv[1]) return false;
+  let argv1 = path.resolve(process.argv[1]);
+  try { argv1 = fs.realpathSync(argv1); } catch { /* keep the resolved path */ }
+  const self = fileURLToPath(url);
+  return process.platform === 'win32' ? self.toLowerCase() === argv1.toLowerCase() : self === argv1;
+}
 export const MAX_LINE_BYTES = 4096;
 
 // ---------- input ----------

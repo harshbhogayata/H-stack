@@ -2,7 +2,7 @@
 // PreToolUse(mcp__.*): send/post/merge/delete tools are irreversible (HS-030); argument taint (HS-032);
 // scope lock on issue/PR numbers (HS-035). FAILURE_MODE=closed
 import path from 'node:path';
-import { runHook, projectDir, sessionDir, readJson, loadConfig, refusal, preDecision, sha, appendLine } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, loadConfig, refusal, preDecision, sha, appendLine, isMain } from '../lib/core.mjs';
 import { taintedIn } from '../lib/taint.mjs';
 import { logTool } from '../lib/telemetry.mjs';
 
@@ -43,4 +43,4 @@ export function decide(input, proj) {
   for (const a of asks) logTool(proj, { tool, rule: a.split(':')[0], decision: 'ask' });
   return asks.length ? preDecision('ask', asks.join(' ')) : null;
 }
-if (import.meta.url === `file://${process.argv[1]}`) await runHook('gate-mcp', 'closed', async (i) => decide(i, projectDir(i)));
+if (isMain(import.meta.url)) await runHook('gate-mcp', 'closed', async (i) => decide(i, projectDir(i)));

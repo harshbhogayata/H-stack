@@ -2,7 +2,8 @@
 // Validates evals/tasks.json against the task format in ARCHITECTURE §8.2 (run by CI).
 import fs from 'node:fs';
 import path from 'node:path';
-const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { fileURLToPath } from 'node:url';
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const spec = JSON.parse(fs.readFileSync(path.join(REPO, 'evals', 'tasks.json'), 'utf8'));
 const errs = [];
 const names = new Set();
