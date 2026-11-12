@@ -8,6 +8,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
+const { bashPath } = await import(new URL('../../../lib/core.mjs', import.meta.url));
+
 const [sub, ...rest] = process.argv.slice(2);
 const proj = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const lockDir = path.join(proj, '.h-stack', 'locks');
@@ -17,7 +19,7 @@ if (sub === 'diff') {
   const get = (k) => { const i = rest.indexOf(`--${k}`); return i >= 0 ? rest.splice(i, 2)[1] : null; };
   const oracle = get('oracle'); const cand = get('candidate');
   if (!oracle || !cand || !rest.length) out({ status: 'error', reason: 'usage: oracle.mjs diff --oracle "<cmd {}>" --candidate "<cmd {}>" <inputs...>' });
-  const run = (tpl, f) => spawnSync('bash', ['-c', tpl.replaceAll('{}', q(f))], { cwd: proj, encoding: 'utf8', timeout: 60000 });
+  const run = (tpl, f) => spawnSync(bashPath(), ['-c', tpl.replaceAll('{}', q(f))], { cwd: proj, encoding: 'utf8', timeout: 60000 });
   const failing = [];
   for (const f of rest) {
     const a = run(oracle, f); const b = run(cand, f);

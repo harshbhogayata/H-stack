@@ -13,6 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { bashPath } from '../plugins/h-stack/lib/core.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -83,7 +84,7 @@ async function runOnce(task, arm, n, base) {
   if (DRY) { console.log(JSON.stringify({ task: task.eval_name, arm, env: Object.fromEntries(Object.entries(env).filter(([k]) => k !== 'CLAUDE_CONFIG_DIR')), argv: argv.map((x) => (x.length > 80 ? x.slice(0, 77) + '...' : x)) })); fs.rmSync(ws, { recursive: true, force: true }); return null; }
   const r = await sh('claude', argv, { cwd: ws, env });
   let j = {}; try { j = JSON.parse(r.out.trim().split('\n').pop()); } catch { j = { result: r.out.slice(-3000), is_error: true }; }
-  const check = task.check ? await sh('bash', [path.resolve(REPO, task.check)], { cwd: ws, timeout: 600000 }) : null;
+  const check = task.check ? await sh(bashPath(), [path.resolve(REPO, task.check)], { cwd: ws, timeout: 600000 }) : null;
   const after = hashFiles(ws, task.protected_tests);
   let diff = ''; try { execFileSync('git', ['-C', ws, 'add', '-A', '-N']); diff = execFileSync('git', ['-C', ws, 'diff'], { encoding: 'utf8', maxBuffer: 32 << 20 }); } catch { /* */ }
   const final = String(j.result || '');

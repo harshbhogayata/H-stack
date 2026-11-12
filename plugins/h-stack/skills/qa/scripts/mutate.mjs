@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 
 const { isTestPath } = await import(new URL('../../../lib/tests.mjs', import.meta.url));
-const { loadConfig } = await import(new URL('../../../lib/core.mjs', import.meta.url));
+const { loadConfig, bashPath } = await import(new URL('../../../lib/core.mjs', import.meta.url));
 const argv = process.argv.slice(2);
 const dd = argv.indexOf('--');
 const cmd = dd >= 0 ? argv.slice(dd + 1).join(' ') : '';
@@ -36,7 +36,7 @@ for (const l of diff.split('\n')) {
     for (let k = 0; k < n; k++) targets.push({ file, line: start + k });
   }
 }
-const run = () => spawnSync('bash', ['-c', cmd], { cwd: proj, encoding: 'utf8', timeout: 300000, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } });
+const run = () => spawnSync(bashPath(), ['-c', cmd], { cwd: proj, encoding: 'utf8', timeout: 300000, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } });
 const baseline = run();
 if (baseline.status !== 0) out({ status: 'error', reason: 'the test command fails before mutation; fix the suite first' });
 const survivors = []; let tried = 0;

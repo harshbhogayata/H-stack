@@ -237,6 +237,22 @@ export function treeHash(proj) {
   return h.digest('hex').slice(0, 16);
 }
 
+// Shell for `bash -c` commands and check scripts. On Windows the `bash` on PATH outside Git Bash is
+// usually WSL's launcher (System32\bash.exe), which runs the command in Linux against Windows paths;
+// use Git for Windows' bash (the one Claude Code's Bash tool runs) instead.
+let bashCached = null;
+export function bashPath() {
+  if (process.platform !== 'win32') return 'bash';
+  if (bashCached) return bashCached;
+  const candidates = [process.env.CLAUDE_CODE_GIT_BASH_PATH];
+  try {
+    const exec = execFileSync('git', ['--exec-path'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 3000 }).trim();
+    candidates.push(path.resolve(exec, '..', '..', '..', 'bin', 'bash.exe')); // <Git>/mingw64/libexec/git-core → <Git>/bin/bash.exe
+  } catch { /* git not on PATH */ }
+  bashCached = candidates.find((p) => p && fs.existsSync(p)) || 'bash';
+  return bashCached;
+}
+
 // ---------- misc ----------
 export function now() { return Date.now(); }
 export function toPosix(p) { return String(p).split(path.sep).join('/'); }

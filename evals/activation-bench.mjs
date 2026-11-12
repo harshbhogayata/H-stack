@@ -11,6 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { bashPath } from '../plugins/h-stack/lib/core.mjs';
 // Files the agent created or changed (fixtures are tiny): name + content, for the grader.
 function listNew(dir, seeded) {
   const out = [];
@@ -81,7 +82,7 @@ function run(style, c) {
       let check = null;
       if (c.fixtures) {
         spawnSync('git', ['-C', dir, 'add', '-A', '-N']); diff = spawnSync('git', ['-C', dir, 'diff'], { encoding: 'utf8', maxBuffer: 16 << 20 }).stdout.slice(0, 12000);
-        if (c.check) { const k = spawnSync('bash', ['-c', c.check], { cwd: dir, encoding: 'utf8', timeout: 180000 }); check = { code: k.status, out: (k.stdout + k.stderr).slice(-600) }; }
+        if (c.check) { const k = spawnSync(bashPath(), ['-c', c.check], { cwd: dir, encoding: 'utf8', timeout: 180000 }); check = { code: k.status, out: (k.stdout + k.stderr).slice(-600) }; }
       } else { try { diff = listNew(dir, c.files || {}); } catch { /* */ } }
       fs.rmSync(dir, { recursive: true, force: true });
       resolve({ style, case: c.name, expect: c.expect, skills, loaded: skills.some((s) => expects(c).some((e) => s.endsWith(e))), final, diff, check });

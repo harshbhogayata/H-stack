@@ -11,7 +11,7 @@ import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 
 const { isTestPath } = await import(new URL('../../../lib/tests.mjs', import.meta.url));
-const { loadConfig } = await import(new URL('../../../lib/core.mjs', import.meta.url));
+const { loadConfig, bashPath } = await import(new URL('../../../lib/core.mjs', import.meta.url));
 
 const argv = process.argv.slice(2);
 const dd = argv.indexOf('--');
@@ -31,7 +31,7 @@ const config = loadConfig(proj);
 const fixFiles = [...new Set(changed)].filter((p) => !isTestPath(p, proj, config));
 if (!fixFiles.length) out({ status: 'error', reason: 'no uncommitted non-test changes to verify (commit nothing yet, or the fix is only in tests)' });
 
-const run = (cmd) => spawnSync('bash', ['-c', cmd], { cwd: proj, encoding: 'utf8', timeout: 600000, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } });
+const run = (cmd) => spawnSync(bashPath(), ['-c', cmd], { cwd: proj, encoding: 'utf8', timeout: 600000, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } });
 const backup = fs.mkdtempSync(path.join(os.tmpdir(), 'hs-verify-fix-'));
 const tracked = new Set(git('ls-files').split('\n').filter(Boolean));
 for (const p of fixFiles) {
