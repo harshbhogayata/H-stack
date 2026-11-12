@@ -47,6 +47,10 @@ async function loadDisabled($) {
   try { state.disabled = new Set(String((await $.env.get('HSTACK_DISABLE')) || '').split(',').map((x) => x.trim()).filter(Boolean)) } catch { state.disabled = new Set() }
 }
 
+async function interactive($) {
+  try { return (await $.session.surfaces()).length > 0 } catch { return true }
+}
+
 async function loadState($) {
   try { state.session = String(await $.fs.read('.h-stack/active-session')).trim() } catch { /* no state yet */ }
   const cfg = await readJson($, '.h-stack/config.json', {})
@@ -211,7 +215,9 @@ export function register(on) {
     // HS-040: once per prompt, and never on the turn that answers H-Stack's own note (no resubmit loop:
     // the resubmitted turn gets a new prompt_id, so the pending flag is what stops a second note).
     if (state.concernPending) state.concernPending = false
-    else if (state.config.concerns !== false && !off('concerns') && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
+    // Interactive sessions only (user decision 2026-11-12): a claude -p run has no connected surface, and
+    // there the follow-up would replace the caller's final message.
+    else if (state.config.concerns !== false && !off('concerns') && state.edits > 0 && await interactive($) && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
       state.concernAsked = state.route.prompt_id
       const open = await concernCheck($, e.answer)
       if (open.length) state.concernPending = true

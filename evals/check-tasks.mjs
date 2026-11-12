@@ -19,6 +19,6 @@ const groups = {};
 for (const t of spec.evals) if (t.context_group) (groups[t.context_group] ||= []).push(t.eval_name);
 for (const [g, n] of Object.entries(groups)) if (n.length !== 2) errs.push(`context_group ${g} needs exactly 2 tasks`);
 const real = spec.evals.filter((t) => !t.runner_selftest).length;
-console.log(JSON.stringify({ status: errs.length ? 'fail' : 'ok', reason: `${spec.evals.length} task(s) valid in format; ${real} real user task(s) (target ~10, needs the user)` }));
+console.log(JSON.stringify({ status: errs.length ? 'fail' : 'ok', reason: `${spec.evals.length} task(s) valid in format; ${real} smoke task(s) (target ~10)` }));
 for (const e of errs) console.log(e);
 process.exit(errs.length ? 1 : 0);

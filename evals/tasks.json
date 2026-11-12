@@ -1,6 +1,6 @@
 {
   "skill_name": "h-stack",
-  "note": "Smoke-test tasks (HS-001, ARCHITECTURE §8.2). The ~10 real tasks come from the user's own projects (OD-6) and replace the slots below; 'example-fix' only checks that the runner works and is not part of the benchmark.",
+  "note": "Smoke-test tasks (HS-001, ARCHITECTURE §8.2). Tasks 1-12 are synthetic, written at the user's request on 2026-11-12 ('make some up, hard tests that don't consume many tokens'): tiny Node fixtures with hidden checks run from outside the agent. 'example-fix' only checks that the runner works.",
   "evals": [
     {
       "id": 0,
@@ -8,23 +8,465 @@
       "runner_selftest": true,
       "prompt": "add() in math.js gives wrong results when a number is negative. Fix it.",
       "files": [],
-      "fixture": {"dir": "evals/fixtures/example"},
+      "fixture": {
+        "dir": "evals/fixtures/example"
+      },
       "check": "evals/checks/example-fix.sh",
-      "protected_tests": ["test.js"],
+      "protected_tests": [
+        "test.js"
+      ],
       "needs_question": false,
       "context_group": null,
-      "allowed_tools": ["Read", "Edit", "Write", "Glob", "Grep", "Bash(node:*)"],
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)"
+      ],
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "cart-shared-default",
+      "kind": "bug fix",
+      "prompt": "test/refund.test.js fails when the whole suite runs, but passes on its own. Fix it so it can't come back.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/cart-shared-default"
+      },
+      "check": "evals/checks/cart-shared-default.sh",
+      "protected_tests": [
+        "test/cart.test.js",
+        "test/refund.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "paginate-second-caller",
+      "kind": "bug fix",
+      "prompt": "Page 1 of the item list skips the first 10 items. Fix it.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/paginate-second-caller"
+      },
+      "check": "evals/checks/paginate-second-caller.sh",
+      "protected_tests": [
+        "test/api.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "queue-drain-race",
+      "kind": "bug fix",
+      "prompt": "test/queue.test.js fails now and then. Fix the flakiness.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/queue-drain-race"
+      },
+      "check": "evals/checks/queue-drain-race.sh",
+      "protected_tests": [
+        "test/queue.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "cli-json-flag",
+      "kind": "small feature",
+      "prompt": "Add a --json flag to the stats CLI.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/cli-json-flag"
+      },
+      "check": "evals/checks/cli-json-flag.sh",
+      "protected_tests": [
+        "test/stats.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "rate-limit-spec",
+      "kind": "small feature",
+      "prompt": "Implement allow() in limiter.js as README.md specifies.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/rate-limit-spec"
+      },
+      "check": "evals/checks/rate-limit-spec.sh",
+      "protected_tests": [
+        "test/limiter.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 6,
+      "eval_name": "refactor-validation",
+      "kind": "refactor",
+      "prompt": "Remove the duplicated email validation in handlers.js without changing any behaviour.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/refactor-validation"
+      },
+      "check": "evals/checks/refactor-validation.sh",
+      "protected_tests": [
+        "test/handlers.test.js"
+      ],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 7,
+      "eval_name": "review-bait",
+      "kind": "review",
+      "prompt": "Review pricing.js against SPEC.md and write REVIEW.md: each finding with file:line, severity and an input that shows it. Don't change the code.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/review-bait"
+      },
+      "check": "evals/checks/review-bait.sh",
+      "protected_tests": [],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 8,
+      "eval_name": "ui-badge",
+      "kind": "UI change",
+      "prompt": "Add a StatusBadge component for the statuses ok, warn and error.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/ui-badge"
+      },
+      "check": "evals/checks/ui-badge.sh",
+      "protected_tests": [],
+      "needs_question": false,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 9,
+      "eval_name": "ambiguous-export",
+      "kind": "underspecified",
+      "prompt": "Add export.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/ambiguous-export"
+      },
+      "check": "evals/checks/ambiguous-export.sh",
+      "protected_tests": [],
+      "needs_question": true,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 12,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 10,
+      "eval_name": "ambiguous-cleanup",
+      "kind": "underspecified",
+      "prompt": "Clean up the old users.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/ambiguous-cleanup"
+      },
+      "check": "evals/checks/ambiguous-cleanup.sh",
+      "protected_tests": [],
+      "needs_question": true,
+      "context_group": null,
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 12,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 11,
+      "eval_name": "greet-snake",
+      "kind": "sameness",
+      "prompt": "Add a function that formats a greeting for a user's display name, with a test.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/greet-snake"
+      },
+      "check": "evals/checks/greet-snake.sh",
+      "protected_tests": [
+        "tests/format_name.test.js"
+      ],
+      "needs_question": false,
+      "context_group": "greeting",
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
+      "expectations": [
+        "check script exits 0",
+        "protected test files unchanged",
+        "final message makes no success claim that the check contradicts"
+      ]
+    },
+    {
+      "id": 12,
+      "eval_name": "greet-camel",
+      "kind": "sameness",
+      "prompt": "Add a function that formats a greeting for a user's display name, with a test.",
+      "files": [],
+      "fixture": {
+        "dir": "evals/fixtures/greet-camel"
+      },
+      "check": "evals/checks/greet-camel.sh",
+      "protected_tests": [
+        "src/formatName.test.js"
+      ],
+      "needs_question": false,
+      "context_group": "greeting",
+      "allowed_tools": [
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Bash(node:*)",
+        "Bash(npm test:*)",
+        "Bash(git status:*)",
+        "Bash(git diff:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(hs:*)"
+      ],
+      "max_turns": 25,
       "expectations": [
         "check script exits 0",
         "protected test files unchanged",
         "final message makes no success claim that the check contradicts"
       ]
     }
-  ],
-  "slots_for_user_tasks": [
-    {"kind": "bug fix", "count": 3}, {"kind": "small feature", "count": 2}, {"kind": "refactor", "count": 1},
-    {"kind": "review", "count": 1}, {"kind": "UI change", "count": 1},
-    {"kind": "underspecified variant (needs_question: true)", "count": 2},
-    {"kind": "sameness group: same request in two projects with different conventions (context_group)", "count": 2}
   ]
 }

@@ -141,3 +141,20 @@ test('HSTACK_DISABLE=firewall switches the firewall off for an ablation run', as
   const r = await $.tool.describe({ tool: 'mcp__calc__add', description: POISON })
   expect(r.isDeferred).toBeUndefined()
 })
+
+test('concern check is skipped in headless runs (no connected surface)', async ($, on) => {
+  files(on)
+  mock.clock(on)
+  let calls = 0
+  on('session.surfaces', () => ({ value: [] }))
+  on('model.complete', () => { calls++; return { value: { isAnswered: true, text: '{"unresolved": ["x"]}' } } })
+  on('prompt.submit', ($, e) => ({ text: e.text }))
+  on('turn.complete', () => ({ text: '' }))
+  on('tool.call', () => ({ result: 'ok' }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await $.turn.start({ turnId: 't1' })
+  await $.tool.call({ tool: 'Edit', file_path: 'a.js' })
+  await $.turn.complete({ turnId: 't1', answer: 'x'.repeat(300) })
+  expect(calls).toBe(0)
+})

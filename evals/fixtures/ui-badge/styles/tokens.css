@@ -1,0 +1,5 @@
+:root {
+  --c-ok-fg: #14532d; --c-ok-bg: #dcfce7; --c-warn-fg: #713f12; --c-warn-bg: #fef9c3;
+  --c-err-fg: #7f1d1d; --c-err-bg: #fee2e2; --radius-pill: 999px; --space-1: 4px; --space-2: 8px; --font-small: 12px;
+}
+@media (prefers-color-scheme: dark) { :root { --c-ok-fg: #bbf7d0; --c-ok-bg: #14532d; --c-warn-fg: #fef08a; --c-warn-bg: #713f12; --c-err-fg: #fecaca; --c-err-bg: #7f1d1d; } }

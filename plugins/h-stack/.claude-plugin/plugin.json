@@ -4,5 +4,7 @@
   "version": "0.0.1",
   "author": {
     "name": "harshbhogayata"
-  }
+  },
+  "license": "MIT",
+  "icon": ".claude-plugin/icon.png"
 }

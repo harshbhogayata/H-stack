@@ -1,0 +1,11 @@
+const path = require('path'); const assert = require('assert');
+const { createLimiter } = require(path.resolve('limiter.js'));
+let a = createLimiter({ capacity: 3, refillPerSec: 2 });
+assert.ok(a('x', 0) && a('x', 0) && a('x', 0)); assert.ok(!a('x', 0));
+assert.ok(!a('x', 400), '0.8 token is not a whole token'); assert.ok(a('x', 500), '1 token after 500ms');
+assert.ok(a('y', 500), 'keys are independent');
+a = createLimiter({ capacity: 2, refillPerSec: 1 });
+a('z', 0); a('z', 0); assert.ok(!a('z', 0));
+assert.ok(a('z', 100000) && a('z', 100000) && !a('z', 100000), 'refill capped at capacity');
+a = createLimiter({ capacity: 1, refillPerSec: 1 });
+assert.ok(a('t', 5000)); assert.ok(!a('t', 1000), 'time going backwards adds nothing'); assert.ok(!a('t', 5500)); assert.ok(a('t', 6000));

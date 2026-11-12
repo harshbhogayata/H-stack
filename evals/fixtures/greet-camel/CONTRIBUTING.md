@@ -1,0 +1,3 @@
+- ES modules (`import`/`export`), camelCase names, 2-space indentation, JSDoc on every exported function.
+- Source in `src/`; each module has a sibling test `src/<module>.test.js` using node:test.
+- Named exports only.

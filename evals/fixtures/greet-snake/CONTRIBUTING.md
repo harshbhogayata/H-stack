@@ -1,0 +1,3 @@
+- CommonJS (`require`, `module.exports`), snake_case function names, 4-space indentation.
+- One module per file in `lib/`; tests in `tests/<module>.test.js` with node:test and assert/strict.
+- No default exports; no classes.
