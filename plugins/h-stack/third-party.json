@@ -377,7 +377,7 @@
           "upstream_sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
         }
       ],
-      "changes": "Design-studio persona and fixed preferences removed; applies only where the project has no design system; grounding, plan-check-build-critique loop, generated-default self-check and writing guidance kept and condensed."
+      "changes": "Design-studio persona and fixed preferences removed; applies only where the project has no design system; grounding, plan-check-build-critique loop, generated-default self-check and writing guidance kept and condensed; 'one memorable element', 'spend boldness in one place' and 'remove one element' replaced by a test that the distinctive element carries the argument, a first view that says what the product is next to it, and a page complete beyond that element."
     },
     {
       "skill": "memory",
