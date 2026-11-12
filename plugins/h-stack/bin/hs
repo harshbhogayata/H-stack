@@ -4,13 +4,11 @@
 //           goal, lesson, vote, manifest, review-override, status.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const core = await import(path.join(here, '..', 'lib', 'core.mjs'));
-const { appendFailure } = await import(path.join(here, '..', 'lib', 'append.mjs'));
-const { validateLessonText } = await import(path.join(here, '..', 'lib', 'lessons.mjs'));
-const { isTestPath } = await import(path.join(here, '..', 'lib', 'tests.mjs'));
+const core = await import(new URL('../lib/core.mjs', import.meta.url));
+const { appendFailure } = await import(new URL('../lib/append.mjs', import.meta.url));
+const { validateLessonText } = await import(new URL('../lib/lessons.mjs', import.meta.url));
+const { isTestPath } = await import(new URL('../lib/tests.mjs', import.meta.url));
 const { appendLine, readJsonl, latestById, sessionDir, stateDir, activeSession, readJson, writeJsonAtomic, loadConfig, redact } = core;
 
 const proj = process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -114,7 +112,7 @@ switch (cmd) {
       const raw = fs.readFileSync(src, 'utf8');
       let items;
       try { items = JSON.parse(raw).items; } catch {
-        const { parseYaml } = await import(path.join(here, '..', 'lib', 'yaml.mjs'));
+        const { parseYaml } = await import(new URL('../lib/yaml.mjs', import.meta.url));
         items = parseYaml(raw).items;
       }
       if (!Array.isArray(items) || !items.length) out('error', 'rubric needs a non-empty items list');
@@ -165,7 +163,7 @@ switch (cmd) {
   case 'manifest': {
     const file = path.join(stateDir(proj), 'active-manifest.json');
     if (pos[0] === 'start') {
-      const { loadManifest } = await import(path.join(here, '..', 'lib', 'effects.mjs'));
+      const { loadManifest } = await import(new URL('../lib/effects.mjs', import.meta.url));
       const m = loadManifest(pos[1]);
       writeJsonAtomic(file, { ...m, source: pos[1] });
       out('ok', `manifest ${m.name || pos[1]} armed: actions outside its ${m.effects.length} declared effect(s) are denied until hs manifest stop`);
@@ -191,7 +189,7 @@ switch (cmd) {
     break;
   }
   case 'retro': {
-    const { retro } = await import(path.join(here, '..', 'lib', 'retro.mjs'));
+    const { retro } = await import(new URL('../lib/retro.mjs', import.meta.url));
     const r = retro(proj);
     const solo = Object.entries(r.solo_boundary).map(([c, s]) => `${c} ${s.passed}/${s.runs} -> ${s.verify}`).join('; ') || 'no routed turns yet';
     out('ok', `prompts ${r.activation.prompts}, routed ${r.activation.routed}, corrections ${r.activation.corrections}; turns ${r.turns.count} (${r.turns.tokens} tokens, ${r.turns.aborted} aborted); routing examples ${r.routing_examples}; verification effort: ${solo}`, { retro: r });
