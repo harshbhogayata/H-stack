@@ -4,15 +4,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { runHook, projectDir, sessionDir, readJson, writeJsonAtomic, relToProject, context } from '../lib/core.mjs';
+import { runHook, projectDir, sessionDir, readJson, writeJsonAtomic, relToProject, context, bashPath } from '../lib/core.mjs';
 
 function check(abs) {
   const ext = path.extname(abs).toLowerCase();
-  const run = (cmd, args) => { const r = spawnSync(cmd, args, { encoding: 'utf8', timeout: 2500 }); if (r.error) return null; return r.status === 0 ? '' : (r.stderr || r.stdout || 'syntax error').trim(); };
+  // 9009: Windows could not find the command (or hit the Microsoft Store python stub); no parser, no note.
+  const run = (cmd, args) => { const r = spawnSync(cmd, args, { encoding: 'utf8', timeout: 2500 }); if (r.error || r.status === 9009) return null; return r.status === 0 ? '' : (r.stderr || r.stdout || 'syntax error').trim(); };
   if (ext === '.json' && !/tsconfig|jsconfig|\.vscode/.test(abs)) { try { JSON.parse(fs.readFileSync(abs, 'utf8')); return ''; } catch (e) { return String(e.message); } }
   if (['.js', '.mjs', '.cjs'].includes(ext)) return run(process.execPath, ['--check', abs]);
-  if (ext === '.py') return run('python3', ['-c', 'import ast,sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])', abs]);
-  if (['.sh', '.bash'].includes(ext)) return run('bash', ['-n', abs]);
+  if (ext === '.py') return run(process.platform === 'win32' ? 'python' : 'python3', ['-c', 'import ast,sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])', abs]);
+  if (['.sh', '.bash'].includes(ext)) return run(bashPath(), ['-n', abs]);
   if (ext === '.rb') return run('ruby', ['-c', abs]);
   if (ext === '.php') return run('php', ['-l', abs]);
   if (ext === '.go') return run('gofmt', ['-e', '-l', abs]);
