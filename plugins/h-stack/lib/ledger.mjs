@@ -1,7 +1,8 @@
 // Receipt/ledger helpers shared by ledger.mjs (writer), stop.mjs, batch.mjs and gate-bash (readers).
 import path from 'node:path';
 import { readJsonl, sessionDir, loadConfig } from './core.mjs';
-import { parseCommands, exe } from './shell.mjs';
+import { exe } from './shell.mjs';
+import { parseShell } from './pwsh.mjs';
 
 export function ledgerFile(proj, sid) { return path.join(sessionDir(proj, sid), 'ledger.jsonl'); }
 export function readLedger(proj, sid) { return readJsonl(ledgerFile(proj, sid)); }
@@ -9,8 +10,8 @@ export function readLedger(proj, sid) { return readJsonl(ledgerFile(proj, sid));
 // Self-audit F12: the kind comes from what each parsed command runs (`npm test`, `pytest`), not from
 // the raw text, so `echo tests` is not a test receipt.
 const NOOP = new Set(['echo', 'printf', 'true', ':', 'cat', 'ls', 'grep', 'rg', 'head', 'tail', 'touch', 'mkdir', 'cd', 'sleep', 'which', 'type', 'export', 'test', '[']);
-export function claimKinds(cmd, config) {
-  const heads = parseCommands(cmd).filter((c) => !NOOP.has(exe(c))).map((c) => [exe(c), ...c.argv.slice(1, 4)].join(' '));
+export function claimKinds(cmd, config, shell) {
+  const heads = parseShell(cmd, shell).filter((c) => !NOOP.has(exe(c))).map((c) => [exe(c), ...c.argv.slice(1, 4)].join(' '));
   const kinds = [];
   for (const [k, re] of Object.entries(config.claims || {})) { try { const r = new RegExp(re, 'i'); if (heads.some((h) => r.test(h))) kinds.push(k); } catch { /* bad config */ } }
   return kinds;

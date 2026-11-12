@@ -1,6 +1,7 @@
 // HS-030 irreversible-action classifier, HS-034 credential exec, HS-035 scope lock helpers.
 // Effect classes: medium (ask with manifest; some need a dry-run receipt) and high (deny).
-import { parseCommands, exe, normaliseArgv } from './shell.mjs';
+import { exe, normaliseArgv } from './shell.mjs';
+import { parseShell, pwshText } from './pwsh.mjs';
 
 const has = (argv, ...words) => words.every((w) => argv.includes(w));
 const sub = (argv, i) => argv[i] || '';
@@ -80,16 +81,19 @@ const SECRET_SRC = /(\$\{?(AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|GITHUB_TOKEN|
 
 const CRED_PRINTERS = [/^gh auth token\b/, /^gh auth status .*--show-token/, /^aws (configure get|configure export-credentials|sts get-session-token|ecr get-login-password)\b/, /^gcloud auth (print-access-token|print-identity-token|application-default print-access-token)\b/, /^az account get-access-token\b/, /^(security) find-(generic|internet)-password\b/, /^op (read|item get)\b/, /^vault (read|kv get)\b/, /^(cat|head|tail|less|base64|xxd) .*(\.config\/gh\/hosts\.yml|\.git-credentials|\.kube\/config)\b/, /^git credential fill\b/, /^npm token\b/];
 
+// ctx.shell 'powershell' reads the command as PowerShell (lib/pwsh.mjs); $env:NAME counts as $NAME.
+const PWSH_ENV_DUMP = /(^|; )ls env:|GetEnvironmentVariables?/i;
 export function classifyBash(command, ctx = {}) {
-  const cmds = parseCommands(command);
+  const ps = ctx.shell === 'powershell';
+  const cmds = parseShell(command, ctx.shell);
   const findings = [];
-  const text = String(command);
+  const text = ps ? pwshText(command) : String(command);
   const usesNet = cmds.some((c) => NET.has(exe(c)));
   // Match the de-quoted parsed tokens as well as the raw text (self-audit F8: `.e""nv`), and treat
   // commands that print a credential as secret sources (`$(gh auth token)`).
-  const tokens = cmds.map((c) => c.argv.join(' ')).join(' ; ');
+  const tokens = ps ? pwshText(cmds.map((c) => c.argv.join(' ')).join(' ; ')) : cmds.map((c) => c.argv.join(' ')).join(' ; ');
   const printsCred = cmds.some((c) => CRED_PRINTERS.some((re) => re.test(`${exe(c)} ${c.argv.slice(1).join(' ')}`)));
-  if (usesNet && (SECRET_SRC.test(text) || SECRET_SRC.test(tokens) || printsCred)) {
+  if (usesNet && (SECRET_SRC.test(text) || SECRET_SRC.test(tokens) || printsCred || (ps && (PWSH_ENV_DUMP.test(tokens) || PWSH_ENV_DUMP.test(text))))) {
     findings.push({ cls: 'exfiltration', high: true, target: 'secret to network', destination: (text.match(/https?:\/\/[^\s'"]+/) || ['remote'])[0] });
   }
   for (const raw of cmds) {
@@ -104,9 +108,9 @@ export function classifyBash(command, ctx = {}) {
 
 // HS-034: credential-bearing commands run through project-controlled executables.
 const CRED_HINT = /\b(login|auth|token|credential|secret|publish|deploy|release|whoami|configure)\b/i;
-export function credentialExec(command) {
+export function credentialExec(command, shell) {
   const out = [];
-  for (const c of parseCommands(command)) {
+  for (const c of parseShell(command, shell)) {
     const a = c.argv; const e = exe(c);
     const viaProject = (e === 'npx' && !a.includes('--no-install')) || (e === 'pnpm' && ['exec', 'dlx'].includes(a[1])) || (['npm', 'yarn', 'pnpm', 'bun'].includes(e) && a[1] === 'run') || /node_modules\/\.bin\//.test(a[0] || '') || (e === 'bunx') || (e === 'yarn' && a[1] === 'dlx');
     if (viaProject && CRED_HINT.test(a.join(' '))) out.push(a.slice(0, 4).join(' '));
@@ -115,9 +119,9 @@ export function credentialExec(command) {
 }
 
 // HS-035: gh issue/pr write target number.
-export function ghTargetNumbers(command) {
+export function ghTargetNumbers(command, shell) {
   const nums = [];
-  for (const c of parseCommands(command)) {
+  for (const c of parseShell(command, shell)) {
     const a = c.argv;
     if (exe(c) !== 'gh') continue;
     if (['issue', 'pr'].includes(a[1]) && ['comment', 'review', 'close', 'edit', 'merge', 'reopen', 'lock', 'ready'].includes(a[2])) {

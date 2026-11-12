@@ -4,7 +4,8 @@
 // file) replaces the network in tests.
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseCommands, exe, normaliseArgv } from './shell.mjs';
+import { exe, normaliseArgv } from './shell.mjs';
+import { parseShell } from './pwsh.mjs';
 import { stateDir, readJson, writeJsonAtomic } from './core.mjs';
 import { PY_STDLIB, NODE_BUILTINS, TOP } from './deps-data.mjs';
 
@@ -32,9 +33,9 @@ const stripVersion = (eco, spec) => {
 const isLocalSpec = (s) => /^(\.|\/|~|file:|git\+|https?:|link:|workspace:|-)/.test(s) || s.includes('/') && s.endsWith('.tgz');
 
 // Packages named by an install command.
-export function installTargets(command) {
+export function installTargets(command, shell) {
   const out = [];
-  for (const c of parseCommands(command)) {
+  for (const c of parseShell(command, shell)) {
     const a = normaliseArgv(c.argv); const e = exe(c);
     const VALUE_FLAGS = new Set(['--prefix', '-C', '--dir', '--cwd', '--directory', '--project', '--manifest-path', '--config', '--userconfig', '--cache', '--workspace-dir', '--features', '-F', '--registry', '--tag', '--target', '--git', '--branch', '--rev', '--path', '--vers', '--version', '--source', '--group', '-G', '--index', '--filter', '--workspace', '-w', '--save-prefix', '--python', '-p', '--package']);
     const args = (from) => { const r = []; const xs = a.slice(from); for (let k = 0; k < xs.length; k++) { if (VALUE_FLAGS.has(xs[k])) { k++; continue; } if (!xs[k].startsWith('-')) r.push(xs[k]); } return r; };

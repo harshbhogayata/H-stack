@@ -141,7 +141,7 @@ export const DEFAULT_CONFIG = {
   long_run: { overseer: false },
   retention: { sessions_days: 30, telemetry_days: 90, other_days: 180 },
   claims: {
-    test: '\\b(test|tests|pytest|jest|vitest|mocha|ava|rspec|phpunit|ctest|go test|cargo test|npm t|bun test|deno test|unittest|tox|nox)\\b',
+    test: '\\b(test|tests|pytest|jest|vitest|mocha|ava|rspec|phpunit|ctest|go test|cargo test|npm t|bun test|deno test|unittest|tox|nox|invoke-pester)\\b',
     build: '\\b(build|compile|tsc|make|cargo build|go build|webpack|vite build|gradle|mvn|bazel)\\b',
     lint: '\\b(lint|eslint|ruff|flake8|pylint|clippy|golangci|rubocop|biome|prettier --check|stylelint)\\b',
     typecheck: '\\b(tsc|mypy|pyright|typecheck|type-check|flow check)\\b',
