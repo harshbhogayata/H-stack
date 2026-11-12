@@ -20,9 +20,9 @@ export function pwshText(s) {
 
 // Split into statements; bodies of $( ), @( ), ( ) and { } become separate sources.
 function split(src) {
-  const parts = []; const subs = [];
-  let cur = '';
-  const flush = () => { if (cur.trim()) parts.push(cur.trim()); cur = ''; };
+  const parts = []; const subs = []; const piped = [];
+  let cur = ''; let nextPiped = false;
+  const flush = (pipe = false) => { if (cur.trim()) { parts.push(cur.trim()); piped.push(nextPiped); } cur = ''; nextPiped = pipe; };
   const group = (i, open, close) => {
     let d = 1; let j = i + 1; let q = null;
     for (; j < src.length && d > 0; j++) {
@@ -70,7 +70,7 @@ function split(src) {
     if (c === '$' && src[i + 1] === '{') { const e = src.indexOf('}', i); cur += e < 0 ? src.slice(i) : src.slice(i, e + 1); i = e < 0 ? src.length : e; continue; }
     if (c === '(' || c === '{') { const close = c === '(' ? ')' : '}'; const j = group(i, c, close); if (cur.endsWith('$') || cur.endsWith('@')) cur = cur.slice(0, -1); cur += c === '(' ? '(…)' : '{…}'; i = j - 1; continue; }
     if (c === ';' || c === '\n' || c === '\r') { flush(); continue; }
-    if (c === '|') { flush(); if (src[i + 1] === '|') i++; continue; }
+    if (c === '|') { if (src[i + 1] === '|') { flush(); i++; } else flush(true); continue; }
     if (c === '&') {
       if (src[i + 1] === '&') { flush(); i++; continue; }
       if (cur.endsWith('>')) { cur += c; continue; } // 2>&1
@@ -79,7 +79,7 @@ function split(src) {
     cur += c;
   }
   flush();
-  return { parts, subs };
+  return { parts, subs, piped };
 }
 function innerParen(s, i) {
   let d = 0;
@@ -261,11 +261,15 @@ function translate(argv, env, redirects, depth) {
 }
 
 function parseInner(src, depth) {
-  const { parts, subs } = split(String(src || ''));
+  const { parts, subs, piped } = split(String(src || ''));
   const out = [];
   const env = {};
-  for (const p of parts) {
+  // Paths a pipeline stage hands on: `Get-ChildItem .h-stack | Remove-Item` removes .h-stack's files.
+  let handed = [];
+  for (const [k, p] of parts.entries()) {
     let { argv, redirects, quotedFirst } = tokenize(p);
+    const from = piped[k] ? handed : [];
+    handed = quotedFirst ? argv : [];
     // $env:NAME = value carries to the later statements, like an exported variable.
     const asg = /^\$env:([A-Za-z_]\w*)$/i.exec(argv[0] || '');
     if (asg && argv[1] === '=') { env[asg[1].toUpperCase()] = argv.slice(2).join(' '); continue; }
@@ -278,7 +282,12 @@ function parseInner(src, depth) {
     while (argv[0] === '&' || argv[0] === '.') argv = argv.slice(1);
     if (argv.length && KEYWORDS.has(argv[0].toLowerCase())) continue;
     if (argv.length && /^\$/.test(argv[0]) && !redirects.length) continue; // an expression, not a command
-    out.push(...translate(argv, { ...env }, redirects, depth));
+    const cmds = translate(argv, { ...env }, redirects, depth);
+    const [c] = cmds;
+    if (cmds.length === 1 && /^(where-object|where|\?|sort-object|sort|select-object|select)$/.test(c.argv[0])) handed = from;
+    if (cmds.length === 1 && ['ls', 'stat', 'cat'].includes(c.argv[0])) { const b = bind(argv.slice(1), PATHS); handed = [...first(b, 'Path', 'LiteralPath'), ...b._]; }
+    if (cmds.length === 1 && from.length && ['rm', 'tee', 'truncate'].includes(c.argv[0]) && !c.argv.slice(1).some((x) => !x.startsWith('-'))) c.argv.push(...from);
+    out.push(...cmds);
   }
   if (depth < 6) for (const s of subs) out.push(...parseInner(s, depth + 1));
   return out.filter((c) => c.argv.length || c.redirects.length);

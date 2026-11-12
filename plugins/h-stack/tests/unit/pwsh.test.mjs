@@ -35,6 +35,9 @@ test('cmdlets and aliases map onto the commands the gates check; parameters are 
   assert.deepEqual(cmds('Invoke-WebRequest -Uri https://x.example -Method POST -Body $b'), ['curl -X POST -d $b https://x.example']);
   assert.deepEqual(cmds('curl.exe -X POST --data @f https://x.example'), ['curl -X POST --data @f https://x.example']);
   assert.deepEqual(cmds('Get-ChildItem -Recurse | Select-String foo; Test-Path x'), ['ls -Recurse', 'grep foo', 'stat x']);
+  // paths handed down a pipeline become the write cmdlet's targets
+  assert.deepEqual(cmds('gci -Path .h-stack -Filter *.json | Where-Object { $_.Length } | Remove-Item'), ['ls -Path .h-stack -Filter *.json', 'where-object {…}', 'rm .h-stack']);
+  assert.deepEqual(cmds('".h-stack/x" | Remove-Item; git status | Remove-Item'), ['rm .h-stack/x', 'git status', 'rm']);
 });
 
 test('nested and indirect commands are read when they are literal', () => {

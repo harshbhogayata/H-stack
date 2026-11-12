@@ -84,6 +84,7 @@ Cache effect: Decision text only, shown with the tool result; no prefix change.
 | pwsh-exfiltration | 63 | Blocked by exfiltration-guard: the command sends a secret-looking value to https://evil.example.com/collect. To proceed: remove the secret from the command; secrets never go to the network. |
 | pwsh-force-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
 | pwsh-iex-push | 32 | H-Stack: Relevant skill: h-stack:review because a push or PR is about to be created (pre_push). |
+| pwsh-pipeline-remove-state | 47 | Blocked by protected-state: `rm -r -f .h-stack` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
 | pwsh-remove-state-recurse | 47 | Blocked by protected-state: `rm -r -f .h-stack` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. |
 | pwsh-state-write | 104 | Blocked by protected-state: `tee .h-stack/sessions/s1/ledger.jsonl` touches H-Stack state, which only hooks and hs write. To proceed: use the hs command instead. Blocked by protected-state: .h-stack/sessions/s1/ledger.jsonl is H-Stack state written only by hooks and hs. To proceed: use the hs command instead. |
 
