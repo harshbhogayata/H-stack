@@ -5,12 +5,15 @@
 //   turn.start/step/complete  step budget (HS-038), telemetry (HS-058), announcement (HS-056),
 //                  boundary offers (HS-024), unresolved-concern check (HS-040, off by default)
 //   ui.render Spinner (HS-056) and Pane (HS-057)   $.clock.every overseer (HS-042, long runs only)
+// State paths are absolute under the session's project root: $.fs resolves a relative path against the
+// session's working directory, which a shell `cd` moves (a stray .h-stack/ appeared under skills/…/references).
 import { scanDescription, neutralise, serverOf } from '../lib/pure/firewall.mjs'
 import { classify } from '../lib/pure/classify-rules.mjs'
 import { overseerFindings, offerFor, spawnBudget } from '../lib/pure/mod-rules.mjs'
 
 const state = {
   config: { classifier: { fallback: false }, budgets: { spawn: { direct: 0, light: 1, full: 5 } }, models: {}, concerns: true, offers: true, pane: 'auto', long_run: { overseer: true } },
+  root: '',
   index: { skills: [] },
   route: {},
   session: '',
@@ -29,6 +32,13 @@ const state = {
   disabled: new Set(),
   pane: { receipts: [], assumptions: [], decisions: [], wishes: [] },
   overseerNoted: '',
+}
+
+// Absolute path under the project root for a state path such as '.h-stack/config.json'.
+const at = (rel) => (state.root ? `${state.root.replace(/[\\/]+$/, '')}/${rel}` : rel)
+
+async function loadRoot($, cwd) {
+  try { state.root = String(await $.session.root()) } catch { state.root = cwd || state.root }
 }
 
 async function readJson($, path, fallback) {
@@ -52,32 +62,32 @@ async function interactive($) {
 }
 
 async function loadState($) {
-  try { state.session = String(await $.fs.read('.h-stack/active-session')).trim() } catch { /* no state yet */ }
-  const cfg = await readJson($, '.h-stack/config.json', {})
+  try { state.session = String(await $.fs.read(at('.h-stack/active-session'))).trim() } catch { /* no state yet */ }
+  const cfg = await readJson($, at('.h-stack/config.json'), {})
   state.config = { ...state.config, ...cfg, budgets: { ...state.config.budgets, ...(cfg.budgets || {}) } }
-  if (state.session) state.route = await readJson($, `.h-stack/sessions/${state.session}/route.json`, {})
+  if (state.session) state.route = await readJson($, at(`.h-stack/sessions/${state.session}/route.json`), {})
 }
 
 async function refreshPane($) {
   if (!state.session) return
-  const dir = `.h-stack/sessions/${state.session}`
+  const dir = at(`.h-stack/sessions/${state.session}`)
   state.pane.receipts = (await readJsonl($, `${dir}/ledger.jsonl`)).filter((r) => r.kind === 'receipt').slice(-5)
   state.pane.assumptions = (await readJsonl($, `${dir}/assumptions.jsonl`)).slice(-5)
   state.pane.decisions = (await readJsonl($, `${dir}/decisions.jsonl`)).slice(-5)
-  state.pane.wishes = (await readJsonl($, '.h-stack/wishlist.jsonl')).slice(-3)
+  state.pane.wishes = (await readJsonl($, at('.h-stack/wishlist.jsonl'))).slice(-3)
 }
 
 async function writeSteps($) {
   if (!state.session || !state.route.prompt_id) return
-  try { await $.fs.write(`.h-stack/sessions/${state.session}/steps.json`, JSON.stringify({ prompt_id: state.route.prompt_id, count: state.steps })) } catch { /* observe only */ }
+  try { await $.fs.write(at(`.h-stack/sessions/${state.session}/steps.json`), JSON.stringify({ prompt_id: state.route.prompt_id, count: state.steps })) } catch { /* observe only */ }
 }
 
 async function appendTelemetry($, row) {
   try {
     let prev = ''
-    try { prev = String(await $.fs.read('.h-stack/telemetry/mod-turns.jsonl')) } catch { /* first */ }
+    try { prev = String(await $.fs.read(at('.h-stack/telemetry/mod-turns.jsonl'))) } catch { /* first */ }
     const lines = (prev + JSON.stringify(row) + '\n').split('\n').filter(Boolean).slice(-2000)
-    await $.fs.write('.h-stack/telemetry/mod-turns.jsonl', lines.join('\n') + '\n')
+    await $.fs.write(at('.h-stack/telemetry/mod-turns.jsonl'), lines.join('\n') + '\n')
   } catch { /* never break a turn */ }
 }
 
@@ -95,9 +105,9 @@ async function concernCheck($, answer) {
 
 async function overseerTick($) {
   if (!state.session) return
-  const goal = await readJson($, `.h-stack/sessions/${state.session}/goal.json`, null)
+  const goal = await readJson($, at(`.h-stack/sessions/${state.session}/goal.json`), null)
   if (!goal) return
-  const rows = await readJsonl($, `.h-stack/sessions/${state.session}/ledger.jsonl`)
+  const rows = await readJsonl($, at(`.h-stack/sessions/${state.session}/ledger.jsonl`))
   const found = overseerFindings(rows, await $.clock.now())
   const key = found.map((f) => f.kind).join(',')
   if (!found.length || key === state.overseerNoted) return
@@ -108,6 +118,7 @@ async function overseerTick($) {
 export function register(on) {
   on('session.start', async ($, e, next) => {
     await loadDisabled($)
+    await loadRoot($, e.cwd)
     await loadState($)
     state.index = await readJson($, new URL('../index.json', import.meta.url).pathname, { skills: [] })
     // HS-042: the timer runs every session but acts only during a long run (a recorded /goal).
@@ -168,6 +179,7 @@ export function register(on) {
   })
 
   on('turn.start', async ($, e, next) => {
+    await loadRoot($, state.root)
     await loadState($)
     state.turn = e.turnId
     state.steps = 0
@@ -178,7 +190,7 @@ export function register(on) {
     state.calls = []
     state.tools = {}
     // HS-057: the pane opens by itself once a long run (a recorded /goal) is in progress (pane: 'auto').
-    if (state.config.pane === 'auto' && !off('pane') && !state.paneOpen && state.session && await readJson($, `.h-stack/sessions/${state.session}/goal.json`, null)) {
+    if (state.config.pane === 'auto' && !off('pane') && !state.paneOpen && state.session && await readJson($, at(`.h-stack/sessions/${state.session}/goal.json`), null)) {
       try { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true } catch { /* no pane support */ }
     }
     return next(e)

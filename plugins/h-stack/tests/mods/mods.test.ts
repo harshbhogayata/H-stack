@@ -158,3 +158,39 @@ test('concern check is skipped in headless runs (no connected surface)', async (
   await $.turn.complete({ turnId: 't1', answer: 'x'.repeat(300) })
   expect(calls).toBe(0)
 })
+
+// HS-086 / stray-state fix: a stub session whose shell has cd'd below the project root.
+function project(on, { config = '{}', surfaces = ['terminal'], cwd = '/proj/plugins/h-stack/skills/design-ui/references' } = {}) {
+  const fsMap = { 'active-session': 's1', 'config.json': config, 'route.json': JSON.stringify({ prompt_id: 'p1', size: 'light', skills: [], rules: [] }) }
+  const writes = []
+  const submitted = []
+  on('fs.read', ($, e) => { const k = Object.keys(fsMap).find((n) => e.path.endsWith(n)); return k ? { value: fsMap[k] } : { deny: 'not found' } })
+  on('fs.write', ($, e) => { writes.push(e.path); return { value: undefined } })
+  on('session.root', () => ({ value: '/proj' }))
+  on('session.cwd', () => ({ value: cwd }))
+  on('session.surfaces', () => ({ value: surfaces }))
+  on('session.start', ($, e) => ({ cwd: e.cwd || '/proj' }))
+  on('turn.start', ($, e) => ({ turnId: e.turnId }))
+  on('turn.complete', () => ({ text: '' }))
+  on('tool.call', () => ({ result: 'ok' }))
+  on('model.complete', () => ({ value: { isAnswered: true, text: '{"unresolved": []}' } }))
+  on('prompt.submit', ($, e) => { submitted.push(e.text); return { text: e.text } })
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  return { writes, submitted }
+}
+
+async function turn($, id, calls) {
+  await $.turn.start({ turnId: id })
+  for (const c of calls) await $.tool.call(c)
+  await $.turn.complete({ turnId: id, answer: 'Done.' })
+}
+
+test('state paths stay under the project root after a shell cd', async ($, on) => {
+  mock.clock(on)
+  const { writes } = project(on)
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await turn($, 't1', [{ tool: 'Bash', command: 'cd plugins/h-stack/skills/design-ui/references && cat baseline.md' }])
+  expect(writes.length > 0).toBe(true)
+  // The engine resolves each path before fs.write sees it (C:\proj\... on Windows); a relative one lands under the cd'd folder.
+  expect(writes.map((p) => p.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '')).filter((p) => !p.startsWith('/proj/.h-stack/'))).toEqual([])
+})
