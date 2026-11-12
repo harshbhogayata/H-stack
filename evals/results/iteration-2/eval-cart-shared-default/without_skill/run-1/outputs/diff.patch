@@ -1,0 +1,44 @@
+diff --git a/lib/cart.js b/lib/cart.js
+index beecedd..1540831 100644
+--- a/lib/cart.js
++++ b/lib/cart.js
+@@ -1,6 +1,6 @@
+ const { getDefaults } = require('./settings');
+ function createCart(customer) {
+-  const opts = Object.assign(getDefaults(), customer.prefs || {});
++  const opts = { ...getDefaults(), ...(customer.prefs || {}) };
+   return { customer: customer.name, currency: opts.currency, taxRate: opts.taxRate, items: [] };
+ }
+ function total(cart) {
+diff --git a/lib/settings.js b/lib/settings.js
+index cd82365..9131c09 100644
+--- a/lib/settings.js
++++ b/lib/settings.js
+@@ -1,3 +1,4 @@
+-const defaults = require('../config/defaults.json');
+-function getDefaults() { return defaults; }
++const defaults = Object.freeze({ ...require('../config/defaults.json') });
++// Return a fresh copy so callers can never mutate the shared, process-wide defaults.
++function getDefaults() { return { ...defaults }; }
+ module.exports = { getDefaults };
+diff --git a/test/settings.test.js b/test/settings.test.js
+new file mode 100644
+index 0000000..8a8c551
+--- /dev/null
++++ b/test/settings.test.js
+@@ -0,0 +1,15 @@
++const test = require('node:test'); const assert = require('node:assert');
++const { getDefaults } = require('../lib/settings');
++const { createCart, refund } = require('../lib/cart');
++
++test('mutating returned defaults does not leak into later calls', () => {
++  const d = getDefaults();
++  d.currency = 'XXX';
++  assert.strictEqual(getDefaults().currency, 'EUR');
++});
++
++test('per-customer prefs do not change shop defaults', () => {
++  createCart({ name: 'bob', prefs: { currency: 'USD' } });
++  assert.strictEqual(getDefaults().currency, 'EUR');
++  assert.strictEqual(refund(1).currency, 'EUR');
++});

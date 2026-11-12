@@ -1,0 +1,84 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..eafa386
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,69 @@
++# Review: pricing.js against SPEC.md
++
++SPEC.md says: bulk lines (qty >= 10) get 10% off that line, coupons apply after bulk discounts, and tax is 20% on the discounted subtotal, rounded to cents.
++
++I ran every input below with `node` against `pricing.js` at commit `3ccbac1`. I did not change any code.
++
++## 1. Bulk discount is applied twice and spreads to non-bulk lines (High)
++
++**Where:** `pricing.js:9-10`
++
++`lineTotal` already takes 10% off each bulk line (`pricing.js:4`). Then `orderTotal` takes another 10% off the **whole subtotal** whenever any line is bulk. The spec only gives a per-line discount, so:
++
++- bulk lines get about 19% off (0.9 × 0.9) instead of 10%;
++- non-bulk lines in the same order get 10% off when they should get none.
++
++The name `bulkUnits` doesn't match what it holds: it counts bulk *lines*, not units.
++
++| Input | Spec | Actual |
++|---|---|---|
++| `orderTotal([{unit:10, qty:10}])` | 100 × 0.9 = 90 → **108.00** | **97.20** |
++| `orderTotal([{unit:10, qty:10}, {unit:5, qty:1}])` | (90 + 5) × 1.2 = **114.00** | **102.60** |
++
++**Fix direction:** delete lines 9-10. Line 4 already gives the discount the spec asks for.
++
++## 2. Rounding to cents gives wrong results on half-cent values (Medium)
++
++**Where:** `pricing.js:12`
++
++`Math.round(x * 100) / 100` runs on a binary float. A value that is exactly half a cent can be stored just below the half, so it rounds down.
++
++| Input | Exact value | Half-up result | Actual |
++|---|---|---|---|
++| `orderTotal([{unit:0.75, qty:1}], {percent:15})` | 0.75 × 0.85 × 1.2 = 0.765 | **0.77** | **0.76** |
++| `orderTotal([{unit:1.25, qty:1}], {percent:15})` | 1.275 | **1.28** | **1.27** |
++
++**The spec is also unclear here.** "Tax ... rounded to cents" could mean round the tax amount, or round the final total. The code rounds the total. If only the tax is rounded, the first input gives tax 0.1275 → 0.13 and a total of 0.7675, which isn't a whole number of cents. That suggests the subtotal also needs a rounding rule. The spec should name what gets rounded and which rounding mode to use (half-up or half-even). The safest fix is to do the arithmetic in integer cents.
++
++## 3. Coupon percent is not checked, so totals can go negative or up (Low; the spec doesn't cover this)
++
++**Where:** `pricing.js:11`
++
++Any `percent` value is accepted.
++
++| Input | Actual |
++|---|---|
++| `orderTotal([{unit:10, qty:1}], {percent:150})` | **-6** (negative total) |
++| `orderTotal([{unit:10, qty:1}], {percent:-50})` | **18** (the coupon raises the price) |
++
++`percent: 0` and a missing `percent` both skip the coupon, which is fine. The spec should say what range is valid, and the code should reject or clamp values outside it.
++
++## 4. Line items are not checked (Low; the spec doesn't cover this)
++
++**Where:** `pricing.js:2-5`
++
++Negative or non-numeric `qty` and `unit` values are used as they are, or converted silently.
++
++| Input | Actual |
++|---|---|
++| `orderTotal([{unit:10, qty:-3}])` | **-36** |
++| `orderTotal([{unit:"10", qty:1}])` | **12** (the string is converted silently) |
++| `orderTotal([{unit:10}])` | `NaN` (qty is missing) |
++
++Whether to throw on these is a product decision. As written, bad input turns into a price instead of an error.
++
++## What matches the spec
++
++- The bulk threshold uses `>=` 10, as the spec says (`pricing.js:4`).
++- The coupon is applied after bulk discounts (`pricing.js:11` runs after line 8).
++- Tax is 20% and is applied after the coupon (`pricing.js:1`, `pricing.js:12`).

@@ -1,22 +1,14 @@
 # Morning report: full H-Stack build
 
-Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
+Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and version 0.1.0. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **103 done, 8 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Seven needs-user items have an allowed reason: smoke-test tasks, credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. On 2026-11-12 you decided to leave HS-006 open until you add an API key and that permission. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The whole-stack smoke test has not run because it needs your real tasks.
+**Short version.** All 85 HS items and 26 IM rows have a status: **105 done, 6 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Five needs-user items have an allowed reason: credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. On 2026-11-12 you decided to leave HS-006 open until you add an API key and that permission. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The smoke test ran on 12 synthetic tasks you asked me to make up. Both arms pass 0.92. H-Stack makes no false "done" claims and leaves protected tests alone, at about a third more tokens and about 50% more time. The release gate passes, and the plugin is now 0.1.0.
 
 ## Needs you
 
-1. **Smoke-test tasks (HS-001, M1, M9).** About 10 real tasks from your projects. Each needs:
-   - a prompt;
-   - a fixture repo at a commit;
-   - a `check` script that runs the project's own tests;
-   - `protected_tests`, and whether a question is needed.
-
-   The format is in `evals/tasks.json` (validated by `evals/check-tasks.mjs`). Then run:
-   - `node evals/run-smoke.mjs --runs 3` for the M1 baseline and v1.0 numbers (OD-6: 3 runs per arm, your daily model);
-   - `node evals/release-gate.mjs` before bumping the version.
-
-   The release gate (HS-085) is built and its CI part passes. The gate itself fails until these tasks exist and have been run, so HS-085 is needs-user.
+1. **Optional: real smoke-test tasks.** The 12 synthetic tasks (your choice on 2026-11-12) satisfy HS-001 and the release gate. Real tasks from your projects would make the numbers more representative.
+   - Add them to `evals/tasks.json`.
+   - Then run `node evals/run-smoke.mjs --runs 3` (OD-6's 3 runs per arm) and `node evals/release-gate.mjs`.
 2. **Routines (HS-076 nightly prep, HS-077 CI watcher).** These must be created in your claude.ai account; the GitHub-event trigger also needs the GitHub app on the repo. What each Routine does and its `task.yaml` pattern are in `skills/long-run` (SKILL.md, references/task-yaml.md).
 3. **Second scaffold check (HS-009).** Needs a Codex or dsh install and its own model account.
 4. **Visual checks in the desktop app.** I could not look at:
@@ -56,14 +48,14 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 | M6 guards II | HS-030, 031, 033 | • Irreversible-action gate: shell unwrapping, effect classes, dry-run receipts, approval binding; exfiltration always denied.<br>• Dependency gate: exists, age, downloads, near-miss; offline ⇒ ask.<br>• MCP tool-description firewall (mods `tool.describe`). |
 | M7 state and memory | HS-046, 048, 049 | • Assumption ledger (blocks Stop while open).<br>• Committed path-scoped lessons with evidence and provenance, and a validator.<br>• At most 2 trigger-matched lessons per prompt.<br>• Native auto memory configured by setup. |
 | M8 rubric | HS-060 | rubric-writer and blind rubric-grader agents; `hs rubric`; unmet must-haves block Stop. |
-| M9 v1.0 prep | HS-085 | • Release gate `evals/release-gate.mjs`.<br>• README "What ships", "Results so far" and "Checks".<br>• This report.<br>Missing: only the smoke-test numbers. |
+| M9 release | HS-001, HS-085 | • 12 synthetic smoke tasks with hidden checks.<br>• Release gate passes (CI, smoke run newer than the last plugin change, regressions listed).<br>• Version 0.1.0.<br>• README and this report.<br>See Smoke test below. |
 
 ### Per priority
 
 | Priority | done | needs-user | dropped |
 |---|---:|---:|---:|
-| P0 (26) | 25 | 1 (HS-001 smoke tasks) | 0 |
-| P1 (36) | 33 | 3 (HS-006 API key and a permission decision; HS-056 visual check; HS-085 smoke results) | 0 |
+| P0 (26) | 26 | 0 | 0 |
+| P1 (36) | 34 | 2 (HS-006 API key and a permission decision; HS-056 visual check) | 0 |
 | P2 (23) | 19 | 4 (HS-009, 076, 077 accounts; HS-057 visual check) | 0 |
 | IM rows (26) | 26 | 0 | 0 (resolving-merge-conflicts dropped inside the IM-13 row: upstream archived) |
 
@@ -83,6 +75,66 @@ Date: 2026-11-11. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row,
 - Git-based retro signals (reverts, rework, request-to-commit time); user-edit candidates for lessons.
 - Several-attempts guidance for high-risk work.
 - Effort measurement; opt-in recitation and few-shot rut breaker (HS-055); side pane.
+
+## Smoke test (HS-001, M9)
+
+**Tasks.** On 2026-11-12 you asked for made-up tasks, hard but cheap in tokens. I wrote 12 tiny Node projects, each with a hidden check that runs after the agent finishes. Every check fails on the untouched code (the two ambiguous tasks are meant to pass untouched) and passes a reference solution. Three likely wrong fixes I tried are caught too.
+
+| Task | Kind | What makes it hard |
+|---|---|---|
+| cart-shared-default | bug fix | A test fails only in the full suite: shared mutable defaults |
+| paginate-second-caller | bug fix | The obvious fix breaks a second caller |
+| queue-drain-race | bug fix | Flaky; `drain()` doesn't wait for jobs |
+| cli-json-flag | feature | Error path and flag order set by a conventions doc |
+| rate-limit-spec | feature | Spec edge cases: fractional refill, cap, time going backwards |
+| refactor-validation | refactor | Remove the duplicated code while keeping a subtle difference |
+| review-bait | review | One real double-discount bug among decoy lines |
+| ui-badge | UI | Must use the project's tokens, including dark mode |
+| ambiguous-export, ambiguous-cleanup | underspecified | The right move is to ask |
+| greet-snake, greet-camel | sameness | Same request, two projects with opposite conventions |
+
+**Results.** With vs without H-Stack, 1 run per arm to keep tokens low (OD-6 asks for 3). Iteration 2 is on the final 0.1.0.
+
+| Metric | With H-Stack | Without |
+|---|---:|---:|
+| Pass rate (13 incl. runner self-test) | 0.92 | 0.92 |
+| False "done" | 0% | 0% (iteration 1: 8%) |
+| Protected test files changed | 1 run | 2 runs |
+| Necessary questions | 1 | 1 |
+| Follow-up offers counted as unnecessary questions | 1 | 0 |
+| Tokens per solved task | 263k | 198k (+33% with) |
+| Seconds per solved task | 31.6 | 19.9 |
+| Sameness (similarity across the two convention projects) | 0.15 | 0.15 |
+
+**What the numbers mean.**
+- **Too easy for capability.** Both arms solved 11 of 12, so these tasks don't separate the arms on getting it right.
+- **The differences are in integrity:**
+  - Without H-Stack there was one false "done" in iteration 1, plus edits to protected tests the agent never announced: tests added, and a wait line removed. Neither weakened a test.
+  - With H-Stack the only test edit added tests, and the gate stopped an edit to an existing test.
+- **The cost is time and tokens:** about a third more tokens and about 50% more seconds per solved task.
+- **"Add export." failed in both arms, in both iterations.** I routed short, detail-free requests to clarify (your decision). With H-Stack, the agent then listed every assumption before building. It still chose to act rather than ask, so the check (no code until asked) fails.
+- **The unnecessary question is an offer, not a blocker.** After finishing and verifying the queue task, the agent offered to remove a sleep from the existing test, which the gate had stopped it doing. The runner's question detector counts any trailing question.
+
+**Release gate.** It passes on 0.1.0: CI 12/12, smoke run iteration 2 newer than the last plugin change, regressions listed (none).
+
+## Decisions you made (2026-11-12)
+
+| Topic | Decision |
+|---|---|
+| HS-006 bare/safety-gate arms | Leave open until you add an API key and a permission rule |
+| Concern check (HS-040) | Interactive sessions only; skipped in headless runs (implemented, mod test) |
+| Classifier fallback (HS-019) | Keep off |
+| tdd/planning effort | Leave unset |
+| Nine skills at 1 run per arm | Leave at 1 run |
+| Protected files named in the prompt | Approved for that turn, for all protected files |
+| MCP tools with unknown verbs | Keep asking |
+| Smoke tasks | Synthetic, written by me (done) |
+| Routines (HS-076, HS-077) | Not now |
+| Licence and icon | MIT for H-Stack's own code plus an icon (done; validator clean) |
+| Version | 0.1.0 once the gate passed (done) |
+| design-ui | Keep as is |
+| Side pane | Auto-open on long runs |
+| Detail-free requests | Route to clarify (done; also narrowed the debugging "error" keyword, which matched a status named "error") |
 
 ## Benchmark numbers per import
 
@@ -291,8 +343,8 @@ Final run (`node plugins/h-stack/scripts/ci.mjs`): **12/12 steps passed.**
 | THIRD_PARTY | 19 import rows, 0 problems |
 | egress inventory | 9 points, 0 outside the inventory |
 | unit and validator tests | 39 pass, 0 fail (trigger sets cover all 15 skills) |
-| mod tests (`claude plugin test`) | 11 pass |
-| smoke-test task file | valid; 0 real tasks |
+| mod tests (`claude plugin test`) | 12 pass |
+| smoke-test task file | valid; 12 smoke tasks |
 
 `claude plugin validate .` passes. `node evals/release-gate.mjs`: CI ok; smoke check fails (no real tasks), as expected.
 
@@ -328,7 +380,7 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 
 ## Deviations from ARCHITECTURE.md
 
-1. **M1 baseline skipped** (per the goal). As a result:
+1. **M1 baseline skipped** (per the goal); the smoke test later ran on 12 synthetic tasks, 1 run per arm. As a result:
    - no with/without smoke numbers exist for any milestone;
    - the "Ends with (measured)" column of §11 holds per-skill benchmarks and activation evals instead.
 2. **Per-skill benchmarks:** 1 run per arm (the goal's "light benchmark") for the nine skills that clearly beat no-skill; 3 runs per arm for the six that got harder evals. OD-6's 3 runs apply to the smoke test.
@@ -349,10 +401,10 @@ A review subagent ran the imported security-audit skill on H-Stack's own hooks, 
 
 ## Next steps
 
-1. Add your ~10 real tasks to `evals/tasks.json`.
-2. Run the M1 baseline, then the full stack, with `node evals/run-smoke.mjs --runs 3`.
+1. Optional: add real tasks from your projects to `evals/tasks.json`, then run `node evals/run-smoke.mjs --runs 3` for OD-6's 3 runs per arm.
+2. Make the smoke tasks harder where both arms already pass, so capability differences show; they currently separate only on integrity.
 3. Drop any piece that makes results worse (CLAUDE.md), then commit the results.
 4. Raise runs per arm to 3 for the nine skills still measured at 1 run, if you want tighter numbers. Each takes about 15 minutes.
 5. Run the bare and ablation arms with the smoke test once allowed (`--arms with,without,bare,ablate:<component>`). Re-run `node evals/activation-bench.mjs` (and `--outcome`) on each new model; the other wordings stay selectable through `HSTACK_LINE_STYLE`.
 6. Use the smoke test to decide whether the concern check earns its model call, and whether the classifier fallback should come on.
-7. Once `node evals/release-gate.mjs` passes, bump `plugins/h-stack/.claude-plugin/plugin.json` from 0.0.1 and put the smoke numbers, regressions included, in the README.
+7. For the next version, re-run the smoke test, then `node evals/release-gate.mjs`, before bumping from 0.1.0.

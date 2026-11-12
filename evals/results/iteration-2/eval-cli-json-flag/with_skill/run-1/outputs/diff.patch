@@ -1,0 +1,54 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/bin/stats.js b/bin/stats.js
+index c1815d1..9d7496e 100644
+--- a/bin/stats.js
++++ b/bin/stats.js
+@@ -1,9 +1,15 @@
+ #!/usr/bin/env node
+ const fs = require('fs');
+-const file = process.argv[2];
++const args = process.argv.slice(2);
++const json = args.includes('--json');
++const file = args.filter(a => a !== '--json')[0];
+ let nums;
+ try { nums = fs.readFileSync(file, 'utf8').split(/\s+/).filter(Boolean).map(Number); }
+ catch (e) { console.error(`stats: cannot read ${file}: ${e.code}`); process.exit(2); }
+ const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+-console.log(`count: ${nums.length}`);
+-console.log(`mean: ${mean}`);
++if (json) {
++  console.log(JSON.stringify({ count: nums.length, mean }));
++} else {
++  console.log(`count: ${nums.length}`);
++  console.log(`mean: ${mean}`);
++}
+diff --git a/test/stats.test.js b/test/stats.test.js
+index 9ce650d..c75376e 100644
+--- a/test/stats.test.js
++++ b/test/stats.test.js
+@@ -4,3 +4,17 @@ test('text output', () => {
+   const f = path.join(os.tmpdir(), 'nums.txt'); fs.writeFileSync(f, '1 2 3');
+   assert.match(execFileSync('node', ['bin/stats.js', f], { encoding: 'utf8' }), /count: 3\nmean: 2/);
+ });
++for (const args of [['--json', 'F'], ['F', '--json']]) {
++  test(`json output (${args.join(' ')})`, () => {
++    const f = path.join(os.tmpdir(), 'nums.txt'); fs.writeFileSync(f, '1 2 3');
++    const out = execFileSync('node', ['bin/stats.js', ...args.map(a => a === 'F' ? f : a)], { encoding: 'utf8' });
++    assert.deepStrictEqual(JSON.parse(out), { count: 3, mean: 2 });
++    assert.strictEqual(out.trim().split('\n').length, 1);
++  });
++}
++test('json error: nothing on stdout, exit 2', () => {
++  const r = require('child_process').spawnSync('node', ['bin/stats.js', '--json', '/nonexistent/x'], { encoding: 'utf8' });
++  assert.strictEqual(r.status, 2);
++  assert.strictEqual(r.stdout, '');
++  assert.match(r.stderr, /^stats: cannot read \/nonexistent\/x: ENOENT/);
++});

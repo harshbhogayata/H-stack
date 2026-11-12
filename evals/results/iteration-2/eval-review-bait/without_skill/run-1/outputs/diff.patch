@@ -1,0 +1,57 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..f74ea58
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,51 @@
++# Review: pricing.js against SPEC.md
++
++Spec: *Bulk lines (qty >= 10) get 10% off that line. Coupons apply after bulk discounts. Tax is 20% on the discounted subtotal, rounded to cents.*
++
++I ran every input below against the current code with `node`. "Expected" means what the spec says the result should be.
++
++---
++
++## 1. Bulk discount is applied twice, and to lines that aren't bulk lines
++- **Location:** `pricing.js:9-10`
++- **Severity:** High. Every order with a bulk line is undercharged.
++- **Problem:** `lineTotal` already gives bulk lines 10% off (`pricing.js:4`). `orderTotal` then takes another 10% off the whole subtotal whenever any line is bulk. The spec only gives a per-line discount. So bulk lines get about 19% off in total, and lines that aren't bulk also get 10% off.
++- **Inputs that show it:**
++  | Input | Expected | Actual |
++  |---|---|---|
++  | `orderTotal([{unit:10, qty:10}])` | 90 × 1.2 = **108.00** | **97.20** |
++  | `orderTotal([{unit:10, qty:10}, {unit:5, qty:1}])` | (90 + 5) × 1.2 = **114.00** | **102.60** (the 5.00 line that isn't bulk was discounted too) |
++  | `orderTotal([{unit:10, qty:10}], {percent:10})` | 90 × 0.9 × 1.2 = **97.20** | **87.48** |
++- **Fix direction:** delete lines 9–10. The per-line discount in `lineTotal` is all the spec asks for.
++
++## 2. The total is rounded, not the tax
++- **Location:** `pricing.js:12`
++- **Severity:** Low. The spec is ambiguous here; this needs a decision.
++- **Problem:** The spec says the tax is "rounded to cents". The code instead rounds `subtotal × 1.2` as a single number. The two give different results when a coupon leaves the subtotal with fractions of a cent. The code also never rounds the subtotal itself, so it's unclear what the shown subtotal and tax should be.
++- **Input that shows it:** `orderTotal([{unit:0.005, qty:3}], {percent:5})`. The subtotal is 0.01425.
++  - Code: round(0.01425 × 1.2 = 0.0171) = **0.02**
++  - Rounding the subtotal and the tax separately, as the spec words it: round(0.01425) + round(0.00285) = 0.01 + 0.00 = **0.01**
++- **Fix direction:** decide on the rounding rule. One option is to round the subtotal to cents, then compute `tax = round(subtotal × 0.2)` and `total = subtotal + tax`. Add a test that pins the rule down.
++
++## 3. Coupon percent is not checked
++- **Location:** `pricing.js:11`
++- **Severity:** Medium. The spec doesn't cover this, but it can produce a negative or inflated total.
++- **Problem:** `coupon.percent` is used without checking its range or type. A percent over 100 gives a negative total. A negative percent adds a surcharge. A string is silently converted to a number.
++- **Inputs that show it:**
++  - `orderTotal([{unit:10, qty:1}], {percent:150})` returns **-6**
++  - `orderTotal([{unit:10, qty:1}], {percent:-50})` returns **18.00** (expected 12.00 or an error)
++- **Fix direction:** reject coupons outside 0–100, or clamp them to that range.
++
++## 4. Misleading name: `bulkUnits` counts lines, not units
++- **Location:** `pricing.js:9`
++- **Severity:** Nit. Finding 1 removes this line anyway.
++- **Problem:** The variable counts bulk *lines*, not units. Nothing behaves differently because it's only compared with `> 0`.
++
++---
++
++## What matches the spec
++- The per-line bulk threshold (`qty >= 10`, 10% off) in `lineTotal`.
++- The coupon is applied after the bulk discount, as the spec requires.
++- Tax is 20% of the discounted amount.
++
++There are no tests in the repo. `npm test` runs `node --test` and finds nothing. A test with the inputs from finding 1 would have caught the main bug.

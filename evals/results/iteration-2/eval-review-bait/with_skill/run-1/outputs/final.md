@@ -1,0 +1,3 @@
+I re-ran all nine example inputs from `REVIEW.md` against the current `pricing.js` after writing it, and each returned the value the review gives (receipt r-9a6652, exit 0). `git status` shows only `REVIEW.md` and the hook's `.h-stack/` folder as new; `pricing.js` is unchanged. The check script is at `/tmp/claude-0/-tmp-hs-smoke-SQiUUm/8dc75502-e5c5-48d4-b247-e1229af80b43/scratchpad/check_review.js`.
+
+Not verified: the correct values the review compares against (108.00, 114.00, 0.77, 1.28) are worked out by hand from SPEC.md. No test suite or reference implementation checks them.

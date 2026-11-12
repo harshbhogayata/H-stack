@@ -1,0 +1,73 @@
+diff --git a/src/notes.js b/src/notes.js
+index fbbf243..07f3887 100644
+--- a/src/notes.js
++++ b/src/notes.js
+@@ -1,4 +1,26 @@
+ const notes = [];
+ function addNote(title, body, tags = []) { notes.push({ id: notes.length + 1, title, body, tags, created: new Date().toISOString() }); }
+ function listNotes() { return notes.slice(); }
+-module.exports = { addNote, listNotes };
++
++// Returns the notes serialized as a string. No file I/O, so the desktop
++// and web apps can each decide how to save or download the result.
++function exportNotes(format = 'json') {
++  switch (format) {
++    case 'json':
++      return JSON.stringify(notes, null, 2);
++    case 'markdown':
++      return notes.map((n) => {
++        const tags = n.tags.length ? `\n\nTags: ${n.tags.join(', ')}` : '';
++        return `# ${n.title}\n\n_${n.created}_\n\n${n.body}${tags}\n`;
++      }).join('\n');
++    case 'csv': {
++      const cell = (v) => `"${String(v).replace(/"/g, '""')}"`;
++      const rows = notes.map((n) => [n.id, n.title, n.body, n.tags.join(';'), n.created].map(cell).join(','));
++      return ['id,title,body,tags,created', ...rows].join('\n');
++    }
++    default:
++      throw new Error(`Unsupported export format: ${format}`);
++  }
++}
++
++module.exports = { addNote, listNotes, exportNotes };
+diff --git a/test/notes.test.js b/test/notes.test.js
+new file mode 100644
+index 0000000..96a6679
+--- /dev/null
++++ b/test/notes.test.js
+@@ -0,0 +1,35 @@
++const test = require('node:test');
++const assert = require('node:assert');
++const { addNote, exportNotes } = require('../src/notes');
++
++addNote('Groceries', 'Milk, "fresh" eggs', ['home', 'errands']);
++addNote('Idea', 'Build a thing');
++
++test('json export round-trips', () => {
++  const parsed = JSON.parse(exportNotes('json'));
++  assert.strictEqual(parsed.length, 2);
++  assert.strictEqual(parsed[0].title, 'Groceries');
++});
++
++test('json is the default format', () => {
++  assert.strictEqual(exportNotes(), exportNotes('json'));
++});
++
++test('markdown export includes titles, bodies and tags', () => {
++  const md = exportNotes('markdown');
++  assert.match(md, /^# Groceries/m);
++  assert.match(md, /Tags: home, errands/);
++  assert.match(md, /^# Idea/m);
++});
++
++test('csv export has a header and escapes quotes', () => {
++  const lines = exportNotes('csv').split('\n');
++  assert.strictEqual(lines[0], 'id,title,body,tags,created');
++  assert.strictEqual(lines.length, 3);
++  assert.match(lines[1], /"Milk, ""fresh"" eggs"/);
++  assert.match(lines[1], /"home;errands"/);
++});
++
++test('unknown format throws', () => {
++  assert.throws(() => exportNotes('xml'), /Unsupported export format/);
++});
