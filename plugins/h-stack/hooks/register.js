@@ -5,14 +5,17 @@
 //   turn.start/step/complete  step budget (HS-038), telemetry (HS-058), announcement (HS-056),
 //                  boundary offers (HS-024), unresolved-concern check (HS-040, off by default)
 //   ui.render Spinner (HS-056) and Pane (HS-057)   $.clock.every overseer (HS-042, long runs only)
+//   prompt.compose + turn.complete  show results and use the session's visual tools (HS-086, HS-087;
+//                  interactive sessions only)
 // State paths are absolute under the session's project root: $.fs resolves a relative path against the
 // session's working directory, which a shell `cd` moves (a stray .h-stack/ appeared under skills/…/references).
 import { scanDescription, neutralise, serverOf } from '../lib/pure/firewall.mjs'
 import { classify } from '../lib/pure/classify-rules.mjs'
 import { overseerFindings, offerFor, spawnBudget } from '../lib/pure/mod-rules.mjs'
+import { SHOW_RULE, showNote } from '../lib/pure/show-rules.mjs'
 
 const state = {
-  config: { classifier: { fallback: false }, budgets: { spawn: { direct: 0, light: 1, full: 5 } }, models: {}, concerns: true, offers: true, pane: 'auto', long_run: { overseer: true } },
+  config: { classifier: { fallback: false }, budgets: { spawn: { direct: 0, light: 1, full: 5 } }, models: {}, concerns: true, offers: true, show_results: true, pane: 'auto', long_run: { overseer: true } },
   root: '',
   index: { skills: [] },
   route: {},
@@ -27,7 +30,11 @@ const state = {
   calls: [],
   tools: {},
   concernAsked: '',
-  concernPending: false,
+  followUpPending: false,
+  written: [],
+  opens: [],
+  shown: new Set(),
+  noDisplay: false,
   paneOpen: false,
   disabled: new Set(),
   pane: { receipts: [], assumptions: [], decisions: [], wishes: [] },
@@ -120,6 +127,11 @@ export function register(on) {
     await loadDisabled($)
     await loadRoot($, e.cwd)
     await loadState($)
+    // HS-086: no local display to open things on (SSH, a container, a remote or cloud session).
+    try {
+      const remote = [await $.env.get('SSH_CONNECTION'), await $.env.get('SSH_TTY'), await $.env.get('CLAUDE_CODE_REMOTE'), await $.env.get('CODESPACES'), await $.env.get('REMOTE_CONTAINERS'), await $.env.get('container')]
+      state.noDisplay = remote.some(Boolean)
+    } catch { state.noDisplay = false }
     state.index = await readJson($, new URL('../index.json', import.meta.url).pathname, { skills: [] })
     // HS-042: the timer runs every session but acts only during a long run (a recorded /goal).
     if (!off('overseer') && (!state.config.long_run || state.config.long_run.overseer !== false)) $.clock.every(30000, async () => { await overseerTick($) })
@@ -178,7 +190,17 @@ export function register(on) {
     return next({ ...e, context: [...(e.context || []), parts.join(' ')] })
   })
 
+  // HS-086, HS-087: the show-results and visual-tools rule, in interactive sessions only. A -p run has no
+  // surface (the same signal the concern check reads) and carries the 'print' trait; evals never see it.
+  on('prompt.compose', async ($, e, next) => {
+    const r = await next(e)
+    const surfaces = e.surfaces || []
+    if (!surfaces.length || (e.traits || []).includes('print') || state.config.show_results === false || off('show')) return r
+    return { ...r, sections: [...(r.sections || []), { id: 'h-stack:show-results', text: SHOW_RULE, scope: 'session' }] }
+  })
+
   on('turn.start', async ($, e, next) => {
+    if (e.agentId) return next(e)
     await loadRoot($, state.root)
     await loadState($)
     state.turn = e.turnId
@@ -189,6 +211,8 @@ export function register(on) {
     state.edits = 0
     state.calls = []
     state.tools = {}
+    state.written = []
+    state.opens = []
     // HS-057: the pane opens by itself once a long run (a recorded /goal) is in progress (pane: 'auto').
     if (state.config.pane === 'auto' && !off('pane') && !state.paneOpen && state.session && await readJson($, at(`.h-stack/sessions/${state.session}/goal.json`), null)) {
       try { await $.ui.open({ id: 'h-stack', title: 'H-Stack' }); state.paneOpen = true } catch { /* no pane support */ }
@@ -201,6 +225,9 @@ export function register(on) {
     const input = e.input || e
     if (e.tool) state.tools[e.tool] = (state.tools[e.tool] || 0) + 1
     if (e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit') state.edits += 1
+    // HS-086: what the turn wrote, and every other call (an open command, a preview or artifact tool).
+    if (['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(e.tool)) { const p = input.file_path || input.notebook_path; if (p) state.written.push(String(p)) }
+    else if (e.tool && e.tool !== 'Read') { let text = ''; try { text = typeof input.command === 'string' ? input.command : JSON.stringify(input) } catch { /* unserialisable */ } state.opens.push({ tool: e.tool, text: String(text).slice(0, 2000) }) }
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
       const cmd = String(input.command || '')
       state.calls.push(cmd.slice(0, 80))
@@ -224,16 +251,26 @@ export function register(on) {
     await refreshPane($)
     $.ui.invalidate('ui.render')
     if (e.isAborted) return next(e)
-    // HS-040: once per prompt, and never on the turn that answers H-Stack's own note (no resubmit loop:
-    // the resubmitted turn gets a new prompt_id, so the pending flag is what stops a second note).
-    if (state.concernPending) state.concernPending = false
+    // HS-040, HS-086: one follow-up per prompt at most, and never on the turn that answers H-Stack's own
+    // note (no resubmit loop: the resubmitted turn gets a new prompt_id, so the pending flag stops a second).
     // Interactive sessions only (user decision 2026-11-12): a claude -p run has no connected surface, and
     // there the follow-up would replace the caller's final message.
-    else if (state.config.concerns !== false && !off('concerns') && state.edits > 0 && await interactive($) && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
-      state.concernAsked = state.route.prompt_id
-      const open = await concernCheck($, e.answer)
-      if (open.length) state.concernPending = true
-      if (open.length) $.prompt.submit({ text: `H-Stack concern check: the last reply raised ${open.length} point(s) it did not resolve: ${open.slice(0, 3).join('; ')}. Resolve them or say why they don't apply.` })
+    if (state.followUpPending) state.followUpPending = false
+    else if (await interactive($)) {
+      const parts = []
+      if (state.config.concerns !== false && !off('concerns') && state.edits > 0 && state.concernAsked !== state.route.prompt_id && String(e.answer || '').length > 200) {
+        state.concernAsked = state.route.prompt_id
+        const open = await concernCheck($, e.answer)
+        if (open.length) parts.push(`H-Stack concern check: the last reply raised ${open.length} point(s) it did not resolve: ${open.slice(0, 3).join('; ')}. Resolve them or say why they don't apply.`)
+      }
+      // HS-086: a viewable output written this turn and not opened. Not during a long run (unattended).
+      if (state.config.show_results !== false && !off('show') && state.written.length && !(state.session && await readJson($, at(`.h-stack/sessions/${state.session}/goal.json`), null))) {
+        const root = state.root.replace(/\\/g, '/').replace(/\/+$/, '')
+        const rel = (p) => { const f = String(p).replace(/\\/g, '/'); return root && f.toLowerCase().startsWith(root.toLowerCase() + '/') ? f.slice(root.length + 1) : f }
+        const note = showNote({ written: state.written.map(rel), calls: state.opens, seen: state.shown, noDisplay: state.noDisplay })
+        if (note) parts.push(note)
+      }
+      if (parts.length) { state.followUpPending = true; $.prompt.submit({ text: parts.join('\n') }) }
     }
     const lines = []
     const skills = (state.route.skills || []).join(', ')

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { splitFrontmatter } from '../lib/yaml.mjs';
 import { allCases, setupProject, runCase } from './snapshot.mjs';
 import { isMain } from '../lib/core.mjs';
+import { SHOW_RULE, showNote } from '../lib/pure/show-rules.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const tokens = (s) => Math.ceil(Buffer.byteLength(String(s || '')) / 3);
@@ -40,7 +41,11 @@ export function measure() {
   for (const x of ls) { const lessonLines = x.text.split('\n').filter((l) => l.startsWith('H-Stack lesson')); rows.push({ item: 'lesson retrieval (<=2 lessons with excerpts)', tokens: tokens(lessonLines.join('\n')), budget: 840 }); rows.push({ item: 'lessons per prompt', tokens: lessonLines.length, budget: 2 }); }
   const clMax = Math.max(0, ...cl.map((x) => tokens(x.text.split('\n').filter((l) => !l.startsWith('H-Stack lesson')).join('\n'))));
   rows.push({ item: 'classifier line (largest fixture)', tokens: clMax, budget: BUDGET.classifierLine });
-  rows.push({ item: 'always-on total (listing + SessionStart + one classifier line)', tokens: listing + ssMax + clMax, budget: BUDGET.alwaysOn });
+  // HS-086/087: the mod's system-prompt rule, sent in interactive sessions only (never in claude -p).
+  const show = tokens(SHOW_RULE);
+  rows.push({ item: 'show-results rule (interactive sessions only)', tokens: show, budget: 300 });
+  rows.push({ item: 'always-on total (listing + SessionStart + one classifier line + show-results rule)', tokens: listing + ssMax + clMax + show, budget: BUDGET.alwaysOn });
+  rows.push({ item: 'show-results note (one file)', tokens: tokens(showNote({ written: ['site/index.html'] })), budget: BUDGET.eventNote });
   const sa = render((c) => c.hook === 'subagent-start.mjs');
   rows.push({ item: 'SubagentStart output', tokens: Math.max(0, ...sa.map((x) => tokens(x.text))), budget: BUDGET.subagentStart });
   const notes = render((c) => ['batch.mjs', 'taint.mjs', 'failure.mjs', 'repeat.mjs'].includes(c.hook) || (c.hook === 'ledger.mjs'));

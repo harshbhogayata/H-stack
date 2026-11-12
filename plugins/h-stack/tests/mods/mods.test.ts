@@ -194,3 +194,51 @@ test('state paths stay under the project root after a shell cd', async ($, on) =
   // The engine resolves each path before fs.write sees it (C:\proj\... on Windows); a relative one lands under the cd'd folder.
   expect(writes.map((p) => p.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '')).filter((p) => !p.startsWith('/proj/.h-stack/'))).toEqual([])
 })
+
+test('show results: an interactive turn that wrote index.html and opened nothing gets the note once', async ($, on) => {
+  mock.clock(on)
+  const { submitted } = project(on)
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await turn($, 't1', [{ tool: 'Write', file_path: '/proj/site/index.html', content: '<h1>hi</h1>' }])
+  expect(submitted.length).toBe(1)
+  expect(submitted[0]).toContain('site/index.html')
+  expect(submitted[0]).toContain('not been opened')
+  await turn($, 't2', []) // the turn that answers the note
+  await turn($, 't3', [{ tool: 'Edit', file_path: '/proj/site/index.html', old_string: 'hi', new_string: 'hello' }])
+  expect(submitted.length).toBe(1)
+})
+
+test('show results: nothing in a headless session', async ($, on) => {
+  mock.clock(on)
+  const { submitted } = project(on, { surfaces: [] })
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await turn($, 't1', [{ tool: 'Write', file_path: '/proj/index.html', content: '<h1>hi</h1>' }])
+  expect(submitted.length).toBe(0)
+})
+
+test('show results: nothing with show_results off', async ($, on) => {
+  mock.clock(on)
+  const { submitted } = project(on, { config: '{"show_results": false}' })
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await turn($, 't1', [{ tool: 'Write', file_path: '/proj/index.html', content: '<h1>hi</h1>' }])
+  expect(submitted.length).toBe(0)
+})
+
+test('show results: nothing when the turn already opened the file', async ($, on) => {
+  mock.clock(on)
+  const { submitted } = project(on)
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  await turn($, 't1', [{ tool: 'Write', file_path: '/proj/index.html', content: '<h1>hi</h1>' }, { tool: 'PowerShell', command: 'Start-Process index.html' }])
+  expect(submitted.length).toBe(0)
+})
+
+test('show-results rule joins the system prompt only in interactive sessions with the switch on', async ($, on) => {
+  mock.clock(on)
+  project(on)
+  on('prompt.compose', () => ({ sections: [{ id: 'intro', text: 'x', scope: 'shared' }] }))
+  await $.session.start({ cwd: '/proj', sessionId: 's1' })
+  const ids = async (e) => ((await $.prompt.compose({ model: 'm', promptModel: 'm', tools: [], outputStyle: null, traits: [], surfaces: ['terminal'], ...e })).sections || []).map((s) => s.id)
+  expect(await ids({})).toContain('h-stack:show-results')
+  expect(await ids({ surfaces: [] })).not.toContain('h-stack:show-results')
+  expect(await ids({ traits: ['print'] })).not.toContain('h-stack:show-results')
+})
