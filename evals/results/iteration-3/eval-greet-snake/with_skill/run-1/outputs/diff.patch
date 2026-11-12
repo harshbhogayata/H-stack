@@ -1,0 +1,45 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/lib/format_greeting.js b/lib/format_greeting.js
+new file mode 100644
+index 0000000..455f42f
+--- /dev/null
++++ b/lib/format_greeting.js
+@@ -0,0 +1,6 @@
++function format_greeting(display_name) {
++    const name = (display_name ?? '').trim();
++    return name ? `Hello, ${name}!` : 'Hello!';
++}
++
++module.exports = { format_greeting };
+diff --git a/tests/format_greeting.test.js b/tests/format_greeting.test.js
+new file mode 100644
+index 0000000..a2216f2
+--- /dev/null
++++ b/tests/format_greeting.test.js
+@@ -0,0 +1,18 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { format_greeting } = require('../lib/format_greeting');
++
++test('greets a display name', () => {
++    assert.equal(format_greeting('Ada Lovelace'), 'Hello, Ada Lovelace!');
++});
++
++test('trims surrounding whitespace', () => {
++    assert.equal(format_greeting('  Ada  '), 'Hello, Ada!');
++});
++
++test('falls back to a plain greeting when the name is empty or missing', () => {
++    assert.equal(format_greeting(''), 'Hello!');
++    assert.equal(format_greeting('   '), 'Hello!');
++    assert.equal(format_greeting(undefined), 'Hello!');
++    assert.equal(format_greeting(null), 'Hello!');
++});

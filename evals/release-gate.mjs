@@ -20,8 +20,10 @@ const real = new Set(tasks.map((t) => t.eval_name));
 const iters = fs.readdirSync(path.join(REPO, 'evals/results')).filter((d) => /^iteration-\d+$/.test(d) && fs.existsSync(path.join(REPO, 'evals/results', d, 'smoke-summary.json'))).sort((a, b) => Number(b.slice(10)) - Number(a.slice(10)));
 let lastChange = 0;
 try { lastChange = Number(execFileSync('git', ['log', '-1', '--format=%ct', '--', 'plugins/h-stack'], { cwd: REPO, encoding: 'utf8' }).trim()) * 1000; } catch { /* no git */ }
+// The most recent run (by timestamp) that covers every smoke task; partial or one-task runs don't count.
 const latest = iters.map((d) => ({ d, s: JSON.parse(fs.readFileSync(path.join(REPO, 'evals/results', d, 'smoke-summary.json'), 'utf8')) }))
-  .find(({ s }) => (s.tasks || []).some((n) => real.has(n)));
+  .filter(({ s }) => [...real].every((n) => (s.tasks || []).includes(n)))
+  .sort((a, b) => Date.parse(b.s.timestamp || 0) - Date.parse(a.s.timestamp || 0))[0];
 if (!real.size) check('smoke', false, 'evals/tasks.json has no real user tasks yet (target ~10; needs the user, HS-001)');
 else if (!latest) check('smoke', false, 'no smoke-test run on the real tasks under evals/results/');
 else {

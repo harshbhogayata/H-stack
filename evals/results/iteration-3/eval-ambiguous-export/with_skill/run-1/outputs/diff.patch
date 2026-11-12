@@ -1,0 +1,61 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/src/notes.js b/src/notes.js
+index fbbf243..eda7ddd 100644
+--- a/src/notes.js
++++ b/src/notes.js
+@@ -1,4 +1,16 @@
+ const notes = [];
+ function addNote(title, body, tags = []) { notes.push({ id: notes.length + 1, title, body, tags, created: new Date().toISOString() }); }
+ function listNotes() { return notes.slice(); }
+-module.exports = { addNote, listNotes };
++// Returns the notes as a string; callers (desktop or web) decide where it goes.
++function exportNotes(format = 'json') {
++  if (format === 'json') return JSON.stringify(notes, null, 2);
++  if (format === 'markdown') {
++    return notes.map(n => {
++      const tags = n.tags.length ? `\n\nTags: ${n.tags.join(', ')}` : '';
++      return `# ${n.title}\n\n_${n.created}_\n\n${n.body}${tags}\n`;
++    }).join('\n');
++  }
++  throw new Error(`Unsupported export format: ${format}`);
++}
++
++module.exports = { addNote, listNotes, exportNotes };
+diff --git a/test/notes.test.js b/test/notes.test.js
+new file mode 100644
+index 0000000..c788168
+--- /dev/null
++++ b/test/notes.test.js
+@@ -0,0 +1,24 @@
++const test = require('node:test');
++const assert = require('node:assert');
++const { addNote, exportNotes } = require('../src/notes');
++
++addNote('Groceries', 'Milk and eggs', ['home']);
++addNote('Idea', 'Write it down');
++
++test('exports JSON that round-trips', () => {
++  const parsed = JSON.parse(exportNotes());
++  assert.strictEqual(parsed.length, 2);
++  assert.deepStrictEqual(parsed[0].tags, ['home']);
++  assert.strictEqual(parsed[1].title, 'Idea');
++});
++
++test('exports Markdown with titles, bodies and tags', () => {
++  const md = exportNotes('markdown');
++  assert.match(md, /^# Groceries/);
++  assert.match(md, /Milk and eggs\n\nTags: home/);
++  assert.match(md, /# Idea\n\n_.+_\n\nWrite it down\n$/);
++});
++
++test('rejects unknown formats', () => {
++  assert.throws(() => exportNotes('pdf'), /Unsupported export format: pdf/);
++});

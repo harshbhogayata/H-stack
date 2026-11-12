@@ -1,0 +1,65 @@
+diff --git a/bin/stats.js b/bin/stats.js
+index c1815d1..38fb752 100644
+--- a/bin/stats.js
++++ b/bin/stats.js
+@@ -1,9 +1,26 @@
+ #!/usr/bin/env node
+ const fs = require('fs');
+-const file = process.argv[2];
++
++function fail(msg) { console.error(`stats: ${msg}`); process.exit(2); }
++
++let json = false;
++const files = [];
++for (const arg of process.argv.slice(2)) {
++  if (arg === '--json') json = true;
++  else if (arg.startsWith('--')) fail(`unknown option ${arg}: not supported`);
++  else files.push(arg);
++}
++if (files.length !== 1) fail(`usage: expected exactly one file argument, got ${files.length}`);
++const file = files[0];
++
+ let nums;
+ try { nums = fs.readFileSync(file, 'utf8').split(/\s+/).filter(Boolean).map(Number); }
+-catch (e) { console.error(`stats: cannot read ${file}: ${e.code}`); process.exit(2); }
++catch (e) { fail(`cannot read ${file}: ${e.code}`); }
+ const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+-console.log(`count: ${nums.length}`);
+-console.log(`mean: ${mean}`);
++
++if (json) {
++  console.log(JSON.stringify({ count: nums.length, mean }));
++} else {
++  console.log(`count: ${nums.length}`);
++  console.log(`mean: ${mean}`);
++}
+diff --git a/test/stats.test.js b/test/stats.test.js
+index 9ce650d..d6377f7 100644
+--- a/test/stats.test.js
++++ b/test/stats.test.js
+@@ -1,6 +1,23 @@
+-const test = require('node:test'); const assert = require('node:assert'); const { execFileSync } = require('child_process');
++const test = require('node:test'); const assert = require('node:assert'); const { execFileSync, spawnSync } = require('child_process');
+ const fs = require('fs'); const os = require('os'); const path = require('path');
++const f = path.join(os.tmpdir(), 'nums.txt');
+ test('text output', () => {
+-  const f = path.join(os.tmpdir(), 'nums.txt'); fs.writeFileSync(f, '1 2 3');
++  fs.writeFileSync(f, '1 2 3');
+   assert.match(execFileSync('node', ['bin/stats.js', f], { encoding: 'utf8' }), /count: 3\nmean: 2/);
+ });
++test('--json after file', () => {
++  fs.writeFileSync(f, '1 2 3');
++  const out = execFileSync('node', ['bin/stats.js', f, '--json'], { encoding: 'utf8' });
++  assert.deepStrictEqual(JSON.parse(out), { count: 3, mean: 2 });
++});
++test('--json before file', () => {
++  fs.writeFileSync(f, '1 2 3');
++  const out = execFileSync('node', ['bin/stats.js', '--json', f], { encoding: 'utf8' });
++  assert.deepStrictEqual(JSON.parse(out), { count: 3, mean: 2 });
++});
++test('--json error writes nothing to stdout and exits 2', () => {
++  const r = spawnSync('node', ['bin/stats.js', '--json', path.join(os.tmpdir(), 'does-not-exist.txt')], { encoding: 'utf8' });
++  assert.strictEqual(r.status, 2);
++  assert.strictEqual(r.stdout, '');
++  assert.match(r.stderr, /^stats: cannot read .*: ENOENT/);
++});

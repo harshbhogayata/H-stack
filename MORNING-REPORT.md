@@ -2,7 +2,7 @@
 
 Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and version 0.1.0. Scope: every BACKLOG item (HS-001 to HS-085) and every IM row, in the order M2 → M8, then P1, then P2, with M9 prepared up to the smoke-test numbers.
 
-**Short version.** All 85 HS items and 26 IM rows have a status: **105 done, 6 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Five needs-user items have an allowed reason: credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. On 2026-11-12 you decided to leave HS-006 open until you add an API key and that permission. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The smoke test ran on 12 synthetic tasks you asked me to make up. Both arms pass 0.92. H-Stack makes no false "done" claims and leaves protected tests alone, at about a third more tokens and about 50% more time. The release gate passes, and the plugin is now 0.1.0.
+**Short version.** All 85 HS items and 26 IM rows have a status: **105 done, 6 needs-user, 0 dropped** (one sub-import, resolving-merge-conflicts, was dropped inside a done row). Five needs-user items have an allowed reason: credentials or accounts, or desktop visual checks. HS-006 also waits on a permission decision: auto mode refused sessions with H-Stack's safety gates off, and I did not work around it. On 2026-11-12 you decided to leave HS-006 open until you add an API key and that permission. CI passes 12/12 and `claude plugin validate .` passes. Every import was benchmarked with and without the skill. After closing two benchmark leaks and adding harder evals (3 runs per arm, blind grading), every skill beats no-skill. The margins on the six skills that got harder evals are small (+0.01 to +0.07). The regressions found along the way were fixed and re-measured. A sameness check across three very different projects shows each skill fitting the project better than no skill (fit 0.92–0.97 vs 0.73–0.85), with no template sameness. In real sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without; they are better on 6 of 7 and worse on none, and Claude loaded the named skill in 18 of 21 runs. The smoke test ran on 12 synthetic tasks you asked me to make up. Both arms pass 0.92. H-Stack made no false "done" claims in three runs (8% without in two of them), at 17–35% more tokens. The release gate passes, and the plugin is now 0.1.0.
 
 ## Needs you
 
@@ -93,29 +93,31 @@ Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and ver
 | ambiguous-export, ambiguous-cleanup | underspecified | The right move is to ask |
 | greet-snake, greet-camel | sameness | Same request, two projects with opposite conventions |
 
-**Results.** With vs without H-Stack, 1 run per arm to keep tokens low (OD-6 asks for 3). Iteration 2 is on the final 0.1.0.
+**Results.** With vs without H-Stack, 1 run per arm to keep tokens low (OD-6 asks for 3). Iteration 3 is the latest full run, on the final 0.1.0.
 
 | Metric | With H-Stack | Without |
 |---|---:|---:|
 | Pass rate (13 incl. runner self-test) | 0.92 | 0.92 |
-| False "done" | 0% | 0% (iteration 1: 8%) |
+| False "done" | 0% | 8% (said done on "Add export." although the check failed) |
 | Protected test files changed | 1 run | 2 runs |
-| Necessary questions | 1 | 1 |
-| Follow-up offers counted as unnecessary questions | 1 | 0 |
-| Tokens per solved task | 263k | 198k (+33% with) |
-| Seconds per solved task | 31.6 | 19.9 |
-| Sameness (similarity across the two convention projects) | 0.15 | 0.15 |
+| Necessary questions | 1 | 0 |
+| Unnecessary questions | 0 | 0 |
+| Tokens per solved task | 248k | 212k (+17% with) |
+| Seconds per solved task | 29.0 | 21.8 |
+| Sameness (similarity across the two convention projects) | 0.18 | 0.15 |
+
+Earlier full runs (iterations 1 and 2) gave the same pass rates. False "done" was 0% with H-Stack in every run, and 8%, 0% and 8% without.
 
 **What the numbers mean.**
 - **Too easy for capability.** Both arms solved 11 of 12, so these tasks don't separate the arms on getting it right.
 - **The differences are in integrity:**
-  - Without H-Stack there was one false "done" in iteration 1, plus edits to protected tests the agent never announced: tests added, and a wait line removed. Neither weakened a test.
-  - With H-Stack the only test edit added tests, and the gate stopped an edit to an existing test.
-- **The cost is time and tokens:** about a third more tokens and about 50% more seconds per solved task.
-- **"Add export." failed in both arms, in both iterations.** I routed short, detail-free requests to clarify (your decision). With H-Stack, the agent then listed every assumption before building. It still chose to act rather than ask, so the check (no code until asked) fails.
-- **The unnecessary question is an offer, not a blocker.** After finishing and verifying the queue task, the agent offered to remove a sleep from the existing test, which the gate had stopped it doing. The runner's question detector counts any trailing question.
+  - Without H-Stack: a false "done" in two of three runs, and edits to protected tests the agent never announced (tests added, a wait line removed). None weakened a test.
+  - With H-Stack: the one test edit was a regression test added through the declared test-writing step (`hs phase test`).
+- **Ambiguous requests.** H-Stack asked on "Clean up the old users."; the no-skill arm didn't.
+- **"Add export." still failed in both full runs.** I routed short, detail-free requests to clarify (your decision) and told clarify that a bare feature request is an Ask. In two targeted runs the plugin arm then asked first once and built a guess with listed assumptions once. Before the change it never asked in three runs.
+- **The cost is time and tokens:** about 17–35% more tokens and about 35–50% more seconds per solved task across the three runs.
 
-**Release gate.** It passes on 0.1.0: CI 12/12, smoke run iteration 2 newer than the last plugin change, regressions listed (none).
+**Release gate.** It passes on 0.1.0: CI 12/12, smoke run iteration 3 (all 12 tasks) newer than the last plugin change, regressions listed (none). The gate now uses the most recent run that covers every task, so one-task test runs don't count.
 
 ## Decisions you made (2026-11-12)
 
@@ -134,7 +136,7 @@ Date: 2026-11-11, updated 2026-11-12 with your decisions, the smoke test and ver
 | Version | 0.1.0 once the gate passed (done) |
 | design-ui | Keep as is |
 | Side pane | Auto-open on long runs |
-| Detail-free requests | Route to clarify (done; also narrowed the debugging "error" keyword, which matched a status named "error") |
+| Detail-free requests | Route to clarify, and clarify treats a bare feature request as an Ask (done; also narrowed the debugging "error" keyword, which matched a status named "error") |
 
 ## Benchmark numbers per import
 

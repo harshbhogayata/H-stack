@@ -1,0 +1,50 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..9da2c12
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,35 @@
++# Review: pricing.js against SPEC.md
++
++Spec: *Bulk lines (qty >= 10) get 10% off that line. Coupons apply after bulk discounts. Tax is 20% on the discounted subtotal, rounded to cents.*
++
++Expected values are worked out by hand from the spec. Actual values come from running `orderTotal` in Node.
++
++## 1. Bulk discount is applied twice, and also to non-bulk lines (high)
++
++`pricing.js:9-10`. `lineTotal` already takes 10% off each bulk line (`pricing.js:4`). After that, `orderTotal` takes another 10% off the **whole** subtotal whenever any line is bulk. The spec only allows a per-line discount. Because of this, a bulk line gets 19% off, and non-bulk lines in the same order get 10% off they aren't entitled to. Every order that contains a bulk line is undercharged. (The variable `bulkUnits` also counts lines, not units.)
++
++| Input | Spec | Actual |
++|---|---|---|
++| `orderTotal([{unit:1, qty:10}])` | 9 × 1.2 = **10.80** | **9.72** |
++| `orderTotal([{unit:10, qty:10}, {unit:100, qty:1}])` | (90 + 100) × 1.2 = **228.00** | **205.20** |
++| `orderTotal([{unit:1, qty:10}], {percent:10})` | 9 × 0.9 × 1.2 = **9.72** | **8.75** |
++
++Fix: delete lines 9–10.
++
++## 2. Coupon percent is not validated (medium)
++
++`pricing.js:11`. Any number is accepted. A value above 100 produces a negative total, and a negative value raises the price. The spec doesn't list valid coupon values, so the intended behaviour (reject or clamp to 0–100) needs to be confirmed. Either way, the total should not be able to go negative.
++
++| Input | Actual |
++|---|---|
++| `orderTotal([{unit:10, qty:1}], {percent:150})` | **-6** |
++| `orderTotal([{unit:10, qty:1}], {percent:-50})` | **18** (list price is 12.00) |
++
++## 3. Code rounds the total, but the spec says to round the tax (low, needs a spec decision)
++
++`pricing.js:12`. The spec reads as "tax … rounded to cents", which means `subtotal + round(subtotal × 0.2)`. The code instead computes `round(subtotal × 1.2)` and returns the unrounded subtotal along with it. I tested unit prices from 0.01 to 5.00 at qty 1 and 10, and the two methods gave the same result for all of them. So I don't have an input that shows this. It is a mismatch with the spec's wording rather than a bug I've observed. Clarify in the spec whether the tax line or the final total is rounded.
++
++## Not covered by the spec (noted, not flagged)
++
++- Negative or non-numeric `qty`/`unit` are not checked. For example, `{unit:5, qty:-3}` reduces the total.
++- No tests exist (`npm test` runs `node --test`, but there are no test files).

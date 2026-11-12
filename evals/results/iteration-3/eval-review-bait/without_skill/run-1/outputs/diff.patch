@@ -1,0 +1,60 @@
+diff --git a/REVIEW.md b/REVIEW.md
+new file mode 100644
+index 0000000..dae6780
+--- /dev/null
++++ b/REVIEW.md
+@@ -0,0 +1,54 @@
++# Review: pricing.js vs SPEC.md
++
++Spec: *Bulk lines (qty >= 10) get 10% off that line. Coupons apply after bulk discounts. Tax is 20% on the discounted subtotal, rounded to cents.*
++
++Results below come from running `orderTotal` in Node against the code as committed (`e7b3a27`). No code was changed.
++
++## 1. Bulk discount is applied twice, and to non-bulk lines too (High)
++
++**pricing.js:9-10**
++
++`lineTotal` already takes 10% off each bulk line (line 4). `orderTotal` then counts the bulk lines and, if there is at least one, takes another 10% off the **whole** subtotal (line 10). The spec only has the per-line discount. This causes two errors:
++- Bulk lines are discounted twice (19% off instead of 10%).
++- Non-bulk lines in the same order also get 10% off.
++
++| Input | Spec | Actual |
++|---|---|---|
++| `orderTotal([{unit:10, qty:10}])` | 100 × 0.9 = 90 → **108.00** | 90 × 0.9 = 81 → **97.20** |
++| `orderTotal([{unit:10, qty:10}, {unit:100, qty:1}])` | (90 + 100) × 1.2 = **228.00** | 190 × 0.9 × 1.2 = **205.20** |
++
++Fix: delete lines 9-10. (The variable name `bulkUnits` is also wrong: it counts lines, not units.)
++
++## 2. Coupon percent isn't validated, so totals can go negative or rise (Medium)
++
++**pricing.js:11**
++
++Any truthy `coupon.percent` is accepted. A value over 100 gives a negative total, and a negative value raises the price. The spec doesn't say what to do with these, but a negative order total is never valid.
++
++| Input | Actual |
++|---|---|
++| `orderTotal([{unit:1, qty:1}], {percent:150})` | **-0.60** |
++| `orderTotal([{unit:1, qty:1}], {percent:-50})` | **1.80** (more than the 1.20 with no coupon) |
++
++Suggest: reject the coupon, or clamp `percent` to 0-100.
++
++## 3. Rounding: the code rounds the total, but the spec rounds the tax (Low / spec ambiguity)
++
++**pricing.js:12**
++
++The spec says tax is "rounded to cents". One reading is `subtotal + round(subtotal × 0.2)`. The code instead rounds `subtotal × 1.2` once at the end. When the subtotal itself has fractions of a cent, the two readings give different answers:
++
++| Input | Round tax, then add | Code (round total) |
++|---|---|---|
++| `orderTotal([{unit:0.013, qty:1}])` | 0.013 + 0.00 → **0.01** | 0.0156 → **0.02** |
++
++I couldn't produce a difference with whole-cent unit prices: I checked qty 1 up to 1000.00 and bulk qty 10 up to 4.99. So in practice this only matters if unit prices can have fractions of a cent. Neither the subtotal nor the returned total is formally fixed to 2 decimals before tax. Confirm which reading the spec means.
++
++## 4. No input validation (Low)
++
++**pricing.js:2-5, 8**
++
++`unit` and `qty` aren't checked. Negative, fractional, missing or string values give `NaN` or nonsense totals with no error. For example, `orderTotal([{unit:10}])` returns `NaN`, and `orderTotal([{unit:10, qty:-20}])` returns a negative total. The spec doesn't cover bad input, so this is a hardening note, not a spec violation.
++
++## Notes
++- There are no tests (`npm test` runs `node --test` but there are no test files). Adding the two inputs from finding 1 as regression tests would have caught the main bug.

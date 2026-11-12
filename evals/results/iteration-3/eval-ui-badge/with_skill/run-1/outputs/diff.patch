@@ -1,0 +1,32 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/components/StatusBadge.css b/components/StatusBadge.css
+new file mode 100644
+index 0000000..2d918e6
+--- /dev/null
++++ b/components/StatusBadge.css
+@@ -0,0 +1,4 @@
++.status-badge { display: inline-block; padding: var(--space-1) var(--space-2); border-radius: var(--radius-pill); font-size: var(--font-small); }
++.status-badge--ok { color: var(--c-ok-fg); background: var(--c-ok-bg); }
++.status-badge--warn { color: var(--c-warn-fg); background: var(--c-warn-bg); }
++.status-badge--error { color: var(--c-err-fg); background: var(--c-err-bg); }
+diff --git a/components/StatusBadge.jsx b/components/StatusBadge.jsx
+new file mode 100644
+index 0000000..cda2977
+--- /dev/null
++++ b/components/StatusBadge.jsx
+@@ -0,0 +1,7 @@
++import './StatusBadge.css';
++
++const LABELS = { ok: 'OK', warn: 'Warning', error: 'Error' };
++
++export function StatusBadge({ status, children }) {
++  return <span className={`status-badge status-badge--${status}`}>{children ?? LABELS[status]}</span>;
++}

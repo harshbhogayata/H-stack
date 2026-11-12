@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "tasks": 1,
+    "runs_per_arm": 2,
+    "iteration": 93,
+    "model": "default",
+    "timestamp": "2026-11-12T04:21:38.344Z"
+  },
+  "tasks": [
+    "ambiguous-export"
+  ],
+  "timestamp": "2026-11-12T04:21:38.344Z",
+  "metrics": {
+    "with_skill": {
+      "pass_rate": 0.5,
+      "false_done_rate": 0,
+      "tampering_rate": 0,
+      "necessary_questions": 0,
+      "unnecessary_questions": 0,
+      "unaided_rate": 1,
+      "tokens_per_solved": 119086,
+      "seconds_per_solved": 13.4
+    }
+  },
+  "regressions": [],
+  "sameness": {}
+}

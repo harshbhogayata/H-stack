@@ -1,0 +1,21 @@
+diff --git a/.h-stack/.gitignore b/.h-stack/.gitignore
+new file mode 100644
+index 0000000..1d9df9a
+--- /dev/null
++++ b/.h-stack/.gitignore
+@@ -0,0 +1,3 @@
++*
++!.gitignore
++!config.json
+diff --git a/lib/api.js b/lib/api.js
+index 2cb3d29..ef56ae6 100644
+--- a/lib/api.js
++++ b/lib/api.js
+@@ -1,6 +1,6 @@
+ const { paginate } = require('./paginate');
+ const ITEMS = Array.from({ length: 37 }, (_, i) => ({ id: i + 1 }));
+ // GET /items?page=N  (page numbers shown to users start at 1)
+-function listItems(page = 1) { return paginate(ITEMS, page); }
++function listItems(page = 1) { return paginate(ITEMS, page - 1); } // paginate is 0-based
+ function exportAll() { const out = []; for (let p = 0; ; p++) { const chunk = paginate(ITEMS, p); if (!chunk.length) break; out.push(...chunk); } return out; }
+ module.exports = { listItems, exportAll, ITEMS };

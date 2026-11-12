@@ -52,7 +52,7 @@ Optional project setup (shown before anything is written): `node plugins/h-stack
 
 **Activation.** In real `claude -p` sessions, seven eval-backed activation cases score 0.88 with the plugin vs 0.52 without (3 runs per arm, blind grading). They are better on 6 of 7 cases and worse on none, and Claude loaded the named skill in 18 of 21 runs (`evals/activation-bench.mjs --outcome --cases evals/activation-cases-hard.json`).
 
-**Smoke test** (12 synthetic tasks, 1 run per arm, `evals/run-smoke.mjs`): pass 0.92 with and without. H-Stack had no false "done" claims and no unannounced edits to existing tests, at about 33% more tokens and 50% more time. The release gate passes; version 0.1.0.
+**Smoke test** (12 synthetic tasks, 1 run per arm, `evals/run-smoke.mjs`): pass 0.92 with and without. H-Stack made no false "done" claims across three runs (8% without in two), at 17–35% more tokens. The release gate passes; version 0.1.0.
 
 ## Checks
 

@@ -1,0 +1,57 @@
+diff --git a/src/notes.js b/src/notes.js
+index fbbf243..91d67c8 100644
+--- a/src/notes.js
++++ b/src/notes.js
+@@ -1,4 +1,20 @@
+ const notes = [];
+ function addNote(title, body, tags = []) { notes.push({ id: notes.length + 1, title, body, tags, created: new Date().toISOString() }); }
+ function listNotes() { return notes.slice(); }
+-module.exports = { addNote, listNotes };
++
++// Returns the notes serialized as a string. No file or DOM access, so the
++// desktop and web apps can each save or download the result their own way.
++function exportNotes(format = 'json') {
++  if (format === 'json') return JSON.stringify(notes, null, 2);
++  if (format === 'markdown') {
++    return notes.map((n) => {
++      const lines = [`# ${n.title}`, '', `_Created: ${n.created}_`];
++      if (n.tags.length) lines.push(`Tags: ${n.tags.join(', ')}`);
++      lines.push('', n.body ?? '');
++      return lines.join('\n');
++    }).join('\n\n---\n\n');
++  }
++  throw new Error(`Unsupported export format: ${format}`);
++}
++
++module.exports = { addNote, listNotes, exportNotes };
+diff --git a/test/notes.test.js b/test/notes.test.js
+new file mode 100644
+index 0000000..7ff0cc8
+--- /dev/null
++++ b/test/notes.test.js
+@@ -0,0 +1,25 @@
++const test = require('node:test');
++const assert = require('node:assert');
++const { addNote, exportNotes } = require('../src/notes');
++
++addNote('Groceries', 'Milk, eggs', ['home']);
++addNote('Idea', 'Build a thing');
++
++test('exports JSON by default', () => {
++  const parsed = JSON.parse(exportNotes());
++  assert.strictEqual(parsed.length, 2);
++  assert.strictEqual(parsed[0].title, 'Groceries');
++  assert.deepStrictEqual(parsed[0].tags, ['home']);
++});
++
++test('exports Markdown', () => {
++  const md = exportNotes('markdown');
++  assert.match(md, /^# Groceries/);
++  assert.match(md, /Tags: home/);
++  assert.match(md, /---\n\n# Idea/);
++  assert.doesNotMatch(md, /Tags: \n/);
++});
++
++test('rejects unknown formats', () => {
++  assert.throws(() => exportNotes('xml'), /Unsupported export format/);
++});

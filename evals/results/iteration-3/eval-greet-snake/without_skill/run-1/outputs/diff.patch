@@ -1,0 +1,35 @@
+diff --git a/lib/format_greeting.js b/lib/format_greeting.js
+new file mode 100644
+index 0000000..f9bc6b4
+--- /dev/null
++++ b/lib/format_greeting.js
+@@ -0,0 +1,6 @@
++function format_greeting(display_name) {
++    const name = typeof display_name === 'string' ? display_name.trim() : '';
++    return name ? `Hello, ${name}!` : 'Hello!';
++}
++
++module.exports = { format_greeting };
+diff --git a/tests/format_greeting.test.js b/tests/format_greeting.test.js
+new file mode 100644
+index 0000000..f119822
+--- /dev/null
++++ b/tests/format_greeting.test.js
+@@ -0,0 +1,17 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { format_greeting } = require('../lib/format_greeting');
++
++test('greets by display name', () => {
++    assert.equal(format_greeting('Ada Lovelace'), 'Hello, Ada Lovelace!');
++});
++
++test('trims surrounding whitespace', () => {
++    assert.equal(format_greeting('  Ada  '), 'Hello, Ada!');
++});
++
++test('falls back when name is missing or blank', () => {
++    assert.equal(format_greeting(''), 'Hello!');
++    assert.equal(format_greeting('   '), 'Hello!');
++    assert.equal(format_greeting(undefined), 'Hello!');
++});
