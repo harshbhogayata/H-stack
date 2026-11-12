@@ -27,34 +27,38 @@ metadata:
 
 For any UI work: new screens, components, visual changes, polish, accessibility fixes. Checking a flow in a running browser is `h-stack:qa`. When the project has no graphical UI (a CLI, a library, an API), a request for a "page" or "screen" means that project's own interface for the same job: a command, flags or a config file, following its conventions docs (output streams, error format, config paths, help text), not a web page.
 
-## The job comes before the look
+## Four qualities, each with its own pass
 
-Before any visual direction, say what this screen is for (sell, sign up, configure, inform, decide), who arrives and what they already know, and what they must understand and believe before they act. The content comes from the questions that visitor asks, in the order they ask them. A page that sells usually has to answer: what is it, is it for me, what does it do about my problem, how does it work, why believe it, what do I do next. A settings page asks different ones; the method is the same. Answer each question on the screen, or drop it on purpose and say so in the reply. The questions decide what is there; this visitor and this subject decide the order and form, never a template. The job sets what the page says; the subject's world still sets how it looks (`references/direction.md`): a complete page in a generic look is half done.
+The result must belong to this product: two products asking for "a settings page" get two different pages. It needs four qualities at once; each missing one has a name: an idea without structure is a gimmick; structure without an idea is a template; finish without thought is decoration; thought without finish is a draft.
 
-**Explain the product in words.** The first view says in one plain sentence what the product is and who it is for, next to whatever shows it, with the main action; at desktop width that is one screen, not a text block with the proof below the fold. A headline alone is a slogan. Headings make claims the visitor can check against what follows. Tie each feature to a moment in this user's life, in the subject's own vocabulary. The reply marks invented copy, features, names and data as drafts.
+**The balance.** Structure owns the order of the argument and the grid; the idea owns the form of each part. The visitor's questions decide what must be answered, not that each answer becomes its own band with a heading and three cards: answers can share a part, live inside the demo, or be one line. At least one part takes a form only this subject could have.
 
-**A working page, top to bottom.** Every control does something real or is marked as a placeholder; every link lands somewhere (no bare `href="#"`); the main action is reachable from the first view and again where the argument ends; the last screen is as considered as the first. A demo the visitor can use is proof: build it to work.
+### 1. Thought: the job
 
-## Contract: derive, don't template
+Say what this screen is for (sell, sign up, configure, inform, decide), who arrives, what they already know, and what they must understand before they act. The content comes from the questions that visitor asks, in their order. A selling page usually answers: what is it, is it for me, what does it do about my problem, how does it work, why believe it, what next. A settings page asks different ones. Answer each, or drop it on purpose and say so in the reply.
 
-The result must look like it belongs to this product. Two different products asking for "a settings page" should get two different settings pages.
+**Explain it in words.** The first view says in one plain sentence what this is and who it is for, beside whatever shows it, with the main action. Tie each feature to a moment in this user's life, in the subject's vocabulary. Name things as users do; verbs say what happens; one name per action; errors say what went wrong and how to fix it.
 
-1. **Read the project first**: its design tokens or theme (CSS variables, Tailwind config, theme files), component library and primitives, existing screens that resemble the request, brand assets, copy tone, and any design doc. Use what exists; extend it only where it has no answer, in its own style. A value the theme lacks (an error colour, a new spacing step) becomes a new token in the theme file, with a dark-mode value where the theme has one, never a raw hex or pixel value in the component.
-2. **No design system yet?** Ground the direction in the subject: who uses it, for what job, in what context. Propose a compact plan (palette, type, layout concept, the element that makes it specific) and check it against the brief and against the generic defaults listed in `references/direction.md` before building. The user's own words about look and feel always win.
-3. **Correctness floor** (any product, any style): `references/baseline.md` — accessible primitives, labels, focus, errors next to the action, motion limits, reduced motion, safe areas, data typography, empty states.
-4. **Words are design.** Name things by what users understand, use active verbs that say what happens ("Save changes"), keep one name for an action through the flow, make errors say what went wrong and how to fix it.
+**A working page.** Every control does something real or is marked as a placeholder; every link lands somewhere (no bare `href="#"`); the main action returns where the argument ends. A demo the visitor can use is proof: build it to work.
 
-## Process
+### 2. Idea: before the layout hardens
 
-Job and questions → plan → check the plan against the project and the brief → build the whole page first: every section standing before any one component is perfected → render at phone and desktop width (a screenshot or browser check where the environment allows) → polish pass → one fix round per width; stop when the checks pass.
+With the job clear and no layout yet, ask what in this subject's world (its objects, materials, records, rituals, words) can carry the argument in a way a generic page could not. Write two or three different ideas in a line each, pick one, say why. Take it away: if the page loses a reason to believe, keep it; if it only loses a look, it is decoration. When the project has a design system, the idea is small (how this screen uses the system for its job) and the system's structure wins.
 
-**Polish pass**, looking as the visitor: within a few seconds, can you tell what it is and what to do? Is there one clear order of importance? Do spacing, alignment and type sizes repeat a small set of values? Which section is weakest? Fix it or cut it, then remove what does not serve the job.
+### 3. Structure: the calm outside
+
+1. **Read the project first**: its tokens and theme files, components, similar screens, brand assets, copy tone, design docs. Use what exists; a value the theme lacks becomes a new token in the theme file (with a dark value where the theme has one), never a raw value in the component.
+2. **No design system yet?** Ground it in the subject and plan before building: `references/direction.md`. The user's own words on look and feel win.
+3. One clear order of importance on every screen; each screen does one thing; a small repeated set of spacing, type and radius values; nothing a first-time visitor has to work out. The complexity stays underneath: the visitor feels ease, not machinery.
+
+### 4. Refinement and finish: the worked-out inside
+
+Question every part: what is it for, and where does it fail (long text, small screens, empty and error states, keyboard, both themes where the product has them)? The correctness floor is `references/baseline.md`. Build the whole page before perfecting any part, then work in rounds: render at phone and desktop width, name the single weakest thing, fix it, render again. Stop when a round finds nothing worth fixing, or after three; a round that cannot name a weakness is over, and rounds are not for fiddling. Where rendering is not possible, say so and do the rounds by reading.
 
 Show, don't describe: when proposing directions or comparing options, render each one (a page, a preview, an artifact, the project's own dev server) with the visual tools this session's tool list offers, so the user chooses by looking. When the UI is done, open it for the user at the end, once (H-Stack's show-results rule; interactive sessions only).
 
 ## Before you finish
 
-- The reply names the questions the screen answers, any dropped on purpose, and the invented copy and data.
-- New styles reuse the project's tokens and primitives, or the reply names which new ones were added and why.
-- The baseline checks pass for the changed UI (state which were checked).
-- If you couldn't render it, say so on a "Not verified:" line.
+Four questions; a "no" sends the work back to that pass. Is there an idea only this product could have (2)? Does every part answer something the visitor asks (1)? Can a first-time visitor say what matters most on each screen (3)? Did the last round find nothing worth fixing (4)?
+
+The reply names the idea and the alternatives considered; the questions answered and any dropped on purpose; invented copy, features, names and data as drafts; any new tokens and why; the baseline checks run; and a "Not verified:" line for anything not rendered.
