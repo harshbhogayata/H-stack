@@ -133,6 +133,8 @@ Earlier full runs (iterations 1 and 2) gave the same pass rates. False "done" wa
 | design-ui | Keep as is |
 | Side pane | Auto-open on long runs |
 | Detail-free requests | Route to clarify, and clarify treats a bare feature request as an Ask (done; also narrowed the debugging "error" keyword, which matched a status named "error") |
+| Show the result (HS-086) | Open finished pages, UIs and documents at the end of the turn, reusing or starting one dev server; interactive sessions only; switch `show_results` (built; unmeasured) |
+| Use the session's features (HS-087) | Brainstorming uses the visual tools the session's tool list offers; text where a sentence answers (built; eval cases written, not run) |
 
 ## Benchmark numbers per import
 

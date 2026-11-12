@@ -34,6 +34,6 @@ const missing = [...hs, ...im].filter((r) => !r.status);
 if (missing.length) console.log(`Without status: ${missing.map((r) => r.id).join(', ')}`);
 if (badReason.length) console.log(`needs-user with a reason outside the allowed list: ${badReason.map((r) => r.id).join(', ')}`);
 for (const r of [...hs, ...im].filter((x) => x.status === 'needs-user')) console.log(`  needs-user ${r.id}: ${r.detail.slice(0, 140)}`);
-const ok = !missing.length && !badReason.length && hs.length === 85;
+const ok = !missing.length && !badReason.length && hs.length === 87;
 console.log(JSON.stringify({ status: ok ? 'ok' : 'fail', reason: `${hs.length} HS items, ${im.length} IM rows, ${missing.length} without status, ${badReason.length} disallowed needs-user reasons` }));
 process.exit(ok ? 0 : 1);

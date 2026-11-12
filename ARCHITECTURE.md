@@ -177,7 +177,8 @@ A per-project folder, gitignored. A committed `.h-stack/.gitignore` contains `*`
 
 ```
 .h-stack/
-  config.json                  project settings: irreversible list, allowlist, test globs, budgets
+  config.json                  project settings: irreversible list, allowlist, test globs, budgets; mod switches
+                               concerns, offers, show_results (HS-086), pane, classifier.fallback
   sessions/<session_id>/
     ledger.jsonl               receipts and edits (tree hash, staleness)
     route.json                 sticky playbook, size, explicit-only flags
@@ -375,7 +376,8 @@ H-Stack mods **never return `allow`** from `tool.check`; they only deny or ask. 
 | `agent.spawn` | governor | Size budgets (`{deny}`), model per role; skip resumed runs when counting | 041 | `.catch` → `next(e)` (open) | P1 |
 | `prompt.submit` + `$.model.complete` | classifier fallback | Haiku-class call with the cached catalogue when rules found nothing | 019 | open | P1 |
 | `turn.step` | budget, telemetry | Count tokens and calls per turn (observe only; no model switching, K17) | 038, 058 | open | P1 |
-| `turn.complete` | concerns, offers, telemetry | Unresolved-concern check → `$.prompt.submit` once; boundary offer line; usage | 040, 024, 058 | open | P1 |
+| `turn.complete` | concerns, offers, show results, telemetry | Unresolved-concern check and the show-results note (a viewable file written, not opened) → one `$.prompt.submit` between them, interactive sessions only; boundary offer line; usage | 040, 086, 024, 058 | open | P1 |
+| `prompt.compose` | show results, visual tools | Appends the `h-stack:show-results` section (session scope) when the session has a surface and is not `-p` | 086, 087 | open | P1 |
 | `ui.render` Spinner | status | `H-Stack · size · skill · step n/m` | 056 | Skip drawing | P1 |
 | `ui.render` Pane | status pane | Read-only view of `.h-stack/` | 057 | Skip drawing | P2 |
 | `$.clock.every` | overseer | Long runs only: MAST signatures → note or stop | 042 | open | P1 |
@@ -592,7 +594,8 @@ Both arms use the same model, effort, permission mode and fixture commit. Auto m
 | Skill listing (all H-Stack `description` + `when_to_use`) | Every request | ≤ 900 tokens |
 | SessionStart output (router map + facts) | Once per session start | ≤ 400 tokens |
 | Classifier line | Per non-direct prompt | ≤ 60 tokens; 0 for `direct` |
-| **Always-on total** (listing + SessionStart + one classifier line) | | **≤ 1,500 tokens** (N116 start value) |
+| Show-results rule (mod `prompt.compose`, HS-086/087) | Every request in interactive sessions; never in `-p` | ≤ 300 tokens |
+| **Always-on total** (listing + SessionStart + one classifier line + show-results rule) | | **≤ 1,500 tokens** (N116 start value) |
 | SubagentStart | Per subagent | ≤ 150 tokens |
 | Event notes (receipt line, trigger, repeat-call, provenance) | When triggered, digest-gated | ≤ 40 tokens each; ≤ 1 per batch |
 | Lesson retrieval | Per matching prompt | ≤ 2 lessons × (≤120 text + ≤300 excerpt) |

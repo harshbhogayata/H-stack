@@ -18,7 +18,7 @@ The design behind these items is in [ARCHITECTURE.md](ARCHITECTURE.md). Built 20
 | Anti-ideas | A1–A22 | 22 | [research/00c-beyond-every-stack.md §5](research/00c-beyond-every-stack.md) |
 | **Total** | | **191** | |
 
-The 169 ideas merge into **85 items (HS-001…HS-085)**. The 22 anti-ideas are in [Will not do](#will-not-do). The skills to import per category are in [Skill imports by category](#skill-imports-by-category) (IM-01…IM-16). No source idea was dropped whole; every adjustment is listed in [Anti-idea, licence and native check](#anti-idea-licence-and-native-check).
+The 169 ideas merge into **85 items (HS-001…HS-085)**; HS-086 and HS-087 were added at the user's request on 2026-11-12. The 22 anti-ideas are in [Will not do](#will-not-do). The skills to import per category are in [Skill imports by category](#skill-imports-by-category) (IM-01…IM-16). No source idea was dropped whole; every adjustment is listed in [Anti-idea, licence and native check](#anti-idea-licence-and-native-check).
 
 **Fields per item**
 
@@ -43,19 +43,19 @@ Where an item's priority differs from the one given in 00c, the item says so and
 | Activation | 4 | 5 | 1 | 10 |
 | Guards | 6 | 10 | 2 | 18 |
 | State & memory | 4 | 4 | 3 | 11 |
-| Visibility | 0 | 1 | 1 | 2 |
+| Visibility | 0 | 3 | 1 | 4 |
 | Telemetry | 0 | 1 | 1 | 2 |
 | Skills (category NN) | 1 | 10 | 10 | 21 |
 | Docs | 2 | 0 | 0 | 2 |
 | Distribution | 1 | 1 | 1 | 3 |
-| **Total** | **26** | **36** | **23** | **85** |
+| **Total** | **26** | **38** | **23** | **87** |
 
 | Mode | Items |
 |---|---:|
 | Native — configure only | 10 (HS-002, 003, 007, 008, 026, 029, 043, 054, 076, 077) |
-| Thin | 25 |
+| Thin | 26 |
 | Import | 5 HS items (HS-062, 063, 065, 069, 070). Separately, the IM table has 18 skill imports, 7 native picks and 1 build across all 16 categories |
-| Build | 45 |
+| Build | 46 |
 
 **P0, the core of the full stack:**
 
@@ -945,6 +945,25 @@ Upstream commits are pinned at import time; the research snapshot is 2026-11-11.
 - **Mechanism.** A mod Pane gives a read-only view of the playbook step, skills used, receipts, assumptions, decisions and the wishlist (OD-2).
 - **Evidence.** [00 E13](research/00-activation-and-experience.md); mods Pane site.
 - **Context-over-templates.** n/a.
+
+#### HS-086 · Show the result at the end of the turn
+**Visibility · Build · P1 · S · Autonomy horizon · Depends on: HS-040, HS-056 · Sources: the user's request of 2026-11-12**
+- **Status.** needs-user (visual check in an interactive desktop app or terminal session: built in hooks/register.js and lib/pure/show-rules.mjs, mod tests and unit tests pass; whether Claude opens the page as intended has not been seen in a live session, and claude -p evals cannot see it by design)
+- **Problem.** Claude builds a page, a UI or a document and leaves the user to find and open it.
+- **Mechanism.**
+  - **Rule.** A mod `prompt.compose` section (`h-stack:show-results`), only when the session has a surface and is not a `-p` run: open finished viewable work once at the end, with the session's own preview, file or artifact tool first, else the default browser or app (`start`, `open`, `xdg-open`); reuse a listening dev server, else start the project's dev command once; name what is left running (port, how to stop it); later edits say refresh; no display (SSH, container, cloud) gives the path or URL.
+  - **Backstop.** At `turn.complete`, when the turn wrote a viewable file (`.html`, `.svg`, `.pdf`, images, office documents; UI sources count once per session) and no call opened it, one factual follow-up through the concern check's `$.prompt.submit` path: "H-Stack show-results: this turn wrote X; it has not been opened for the user." Once per output per session; never on the turn that answers it; not during a long run. The mod never opens anything itself.
+  - **Switch.** `show_results: false` in `.h-stack/config.json`.
+- **Evidence.** The user's request; the concern check's interactive test (user decision 2026-11-12) keeps it out of every `claude -p` eval. Unmeasured: no smoke task can see an interactive open.
+- **Context-over-templates.** The opener is the session's own tool or the platform's default app; the server is the project's own dev command.
+
+#### HS-087 · Use what the session can do when brainstorming
+**Visibility · Thin · P1 · S · Judgment · Depends on: HS-086 · Sources: the user's request of 2026-11-12**
+- **Status.** needs-user (smoke-test results: skill-bench cases design-ui `visual-directions` and clarify `sentence-answers` are written and not run, because model runs wait for the user's go-ahead)
+- **Problem.** Claude answers visual or spatial questions with text alone even when the session can render a page, a diagram or option previews.
+- **Mechanism.** The last sentence of the HS-086 rule, plus prose in clarify (previews for options judged by looking), planning (a diagram when a flow, data model or layout is the heart of the plan), design-ui (render directions so the user picks by looking; open the finished UI) and research (tables for multi-dimension comparisons, a diagram for a mechanism). Each reads the tools from the session's own tool list; none names a fixed tool. No visual where a sentence answers.
+- **Evidence.** The user's request. Unmeasured until the two eval cases run.
+- **Context-over-templates.** The tool comes from the session (CLI, desktop app and cloud sessions differ); the form comes from the question.
 
 ### Telemetry
 

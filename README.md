@@ -26,10 +26,12 @@ One plugin, `h-stack`, with 15 skills (one per category, playbooks in `reference
 | Activation | SessionStart skill map, per-prompt classifier (`size=direct/light/full` + one relevant skill), event triggers, act/ask/stop check; "why that?" shows the matched rule |
 | Guards | Evidence receipts and a Stop gate against false "done"; read-only tests outside the declared test-writing step; tamper scan; irreversible-action gate with dry-run receipts; dependency gate; MCP tool-description firewall; taint and fetch-destination checks; scope lock; step and spawn budgets |
 | State and memory | Assumption and decision ledgers, wishlist, compaction checkpoints, committed path-scoped lessons with evidence, auto-memory shadow log, `hs retro` (local telemetry, 90-day retention) |
-| Visibility | Spinner suffix and a one-line announcement of the skill used; optional side pane |
+| Visibility | Spinner suffix and a one-line announcement of the skill used; optional side pane; finished pages, UIs and documents opened at the end of interactive turns, and visual tools used when brainstorming |
 | Skills | core-rules, clarify, planning, tdd, debugging, review, qa, security-audit, design-ui, memory, writing, git-ship, long-run (only when asked), skill-authoring, research |
 
 Imported skills keep their upstream licence; sources, commits and sha256 digests are in [`plugins/h-stack/THIRD_PARTY.md`](plugins/h-stack/THIRD_PARTY.md). Every backlog item's status is in [`BACKLOG.md`](BACKLOG.md).
+
+Per-project switches in `.h-stack/config.json`: `concerns` (unresolved-concern check), `offers`, `show_results` (opens a finished page, UI or document at the end of an interactive turn; `false` turns it off), `pane`, `classifier.fallback`, plus budgets and guard lists ([ARCHITECTURE §4.2](ARCHITECTURE.md#42-h-stack--only-data-with-no-native-home)).
 
 Optional project setup (shown before anything is written): `node plugins/h-stack/scripts/setup.mjs`. The `hs` command (assume, decide, wish, failed, stop, retro, status) is on Claude's PATH inside sessions.
 
