@@ -1,7 +1,7 @@
 ---
 name: long-run
 description: Run /goal, scheduled or parallel work with checkable end states and declared effects.
-when_to_use: Only when asked: overnight, unattended, fan-out.
+when_to_use: "Only when asked: overnight, unattended, fan-out."
 user-invocable: false
 metadata:
   hstack:
