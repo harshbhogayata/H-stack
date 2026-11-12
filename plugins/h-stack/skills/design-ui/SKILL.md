@@ -29,9 +29,9 @@ For any UI work: new screens, components, visual changes, polish, accessibility 
 
 ## The job comes before the look
 
-Before any visual direction, say what this screen is for (sell, sign up, configure, inform, decide), who arrives and what they already know, and what they must understand and believe before they act. The content comes from the questions that visitor asks, in the order they ask them. A page that sells usually has to answer: what is it, is it for me, what does it do about my problem, how does it work, why believe it, what do I do next. A settings page asks different ones; the method is the same. Answer each question on the screen, or drop it on purpose and say so in the reply. The questions decide what is there; this visitor and this subject decide the order and form, never a template.
+Before any visual direction, say what this screen is for (sell, sign up, configure, inform, decide), who arrives and what they already know, and what they must understand and believe before they act. The content comes from the questions that visitor asks, in the order they ask them. A page that sells usually has to answer: what is it, is it for me, what does it do about my problem, how does it work, why believe it, what do I do next. A settings page asks different ones; the method is the same. Answer each question on the screen, or drop it on purpose and say so in the reply. The questions decide what is there; this visitor and this subject decide the order and form, never a template. The job sets what the page says; the subject's world still sets how it looks (`references/direction.md`): a complete page in a generic look is half done.
 
-**Explain the product in words.** The first view says in one plain sentence what the product is and who it is for, next to whatever shows it; a headline alone is a slogan. Headings make claims the visitor can check against what follows. Tie each feature to a moment in this user's life, in the subject's own vocabulary. The reply marks invented copy, features, names and data as drafts.
+**Explain the product in words.** The first view says in one plain sentence what the product is and who it is for, next to whatever shows it, with the main action; at desktop width that is one screen, not a text block with the proof below the fold. A headline alone is a slogan. Headings make claims the visitor can check against what follows. Tie each feature to a moment in this user's life, in the subject's own vocabulary. The reply marks invented copy, features, names and data as drafts.
 
 **A working page, top to bottom.** Every control does something real or is marked as a placeholder; every link lands somewhere (no bare `href="#"`); the main action is reachable from the first view and again where the argument ends; the last screen is as considered as the first. A demo the visitor can use is proof: build it to work.
 
@@ -55,7 +55,6 @@ Show, don't describe: when proposing directions or comparing options, render eac
 ## Before you finish
 
 - The reply names the questions the screen answers, any dropped on purpose, and the invented copy and data.
-
 - New styles reuse the project's tokens and primitives, or the reply names which new ones were added and why.
 - The baseline checks pass for the changed UI (state which were checked).
 - If you couldn't render it, say so on a "Not verified:" line.
