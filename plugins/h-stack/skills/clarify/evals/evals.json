@@ -35,6 +35,17 @@
         "The reply points out that complete erasure within 24 hours conflicts with keeping all data for 7 years with no deletion",
         "The reply stops or asks the user to resolve the conflict, offering a recommended resolution, instead of silently picking one requirement"
       ]
+    },
+    {
+      "id": 4,
+      "eval_name": "sentence-answers",
+      "prompt": "Should greet() keep its single exclamation mark or end with a full stop? One-word answer is fine; don't change anything.",
+      "files": ["evals/files/clear-fix/"],
+      "check": "test -z \"$(git status --porcelain --untracked-files=all)\"",
+      "expectations": [
+        "The check command exits 0 (no files written: no page, diagram or artifact was made for a choice a sentence settles)",
+        "The reply answers in a sentence or two with a recommendation and its reason"
+      ]
     }
   ]
 }

@@ -41,6 +41,7 @@ For a fresh, independent read of a large request, dispatch the `h-stack:intent-c
 - **Facts are looked up, never asked.** Anything in the repo, its history, its docs or its tools is yours to find (dispatch an Explore subagent for wide searches). Only decisions go to the user.
 - **Outcome-changing only.** Ask when the answers lead to different code: scope, behaviour at the edges, data shape, compatibility, irreversible choices. Don't ask about naming or style the codebase already settles.
 - **Ask with AskUserQuestion**, recommended option first and labelled "(Recommended)", worded so accepting it is one click.
+- **Show options the user would judge by looking** (layouts, flows, screens, diagrams): give each a preview if this session's question tool takes one, or lay them side by side in a page or artifact if the session has a tool for that. Read what exists from this session's tool list; a choice a sentence settles stays text.
 - **Batch.** Ask every independent question in one round; questions that depend on an unanswered one wait for the next round.
 - **A skipped question is not permission**, and agreeing in conversation is not approval of a plan the user hasn't seen.
 - **Questions come from this repo's real gaps**, not from a checklist.

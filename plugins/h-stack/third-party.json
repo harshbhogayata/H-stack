@@ -87,7 +87,7 @@
           "upstream_sha256": "deaf176fa179827e80f2ea3101db3ea90fdf562ebef340eba761e4687940f5f5"
         }
       ],
-      "changes": "Fixed save path (docs/superpowers/plans) and Python code templates removed: plan location, commands and layout are derived from the project; announcement line, superpowers sub-skill references and the sdd workspace scripts (task-start/task-done) dropped; ledger rulings become hs decide; completion contract tied to receipts; Interfaces section kept and promoted (HS-060); rubric step added (references/rubric.md is H-Stack's own)."
+      "changes": "Fixed save path (docs/superpowers/plans) and Python code templates removed: plan location, commands and layout are derived from the project; announcement line, superpowers sub-skill references and the sdd workspace scripts (task-start/task-done) dropped; ledger rulings become hs decide; completion contract tied to receipts; Interfaces section kept and promoted (HS-060); rubric step added (references/rubric.md is H-Stack's own). Diagram or visual page for a plan centred on a flow, data model or layout, using the session's own tools (HS-087)."
     },
     {
       "skill": "tdd",
@@ -160,7 +160,7 @@
           "upstream_sha256": "a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2"
         }
       ],
-      "changes": "Grilling kept as the full mode (design tree, frontier rounds, facts looked up never asked, wait for confirmation); 'relentless' default replaced by HS-020's act/ask/stop with at most three outcome-changing questions; emoji question format (a house style) replaced by native AskUserQuestion with the recommended option first; hs assume/stop/wish and the intent-check subagent added; agents/openai.yaml not imported."
+      "changes": "Grilling kept as the full mode (design tree, frontier rounds, facts looked up never asked, wait for confirmation); 'relentless' default replaced by HS-020's act/ask/stop with at most three outcome-changing questions; emoji question format (a house style) replaced by native AskUserQuestion with the recommended option first; hs assume/stop/wish and the intent-check subagent added; agents/openai.yaml not imported. Visual options shown with previews or a page when the session's tools allow (HS-087)."
     },
     {
       "skill": "review",
@@ -462,7 +462,7 @@
           "upstream_sha256": "1f629e18ab899412683bc6a1c4efb4339999e27c2fdac328f26ee10a8c031d33"
         }
       ],
-      "changes": "Kept the primary-sources and save-where-the-repo-keeps-notes rules; added citation with version/date, measured/read/inferred marks and the untrusted-page rule."
+      "changes": "Kept the primary-sources and save-where-the-repo-keeps-notes rules; added citation with version/date, measured/read/inferred marks and the untrusted-page rule. Rule 6: tables for multi-dimension comparisons, a diagram for a mechanism when the session can render one (HS-087)."
     }
   ],
   "dropped": [

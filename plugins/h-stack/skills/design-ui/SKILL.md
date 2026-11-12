@@ -40,6 +40,8 @@ The result must look like it belongs to this product. Two different products ask
 
 Plan → check the plan against the project and the brief → build → look at it (a screenshot or browser check where the environment allows) → critique and remove one thing that doesn't serve the brief.
 
+Show, don't describe: when proposing directions or comparing options, render each one (a page, a preview, an artifact, the project's own dev server) with the visual tools this session's tool list offers, so the user chooses by looking. When the UI is done, open it for the user at the end, once (H-Stack's show-results rule; interactive sessions only).
+
 ## Before you finish
 
 - New styles reuse the project's tokens and primitives, or the reply names which new ones were added and why.

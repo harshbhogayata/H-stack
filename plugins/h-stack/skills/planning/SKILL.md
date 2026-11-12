@@ -47,7 +47,7 @@ Derive the plan's shape from the project, not from a template:
 5. **Steps.** One action each, with a checkable result: write the failing test (its name and assertions with the spec's exact values), run it and see it fail (command plus expected failure), implement (exact signature and file; a body only for an algorithm the signature and tests don't determine), run and see it pass, commit.
 6. **Self-review** against the spec: every requirement maps to a task; every step lets the implementer write exactly one reasonable thing; names and types agree across tasks; review focus items each have a test; the plan is not several times longer than the spec. Fix gaps inline.
 
-Show the plan and ask the user to confirm it before implementing. Agreeing in conversation to "sounds good" is approval of the plan only when the plan itself was shown.
+When a flow, data model or layout is the heart of the plan, show it as a diagram or visual page with whatever this session's tool list offers (text where a sentence does). Show the plan and ask the user to confirm it before implementing. Agreeing in conversation to "sounds good" is approval of the plan only when the plan itself was shown.
 
 ## Rubric (full tasks)
 
