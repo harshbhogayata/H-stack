@@ -1,0 +1,4 @@
+# Check out every text file with LF on all platforms. THIRD_PARTY.md records SHA-256 digests of
+# the shipped files as raw bytes; a CRLF checkout (Git for Windows default) makes every digest
+# differ and the SessionStart hook then reports the skills as unverified.
+* text=auto eol=lf
