@@ -16,6 +16,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { SHOT_ALLOW, SHOT_HINT } from './screenshot.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // --help prints the header comment; without this guard any unknown flag starts model runs.
@@ -33,7 +34,7 @@ const ONLY_EVAL = opt('eval', null);
 const EFFORT = opt('effort', null);
 const RUNS = Number(opt('runs', 1)); // runs per arm per eval
 const LIMIT = /hit your [\w -]*limit/i; // HS-007: compare a skill at two effort levels
-const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(npm run:*)', 'Bash(npx vitest:*)', 'Bash(npx jest:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(grep:*)', 'Bash(rg:*)', 'Bash(find:*)', 'Bash(mkdir:*)', 'Bash(git stash:*)'];
+const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(node:*)', 'Bash(npm test:*)', 'Bash(npm run:*)', 'Bash(npx vitest:*)', 'Bash(npx jest:*)', 'Bash(python3:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(grep:*)', 'Bash(rg:*)', 'Bash(find:*)', 'Bash(mkdir:*)', 'Bash(git stash:*)', SHOT_ALLOW];
 
 function run(cmd, argv, { cwd, input, timeout = 900000, env } = {}) {
   return new Promise((resolve) => {
@@ -75,7 +76,7 @@ async function agentRun(skill, ev, arm) {
   const prompt = arm === 'with_skill'
     ? `Before you start, read the skill file ${path.join(shown, 'SKILL.md')} and follow it (it may point to files in the same folder). H-Stack's helper commands it mentions (hs, receipts) are not installed in this run; skip those steps.\n\nTask: ${ev.prompt}`
     : ev.prompt;
-  const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', String(MAX_TURNS), '--permission-mode', 'acceptEdits', ...(EFFORT ? ['--effort', EFFORT] : []), '--allowedTools', ...TOOLS];
+  const argv = ['-p', `${prompt}\n\n${SHOT_HINT}`, '--output-format', 'json', '--max-turns', String(MAX_TURNS), '--permission-mode', 'acceptEdits', ...(EFFORT ? ['--effort', EFFORT] : []), '--allowedTools', ...TOOLS];
   if (arm === 'with_skill') argv.push('--add-dir', shown);
   if (MODEL) argv.push('--model', MODEL);
   const r = await run('claude', argv, { cwd: ws });

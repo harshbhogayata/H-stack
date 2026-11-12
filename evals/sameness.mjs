@@ -11,6 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { SHOT_ALLOW, SHOT_HINT } from './screenshot.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // --help prints the header comment; without this guard any unknown flag starts model runs.
@@ -23,7 +24,7 @@ const RUNS = Number(opt('runs', 2));
 const PAR = Number(opt('parallel', 6));
 const ONLY = a.flatMap((x, i) => (x === '--skill' ? [a[i + 1]] : []));
 const spec = JSON.parse(fs.readFileSync(path.join(DIR, 'tasks.json'), 'utf8'));
-const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(node:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(mkdir:*)'];
+const TOOLS = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(ls:*)', 'Bash(cat:*)', 'Bash(node:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(mkdir:*)', SHOT_ALLOW];
 
 function run(cmd, argv, cwd, timeout = 600000) {
   return new Promise((resolve) => {
@@ -61,7 +62,7 @@ async function agent(task, ctx, arm) {
   const ws = workspace(ctx);
   const shown = arm === 'with_skill' ? skillCopy(task.skill) : null;
   const prompt = shown ? `Before you start, read the skill file ${path.join(shown, 'SKILL.md')} and follow it (it may point to files in the same folder). H-Stack's helper commands (hs, receipts) are not installed here; skip those steps.\n\nTask: ${task.prompt}` : task.prompt;
-  const argv = ['-p', prompt, '--output-format', 'json', '--max-turns', '25', '--permission-mode', 'acceptEdits', '--allowedTools', ...TOOLS, ...(shown ? ['--add-dir', shown] : [])];
+  const argv = ['-p', `${prompt}\n\n${SHOT_HINT}`, '--output-format', 'json', '--max-turns', '25', '--permission-mode', 'acceptEdits', '--allowedTools', ...TOOLS, ...(shown ? ['--add-dir', shown] : [])];
   const raw = await run('claude', argv, ws);
   let final = ''; try { final = String(JSON.parse(raw.trim().split('\n').pop()).result || ''); } catch { final = raw.slice(-3000); }
   let diff = ''; try { execFileSync('git', ['-C', ws, 'add', '-A', '-N']); diff = execFileSync('git', ['-C', ws, 'diff'], { encoding: 'utf8', maxBuffer: 8 << 20 }); } catch { /* */ }
