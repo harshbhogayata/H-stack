@@ -12,14 +12,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CASES = path.join(ROOT, 'tests', 'snapshots');
 const REFUSAL = /^Blocked by [\w:-]+: .+?\. To proceed: .+?\.$/;
 
+// A path as it appears inside a JSON string: identical on POSIX, backslashes doubled on Windows.
+const jsonEsc = (p) => JSON.stringify(p).slice(1, -1);
+
 export function setupProject(c) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hstack-snap-'));
   process.env.GIT_AUTHOR_DATE = process.env.GIT_COMMITTER_DATE = '2026-01-01T00:00:00Z';
-  const sub = (v) => (typeof v === 'string' ? v.replaceAll('$PROJ', dir) : JSON.parse(JSON.stringify(v).replaceAll('$PROJ', dir)));
+  const sub = (v) => (typeof v === 'string' ? v.replaceAll('$PROJ', dir) : JSON.parse(JSON.stringify(v).replaceAll('$PROJ', jsonEsc(dir))));
   if (c.setup?.git !== false) {
     execFileSync('git', ['init', '-q', '-b', 'main', dir]);
     execFileSync('git', ['-C', dir, 'config', 'user.email', 'snap@example.invalid']);
     execFileSync('git', ['-C', dir, 'config', 'user.name', 'snap']);
+    execFileSync('git', ['-C', dir, 'config', 'core.autocrlf', 'false']); // Git for Windows defaults to true: same bytes on every platform
   }
   for (const [rel, content] of Object.entries(c.setup?.files || {})) {
     fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
@@ -43,11 +47,13 @@ export function setupProject(c) {
 }
 
 export function runCase(c, proj) {
-  const input = JSON.parse(JSON.stringify(c.input).replaceAll('$PROJ', proj));
+  const input = JSON.parse(JSON.stringify(c.input).replaceAll('$PROJ', jsonEsc(proj)));
   const env = { ...process.env, CLAUDE_PROJECT_DIR: proj, CLAUDE_PLUGIN_ROOT: ROOT, HOME: path.join(proj, '.home'), HSTACK_REGISTRY_FIXTURE: path.join(ROOT, 'tests', 'fixtures', 'registry.json'), ...Object.fromEntries(Object.entries(c.env || {}).map(([k, v]) => [k, String(v).replaceAll('__ROOT__', ROOT)])) };
   delete env.CLAUDE_CONFIG_DIR;
   const r = spawnSync('node', [path.join(ROOT, 'hooks', c.hook)], { input: JSON.stringify(input), env, encoding: 'utf8', timeout: 20000 });
-  return { stdout: (r.stdout || '').replaceAll(proj, '$PROJ'), status: r.status, stderr: r.stderr };
+  // JSON output carries the path escaped (C:\\Users\\... on Windows); git prints it with forward slashes.
+  const stdout = [jsonEsc(proj), proj, proj.replaceAll('\\', '/')].reduce((s, p) => s.replaceAll(p, '$PROJ'), r.stdout || '');
+  return { stdout, status: r.status, stderr: r.stderr };
 }
 
 export function contractProblems(stdout) {
